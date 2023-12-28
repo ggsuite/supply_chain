@@ -1,0 +1,61 @@
+<?xml version="1.0" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="169pt" height="188pt" viewBox="0.00 0.00 169.49 188">
+<g id="graph0" class="graph" transform="translate(4.840952001735413,124.90930236250693) scale(0.46651649576840376)" data-name="unix">
+
+<polygon fill="white" stroke="none" points="-4,4 -4,-184 165.49,-184 165.49,4 -4,4"/>
+<!-- Key -->
+<g id="node1" class="node" pointer-events="visible" data-name="Key">
+
+<ellipse fill="none" stroke="black" cx="79.18" cy="-162" rx="27.25" ry="18"/>
+<text text-anchor="middle" x="79.18" y="-157.8" font-family="Times,serif" font-size="14.00">Key</text>
+</g>
+<!-- Synth -->
+<g id="node2" class="node" pointer-events="visible" data-name="Synth">
+
+<ellipse fill="none" stroke="black" cx="35.18" cy="-90" rx="33.65" ry="18"/>
+<text text-anchor="middle" x="35.18" y="-85.8" font-family="Times,serif" font-size="14.00">Synth</text>
+</g>
+<!-- Key&#45;&gt;Synth -->
+<g id="edge1" class="edge" data-name="Key-&gt;Synth">
+
+<path fill="none" stroke="black" d="M69.19,-145.12C63.98,-136.82 57.47,-126.46 51.54,-117.03"/>
+<polygon fill="black" stroke="black" points="54.52,-115.19 46.23,-108.59 48.59,-118.92 54.52,-115.19"/>
+</g>
+<!-- Screen -->
+<g id="node3" class="node" pointer-events="visible" data-name="Screen">
+
+<ellipse fill="none" stroke="black" cx="124.18" cy="-90" rx="37.12" ry="18"/>
+<text text-anchor="middle" x="124.18" y="-85.8" font-family="Times,serif" font-size="14.00">Screen</text>
+</g>
+<!-- Key&#45;&gt;Screen -->
+<g id="edge2" class="edge" data-name="Key-&gt;Screen">
+
+<path fill="none" stroke="black" d="M89.39,-145.12C94.78,-136.73 101.52,-126.24 107.64,-116.73"/>
+<polygon fill="black" stroke="black" points="110.41,-118.88 112.88,-108.58 104.53,-115.1 110.41,-118.88"/>
+</g>
+<!-- Audio -->
+<g id="node4" class="node" pointer-events="visible" data-name="Audio">
+
+<ellipse fill="none" stroke="black" cx="35.18" cy="-18" rx="35.36" ry="18"/>
+<text text-anchor="middle" x="35.18" y="-13.8" font-family="Times,serif" font-size="14.00">Audio</text>
+</g>
+<!-- Synth&#45;&gt;Audio -->
+<g id="edge3" class="edge" data-name="Synth-&gt;Audio">
+
+<path fill="none" stroke="black" d="M35.18,-71.7C35.18,-64.41 35.18,-55.73 35.18,-47.54"/>
+<polygon fill="black" stroke="black" points="38.68,-47.62 35.18,-37.62 31.68,-47.62 38.68,-47.62"/>
+</g>
+<!-- Grid -->
+<g id="node5" class="node" pointer-events="visible" data-name="Grid">
+
+<ellipse fill="none" stroke="black" cx="124.18" cy="-18" rx="28.98" ry="18"/>
+<text text-anchor="middle" x="124.18" y="-13.8" font-family="Times,serif" font-size="14.00">Grid</text>
+</g>
+<!-- Screen&#45;&gt;Grid -->
+<g id="edge4" class="edge" data-name="Screen-&gt;Grid">
+
+<path fill="none" stroke="black" d="M124.18,-71.7C124.18,-64.41 124.18,-55.73 124.18,-47.54"/>
+<polygon fill="black" stroke="black" points="127.68,-47.62 124.18,-37.62 120.68,-47.62 127.68,-47.62"/>
+</g>
+</g>
+</svg>
