@@ -41,5 +41,6 @@ class Producer<T> {
 }
 
 // #############################################################################
+/// Creates an example producer for test purposes
 Producer<int> exampleProducer({Node<int>? worker}) =>
     Producer(worker: worker ?? exampleNode());

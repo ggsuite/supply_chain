@@ -4,8 +4,8 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-import 'package:supply_chain/src/assembly_line.dart';
-import 'package:supply_chain/src/node.dart';
+import 'package:gg_supply_chain/src/assembly_line.dart';
+import 'package:gg_supply_chain/src/node.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -110,8 +110,8 @@ void main() {
       // Removed worker should have no suppliers and customers anymore
       assemblyLine.removeWorker(worker0);
       expect(workers, [worker1, worker2, worker3]);
-      expect(worker0.suppliers, []);
-      expect(worker0.customers, []);
+      expect(worker0.suppliers, <Node<dynamic>>[]);
+      expect(worker0.customers, <Node<dynamic>>[]);
       expect(input.customers, [worker1]);
       expect(worker1.suppliers, [input]);
       expect(worker1.customers, [worker2]);
@@ -126,8 +126,8 @@ void main() {
       expect(workers.elementAt(1), worker2);
       assemblyLine.removeWorker(worker2);
       expect(workers, [worker1, worker3]);
-      expect(worker2.suppliers, []);
-      expect(worker2.customers, []);
+      expect(worker2.suppliers, <Node<dynamic>>[]);
+      expect(worker2.customers, <Node<dynamic>>[]);
       expect(input.customers, [worker1]);
       expect(worker1.suppliers, [input]);
       expect(worker1.customers, [worker3]);
@@ -141,8 +141,8 @@ void main() {
       expect(workers.last, worker3);
       assemblyLine.removeWorker(worker3);
       expect(workers, [worker1]);
-      expect(worker3.suppliers, []);
-      expect(worker3.customers, []);
+      expect(worker3.suppliers, <Node<dynamic>>[]);
+      expect(worker3.customers, <Node<dynamic>>[]);
       expect(input.customers, [worker1]);
       expect(worker1.suppliers, [input]);
       expect(worker1.customers, [output]);
@@ -152,9 +152,9 @@ void main() {
       // Input should be connected to output
       expect(workers.length, 1);
       assemblyLine.removeWorker(worker1);
-      expect(workers, []);
-      expect(worker1.suppliers, []);
-      expect(worker1.customers, []);
+      expect(workers, <Node<dynamic>>[]);
+      expect(worker1.suppliers, <Node<dynamic>>[]);
+      expect(worker1.customers, <Node<dynamic>>[]);
       expect(input.customers, [output]);
       expect(output.suppliers, [input]);
     });

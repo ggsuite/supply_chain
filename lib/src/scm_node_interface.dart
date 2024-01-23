@@ -12,30 +12,31 @@ abstract class ScmNodeInterface {
   // Register nodes
 
   /// Adds a node to scm
-  void addNode(Node node);
+  void addNode(Node<dynamic> node);
 
   /// Removes the node from scm
-  void removeNode(Node node);
+  void removeNode(Node<dynamic> node);
 
   // ...........................................................................
   // Animate nodes
 
   /// Calling this method will nominate the node on each tick
-  void animateNode(Node node);
+  void animateNode(Node<dynamic> node);
 
   /// Calling this method will not nominate the node on each tick anymore
-  void deanimateNode(Node node);
+  void deanimateNode(Node<dynamic> node);
 
   // ...........................................................................
   // Prioritization
-  void priorityHasChanged(Node node);
+  /// This delegate is called when the priority of a node has changed
+  void priorityHasChanged(Node<dynamic> node);
 
   // ...........................................................................
   // Production live cycle
 
   /// Nominate node for production
-  void nominate(Node node);
+  void nominate(Node<dynamic> node);
 
   /// Inform scm about an update
-  void hasNewProduct(Node node);
+  void hasNewProduct(Node<dynamic> node);
 }

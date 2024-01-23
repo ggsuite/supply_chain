@@ -4,8 +4,8 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-import 'package:supply_chain/src/node.dart';
-import 'package:supply_chain/supply_chain.dart';
+import 'package:gg_supply_chain/src/node.dart';
+import 'package:gg_supply_chain/gg_supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -90,7 +90,7 @@ void main() {
       expect(scm.nominatedNodes, isEmpty);
       node.removeSupplier(supplier0);
       expect(node.suppliers, [supplier1]);
-      expect(supplier0.customers, []);
+      expect(supplier0.customers, <Node<dynamic>>[]);
 
       // Was node nominated?
       expect(scm.nominatedNodes, [node]);
@@ -98,8 +98,8 @@ void main() {
       // Remove second supplier
       scm.clear();
       node.removeSupplier(supplier1);
-      expect(node.suppliers, []);
-      expect(supplier1.customers, []);
+      expect(node.suppliers, <Node<dynamic>>[]);
+      expect(supplier1.customers, <Node<dynamic>>[]);
 
       // Was node be nominated?
       expect(scm.nominatedNodes, [node]);
@@ -136,12 +136,12 @@ void main() {
       // Remove first customer
       node.removeCustomer(customer0);
       expect(node.customers, [customer1]);
-      expect(customer0.suppliers, []);
+      expect(customer0.suppliers, <Node<dynamic>>[]);
 
       // Remove second customer
       node.removeCustomer(customer1);
-      expect(node.customers, []);
-      expect(customer1.suppliers, []);
+      expect(node.customers, <Node<dynamic>>[]);
+      expect(customer1.suppliers, <Node<dynamic>>[]);
     });
 
     // #########################################################################

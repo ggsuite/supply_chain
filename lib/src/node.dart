@@ -9,9 +9,16 @@ import 'priority.dart';
 import 'scm.dart';
 import 'scm_node_interface.dart';
 
+/// A supplier delivers products to a node
 typedef Supplier<T> = Node<T>;
+
+/// A customer receives products to a node
 typedef Customer<T> = Node<T>;
+
+/// A worker is a node on the assembly line
 typedef Worker<T> = Node<T>;
+
+/// Produce delegate
 typedef Produce<T> = void Function(Node<T>);
 
 /// A node in the supply chain
@@ -36,6 +43,7 @@ class Node<T> {
   }
 
   // ...........................................................................
+  /// Disposes the node
   void dispose() {
     for (final d in _dispose.reversed) {
       d();
@@ -44,6 +52,7 @@ class Node<T> {
 
   // ...........................................................................
   // Identification
+  /// The name of the node
   final String name;
 
   /// Returns the name of the node
@@ -213,7 +222,7 @@ class Node<T> {
     });
   }
 
-  final List<Function()> _dispose = [];
+  final List<void Function()> _dispose = [];
 
   // ...........................................................................
   final Produce<T> _produce;
@@ -221,6 +230,7 @@ class Node<T> {
   Priority _ownPriority = Priority.frame;
 
   // ...........................................................................
+  /// The supply chain manager
   final ScmNodeInterface scm;
   static int _idCounter = 0;
 
@@ -282,6 +292,7 @@ class Node<T> {
 }
 
 // #############################################################################
+/// Example node for test purposes
 Node<int> exampleNode({
   int initialProduct = 0,
   void Function(Node<int>)? produce,

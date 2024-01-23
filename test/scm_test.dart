@@ -1,8 +1,8 @@
 import 'package:fake_async/fake_async.dart';
-import 'package:supply_chain/src/node.dart';
-import 'package:supply_chain/src/priority.dart';
-import 'package:supply_chain/src/schedule_task.dart';
-import 'package:supply_chain/src/scm.dart';
+import 'package:gg_supply_chain/src/node.dart';
+import 'package:gg_supply_chain/src/priority.dart';
+import 'package:gg_supply_chain/src/schedule_task.dart';
+import 'package:gg_supply_chain/src/scm.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -220,14 +220,14 @@ void main() {
   );
 
   // ...........................................................................
-  void expectPriority(Iterable<Node> nodes, Priority priority) {
+  void expectPriority(Iterable<Node<dynamic>> nodes, Priority priority) {
     for (final node in nodes) {
       expect(node.priority, priority);
     }
   }
 
   // ...........................................................................
-  void expectIsStaged(Iterable<Node> nodes, bool isStaged) {
+  void expectIsStaged(Iterable<Node<dynamic>> nodes, bool isStaged) {
     for (final node in nodes) {
       expect(node.isStaged, isStaged);
     }
@@ -235,9 +235,9 @@ void main() {
 
   // ...........................................................................
   void expectIsReady(
-    Iterable<Node> nodes,
+    Iterable<Node<dynamic>> nodes,
     bool isReady, {
-    Iterable<Node>? except,
+    Iterable<Node<dynamic>>? except,
   }) {
     except ??= [];
 
@@ -655,7 +655,7 @@ void main() {
         producer.ownPriority = Priority.realtime;
 
         // Set clock
-        final elapsedTime = const Duration(milliseconds: 123);
+        const elapsedTime = Duration(milliseconds: 123);
         scm.testStopwatch.elapse(elapsedTime);
 
         // Flush all micro tasks -> Nodes should produce

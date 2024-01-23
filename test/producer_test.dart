@@ -1,5 +1,5 @@
-import 'package:supply_chain/src/node.dart';
-import 'package:supply_chain/src/producer.dart';
+import 'package:gg_supply_chain/src/node.dart';
+import 'package:gg_supply_chain/src/producer.dart';
 import 'package:test/test.dart';
 
 // #############################################################################
@@ -35,22 +35,22 @@ void main() {
       // addSupplier should add supplier to input
       final supplier = exampleNode();
       producer.addSupplier(supplier);
-      expect(producer.output.suppliers, []);
+      expect(producer.output.suppliers, <Node<dynamic>>[]);
       expect(producer.input.suppliers, [supplier]);
 
       // removeSupplier should remove supplier from input
       producer.removeSupplier(supplier);
-      expect(producer.input.suppliers, []);
+      expect(producer.input.suppliers, <Node<dynamic>>[]);
 
       // addCustomer/removeCustomer should add/remove customer to output
       final customer = exampleNode();
       producer.addCustomer(customer);
-      expect(producer.input.customers, []);
+      expect(producer.input.customers, <Node<dynamic>>[]);
       expect(producer.output.customers, [customer]);
 
       // removeCustomer should remove customer from output
       producer.removeCustomer(customer);
-      expect(producer.output.customers, []);
+      expect(producer.output.customers, <Node<dynamic>>[]);
     });
   });
 }

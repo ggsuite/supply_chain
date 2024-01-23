@@ -8,6 +8,7 @@ import 'node.dart';
 
 /// Organizes a linear chain of workers
 class AssemblyLine<T> {
+  /// Constructor
   AssemblyLine({
     required this.input,
     required this.output,
@@ -16,9 +17,11 @@ class AssemblyLine<T> {
   }
 
   // ...........................................................................
-  Iterable<Worker> get workers => _workers;
+  /// Returns the works of the assembly line
+  Iterable<Worker<T>> get workers => _workers;
 
   // ...........................................................................
+  /// Add a worker to the assembly line
   void addWorker(Worker<T> worker) {
     // Worker is already added? Do nothing.
     if (_workers.lastOrNull == worker) {
@@ -55,6 +58,7 @@ class AssemblyLine<T> {
   }
 
   // ...........................................................................
+  /// Remove a worker from the assembly line
   void removeWorker(Worker<T> worker) {
     // Worker already removed? Do nothing.
     final index = _workers.indexOf(worker);
@@ -105,12 +109,16 @@ class AssemblyLine<T> {
   }
 
   // ...........................................................................
+  /// The input node off the assembly line
   final Node<T> input;
+
+  /// The output node off the assembly line
   final Node<T> output;
   final List<Worker<T>> _workers = [];
 }
 
 // #############################################################################
+/// Example assembly line for test purposes
 AssemblyLine<int> exampleAssemblyLine({
   Node<int>? input,
   Node<int>? output,

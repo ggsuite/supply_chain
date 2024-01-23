@@ -21,6 +21,7 @@ class Scm implements ScmNodeInterface {
   // ######################
 
   // ...........................................................................
+  /// Supply chain manager constructor
   Scm({
     this.isTest = false,
   }) {
@@ -35,29 +36,29 @@ class Scm implements ScmNodeInterface {
   // ScmNodeInterface
 
   /// Returns iterable of all nodes
-  Iterable<Node> get nodes => _nodes;
+  Iterable<Node<dynamic>> get nodes => _nodes;
 
   /// Adds a node to scm
   @override
-  void addNode(Node node) {
+  void addNode(Node<dynamic> node) {
     _nodes.add(node);
     nominate(node);
   }
 
   /// Removes the node from scm
   @override
-  void removeNode(Node node) => _nodes.remove(node);
+  void removeNode(Node<dynamic> node) => _nodes.remove(node);
 
   /// Nominate node for production
   @override
-  void nominate(Node node) {
+  void nominate(Node<dynamic> node) {
     _nominatedNodes.add(node);
     _schedulePreparation.trigger();
   }
 
   /// Inform scm about an update
   @override
-  void hasNewProduct(Node node) {
+  void hasNewProduct(Node<dynamic> node) {
     // Node is not in producing nodes?
     // Throw an exception. Only producing nodes should call hasNewProduct()
     if (!_producingNodes.contains(node)) {
@@ -73,15 +74,15 @@ class Scm implements ScmNodeInterface {
   // Animation
 
   /// Returns currently animated nodes
-  Iterable<Node> get animatedNodes => _animatedNodes;
+  Iterable<Node<dynamic>> get animatedNodes => _animatedNodes;
 
   /// Starts to animate node
   @override
-  void animateNode(Node node) => _animatedNodes.add(node);
+  void animateNode(Node<dynamic> node) => _animatedNodes.add(node);
 
   /// Stops to animate node
   @override
-  void deanimateNode(Node node) => _animatedNodes.remove(node);
+  void deanimateNode(Node<dynamic> node) => _animatedNodes.remove(node);
 
   /// Call this method to trigger animation frame calculation
   void tick() => _tick();
@@ -89,16 +90,16 @@ class Scm implements ScmNodeInterface {
   // ...........................................................................
   // Product live cycle
 
-  // List of nodes, nominated for production
-  Iterable<Node> get nominatedNodes => _nominatedNodes;
+  /// List of nodes, nominated for production
+  Iterable<Node<dynamic>> get nominatedNodes => _nominatedNodes;
 
-  // List of nodes, prepared for production
-  Iterable<Node> get preparedNodes => _preparedNodes;
+  /// List of nodes, prepared for production
+  Iterable<Node<dynamic>> get preparedNodes => _preparedNodes;
 
   // ...........................................................................
   // Priority
   @override
-  void priorityHasChanged(Node node) {
+  void priorityHasChanged(Node<dynamic> node) {
     _schedulePriorityUpdate.trigger();
   }
 
@@ -106,7 +107,7 @@ class Scm implements ScmNodeInterface {
   Priority get minProductionPriority => _minProductionPriority;
 
   // ...........................................................................
-  // Cleanup
+  /// Cleanup
   void clear() {
     _nominatedNodes.clear();
     _preparedNodes.clear();
@@ -164,7 +165,10 @@ class Scm implements ScmNodeInterface {
   // ...........................................................................
   // Test timers
 
+  /// Returns a test timer
   GgFakeTimer? get testTimer => _testTimer;
+
+  /// Returns a test stop watch
   GgFakeStopwatch get testStopwatch => _testStopwatch;
 
   Stopwatch _testCreateStopWatch() {
@@ -193,14 +197,14 @@ class Scm implements ScmNodeInterface {
 
   // ...........................................................................
   // Nodes
-  final Set<Node> _nodes = {};
-  final Set<Node> _animatedNodes = {};
+  final Set<Node<dynamic>> _nodes = {};
+  final Set<Node<dynamic>> _animatedNodes = {};
 
   // ...........................................................................
   // Processing stages
-  final Set<Node> _nominatedNodes = {};
-  final Set<Node> _preparedNodes = {};
-  final Set<Node> _producingNodes = {};
+  final Set<Node<dynamic>> _nominatedNodes = {};
+  final Set<Node<dynamic>> _preparedNodes = {};
+  final Set<Node<dynamic>> _producingNodes = {};
 
   // ...........................................................................
   late GgOncePerCycle _schedulePreparation;
@@ -283,7 +287,7 @@ class Scm implements ScmNodeInterface {
 
   // ...........................................................................
   /// Prepares a node and its customers
-  void _prepareNode(Node node) {
+  void _prepareNode(Node<dynamic> node) {
     // Node is already prepared?
     final isAlreadyPrepared = !node.needsPreparation();
     if (isAlreadyPrepared) {
@@ -301,6 +305,7 @@ class Scm implements ScmNodeInterface {
 
   // ...........................................................................
   // Have realtime nodes?
+  /// Returns true if real time nodes are currently prepared
   bool get realtimeNodesArePrepared => _preparedNodes.any(
         (element) => element.priority.value >= Priority.realtime.value,
       );
@@ -370,7 +375,7 @@ class Scm implements ScmNodeInterface {
   }
 
   // ...........................................................................
-  void _finalizeProduction(Node node) {
+  void _finalizeProduction(Node<dynamic> node) {
     // Remove node from producing nodes
     _producingNodes.remove(node);
 
@@ -423,7 +428,7 @@ class Scm implements ScmNodeInterface {
 
   // ..........................................................................
   /// Update priorities
-  void _updatePriorityForNode(Node node) {
+  void _updatePriorityForNode(Node<dynamic> node) {
     // Has already a priority? Return.
     if (node.customerPriority != null) {
       return;
@@ -564,4 +569,5 @@ class Scm implements ScmNodeInterface {
 }
 
 // .............................................................................
+/// Example supply chain manager for test purposes
 Scm exampleScm({bool isTest = true}) => Scm(isTest: isTest);

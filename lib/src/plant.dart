@@ -9,11 +9,13 @@ import 'producer.dart';
 
 /// A plant is a producer with an assembly line
 class Plant<T> extends Producer<T> {
+  /// Constructor
   Plant({
     required super.worker,
   });
 }
 
 // #############################################################################
+/// Creates an example plant
 Plant<int> examplePlant({Node<int>? worker}) =>
     Plant(worker: worker ?? exampleNode());
