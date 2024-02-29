@@ -791,6 +791,55 @@ void main() {
       expect(scm.testFastTasks, isEmpty);
       expect(scm.testNormalTasks, isEmpty);
     });
+
+    // #########################################################################
+    group('testInstance', () {
+      test('should return a new instance with isTest == true', () {
+        final scm = Scm.testInstance;
+        expect(scm.isTest, isTrue);
+      });
+    });
+
+    // #########################################################################
+    group('removeNode', () {
+      test('should remove the node', () {
+        final scm = Scm.testInstance;
+        final node = exampleNode(scm: scm);
+        scm.addNode(node);
+        expect(scm.nodes, contains(node));
+
+        scm.removeNode(node);
+        expect(scm.nodes, isNot(contains(node)));
+      });
+    });
+
+    // #########################################################################
+    group('clear()', () {
+      test('should clear nominated, prepared and producing nodes', () {
+        fakeAsync((fake) {
+          final scm = Scm.testInstance;
+          final node = exampleNode(scm: scm);
+          scm.addNode(node);
+
+          (scm.nominatedNodes as Set<Node>).add(node);
+          (scm.preparedNodes as Set<Node>).add(node);
+          (scm.producingNodes as Set<Node>).add(node);
+
+          // Before
+          expect(scm.nominatedNodes, contains(node));
+          expect(scm.preparedNodes, contains(node));
+          expect(scm.producingNodes, contains(node));
+
+          // Apply
+          scm.clear();
+
+          // After
+          expect(scm.nominatedNodes, isNot(contains(node)));
+          expect(scm.preparedNodes, isNot(contains(node)));
+          expect(scm.producingNodes, isNot(contains(node)));
+        });
+      });
+    });
   });
 
   // ###########################################################################

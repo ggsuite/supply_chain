@@ -9,3 +9,12 @@ typedef Task = void Function();
 
 /// A delegate for scheduling a task
 typedef ScheduleTask = void Function(Task);
+
+/// An example task
+Task get exampleTask => () => print('exampleTask');
+
+/// An example schedule task
+ScheduleTask get exampleScheduleTask => (Task task) {
+      print('runTask:');
+      task();
+    };

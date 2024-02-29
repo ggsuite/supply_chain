@@ -6,6 +6,7 @@
 
 import 'package:gg_supply_chain/src/node.dart';
 import 'package:gg_supply_chain/gg_supply_chain.dart';
+import 'package:gg_supply_chain/src/priority.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -36,6 +37,10 @@ void main() {
       expect(node.product, 1);
       expect(node.name, 'Aaliyah');
       expect(node.toString(), 'Aaliyah');
+
+      // If now scm is given, then the testInstance will be used
+      final node2 = exampleNode();
+      expect(node2.scm, Scm.testInstance);
     });
 
     // .........................................................................
@@ -161,6 +166,46 @@ void main() {
       expect(producer.customers, isEmpty);
       expect(supplier.customers, isEmpty);
       expect(customer.suppliers, isEmpty);
+    });
+
+    // #########################################################################
+    group('isAnimated', () {
+      test('should return true if node is animated', () {
+        expect(node.isAnimated, false);
+        node.isAnimated = true;
+        expect(node.isAnimated, true);
+        node.isAnimated = false;
+        expect(node.isAnimated, false);
+      });
+    });
+
+    // #########################################################################
+    group('ownPriority, priority', () {
+      test('should work as expected', () {
+        // Initially node has lowest priority
+        node.ownPriority = Priority.lowest;
+        expect(node.ownPriority, Priority.lowest);
+
+        // Priority will be the node's own priority
+        // because SCM did not overwrite it
+        expect(node.priority, Priority.lowest);
+
+        // Assumce SCM will add a higher priority
+        node.customerPriority = Priority.highest;
+
+        // Priority will be the customer's priority,
+        // because it is higher then the node's own priority
+        expect(node.priority, Priority.highest);
+
+        // Assume the node itself has a high priority
+        // and SCM assignes a lower priority
+        node.ownPriority = Priority.highest;
+        node.customerPriority = Priority.lowest;
+
+        // Now priority will be the node's own priority
+        // because it is higher then the customer's priority
+        expect(node.priority, Priority.highest);
+      });
     });
   });
 }

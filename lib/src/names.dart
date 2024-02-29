@@ -381,3 +381,11 @@ const names = [
   'Zoe',
   'Zoey',
 ];
+
+int _nameCounter = 0;
+
+/// Returns the next name from the list of names
+String get nextName => names[_nameCounter++ % names.length];
+
+/// Use this function to reset the next name in tests
+void testSetNextCounter(int counter) => _nameCounter = counter;

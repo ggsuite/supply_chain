@@ -37,7 +37,7 @@ class Node<T> {
     required this.scm,
     String? name,
   })  : product = initialProduct,
-        name = name ?? names[_idCounter++ % names.length],
+        name = name ?? nextName,
         _produce = produce {
     _init();
   }
@@ -232,7 +232,6 @@ class Node<T> {
   // ...........................................................................
   /// The supply chain manager
   final ScmNodeInterface scm;
-  static int _idCounter = 0;
 
   // ...........................................................................
   final List<Supplier<dynamic>> _suppliers = [];

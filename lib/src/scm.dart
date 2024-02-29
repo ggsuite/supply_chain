@@ -96,6 +96,9 @@ class Scm implements ScmNodeInterface {
   /// List of nodes, prepared for production
   Iterable<Node<dynamic>> get preparedNodes => _preparedNodes;
 
+  /// List of nodes, currently in production
+  Iterable<Node<dynamic>> get producingNodes => _producingNodes;
+
   // ...........................................................................
   // Priority
   @override

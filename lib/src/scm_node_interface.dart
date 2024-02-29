@@ -40,3 +40,26 @@ abstract class ScmNodeInterface {
   /// Inform scm about an update
   void hasNewProduct(Node<dynamic> node);
 }
+
+// #############################################################################
+
+/// Example implementation of [ScmNodeInterface] for test purposes
+class ExampleScmNodeInterface implements ScmNodeInterface {
+  @override
+  void addNode(Node<dynamic> node) => print('addNode: ${node.name}');
+  @override
+  void removeNode(Node<dynamic> node) => print('removeNode: ${node.name}');
+  @override
+  void animateNode(Node<dynamic> node) => print('animateNode: ${node.name}');
+  @override
+  void deanimateNode(Node<dynamic> node) =>
+      print('deanimateNode: ${node.name}');
+  @override
+  void priorityHasChanged(Node<dynamic> node) =>
+      print('priorityHasChanged: ${node.name}');
+  @override
+  void nominate(Node<dynamic> node) => print('nominate: ${node.name}');
+  @override
+  void hasNewProduct(Node<dynamic> node) =>
+      print('hasNewProduct: ${node.name}');
+}
