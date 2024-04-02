@@ -19,7 +19,7 @@ void main() {
       testSetNextCounter(0);
 
       capturePrint(
-        log: messages.add,
+        ggLog: messages.add,
         code: () {
           ni.addNode(node);
           expect(messages.last, 'addNode: Aaliyah');

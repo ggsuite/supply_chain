@@ -15,7 +15,7 @@ void main() {
       final messages = <String>[];
 
       capturePrint(
-        log: messages.add,
+        ggLog: messages.add,
         code: () {
           final task = exampleTask;
           task();
