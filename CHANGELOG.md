@@ -2,9 +2,13 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Upgraded gg_fake_timer
+
 ### Removed
 
-- dependency to gg\_install\_gg, remove ./check script
+- dependency to gg_install_gg, remove ./check script
 
 ## [1.0.1] - 2024-04-10
 
@@ -16,7 +20,7 @@
 
 ### Added
 
-- 'publish\_to: none for private repositories'
+- 'publish_to: none for private repositories'
 
 ### Changed
 
