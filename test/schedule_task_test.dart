@@ -5,7 +5,7 @@
 // found in the LICENSE file in the root of this package.
 
 import 'package:gg_capture_print/gg_capture_print.dart';
-import 'package:gg_supply_chain/src/schedule_task.dart';
+import 'package:supply_chain/src/schedule_task.dart';
 
 import 'package:test/test.dart';
 

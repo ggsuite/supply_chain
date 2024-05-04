@@ -4,9 +4,9 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-import 'package:gg_supply_chain/src/node.dart';
-import 'package:gg_supply_chain/gg_supply_chain.dart';
-import 'package:gg_supply_chain/src/priority.dart';
+import 'package:supply_chain/src/node.dart';
+import 'package:supply_chain/supply_chain.dart';
+import 'package:supply_chain/src/priority.dart';
 import 'package:test/test.dart';
 
 void main() {

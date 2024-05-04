@@ -1,5 +1,5 @@
-import 'package:gg_supply_chain/src/node.dart';
-import 'package:gg_supply_chain/src/producer.dart';
+import 'package:supply_chain/src/node.dart';
+import 'package:supply_chain/src/producer.dart';
 import 'package:test/test.dart';
 
 // #############################################################################

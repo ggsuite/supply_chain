@@ -5,9 +5,9 @@
 // found in the LICENSE file in the root of this package.
 
 import 'package:gg_capture_print/gg_capture_print.dart';
-import 'package:gg_supply_chain/src/names.dart';
-import 'package:gg_supply_chain/src/node.dart';
-import 'package:gg_supply_chain/src/scm_node_interface.dart';
+import 'package:supply_chain/src/names.dart';
+import 'package:supply_chain/src/node.dart';
+import 'package:supply_chain/src/scm_node_interface.dart';
 import 'package:test/test.dart';
 
 void main() {

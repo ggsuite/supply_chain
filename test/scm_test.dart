@@ -1,8 +1,8 @@
 import 'package:fake_async/fake_async.dart';
-import 'package:gg_supply_chain/src/node.dart';
-import 'package:gg_supply_chain/src/priority.dart';
-import 'package:gg_supply_chain/src/schedule_task.dart';
-import 'package:gg_supply_chain/src/scm.dart';
+import 'package:supply_chain/src/node.dart';
+import 'package:supply_chain/src/priority.dart';
+import 'package:supply_chain/src/schedule_task.dart';
+import 'package:supply_chain/src/scm.dart';
 import 'package:test/test.dart';
 
 void main() {
