@@ -7,6 +7,10 @@
 - Rename gg\_supply\_chain into supply\_chain
 - Updated version
 
+### Fixed
+
+- Removed prefix gg\_ from example/gg\_supply\_chain\_example.dart
+
 ## [1.0.2] - 2024-04-13
 
 ### Changed
