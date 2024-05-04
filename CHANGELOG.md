@@ -5,6 +5,7 @@
 ### Changed
 
 - Rename gg\_supply\_chain into supply\_chain
+- Updated version
 
 ## [1.0.2] - 2024-04-13
 
