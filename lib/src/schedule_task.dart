@@ -11,10 +11,9 @@ typedef Task = void Function();
 typedef ScheduleTask = void Function(Task);
 
 /// An example task
-Task get exampleTask => () => print('exampleTask');
+Task get exampleTask => () => {};
 
 /// An example schedule task
 ScheduleTask get exampleScheduleTask => (Task task) {
-      print('runTask:');
       task();
     };

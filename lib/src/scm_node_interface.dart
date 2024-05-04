@@ -4,6 +4,8 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'package:gg_log/gg_log.dart';
+
 import 'node.dart';
 
 /// Interface used by nodes to communicate with its supply chain manager
@@ -45,21 +47,27 @@ abstract class ScmNodeInterface {
 
 /// Example implementation of [ScmNodeInterface] for test purposes
 class ExampleScmNodeInterface implements ScmNodeInterface {
+  /// Constructor
+  const ExampleScmNodeInterface({required this.ggLog});
+
   @override
-  void addNode(Node<dynamic> node) => print('addNode: ${node.name}');
+  void addNode(Node<dynamic> node) => ggLog('addNode: ${node.name}');
   @override
-  void removeNode(Node<dynamic> node) => print('removeNode: ${node.name}');
+  void removeNode(Node<dynamic> node) => ggLog('removeNode: ${node.name}');
   @override
-  void animateNode(Node<dynamic> node) => print('animateNode: ${node.name}');
+  void animateNode(Node<dynamic> node) => ggLog('animateNode: ${node.name}');
   @override
   void deanimateNode(Node<dynamic> node) =>
-      print('deanimateNode: ${node.name}');
+      ggLog('deanimateNode: ${node.name}');
   @override
   void priorityHasChanged(Node<dynamic> node) =>
-      print('priorityHasChanged: ${node.name}');
+      ggLog('priorityHasChanged: ${node.name}');
   @override
-  void nominate(Node<dynamic> node) => print('nominate: ${node.name}');
+  void nominate(Node<dynamic> node) => ggLog('nominate: ${node.name}');
   @override
   void hasNewProduct(Node<dynamic> node) =>
-      print('hasNewProduct: ${node.name}');
+      ggLog('hasNewProduct: ${node.name}');
+
+  /// The logger
+  final GgLog ggLog;
 }
