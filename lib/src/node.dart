@@ -8,6 +8,8 @@ import 'names.dart';
 import 'priority.dart';
 import 'scm.dart';
 import 'scm_node_interface.dart';
+import 'scope.dart';
+import 'tools.dart';
 
 /// A supplier delivers products to a node
 typedef Supplier<T> = Node<T>;
@@ -34,9 +36,11 @@ class Node<T> {
   Node({
     required T initialProduct,
     required Produce<T> produce,
-    required this.scm,
+    required this.scope,
     String? name,
-  })  : product = initialProduct,
+  })  : scm = scope.scm,
+        product = initialProduct,
+        assert(name == null || name.isPascalCase),
         name = name ?? nextName,
         _produce = produce {
     _init();
@@ -202,9 +206,11 @@ class Node<T> {
   // ...........................................................................
   // Init & Dispose
   void _init() {
+    _initScope();
     _initScm();
   }
 
+  // ...........................................................................
   void _initScm() {
     scm.addNode(this);
     _dispose.add(() {
@@ -222,6 +228,15 @@ class Node<T> {
     });
   }
 
+  // ...........................................................................
+  void _initScope() {
+    scope.addNode(this);
+    _dispose.add(() {
+      scope.removeNode(this);
+    });
+  }
+
+  // ...........................................................................
   final List<void Function()> _dispose = [];
 
   // ...........................................................................
@@ -232,6 +247,9 @@ class Node<T> {
   // ...........................................................................
   /// The supply chain manager
   final ScmNodeInterface scm;
+
+  /// The scope this node belongs to
+  final Scope scope;
 
   // ...........................................................................
   final List<Supplier<dynamic>> _suppliers = [];
@@ -295,9 +313,11 @@ class Node<T> {
 Node<int> exampleNode({
   int initialProduct = 0,
   void Function(Node<int>)? produce,
-  ScmNodeInterface? scm,
+  Scope? scope,
   String? name,
 }) {
+  scope ??= Scope.example(scm: Scm.testInstance);
+
   final result = Node<int>(
     name: name,
     initialProduct: initialProduct,
@@ -306,7 +326,7 @@ Node<int> exampleNode({
           n.product++;
           n.scm.hasNewProduct(n);
         },
-    scm: scm ?? Scm.testInstance,
+    scope: scope,
   );
 
   // Realtime nodes will produce immediately

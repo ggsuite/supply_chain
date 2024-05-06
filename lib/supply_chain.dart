@@ -7,3 +7,7 @@
 library;
 
 export 'src/scm.dart';
+export 'src/scope.dart';
+export 'src/node.dart';
+export 'src/priority.dart';
+export 'src/tools.dart';

@@ -1,8 +1,6 @@
 import 'package:fake_async/fake_async.dart';
-import 'package:supply_chain/src/node.dart';
-import 'package:supply_chain/src/priority.dart';
 import 'package:supply_chain/src/schedule_task.dart';
-import 'package:supply_chain/src/scm.dart';
+import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -24,6 +22,7 @@ void main() {
   late Supplier<int> supplierB;
 
   late Scm scm;
+  late Scope scope;
 
   // ...........................................................................
   void initSupplierProducerCustomer() {
@@ -32,7 +31,7 @@ void main() {
     supplier = Supplier<int>(
       initialProduct: 0,
       name: 'Supplier',
-      scm: scm,
+      scope: scope,
       produce: (p0) {
         // Produce
         p0.product++;
@@ -45,7 +44,7 @@ void main() {
     producer = Node<int>(
       initialProduct: 0,
       name: 'Producer',
-      scm: scm,
+      scope: scope,
       produce: (p0) {
         // Produce
         p0.product = (p0.suppliers.first.product as int) * 10;
@@ -58,7 +57,7 @@ void main() {
     customer = Node<int>(
       initialProduct: 0,
       name: 'Customer',
-      scm: scm,
+      scope: scope,
       produce: (p0) {
         // Produce
         p0.product = (p0.suppliers.first.product as int) + 1;
@@ -77,7 +76,7 @@ void main() {
     key = Node<int>(
       initialProduct: 0,
       name: 'Key',
-      scm: scm,
+      scope: scope,
       produce: (p0) {
         // Produce
         p0.product++;
@@ -90,7 +89,7 @@ void main() {
     synth = Node<int>(
       initialProduct: 0,
       name: 'Synth',
-      scm: scm,
+      scope: scope,
       produce: (p0) {
         // Produce
         p0.product = (p0.suppliers.first.product as int) * 10;
@@ -103,7 +102,7 @@ void main() {
     audio = Node<int>(
       initialProduct: 0,
       name: 'Audio',
-      scm: scm,
+      scope: scope,
       produce: (p0) {
         // Produce
         p0.product = (p0.suppliers.first.product as int) + 1;
@@ -116,7 +115,7 @@ void main() {
     screen = Node<int>(
       initialProduct: 0,
       name: 'Screen',
-      scm: scm,
+      scope: scope,
       produce: (p0) {
         // Produce
         p0.product = (p0.suppliers.first.product as int) * 100;
@@ -129,7 +128,7 @@ void main() {
     grid = Node<int>(
       initialProduct: 0,
       name: 'Grid',
-      scm: scm,
+      scope: scope,
       produce: (p0) {
         // Produce
         p0.product = (p0.suppliers.first.product as int) + 2;
@@ -147,7 +146,7 @@ void main() {
     supplierA = Supplier<int>(
       initialProduct: 0,
       name: 'SupplierA',
-      scm: scm,
+      scope: scope,
       produce: (p0) {
         // Produce
         p0.product++;
@@ -160,7 +159,7 @@ void main() {
     supplierB = Supplier<int>(
       initialProduct: 0,
       name: 'SupplierB',
-      scm: scm,
+      scope: scope,
       produce: (p0) {
         // Produce
         p0.product += 10;
@@ -173,7 +172,7 @@ void main() {
     producer = Node<int>(
       initialProduct: 0,
       name: 'Producer',
-      scm: scm,
+      scope: scope,
       produce: (p0) {
         // Produce
         p0.product = (p0.suppliers.first.product as int) +
@@ -214,6 +213,8 @@ void main() {
       scm = Scm(
         isTest: true,
       );
+
+      scope = Scope.example(scm: scm);
 
       scm.testRunFastTasks();
     },
@@ -574,8 +575,7 @@ void main() {
     test('should throw if hasNewProduct(node) is called without nomination',
         () {
       // Create a node
-      final scm = exampleScm();
-      final node = exampleNode(scm: scm);
+      final node = exampleNode(scope: scope);
 
       // Call hasNewProduct() without nomination.
       // Throws.
@@ -749,7 +749,7 @@ void main() {
     // #########################################################################
     test('should be provided during testing', () {
       // Create some variables
-      final scm = exampleScm();
+      final scm = Scm.example();
       expect(scm.isTest, isTrue);
       var fastTaskCounter = 0;
       var normalTaskCounter = 0;
@@ -804,7 +804,7 @@ void main() {
     group('removeNode', () {
       test('should remove the node', () {
         final scm = Scm.testInstance;
-        final node = exampleNode(scm: scm);
+        final node = exampleNode(scope: scope);
         scm.addNode(node);
         expect(scm.nodes, contains(node));
 
@@ -818,7 +818,7 @@ void main() {
       test('should clear nominated, prepared and producing nodes', () {
         fakeAsync((fake) {
           final scm = Scm.testInstance;
-          final node = exampleNode(scm: scm);
+          final node = exampleNode(scope: scope);
           scm.addNode(node);
 
           (scm.nominatedNodes as Set<Node>).add(node);
@@ -845,8 +845,9 @@ void main() {
   // ###########################################################################
   test('Test with non test environment should work fine', () {
     fakeAsync((fake) {
-      final scm = exampleScm(isTest: false);
-      final node = exampleNode(scm: scm);
+      final scm = Scm.example(isTest: false);
+      final scope = Scope(key: 'Example', scm: scm);
+      final node = exampleNode(scope: scope);
       expect(node.product, 0);
       scm.nominate(node);
       fake.flushMicrotasks();

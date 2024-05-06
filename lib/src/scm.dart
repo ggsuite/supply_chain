@@ -179,6 +179,9 @@ class Scm implements ScmNodeInterface {
     return _testStopwatch;
   }
 
+  /// Example supply chain manager for test purposes
+  factory Scm.example({bool isTest = true}) => Scm(isTest: isTest);
+
   // ######################
   // Private
   // ######################
@@ -570,7 +573,3 @@ class Scm implements ScmNodeInterface {
   GgFakeTimer? _testTimer;
   late GgFakeStopwatch _testStopwatch;
 }
-
-// .............................................................................
-/// Example supply chain manager for test purposes
-Scm exampleScm({bool isTest = true}) => Scm(isTest: isTest);
