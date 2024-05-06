@@ -66,11 +66,42 @@ void main() {
       });
     });
 
-    group('node.dispose()', () {
+    group('node.dispose(), removeNode()', () {
       test('should remove the node from the scope', () {
         expect(scope.nodes, isNotEmpty);
         node.dispose();
         expect(scope.nodes, isEmpty);
+      });
+    });
+
+    group('createHierarchy()', () {
+      test('should allow to create a hierarchy of scopes', () {
+        final root = ExampleScopeRoot(scm: Scm.testInstance);
+        root.createHierarchy();
+        expect(root.nodes.map((n) => n.name), ['RootA', 'RootB']);
+        for (var element in root.nodes) {
+          element.produce();
+        }
+        expect(root.children.map((e) => e.key), ['ChildScopeA', 'ChildScopeB']);
+
+        final childA = root.child('ChildScopeA')!;
+        final childB = root.child('ChildScopeB')!;
+        expect(childA.nodes.map((n) => n.name), ['ChildNodeA', 'ChildNodeB']);
+        expect(childB.nodes.map((n) => n.name), ['ChildNodeA', 'ChildNodeB']);
+
+        for (var element in childA.nodes) {
+          element.produce();
+        }
+
+        for (var element in childB.nodes) {
+          element.produce();
+        }
+      });
+    });
+
+    group('build', () {
+      test('should return an empty array by default', () {
+        expect(scope.build(), isEmpty);
       });
     });
   });

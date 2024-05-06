@@ -26,6 +26,9 @@ class Scope {
   /// Returns the child scopes
   Iterable<Scope> get children => _children.values;
 
+  /// Returns the child scope with the given key
+  Scope? child(String key) => _children[key];
+
   /// The nodes of this scope
   Iterable<Node<dynamic>> get nodes => _nodes.values;
 
@@ -72,11 +75,77 @@ class Scope {
         scm: scm ?? Scm.testInstance,
       );
 
+  // ...........................................................................
+  /// Overide this method to build the nodes belonging to this scope
+  Iterable<Scope> build() => [];
+
+  // ...........................................................................
+  /// Call this method to create child hierarchies
+  void createHierarchy() {
+    for (final child in build()) {
+      _children[child.key] = child;
+      child.createHierarchy();
+    }
+  }
+
   // ######################
   // Private
   // ######################
 
   final Map<String, Scope> _children = {};
-
   final Map<String, Node<dynamic>> _nodes = {};
+}
+
+// #############################################################################
+// Example scopes for test purposes
+
+// .............................................................................
+/// An example root scope
+class ExampleScopeRoot extends Scope {
+  /// Constructor
+  ExampleScopeRoot({required super.scm, super.key = 'ExampleRoot'});
+
+  @override
+  Iterable<Scope> build() {
+    createNode(
+      initialProduct: 0,
+      produce: (node) {},
+      name: 'RootA',
+    );
+
+    createNode(
+      initialProduct: 0,
+      produce: (node) {},
+      name: 'RootB',
+    );
+
+    return [
+      ExampleChildScope(key: 'ChildScopeA', scm: scm),
+      ExampleChildScope(key: 'ChildScopeB', scm: scm),
+    ];
+  }
+}
+
+// .............................................................................
+/// An example child scope
+class ExampleChildScope extends Scope {
+  /// Constructor
+  ExampleChildScope({required super.scm, required super.key});
+
+  @override
+  Iterable<Scope> build() {
+    createNode(
+      initialProduct: 0,
+      produce: (node) {},
+      name: 'ChildNodeA',
+    );
+
+    createNode(
+      initialProduct: 0,
+      produce: (node) {},
+      name: 'ChildNodeB',
+    );
+
+    return [];
+  }
 }

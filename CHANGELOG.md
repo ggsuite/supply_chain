@@ -6,6 +6,10 @@
 
 - Add Scope
 
+### Changed
+
+- Scopes can build an hierrarchy
+
 ## [1.0.0] - 2024-05-04
 
 ### Changed
