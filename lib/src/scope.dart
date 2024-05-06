@@ -22,6 +22,12 @@ class Scope {
   /// The key of the scope
   final String key;
 
+  /// The uinquie id of the scope
+  final int id = _idCounter++;
+
+  /// Reset id counter for test purposes
+  static void testRestIdCounter() => _idCounter = 0;
+
   // ...........................................................................
   /// Returns the child scopes
   Iterable<Scope> get children => _children.values;
@@ -88,12 +94,68 @@ class Scope {
     }
   }
 
+  // ...........................................................................
+  // Print graph
+
+  /// Returns a graph that can be turned into svg using graphviz
+  String get graph {
+    var result = '';
+    result += 'digraph unix { ';
+    result += _graph;
+    result += '}';
+    return result;
+  }
+
   // ######################
   // Private
   // ######################
 
   final Map<String, Scope> _children = {};
   final Map<String, Node<dynamic>> _nodes = {};
+  static int _idCounter = 0;
+
+  // ...........................................................................
+  // Graph
+  String get _graph {
+    {
+      var result = '';
+
+      final scopeId = '${key}_${this.id}';
+
+      // Create a cluster for this scope
+      result += 'subgraph cluster_$scopeId { ';
+      result += 'label = "$key"; ';
+
+      // Write the child scopes
+      for (final childScope in children) {
+        result += childScope._graph;
+      }
+
+      String id(Node<dynamic> node) => '${node.name}_${node.id}';
+
+      // Write each node
+      for (final node in nodes) {
+        final nodeId = id(node);
+        result += '$nodeId [label="${node.name}"]; ';
+      }
+
+      // Write dependencies
+      for (final node in nodes) {
+        if (node.customers.isNotEmpty) {
+          for (final customer in node.customers) {
+            final from = id(node);
+            final to = id(customer);
+
+            result += '"$from" -> "$to"; ';
+          }
+        }
+      }
+
+      result += '}'; // cluster
+
+      return result;
+    }
+  }
 }
 
 // #############################################################################

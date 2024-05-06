@@ -5,6 +5,7 @@
 ### Added
 
 - Add Scope
+- Add Scope class + print scopes using dot
 
 ### Changed
 

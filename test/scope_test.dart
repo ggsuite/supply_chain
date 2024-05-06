@@ -7,11 +7,14 @@
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
+import 'sample_nodes.dart';
+
 void main() {
-  late Scope scope;
   late Node<int> node;
 
   setUp(() {
+    Node.testRestIdCounter();
+    Scope.testRestIdCounter();
     scope = Scope.example();
 
     node = scope.createNode(
@@ -102,6 +105,81 @@ void main() {
     group('build', () {
       test('should return an empty array by default', () {
         expect(scope.build(), isEmpty);
+      });
+    });
+
+    group('graph', () {
+      test('should print a simple graph correctly', () {
+        initSupplierProducerCustomer();
+        createSimpleChain();
+        final graph = scope.graph;
+        expect(
+          graph,
+          'digraph unix { '
+          'subgraph cluster_Example_0 '
+          '{ label = "Example"; '
+          'Node_0 [label="Node"]; '
+          'Supplier_1 [label="Supplier"]; '
+          'Producer_2 [label="Producer"]; '
+          'Customer_3 [label="Customer"]; '
+          '"Supplier_1" -> "Producer_2"; '
+          '"Producer_2" -> "Customer_3"; }}',
+        );
+      });
+
+      test('should print a more advanced graph correctly', () {
+        initMusicExampleNodes();
+
+        // .................................
+        // Create the following supply chain
+        //  key
+        //   |-synth
+        //   |  |-audio (realtime)
+        //   |
+        //   |-screen
+        //   |  |-grid
+        key.addCustomer(synth);
+        key.addCustomer(screen);
+        synth.addCustomer(audio);
+        screen.addCustomer(grid);
+        final graph = scope.graph;
+        expect(
+          graph,
+          'digraph unix { '
+          'subgraph cluster_Example_0 { '
+          'label = "Example";'
+          ' Node_0 [label="Node"];'
+          ' Key_1 [label="Key"];'
+          ' Synth_2 [label="Synth"];'
+          ' Audio_3 [label="Audio"];'
+          ' Screen_4 [label="Screen"];'
+          ' Grid_5 [label="Grid"]; '
+          '"Key_1" -> "Synth_2";'
+          ' "Key_1" -> "Screen_4";'
+          ' "Synth_2" -> "Audio_3";'
+          ' "Screen_4" -> "Grid_5";'
+          ' }}',
+        );
+      });
+
+      test('should print scopes correctly', () {
+        final root = ExampleScopeRoot(scm: Scm.testInstance);
+        root.createHierarchy();
+        final graph = root.graph;
+        expect(
+          graph,
+          'digraph unix { '
+          'subgraph cluster_ExampleRoot_1 { '
+          'label = "ExampleRoot"; subgraph cluster_ChildScopeA_2 { '
+          'label = "ChildScopeA"; ChildNodeA_3 [label="ChildNodeA"]; '
+          'ChildNodeB_4 [label="ChildNodeB"]; '
+          '}subgraph cluster_ChildScopeB_3 '
+          '{ label = "ChildScopeB"; '
+          'ChildNodeA_5 [label="ChildNodeA"]; '
+          'ChildNodeB_6 [label="ChildNodeB"]; '
+          '}RootA_1 [label="RootA"]; '
+          'RootB_2 [label="RootB"]; }}',
+        );
       });
     });
   });

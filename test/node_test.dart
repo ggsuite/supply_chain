@@ -14,6 +14,7 @@ void main() {
 
   setUp(
     () {
+      Node.testRestIdCounter();
       scm = Scm(isTest: true);
       scope = Scope.example(scm: scm);
       node = exampleNode(scope: scope);

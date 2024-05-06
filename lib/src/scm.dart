@@ -123,12 +123,6 @@ class Scm implements ScmNodeInterface {
   /// Set this property to true, if production timeouts should block
   bool shouldTimeOut = true;
 
-  // ...........................................................................
-  // Print graph
-
-  /// Returns a graph that can be turned into svg using graphviz
-  String get graph => _graph;
-
   // ######################
   // Testing
   // ######################
@@ -515,29 +509,6 @@ class Scm implements ScmNodeInterface {
         node.isTimedOut = true;
         _finalizeProduction(node);
       }
-    }
-  }
-
-  // ...........................................................................
-  // Graph
-
-  String get _graph {
-    {
-      var result = '';
-      result += 'digraph unix { ';
-
-      for (final node in nodes) {
-        for (final customer in node.customers) {
-          final from = node.name;
-          final to = customer.name;
-
-          result += '"$from" -> "$to"; ';
-        }
-      }
-
-      result += '}';
-
-      return result;
     }
   }
 

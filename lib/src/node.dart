@@ -59,6 +59,9 @@ class Node<T> {
   /// The name of the node
   final String name;
 
+  /// The unique id of the node
+  final int id = _idCounter++;
+
   /// Returns the name of the node
   @override
   String toString() {
@@ -202,6 +205,11 @@ class Node<T> {
   // ######################
   // Private
   // ######################
+
+  /// Reset Id counter for tests
+  static void testRestIdCounter() => _idCounter = 0;
+
+  static int _idCounter = 0;
 
   // ...........................................................................
   // Init & Dispose
