@@ -19,7 +19,7 @@ void main() {
 
     node = scope.createNode(
       initialProduct: 0,
-      produce: (node) {},
+      produce: (components, previousProduct) => previousProduct,
       name: 'Node',
     );
   });
@@ -53,7 +53,7 @@ void main() {
         expect(
           () => scope.createNode(
             initialProduct: 0,
-            produce: (node) {},
+            produce: (components, previousProduct) => previousProduct,
             name: 'Node',
           ),
           throwsA(
@@ -79,11 +79,12 @@ void main() {
 
     group('createHierarchy()', () {
       test('should allow to create a hierarchy of scopes', () {
-        final root = ExampleScopeRoot(scm: Scm.testInstance);
+        final scm = Scm.testInstance;
+        final root = ExampleScopeRoot(scm: scm);
         root.createHierarchy();
         expect(root.nodes.map((n) => n.name), ['RootA', 'RootB']);
         for (var element in root.nodes) {
-          element.produce();
+          scm.nominate(element);
         }
         expect(root.children.map((e) => e.key), ['ChildScopeA', 'ChildScopeB']);
 
@@ -93,17 +94,19 @@ void main() {
         expect(childB.nodes.map((n) => n.name), ['ChildNodeA', 'ChildNodeB']);
 
         for (var element in childA.nodes) {
-          element.produce();
+          scm.nominate(element);
         }
 
         for (var element in childB.nodes) {
-          element.produce();
+          scm.nominate(element);
         }
 
         final grandChild = childA.child('GrandChildScope')!;
-        for (final node in grandChild.nodes) {
-          node.produce();
+        for (final element in grandChild.nodes) {
+          scm.nominate(element);
         }
+        scm.tick();
+        scm.testFlushTasks();
       });
     });
 
@@ -270,7 +273,7 @@ void main() {
           name: 'Node',
           suppliers: ['Unknown'],
           initialProduct: 0,
-          produce: (p0) {},
+          produce: (components, previous) => previous,
         );
 
         expect(

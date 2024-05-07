@@ -35,25 +35,15 @@ void initSupplierProducerCustomer() {
     initialProduct: 0,
     name: 'Supplier',
     scope: scope,
-    produce: (p0) {
-      // Produce
-      p0.product++;
-
-      // Announce new product
-      p0.scm.hasNewProduct(p0);
-    },
+    produce: (components, previousProduct) => previousProduct + 1,
   );
 
   producer = Node<int>(
     initialProduct: 0,
     name: 'Producer',
     scope: scope,
-    produce: (p0) {
-      // Produce
-      p0.product = (p0.suppliers.first.product as int) * 10;
-
-      // Announce new product
-      p0.scm.hasNewProduct(p0);
+    produce: (components, previousProduct) {
+      return (components.first as int) * 10;
     },
   );
 
@@ -61,12 +51,8 @@ void initSupplierProducerCustomer() {
     initialProduct: 0,
     name: 'Customer',
     scope: scope,
-    produce: (p0) {
-      // Produce
-      p0.product = (p0.suppliers.first.product as int) + 1;
-
-      // Announce new product
-      p0.scm.hasNewProduct(p0);
+    produce: (components, previousProduct) {
+      return (components.first as int) + 1;
     },
   );
 }
@@ -80,12 +66,8 @@ void initMusicExampleNodes() {
     initialProduct: 0,
     name: 'Key',
     scope: scope,
-    produce: (p0) {
-      // Produce
-      p0.product++;
-
-      // Announce new product
-      p0.scm.hasNewProduct(p0);
+    produce: (components, previousProduct) {
+      return previousProduct + 1;
     },
   );
 
@@ -93,12 +75,9 @@ void initMusicExampleNodes() {
     initialProduct: 0,
     name: 'Synth',
     scope: scope,
-    produce: (p0) {
+    produce: (components, previousProduct) {
       // Produce
-      p0.product = (p0.suppliers.first.product as int) * 10;
-
-      // Announce new product
-      p0.scm.hasNewProduct(p0);
+      return (components.first as int) * 10;
     },
   );
 
@@ -106,12 +85,9 @@ void initMusicExampleNodes() {
     initialProduct: 0,
     name: 'Audio',
     scope: scope,
-    produce: (p0) {
+    produce: (components, previousProduct) {
       // Produce
-      p0.product = (p0.suppliers.first.product as int) + 1;
-
-      // Announce new product
-      p0.scm.hasNewProduct(p0);
+      return (components.first as int) + 1;
     },
   );
 
@@ -119,12 +95,9 @@ void initMusicExampleNodes() {
     initialProduct: 0,
     name: 'Screen',
     scope: scope,
-    produce: (p0) {
+    produce: (components, previousProduct) {
       // Produce
-      p0.product = (p0.suppliers.first.product as int) * 100;
-
-      // Announce new product
-      p0.scm.hasNewProduct(p0);
+      return (components.first as int) * 100;
     },
   );
 
@@ -132,12 +105,9 @@ void initMusicExampleNodes() {
     initialProduct: 0,
     name: 'Grid',
     scope: scope,
-    produce: (p0) {
+    produce: (components, previousProduct) {
       // Produce
-      p0.product = (p0.suppliers.first.product as int) + 2;
-
-      // Announce new product
-      p0.scm.hasNewProduct(p0);
+      return (components.first as int) + 2;
     },
   );
 }
@@ -150,12 +120,9 @@ void initTimeoutExampleNodes() {
     initialProduct: 0,
     name: 'SupplierA',
     scope: scope,
-    produce: (p0) {
+    produce: (components, previousProduct) {
       // Produce
-      p0.product++;
-
-      // Announce new product
-      p0.scm.hasNewProduct(p0);
+      return previousProduct + 1;
     },
   );
 
@@ -163,12 +130,8 @@ void initTimeoutExampleNodes() {
     initialProduct: 0,
     name: 'SupplierB',
     scope: scope,
-    produce: (p0) {
-      // Produce
-      p0.product += 10;
-
-      // Don't announce product.
-      // We will do it in test
+    produce: (components, previousProduct) {
+      return previousProduct; // No change. No announcement.
     },
   );
 
@@ -176,13 +139,9 @@ void initTimeoutExampleNodes() {
     initialProduct: 0,
     name: 'Producer',
     scope: scope,
-    produce: (p0) {
+    produce: (components, previousProduct) {
       // Produce
-      p0.product = (p0.suppliers.first.product as int) +
-          (p0.suppliers.last.product as int);
-
-      // Announce new product
-      p0.scm.hasNewProduct(p0);
+      return (components.first as int) + (components.last as int);
     },
   );
 }

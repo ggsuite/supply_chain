@@ -21,7 +21,10 @@ typedef Customer<T> = Node<T>;
 typedef Worker<T> = Node<T>;
 
 /// Produce delegate
-typedef Produce<T> = void Function(Node<T>);
+typedef Produce<T> = T Function(
+  List<dynamic> components,
+  T previousProduct,
+);
 
 /// A node in the supply chain
 class Node<T> {
@@ -149,7 +152,15 @@ class Node<T> {
   T product;
 
   /// Produces the product.
-  void produce() => _produce(this);
+  void produce() {
+    final newProduct =
+        _produce(suppliers.map((s) => s.product).toList(), product);
+
+    if (newProduct != product) {
+      product = newProduct;
+      scm.hasNewProduct(this);
+    }
+  }
 
   /// Returns true, if node is staged for production
   bool isStaged = false;
@@ -320,7 +331,7 @@ class Node<T> {
 /// Example node for test purposes
 Node<int> exampleNode({
   int initialProduct = 0,
-  void Function(Node<int>)? produce,
+  int Function(List<dynamic> components, int previousProduct)? produce,
   Scope? scope,
   String? name,
 }) {
@@ -330,9 +341,8 @@ Node<int> exampleNode({
     name: name,
     initialProduct: initialProduct,
     produce: produce ??
-        (Node<int> n) {
-          n.product++;
-          n.scm.hasNewProduct(n);
+        (List<dynamic> components, int previousProduct) {
+          return previousProduct + 1;
         },
     scope: scope,
   );

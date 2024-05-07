@@ -250,13 +250,13 @@ class ExampleScopeRoot extends Scope {
   Iterable<Scope> build() {
     createNode(
       initialProduct: 0,
-      produce: (node) {},
+      produce: (components, previous) => previous + 1, // coveralls:ignore-line
       name: 'RootA',
     );
 
     createNode(
       initialProduct: 0,
-      produce: (node) {},
+      produce: (components, previous) => previous + 1, // coveralls:ignore-line
       name: 'RootB',
     );
 
@@ -277,14 +277,14 @@ class ExampleChildScope extends Scope {
   Iterable<Scope> build() {
     createNode(
       initialProduct: 0,
-      produce: (node) {},
+      produce: (components, previous) => previous + 1,
       name: 'ChildNodeA',
       suppliers: ['RootA', 'RootB', 'ChildNodeB'],
     );
 
     createNode(
       initialProduct: 0,
-      produce: (node) {},
+      produce: (components, previous) => previous + 1,
       name: 'ChildNodeB',
     );
 
@@ -302,7 +302,7 @@ class ExampleGrandChildScope extends Scope {
   Iterable<Scope> build() {
     createNode(
       initialProduct: 0,
-      produce: (node) {},
+      produce: (components, previous) => previous + 1,
       name: 'GrandChildNodeA',
       suppliers: [
         'RootA',
