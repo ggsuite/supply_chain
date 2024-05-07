@@ -262,14 +262,6 @@ class Scm implements ScmNodeInterface {
   void _prepare() {
     // For all nominated nodes
     for (var node in [...nominatedNodes]) {
-      // Does node need update?
-      final needsUpdate = node.needsUpdate;
-
-      // If node needs no update, continue
-      if (!needsUpdate) {
-        continue;
-      }
-
       // Prepare node
       _prepareNode(node);
     }

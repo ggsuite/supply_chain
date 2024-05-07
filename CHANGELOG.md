@@ -13,6 +13,10 @@
 - Scopes can build an hierrarchy
 - Hand over components and previous value to produce method
 
+### Removed
+
+- Removed needsUpdate because it is not used
+
 ## [1.0.0] - 2024-05-04
 
 ### Changed

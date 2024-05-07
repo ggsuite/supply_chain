@@ -4,6 +4,8 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'package:gg_cache/gg_cache.dart';
+
 import 'names.dart';
 import 'priority.dart';
 import 'scm.dart';
@@ -36,11 +38,16 @@ class Node<T> {
   ///   Important: Call node.reportUpdate() after production.
   /// - [hasUpdates]: Is called after the product has been updated
   /// - [needsUpdates]: Is called when the product needs to be updated
+  /// - [scope]: The scope the node belongs to
+  /// - [name]: The name of the node
+  /// - [cacheSize]: The number of items in the cache
+
   Node({
     required T initialProduct,
     required Produce<T> produce,
     required this.scope,
     String? name,
+    this.cacheSize = 0,
   })  : scm = scope.scm,
         product = initialProduct,
         assert(name == null || name.isPascalCase),
@@ -94,11 +101,6 @@ class Node<T> {
 
   // ...........................................................................
   // Preparation
-
-  /// Returns true if suppliers or internal conditions have changed
-  bool get needsUpdate {
-    return suppliersHash != _previousSupplierHash;
-  }
 
   /// Returns true if node and its customers need to be prepared for production
   bool needsPreparation() {
@@ -182,16 +184,6 @@ class Node<T> {
   /// Remove a supplier from the node
   void removeSupplier(Supplier<dynamic> supplier) => _removeSupplier(supplier);
 
-  /// Calculates a hash for all supplier's products
-  int get suppliersHash {
-    int result = 0;
-    for (final supplier in suppliers) {
-      result = result ^ supplier.product.hashCode;
-    }
-
-    return result;
-  }
-
   // ...........................................................................
   // Customers
 
@@ -260,7 +252,6 @@ class Node<T> {
 
   // ...........................................................................
   final Produce<T> _produce;
-  final int _previousSupplierHash = 1829307102703;
   Priority _ownPriority = Priority.frame;
 
   // ...........................................................................
@@ -269,6 +260,16 @@ class Node<T> {
 
   /// The scope this node belongs to
   final Scope scope;
+
+  /// The number of items in the cache
+  final int cacheSize;
+
+  /// The cache to be used
+  Cache<T> cache = Cache<T>();
+
+  // ######################
+  // Private
+  // ######################
 
   // ...........................................................................
   final List<Supplier<dynamic>> _suppliers = [];
