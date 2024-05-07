@@ -44,6 +44,7 @@ class Scope {
     required T initialProduct,
     required Produce<T> produce,
     required String name,
+    Iterable<String> suppliers = const [],
   }) {
     final node = Node<T>(
       initialProduct: initialProduct,
@@ -51,6 +52,10 @@ class Scope {
       scope: this,
       name: name,
     );
+
+    if (suppliers.isNotEmpty) {
+      _supplierStrings[node.name] = suppliers;
+    }
 
     return node;
   }
@@ -91,7 +96,67 @@ class Scope {
     for (final child in build()) {
       _children[child.key] = child;
       child.createHierarchy();
+      child._parent = this;
     }
+  }
+
+  // ...........................................................................
+  /// Returns true if this scope is an ancestor of the given scope
+  bool isAncestorOf(Scope scope) {
+    if (_children.containsKey(scope.key)) {
+      return true;
+    }
+
+    for (final child in _children.values) {
+      if (child.isAncestorOf(scope)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // ...........................................................................
+  /// Returns true if this scope is a descendant of the given scope
+  bool isDescendantOf(Scope scope) {
+    if (scope._children.containsKey(key)) {
+      return true;
+    }
+
+    for (final child in scope._children.values) {
+      if (isDescendantOf(child)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // ...........................................................................
+  /// Call this method to init the suppliers.
+  /// But not before the whole hierarchy has been created
+  void initSuppliers() {
+    for (final node in _nodes.values) {
+      final suppliers = _supplierStrings[node.name];
+      if (suppliers != null) {
+        _addSuppliers(node, suppliers);
+      }
+    }
+
+    for (final child in _children.values) {
+      child.initSuppliers();
+    }
+  }
+
+  // ...........................................................................
+  /// Returns the node of name in this or any parent nodes
+  Node<dynamic>? findNode(String name) {
+    final node = _nodes[name];
+    if (node != null) {
+      return node;
+    }
+
+    return _parent?.findNode(name);
   }
 
   // ...........................................................................
@@ -111,7 +176,9 @@ class Scope {
   // ######################
 
   final Map<String, Scope> _children = {};
+  Scope? _parent;
   final Map<String, Node<dynamic>> _nodes = {};
+  final Map<String, Iterable<String>> _supplierStrings = {};
   static int _idCounter = 0;
 
   // ...........................................................................
@@ -141,19 +208,31 @@ class Scope {
 
       // Write dependencies
       for (final node in nodes) {
-        if (node.customers.isNotEmpty) {
-          for (final customer in node.customers) {
-            final from = id(node);
-            final to = id(customer);
+        for (final customer in node.customers) {
+          final from = id(node);
+          final to = id(customer);
 
-            result += '"$from" -> "$to"; ';
-          }
+          result += '"$from" -> "$to"; ';
         }
       }
 
       result += '}'; // cluster
 
       return result;
+    }
+  }
+
+  // ...........................................................................
+  void _addSuppliers(Node<dynamic> node, Iterable<String> suppliers) {
+    for (final supplierName in suppliers) {
+      final supplier = findNode(supplierName);
+      if (supplier == null) {
+        throw ArgumentError(
+          'Scope "$key": Supplier with name "$supplierName" not found.',
+        );
+      }
+
+      node.addSupplier(supplier);
     }
   }
 }
@@ -200,12 +279,34 @@ class ExampleChildScope extends Scope {
       initialProduct: 0,
       produce: (node) {},
       name: 'ChildNodeA',
+      suppliers: ['RootA', 'RootB', 'ChildNodeB'],
     );
 
     createNode(
       initialProduct: 0,
       produce: (node) {},
       name: 'ChildNodeB',
+    );
+
+    return [ExampleGrandChildScope(key: 'GrandChildScope', scm: scm)];
+  }
+}
+
+// .............................................................................
+/// An example child scope
+class ExampleGrandChildScope extends Scope {
+  /// Constructor
+  ExampleGrandChildScope({required super.scm, required super.key});
+
+  @override
+  Iterable<Scope> build() {
+    createNode(
+      initialProduct: 0,
+      produce: (node) {},
+      name: 'GrandChildNodeA',
+      suppliers: [
+        'RootA',
+      ],
     );
 
     return [];

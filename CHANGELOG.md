@@ -6,6 +6,7 @@
 
 - Add Scope
 - Add Scope class + print scopes using dot
+- Add isDescendantOf, isAncestorOf, initSuppliers
 
 ### Changed
 
