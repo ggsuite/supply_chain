@@ -356,7 +356,6 @@ class Scm implements ScmNodeInterface {
         node.productionStartTime = _stopwatch.elapsed;
 
         // Produce
-        print('Producing node: $node');
         node.produce();
       }
 
