@@ -11,7 +11,7 @@ class ValueNode<T> extends Node<T> {
   /// Constructor
   ValueNode({
     required super.initialProduct,
-    required super.scope,
+    required super.chain,
     required super.key,
   })  : _value = initialProduct,
         super(produce: (c, p) => initialProduct);
@@ -37,7 +37,7 @@ class ValueNode<T> extends Node<T> {
   /// Example instance for test purposes
   static ValueNode<int> get example => ValueNode<int>(
         initialProduct: 5,
-        scope: SupplyChain.example(),
+        chain: SupplyChain.example(),
         key: 'ValueNode',
       );
 

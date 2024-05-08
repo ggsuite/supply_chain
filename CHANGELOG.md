@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.4] - 2024-05-08
+
+### Changed
+
+- Rename scope into chain
+
 ## [1.0.3] - 2024-05-08
 
 ### Changed
@@ -44,6 +50,7 @@
 - 'Github Actions Pipeline'
 - 'Github Actions Pipeline: Add SDK file containing flutter into .github/workflows to make github installing flutter and not dart SDK'
 
+[1.0.4]: https://github.com/inlavigo/supply_chain/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/inlavigo/supply_chain/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/inlavigo/supply_chain/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/inlavigo/supply_chain/compare/1.0.0...1.0.1

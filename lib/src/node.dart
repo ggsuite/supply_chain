@@ -38,17 +38,17 @@ class Node<T> {
   ///   Important: Call node.reportUpdate() after production.
   /// - [hasUpdates]: Is called after the product has been updated
   /// - [needsUpdates]: Is called when the product needs to be updated
-  /// - [scope]: The scope the node belongs to
+  /// - [chain]: The chain the node belongs to
   /// - [key]: The key of the node
   /// - [cacheSize]: The number of items in the cache
 
   Node({
     required T initialProduct,
     required Produce<T> produce,
-    required this.scope,
+    required this.chain,
     String? key,
     this.cacheSize = 0,
-  })  : scm = scope.scm,
+  })  : scm = chain.scm,
         product = initialProduct,
         assert(key == null || key.isPascalCase),
         key = key ?? nextKey,
@@ -217,7 +217,7 @@ class Node<T> {
   // ...........................................................................
   // Init & Dispose
   void _init() {
-    _initScope();
+    _initChain();
     _initScm();
   }
 
@@ -240,10 +240,10 @@ class Node<T> {
   }
 
   // ...........................................................................
-  void _initScope() {
-    scope.addNode(this);
+  void _initChain() {
+    chain.addNode(this);
     _dispose.add(() {
-      scope.removeNode(this);
+      chain.removeNode(this);
     });
   }
 
@@ -258,8 +258,8 @@ class Node<T> {
   /// The supply chain manager
   final ScmNodeInterface scm;
 
-  /// The scope this node belongs to
-  final SupplyChain scope;
+  /// The chain this node belongs to
+  final SupplyChain chain;
 
   /// The number of items in the cache
   final int cacheSize;
@@ -333,10 +333,10 @@ class Node<T> {
 Node<int> exampleNode({
   int initialProduct = 0,
   int Function(List<dynamic> components, int previousProduct)? produce,
-  SupplyChain? scope,
+  SupplyChain? chain,
   String? key,
 }) {
-  scope ??= SupplyChain.example(scm: Scm.testInstance);
+  chain ??= SupplyChain.example(scm: Scm.testInstance);
 
   final result = Node<int>(
     key: key,
@@ -345,7 +345,7 @@ Node<int> exampleNode({
         (List<dynamic> components, int previousProduct) {
           return previousProduct + 1;
         },
-    scope: scope,
+    chain: chain,
   );
 
   // Realtime nodes will produce immediately

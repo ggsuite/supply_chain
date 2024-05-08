@@ -9,15 +9,15 @@ import 'package:test/test.dart';
 
 void main() {
   late Scm scm;
-  late SupplyChain scope;
+  late SupplyChain chain;
   late Node<int> node;
 
   setUp(
     () {
       Node.testRestIdCounter();
       scm = Scm(isTest: true);
-      scope = SupplyChain.example(scm: scm);
-      node = exampleNode(scope: scope);
+      chain = SupplyChain.example(scm: scm);
+      node = exampleNode(chain: chain);
     },
   );
 
@@ -61,8 +61,8 @@ void main() {
 
     // #########################################################################
     test('suppliers, addSupplier(), removeSupplier()', () {
-      final supplier0 = exampleNode(scope: scope);
-      final supplier1 = exampleNode(scope: scope);
+      final supplier0 = exampleNode(chain: chain);
+      final supplier1 = exampleNode(chain: chain);
 
       // Add supplier the first time
       expect(scm.nominatedNodes, [node, supplier0, supplier1]);
@@ -113,8 +113,8 @@ void main() {
 
     // #########################################################################
     test('customers, addSupplier(), removeSupplier()', () {
-      final customer0 = exampleNode(scope: scope);
-      final customer1 = exampleNode(scope: scope);
+      final customer0 = exampleNode(chain: chain);
+      final customer1 = exampleNode(chain: chain);
 
       // Add customer the first time
       node.addCustomer(customer0);
@@ -153,9 +153,9 @@ void main() {
     // #########################################################################
     test('dispose() should work fine', () {
       // Create a supplier -> producer -> customer chain
-      final supplier = exampleNode(scope: scope, key: 'Supplier');
-      final producer = exampleNode(scope: scope, key: 'Producer');
-      final customer = exampleNode(scope: scope, key: 'Customer');
+      final supplier = exampleNode(chain: chain, key: 'Supplier');
+      final producer = exampleNode(chain: chain, key: 'Producer');
+      final customer = exampleNode(chain: chain, key: 'Customer');
       producer.addCustomer(customer);
       producer.addSupplier(supplier);
 

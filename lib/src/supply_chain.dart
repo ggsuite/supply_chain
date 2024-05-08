@@ -49,7 +49,7 @@ class SupplyChain {
     final node = Node<T>(
       initialProduct: initialProduct,
       produce: produce,
-      scope: this,
+      chain: this,
       key: key,
     );
 

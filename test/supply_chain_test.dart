@@ -15,9 +15,9 @@ void main() {
   setUp(() {
     Node.testRestIdCounter();
     SupplyChain.testRestIdCounter();
-    scope = SupplyChain.example();
+    chain = SupplyChain.example();
 
-    node = scope.createNode(
+    node = chain.createNode(
       initialProduct: 0,
       produce: (components, previousProduct) => previousProduct,
       key: 'Node',
@@ -27,31 +27,31 @@ void main() {
   group('Chain', () {
     group('basic properties', () {
       test('example', () {
-        expect(scope, isA<SupplyChain>());
+        expect(chain, isA<SupplyChain>());
       });
 
       test('scm', () {
-        expect(scope.scm, Scm.testInstance);
+        expect(chain.scm, Scm.testInstance);
       });
 
       test('key', () {
-        expect(scope.key, 'Example');
+        expect(chain.key, 'Example');
       });
 
       test('children', () {
-        expect(scope.children, isEmpty);
+        expect(chain.children, isEmpty);
       });
     });
 
     group('createNode(), addNode()', () {
-      test('should create a node and set the scope and SCM correctly', () {
-        expect(node.scope, scope);
-        expect(node.scm, scope.scm);
+      test('should create a node and set the chain and SCM correctly', () {
+        expect(node.chain, chain);
+        expect(node.scm, chain.scm);
       });
 
       test('should throw if a node with the same key already exists', () {
         expect(
-          () => scope.createNode(
+          () => chain.createNode(
             initialProduct: 0,
             produce: (components, previousProduct) => previousProduct,
             key: 'Node',
@@ -64,21 +64,21 @@ void main() {
         );
       });
 
-      test('should add the node to the scope\'s nodes', () {
-        expect(scope.nodes, [node]);
+      test('should add the node to the chain\'s nodes', () {
+        expect(chain.nodes, [node]);
       });
     });
 
     group('node.dispose(), removeNode()', () {
-      test('should remove the node from the scope', () {
-        expect(scope.nodes, isNotEmpty);
+      test('should remove the node from the chain', () {
+        expect(chain.nodes, isNotEmpty);
         node.dispose();
-        expect(scope.nodes, isEmpty);
+        expect(chain.nodes, isEmpty);
       });
     });
 
     group('createHierarchy()', () {
-      test('should allow to create a hierarchy of scopes', () {
+      test('should allow to create a hierarchy of chains', () {
         final scm = Scm.testInstance;
         final root = ExampleChainRoot(scm: scm);
         root.createHierarchy();
@@ -112,7 +112,7 @@ void main() {
 
     group('build', () {
       test('should return an empty array by default', () {
-        expect(scope.build(), isEmpty);
+        expect(chain.build(), isEmpty);
       });
     });
 
@@ -120,7 +120,7 @@ void main() {
       test('should print a simple graph correctly', () {
         initSupplierProducerCustomer();
         createSimpleChain();
-        final graph = scope.graph;
+        final graph = chain.graph;
         expect(
           graph,
           'digraph unix { '
@@ -150,7 +150,7 @@ void main() {
         key.addCustomer(screen);
         synth.addCustomer(audio);
         screen.addCustomer(grid);
-        final graph = scope.graph;
+        final graph = chain.graph;
         expect(
           graph,
           'digraph unix { '
@@ -170,7 +170,7 @@ void main() {
         );
       });
 
-      test('should print scopes correctly', () {
+      test('should print chains correctly', () {
         final root = ExampleChainRoot(scm: Scm.testInstance);
         root.createHierarchy();
         root.initSuppliers();
@@ -213,7 +213,7 @@ void main() {
         final rootChain = ExampleChainRoot(scm: Scm.testInstance);
         rootChain.createHierarchy();
 
-        // Find a node directly contained in scope
+        // Find a node directly contained in chain
         final rootA = rootChain.findNode('RootA');
         expect(rootA?.key, 'RootA');
 
@@ -228,7 +228,7 @@ void main() {
         final childNodeA = rootChain.findNode('ChildNodeA');
         expect(childNodeA, isNull);
 
-        // Should return nodes from parent scope
+        // Should return nodes from parent chain
         final childChainA = rootChain.child('ChildChainA')!;
         final rootAFromChild = childChainA.findNode('RootA');
         expect(rootAFromChild?.key, 'RootA');
@@ -267,9 +267,9 @@ void main() {
 
       test('should throw if a supplier is not found', () {
         final scm = Scm.testInstance;
-        final scope = SupplyChain.example(scm: scm);
+        final chain = SupplyChain.example(scm: scm);
 
-        scope.createNode<int>(
+        chain.createNode<int>(
           key: 'Node',
           suppliers: ['Unknown'],
           initialProduct: 0,
@@ -277,7 +277,7 @@ void main() {
         );
 
         expect(
-          () => scope.initSuppliers(),
+          () => chain.initSuppliers(),
           throwsA(
             predicate<ArgumentError>(
               (e) => e.toString().contains(
@@ -289,7 +289,7 @@ void main() {
       });
 
       group('isAncestorOf(node)', () {
-        test('should return true if the scope is an ancestor', () {
+        test('should return true if the chain is an ancestor', () {
           final rootChain = ExampleChainRoot(scm: Scm.testInstance);
           rootChain.createHierarchy();
           final childChainA = rootChain.child('ChildChainA')!;
@@ -304,7 +304,7 @@ void main() {
       });
 
       group('isDescendantOf(node)', () {
-        test('should return true if the scope is a descendant', () {
+        test('should return true if the chain is a descendant', () {
           final rootChain = ExampleChainRoot(scm: Scm.testInstance);
           rootChain.createHierarchy();
           final childChainA = rootChain.child('ChildChainA')!;

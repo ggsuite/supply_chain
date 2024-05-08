@@ -25,7 +25,7 @@ late Supplier<int> supplierA;
 late Supplier<int> supplierB;
 
 late Scm scm;
-late SupplyChain scope;
+late SupplyChain chain;
 
 // ...........................................................................
 void initSupplierProducerCustomer() {
@@ -34,14 +34,14 @@ void initSupplierProducerCustomer() {
   supplier = Supplier<int>(
     initialProduct: 0,
     key: 'Supplier',
-    scope: scope,
+    chain: chain,
     produce: (components, previousProduct) => previousProduct + 1,
   );
 
   producer = Node<int>(
     initialProduct: 0,
     key: 'Producer',
-    scope: scope,
+    chain: chain,
     produce: (components, previousProduct) {
       return (components.first as int) * 10;
     },
@@ -50,7 +50,7 @@ void initSupplierProducerCustomer() {
   customer = Node<int>(
     initialProduct: 0,
     key: 'Customer',
-    scope: scope,
+    chain: chain,
     produce: (components, previousProduct) {
       return (components.first as int) + 1;
     },
@@ -65,7 +65,7 @@ void initMusicExampleNodes() {
   key = Node<int>(
     initialProduct: 0,
     key: 'Key',
-    scope: scope,
+    chain: chain,
     produce: (components, previousProduct) {
       return previousProduct + 1;
     },
@@ -74,7 +74,7 @@ void initMusicExampleNodes() {
   synth = Node<int>(
     initialProduct: 0,
     key: 'Synth',
-    scope: scope,
+    chain: chain,
     produce: (components, previousProduct) {
       // Produce
       return (components.first as int) * 10;
@@ -84,7 +84,7 @@ void initMusicExampleNodes() {
   audio = Node<int>(
     initialProduct: 0,
     key: 'Audio',
-    scope: scope,
+    chain: chain,
     produce: (components, previousProduct) {
       // Produce
       return (components.first as int) + 1;
@@ -94,7 +94,7 @@ void initMusicExampleNodes() {
   screen = Node<int>(
     initialProduct: 0,
     key: 'Screen',
-    scope: scope,
+    chain: chain,
     produce: (components, previousProduct) {
       // Produce
       return (components.first as int) * 100;
@@ -104,7 +104,7 @@ void initMusicExampleNodes() {
   grid = Node<int>(
     initialProduct: 0,
     key: 'Grid',
-    scope: scope,
+    chain: chain,
     produce: (components, previousProduct) {
       // Produce
       return (components.first as int) + 2;
@@ -119,7 +119,7 @@ void initTimeoutExampleNodes() {
   supplierA = Supplier<int>(
     initialProduct: 0,
     key: 'SupplierA',
-    scope: scope,
+    chain: chain,
     produce: (components, previousProduct) {
       // Produce
       return previousProduct + 1;
@@ -129,7 +129,7 @@ void initTimeoutExampleNodes() {
   supplierB = Supplier<int>(
     initialProduct: 0,
     key: 'SupplierB',
-    scope: scope,
+    chain: chain,
     produce: (components, previousProduct) {
       return previousProduct; // No change. No announcement.
     },
@@ -138,7 +138,7 @@ void initTimeoutExampleNodes() {
   producer = Node<int>(
     initialProduct: 0,
     key: 'Producer',
-    scope: scope,
+    chain: chain,
     produce: (components, previousProduct) {
       // Produce
       return (components.first as int) + (components.last as int);

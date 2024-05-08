@@ -29,7 +29,7 @@ void main() {
         isTest: true,
       );
 
-      scope = SupplyChain.example(scm: scm);
+      chain = SupplyChain.example(scm: scm);
 
       scm.testRunFastTasks();
     },
@@ -390,7 +390,7 @@ void main() {
     test('should throw if hasNewProduct(node) is called without nomination',
         () {
       // Create a node
-      final node = exampleNode(scope: scope);
+      final node = exampleNode(chain: chain);
 
       // Call hasNewProduct() without nomination.
       // Throws.
@@ -579,7 +579,7 @@ void main() {
     group('removeNode', () {
       test('should remove the node', () {
         final scm = Scm.testInstance;
-        final node = exampleNode(scope: scope);
+        final node = exampleNode(chain: chain);
         scm.addNode(node);
         expect(scm.nodes, contains(node));
 
@@ -593,7 +593,7 @@ void main() {
       test('should clear nominated, prepared and producing nodes', () {
         fakeAsync((fake) {
           final scm = Scm.testInstance;
-          final node = exampleNode(scope: scope);
+          final node = exampleNode(chain: chain);
           scm.addNode(node);
 
           (scm.nominatedNodes as Set<Node>).add(node);
@@ -621,8 +621,8 @@ void main() {
   test('Test with non test environment should work fine', () {
     fakeAsync((fake) {
       final scm = Scm.example(isTest: false);
-      final scope = SupplyChain(key: 'Example', scm: scm);
-      final node = exampleNode(scope: scope);
+      final chain = SupplyChain(key: 'Example', scm: scm);
+      final node = exampleNode(chain: chain);
       expect(node.product, 0);
       scm.nominate(node);
       fake.flushMicrotasks();
