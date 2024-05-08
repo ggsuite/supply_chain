@@ -6,7 +6,7 @@
 
 import 'package:gg_cache/gg_cache.dart';
 
-import 'names.dart';
+import 'keys.dart';
 import 'priority.dart';
 import 'scm.dart';
 import 'scm_node_interface.dart';
@@ -39,19 +39,19 @@ class Node<T> {
   /// - [hasUpdates]: Is called after the product has been updated
   /// - [needsUpdates]: Is called when the product needs to be updated
   /// - [scope]: The scope the node belongs to
-  /// - [name]: The name of the node
+  /// - [key]: The key of the node
   /// - [cacheSize]: The number of items in the cache
 
   Node({
     required T initialProduct,
     required Produce<T> produce,
     required this.scope,
-    String? name,
+    String? key,
     this.cacheSize = 0,
   })  : scm = scope.scm,
         product = initialProduct,
-        assert(name == null || name.isPascalCase),
-        name = name ?? nextName,
+        assert(key == null || key.isPascalCase),
+        key = key ?? nextKey,
         _produce = produce {
     _init();
   }
@@ -66,16 +66,16 @@ class Node<T> {
 
   // ...........................................................................
   // Identification
-  /// The name of the node
-  final String name;
+  /// The key of the node
+  final String key;
 
   /// The unique id of the node
   final int id = _idCounter++;
 
-  /// Returns the name of the node
+  /// Returns the key of the node
   @override
   String toString() {
-    return name;
+    return key;
   }
 
   // ...........................................................................
@@ -334,12 +334,12 @@ Node<int> exampleNode({
   int initialProduct = 0,
   int Function(List<dynamic> components, int previousProduct)? produce,
   Scope? scope,
-  String? name,
+  String? key,
 }) {
   scope ??= Scope.example(scm: Scm.testInstance);
 
   final result = Node<int>(
-    name: name,
+    key: key,
     initialProduct: initialProduct,
     produce: produce ??
         (List<dynamic> components, int previousProduct) {

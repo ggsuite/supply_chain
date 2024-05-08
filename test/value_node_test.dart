@@ -14,7 +14,7 @@ void main() {
   group('ValueNode', () {
     group('example', () {
       test('should have the right initial values', () {
-        expect(valueNode.name, 'ValueNode');
+        expect(valueNode.key, 'ValueNode');
         expect(valueNode.scope.key, 'Example');
         expect(valueNode.product, 5);
       });

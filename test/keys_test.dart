@@ -4,7 +4,7 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-import 'package:supply_chain/src/names.dart';
+import 'package:supply_chain/src/keys.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -12,18 +12,18 @@ void main() {
     group('nextName', () {
       test('should return the next name', () {
         testSetNextCounter(0);
-        expect(nextName, names[0]);
-        expect(nextName, names[1]);
-        expect(nextName, names[2]);
+        expect(nextKey, keys[0]);
+        expect(nextKey, keys[1]);
+        expect(nextKey, keys[2]);
 
         testSetNextCounter(0);
-        expect(nextName, names[0]);
-        expect(nextName, names[1]);
-        expect(nextName, names[2]);
+        expect(nextKey, keys[0]);
+        expect(nextKey, keys[1]);
+        expect(nextKey, keys[2]);
 
-        testSetNextCounter(names.length - 1);
-        expect(nextName, names.last);
-        expect(nextName, names.first);
+        testSetNextCounter(keys.length - 1);
+        expect(nextKey, keys.last);
+        expect(nextKey, keys.first);
       });
     });
   });

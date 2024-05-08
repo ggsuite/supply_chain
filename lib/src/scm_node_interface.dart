@@ -51,22 +51,20 @@ class ExampleScmNodeInterface implements ScmNodeInterface {
   const ExampleScmNodeInterface({required this.ggLog});
 
   @override
-  void addNode(Node<dynamic> node) => ggLog('addNode: ${node.name}');
+  void addNode(Node<dynamic> node) => ggLog('addNode: ${node.key}');
   @override
-  void removeNode(Node<dynamic> node) => ggLog('removeNode: ${node.name}');
+  void removeNode(Node<dynamic> node) => ggLog('removeNode: ${node.key}');
   @override
-  void animateNode(Node<dynamic> node) => ggLog('animateNode: ${node.name}');
+  void animateNode(Node<dynamic> node) => ggLog('animateNode: ${node.key}');
   @override
-  void deanimateNode(Node<dynamic> node) =>
-      ggLog('deanimateNode: ${node.name}');
+  void deanimateNode(Node<dynamic> node) => ggLog('deanimateNode: ${node.key}');
   @override
   void priorityHasChanged(Node<dynamic> node) =>
-      ggLog('priorityHasChanged: ${node.name}');
+      ggLog('priorityHasChanged: ${node.key}');
   @override
-  void nominate(Node<dynamic> node) => ggLog('nominate: ${node.name}');
+  void nominate(Node<dynamic> node) => ggLog('nominate: ${node.key}');
   @override
-  void hasNewProduct(Node<dynamic> node) =>
-      ggLog('hasNewProduct: ${node.name}');
+  void hasNewProduct(Node<dynamic> node) => ggLog('hasNewProduct: ${node.key}');
 
   /// The logger
   final GgLog ggLog;

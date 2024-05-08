@@ -36,7 +36,7 @@ void main() {
 
       // Production should be done
       expect(node.product, 1);
-      expect(node.name, 'Aaliyah');
+      expect(node.key, 'Aaliyah');
       expect(node.toString(), 'Aaliyah');
 
       // If now scm is given, then the testInstance will be used
@@ -153,9 +153,9 @@ void main() {
     // #########################################################################
     test('dispose() should work fine', () {
       // Create a supplier -> producer -> customer chain
-      final supplier = exampleNode(scope: scope, name: 'Supplier');
-      final producer = exampleNode(scope: scope, name: 'Producer');
-      final customer = exampleNode(scope: scope, name: 'Customer');
+      final supplier = exampleNode(scope: scope, key: 'Supplier');
+      final producer = exampleNode(scope: scope, key: 'Producer');
+      final customer = exampleNode(scope: scope, key: 'Customer');
       producer.addCustomer(customer);
       producer.addSupplier(supplier);
 

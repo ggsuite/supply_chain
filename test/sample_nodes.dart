@@ -33,14 +33,14 @@ void initSupplierProducerCustomer() {
   // Supplier, Producer, Customer
   supplier = Supplier<int>(
     initialProduct: 0,
-    name: 'Supplier',
+    key: 'Supplier',
     scope: scope,
     produce: (components, previousProduct) => previousProduct + 1,
   );
 
   producer = Node<int>(
     initialProduct: 0,
-    name: 'Producer',
+    key: 'Producer',
     scope: scope,
     produce: (components, previousProduct) {
       return (components.first as int) * 10;
@@ -49,7 +49,7 @@ void initSupplierProducerCustomer() {
 
   customer = Node<int>(
     initialProduct: 0,
-    name: 'Customer',
+    key: 'Customer',
     scope: scope,
     produce: (components, previousProduct) {
       return (components.first as int) + 1;
@@ -64,7 +64,7 @@ void initMusicExampleNodes() {
 
   key = Node<int>(
     initialProduct: 0,
-    name: 'Key',
+    key: 'Key',
     scope: scope,
     produce: (components, previousProduct) {
       return previousProduct + 1;
@@ -73,7 +73,7 @@ void initMusicExampleNodes() {
 
   synth = Node<int>(
     initialProduct: 0,
-    name: 'Synth',
+    key: 'Synth',
     scope: scope,
     produce: (components, previousProduct) {
       // Produce
@@ -83,7 +83,7 @@ void initMusicExampleNodes() {
 
   audio = Node<int>(
     initialProduct: 0,
-    name: 'Audio',
+    key: 'Audio',
     scope: scope,
     produce: (components, previousProduct) {
       // Produce
@@ -93,7 +93,7 @@ void initMusicExampleNodes() {
 
   screen = Node<int>(
     initialProduct: 0,
-    name: 'Screen',
+    key: 'Screen',
     scope: scope,
     produce: (components, previousProduct) {
       // Produce
@@ -103,7 +103,7 @@ void initMusicExampleNodes() {
 
   grid = Node<int>(
     initialProduct: 0,
-    name: 'Grid',
+    key: 'Grid',
     scope: scope,
     produce: (components, previousProduct) {
       // Produce
@@ -118,7 +118,7 @@ void initTimeoutExampleNodes() {
   // SupplierA, SupplierB, Producer
   supplierA = Supplier<int>(
     initialProduct: 0,
-    name: 'SupplierA',
+    key: 'SupplierA',
     scope: scope,
     produce: (components, previousProduct) {
       // Produce
@@ -128,7 +128,7 @@ void initTimeoutExampleNodes() {
 
   supplierB = Supplier<int>(
     initialProduct: 0,
-    name: 'SupplierB',
+    key: 'SupplierB',
     scope: scope,
     produce: (components, previousProduct) {
       return previousProduct; // No change. No announcement.
@@ -137,7 +137,7 @@ void initTimeoutExampleNodes() {
 
   producer = Node<int>(
     initialProduct: 0,
-    name: 'Producer',
+    key: 'Producer',
     scope: scope,
     produce: (components, previousProduct) {
       // Produce

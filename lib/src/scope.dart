@@ -50,11 +50,11 @@ class Scope {
       initialProduct: initialProduct,
       produce: produce,
       scope: this,
-      name: name,
+      key: name,
     );
 
     if (suppliers.isNotEmpty) {
-      _supplierStrings[node.name] = suppliers;
+      _supplierStrings[node.key] = suppliers;
     }
 
     return node;
@@ -64,19 +64,19 @@ class Scope {
   /// Adds an existing node to the scope
   void addNode(Node<dynamic> node) {
     // Throw if node with name already exists
-    if (_nodes.containsKey(node.name)) {
+    if (_nodes.containsKey(node.key)) {
       throw ArgumentError(
-        'Node with name ${node.name} already exists in scope "$key"',
+        'Node with name ${node.key} already exists in scope "$key"',
       );
     }
 
-    _nodes[node.name] = node;
+    _nodes[node.key] = node;
   }
 
   // ...........................................................................
   /// Remove the node from the scope
   void removeNode(Node<dynamic> node) {
-    _nodes.remove(node.name);
+    _nodes.remove(node.key);
   }
 
   // ...........................................................................
@@ -137,7 +137,7 @@ class Scope {
   /// But not before the whole hierarchy has been created
   void initSuppliers() {
     for (final node in _nodes.values) {
-      final suppliers = _supplierStrings[node.name];
+      final suppliers = _supplierStrings[node.key];
       if (suppliers != null) {
         _addSuppliers(node, suppliers);
       }
@@ -198,12 +198,12 @@ class Scope {
         result += childScope._graph;
       }
 
-      String id(Node<dynamic> node) => '${node.name}_${node.id}';
+      String id(Node<dynamic> node) => '${node.key}_${node.id}';
 
       // Write each node
       for (final node in nodes) {
         final nodeId = id(node);
-        result += '$nodeId [label="${node.name}"]; ';
+        result += '$nodeId [label="${node.key}"]; ';
       }
 
       // Write dependencies

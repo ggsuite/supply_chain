@@ -5,7 +5,7 @@
 // found in the LICENSE file in the root of this package.
 
 /// A list of default names used for nodes
-const names = [
+const keys = [
   'Aaliyah',
   'Aaron',
   'Abel',
@@ -385,7 +385,7 @@ const names = [
 int _nameCounter = 0;
 
 /// Returns the next name from the list of names
-String get nextName => names[_nameCounter++ % names.length];
+String get nextKey => keys[_nameCounter++ % keys.length];
 
 /// Use this function to reset the next name in tests
 void testSetNextCounter(int counter) => _nameCounter = counter;

@@ -82,7 +82,7 @@ void main() {
         final scm = Scm.testInstance;
         final root = ExampleScopeRoot(scm: scm);
         root.createHierarchy();
-        expect(root.nodes.map((n) => n.name), ['RootA', 'RootB']);
+        expect(root.nodes.map((n) => n.key), ['RootA', 'RootB']);
         for (var element in root.nodes) {
           scm.nominate(element);
         }
@@ -90,8 +90,8 @@ void main() {
 
         final childA = root.child('ChildScopeA')!;
         final childB = root.child('ChildScopeB')!;
-        expect(childA.nodes.map((n) => n.name), ['ChildNodeA', 'ChildNodeB']);
-        expect(childB.nodes.map((n) => n.name), ['ChildNodeA', 'ChildNodeB']);
+        expect(childA.nodes.map((n) => n.key), ['ChildNodeA', 'ChildNodeB']);
+        expect(childB.nodes.map((n) => n.key), ['ChildNodeA', 'ChildNodeB']);
 
         for (var element in childA.nodes) {
           scm.nominate(element);
@@ -215,10 +215,10 @@ void main() {
 
         // Find a node directly contained in scope
         final rootA = rootScope.findNode('RootA');
-        expect(rootA?.name, 'RootA');
+        expect(rootA?.key, 'RootA');
 
         final rootB = rootScope.findNode('RootB');
-        expect(rootB?.name, 'RootB');
+        expect(rootB?.key, 'RootB');
 
         // Unknown node? Return null
         final unknownNode = rootScope.findNode('Unknown');
@@ -231,11 +231,11 @@ void main() {
         // Should return nodes from parent scope
         final childScopeA = rootScope.child('ChildScopeA')!;
         final rootAFromChild = childScopeA.findNode('RootA');
-        expect(rootAFromChild?.name, 'RootA');
+        expect(rootAFromChild?.key, 'RootA');
 
         // Child nodes should find their own nodes
         final childNodeAFromChild = childScopeA.findNode('ChildNodeA');
-        expect(childNodeAFromChild?.name, 'ChildNodeA');
+        expect(childNodeAFromChild?.key, 'ChildNodeA');
       });
     });
 
