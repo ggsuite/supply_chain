@@ -208,7 +208,7 @@ void main() {
       });
     });
 
-    group('findSupplier(key)', () {
+    group('findNode(key)', () {
       test('should return the supplier with the given key or null', () {
         final rootChain = ExampleChainRoot(scm: Scm.testInstance);
         rootChain.createHierarchy();
@@ -251,6 +251,22 @@ void main() {
             ),
           ),
         );
+      });
+    });
+
+    group('hasNode(key)', () {
+      test('should return true if the chain has a node with the given key', () {
+        final rootChain = ExampleChainRoot(scm: Scm.testInstance);
+        rootChain.createHierarchy();
+        expect(rootChain.hasNode('RootA'), isTrue);
+        expect(rootChain.hasNode('RootB'), isTrue);
+        expect(rootChain.hasNode('Unknown'), isFalse);
+
+        final childChain = rootChain.child('ChildChainA')!;
+        expect(childChain.hasNode('ChildNodeA'), isTrue);
+        expect(childChain.hasNode('ChildNodeB'), isTrue);
+        expect(childChain.hasNode('Unknown'), isFalse);
+        expect(childChain.hasNode('RootA'), isTrue);
       });
     });
 

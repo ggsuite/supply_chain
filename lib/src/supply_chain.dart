@@ -149,6 +149,17 @@ class SupplyChain {
   }
 
   // ...........................................................................
+  /// Returns true if a node with the given key exists in this or a
+  /// parent supply chain
+  bool hasNode(String key) {
+    if (_nodes.containsKey(key)) {
+      return true;
+    }
+
+    return _parent?.hasNode(key) ?? false;
+  }
+
+  // ...........................................................................
   /// Returns the node of key in this or any parent nodes
   Node<T>? findNode<T>(String key) {
     final node = _nodes[key];

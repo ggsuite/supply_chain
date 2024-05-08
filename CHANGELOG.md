@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.7] - 2024-05-08
+
+### Added
+
+- Add SupplyChain.hasNode
+
 ## [1.0.6] - 2024-05-08
 
 ### Removed
@@ -62,6 +68,7 @@
 - 'Github Actions Pipeline'
 - 'Github Actions Pipeline: Add SDK file containing flutter into .github/workflows to make github installing flutter and not dart SDK'
 
+[1.0.7]: https://github.com/inlavigo/supply_chain/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/inlavigo/supply_chain/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/inlavigo/supply_chain/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/inlavigo/supply_chain/compare/1.0.3...1.0.4
