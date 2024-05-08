@@ -25,7 +25,7 @@ late Supplier<int> supplierA;
 late Supplier<int> supplierB;
 
 late Scm scm;
-late Scope scope;
+late SupplyChain scope;
 
 // ...........................................................................
 void initSupplierProducerCustomer() {

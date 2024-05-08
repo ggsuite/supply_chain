@@ -14,8 +14,8 @@ void main() {
 
   setUp(() {
     Node.testRestIdCounter();
-    Scope.testRestIdCounter();
-    scope = Scope.example();
+    SupplyChain.testRestIdCounter();
+    scope = SupplyChain.example();
 
     node = scope.createNode(
       initialProduct: 0,
@@ -24,10 +24,10 @@ void main() {
     );
   });
 
-  group('Scope', () {
+  group('Chain', () {
     group('basic properties', () {
       test('example', () {
-        expect(scope, isA<Scope>());
+        expect(scope, isA<SupplyChain>());
       });
 
       test('scm', () {
@@ -80,16 +80,16 @@ void main() {
     group('createHierarchy()', () {
       test('should allow to create a hierarchy of scopes', () {
         final scm = Scm.testInstance;
-        final root = ExampleScopeRoot(scm: scm);
+        final root = ExampleChainRoot(scm: scm);
         root.createHierarchy();
         expect(root.nodes.map((n) => n.key), ['RootA', 'RootB']);
         for (var element in root.nodes) {
           scm.nominate(element);
         }
-        expect(root.children.map((e) => e.key), ['ChildScopeA', 'ChildScopeB']);
+        expect(root.children.map((e) => e.key), ['ChildChainA', 'ChildChainB']);
 
-        final childA = root.child('ChildScopeA')!;
-        final childB = root.child('ChildScopeB')!;
+        final childA = root.child('ChildChainA')!;
+        final childB = root.child('ChildChainB')!;
         expect(childA.nodes.map((n) => n.key), ['ChildNodeA', 'ChildNodeB']);
         expect(childB.nodes.map((n) => n.key), ['ChildNodeA', 'ChildNodeB']);
 
@@ -101,7 +101,7 @@ void main() {
           scm.nominate(element);
         }
 
-        final grandChild = childA.child('GrandChildScope')!;
+        final grandChild = childA.child('GrandChildChain')!;
         for (final element in grandChild.nodes) {
           scm.nominate(element);
         }
@@ -171,7 +171,7 @@ void main() {
       });
 
       test('should print scopes correctly', () {
-        final root = ExampleScopeRoot(scm: Scm.testInstance);
+        final root = ExampleChainRoot(scm: Scm.testInstance);
         root.createHierarchy();
         root.initSuppliers();
         final graph = root.graph;
@@ -180,18 +180,18 @@ void main() {
           'digraph unix '
           '{ subgraph cluster_ExampleRoot_1 '
           '{ label = "ExampleRoot"; '
-          'subgraph cluster_ChildScopeA_2 '
-          '{ label = "ChildScopeA"; '
-          'subgraph cluster_GrandChildScope_4 '
-          '{ label = "GrandChildScope"; '
+          'subgraph cluster_ChildChainA_2 '
+          '{ label = "ChildChainA"; '
+          'subgraph cluster_GrandChildChain_4 '
+          '{ label = "GrandChildChain"; '
           'GrandChildNodeA_5 [label="GrandChildNodeA"]; '
           '}ChildNodeA_3 [label="ChildNodeA"]; '
           'ChildNodeB_4 [label="ChildNodeB"]; '
           '"ChildNodeB_4" -> "ChildNodeA_3"; '
-          '}subgraph cluster_ChildScopeB_3 '
-          '{ label = "ChildScopeB"; '
-          'subgraph cluster_GrandChildScope_5 '
-          '{ label = "GrandChildScope"; '
+          '}subgraph cluster_ChildChainB_3 '
+          '{ label = "ChildChainB"; '
+          'subgraph cluster_GrandChildChain_5 '
+          '{ label = "GrandChildChain"; '
           'GrandChildNodeA_8 [label="GrandChildNodeA"]; '
           '}ChildNodeA_6 [label="ChildNodeA"]; '
           'ChildNodeB_7 [label="ChildNodeB"]; '
@@ -210,31 +210,31 @@ void main() {
 
     group('findSupplier(name)', () {
       test('should return the supplier with the given name or null', () {
-        final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
-        rootScope.createHierarchy();
+        final rootChain = ExampleChainRoot(scm: Scm.testInstance);
+        rootChain.createHierarchy();
 
         // Find a node directly contained in scope
-        final rootA = rootScope.findNode('RootA');
+        final rootA = rootChain.findNode('RootA');
         expect(rootA?.key, 'RootA');
 
-        final rootB = rootScope.findNode('RootB');
+        final rootB = rootChain.findNode('RootB');
         expect(rootB?.key, 'RootB');
 
         // Unknown node? Return null
-        final unknownNode = rootScope.findNode('Unknown');
+        final unknownNode = rootChain.findNode('Unknown');
         expect(unknownNode, isNull);
 
         // Should not return child nodes
-        final childNodeA = rootScope.findNode('ChildNodeA');
+        final childNodeA = rootChain.findNode('ChildNodeA');
         expect(childNodeA, isNull);
 
         // Should return nodes from parent scope
-        final childScopeA = rootScope.child('ChildScopeA')!;
-        final rootAFromChild = childScopeA.findNode('RootA');
+        final childChainA = rootChain.child('ChildChainA')!;
+        final rootAFromChild = childChainA.findNode('RootA');
         expect(rootAFromChild?.key, 'RootA');
 
         // Child nodes should find their own nodes
-        final childNodeAFromChild = childScopeA.findNode('ChildNodeA');
+        final childNodeAFromChild = childChainA.findNode('ChildNodeA');
         expect(childNodeAFromChild?.key, 'ChildNodeA');
       });
     });
@@ -244,20 +244,20 @@ void main() {
         'should find and add the suppliers added on createNode(....)',
         () {
           final scm = Scm.testInstance;
-          final rootScope = ExampleScopeRoot(scm: scm);
-          rootScope.createHierarchy();
-          rootScope.initSuppliers();
+          final rootChain = ExampleChainRoot(scm: scm);
+          rootChain.createHierarchy();
+          rootChain.initSuppliers();
 
           // The root node has no suppliers
-          final rootA = rootScope.findNode('RootA');
-          final rootB = rootScope.findNode('RootB');
+          final rootA = rootChain.findNode('RootA');
+          final rootB = rootChain.findNode('RootB');
           expect(rootA?.suppliers, isEmpty);
           expect(rootB?.suppliers, isEmpty);
 
           /// The child node a should have the root nodes as suppliers
-          final childScopeA = rootScope.child('ChildScopeA')!;
-          final childNodeA = childScopeA.findNode('ChildNodeA');
-          final childNodeB = childScopeA.findNode('ChildNodeB');
+          final childChainA = rootChain.child('ChildChainA')!;
+          final childNodeA = childChainA.findNode('ChildNodeA');
+          final childNodeB = childChainA.findNode('ChildNodeB');
           expect(childNodeA?.suppliers, hasLength(3));
           expect(childNodeA?.suppliers, contains(rootA));
           expect(childNodeA?.suppliers, contains(rootB));
@@ -267,7 +267,7 @@ void main() {
 
       test('should throw if a supplier is not found', () {
         final scm = Scm.testInstance;
-        final scope = Scope.example(scm: scm);
+        final scope = SupplyChain.example(scm: scm);
 
         scope.createNode<int>(
           name: 'Node',
@@ -281,7 +281,7 @@ void main() {
           throwsA(
             predicate<ArgumentError>(
               (e) => e.toString().contains(
-                    'Scope "Example": Supplier with name "Unknown" not found.',
+                    'Chain "Example": Supplier with name "Unknown" not found.',
                   ),
             ),
           ),
@@ -290,31 +290,31 @@ void main() {
 
       group('isAncestorOf(node)', () {
         test('should return true if the scope is an ancestor', () {
-          final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
-          rootScope.createHierarchy();
-          final childScopeA = rootScope.child('ChildScopeA')!;
-          final childScopeB = rootScope.child('ChildScopeB')!;
-          final grandChildScope = childScopeA.child('GrandChildScope')!;
-          expect(rootScope.isAncestorOf(childScopeA), isTrue);
-          expect(rootScope.isAncestorOf(childScopeB), isTrue);
-          expect(childScopeA.isAncestorOf(childScopeB), isFalse);
-          expect(childScopeB.isAncestorOf(childScopeA), isFalse);
-          expect(rootScope.isAncestorOf(grandChildScope), isTrue);
+          final rootChain = ExampleChainRoot(scm: Scm.testInstance);
+          rootChain.createHierarchy();
+          final childChainA = rootChain.child('ChildChainA')!;
+          final childChainB = rootChain.child('ChildChainB')!;
+          final grandChildChain = childChainA.child('GrandChildChain')!;
+          expect(rootChain.isAncestorOf(childChainA), isTrue);
+          expect(rootChain.isAncestorOf(childChainB), isTrue);
+          expect(childChainA.isAncestorOf(childChainB), isFalse);
+          expect(childChainB.isAncestorOf(childChainA), isFalse);
+          expect(rootChain.isAncestorOf(grandChildChain), isTrue);
         });
       });
 
       group('isDescendantOf(node)', () {
         test('should return true if the scope is a descendant', () {
-          final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
-          rootScope.createHierarchy();
-          final childScopeA = rootScope.child('ChildScopeA')!;
-          final childScopeB = rootScope.child('ChildScopeB')!;
-          final grandChildScope = childScopeA.child('GrandChildScope')!;
-          expect(childScopeA.isDescendantOf(rootScope), isTrue);
-          expect(childScopeB.isDescendantOf(rootScope), isTrue);
-          expect(childScopeA.isDescendantOf(childScopeB), isFalse);
-          expect(childScopeB.isDescendantOf(childScopeA), isFalse);
-          expect(grandChildScope.isDescendantOf(rootScope), isTrue);
+          final rootChain = ExampleChainRoot(scm: Scm.testInstance);
+          rootChain.createHierarchy();
+          final childChainA = rootChain.child('ChildChainA')!;
+          final childChainB = rootChain.child('ChildChainB')!;
+          final grandChildChain = childChainA.child('GrandChildChain')!;
+          expect(childChainA.isDescendantOf(rootChain), isTrue);
+          expect(childChainB.isDescendantOf(rootChain), isTrue);
+          expect(childChainA.isDescendantOf(childChainB), isFalse);
+          expect(childChainB.isDescendantOf(childChainA), isFalse);
+          expect(grandChildChain.isDescendantOf(rootChain), isTrue);
         });
       });
     });

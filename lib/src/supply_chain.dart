@@ -7,10 +7,10 @@
 import '../supply_chain.dart';
 import 'scm_node_interface.dart';
 
-/// A scope is a container for nodes
-class Scope {
-  /// Creates a scope with a key. Key must be lower camel case.
-  Scope({
+/// A supply chain is a container for connected nodes
+class SupplyChain {
+  /// Creates a chain with a key. Key must be lower camel case.
+  SupplyChain({
     required this.key,
     required this.scm,
   }) : assert(key.isPascalCase);
@@ -19,27 +19,27 @@ class Scope {
   /// The supply chain manager
   final ScmNodeInterface scm;
 
-  /// The key of the scope
+  /// The key of the chain
   final String key;
 
-  /// The uinquie id of the scope
+  /// The uinquie id of the chain
   final int id = _idCounter++;
 
   /// Reset id counter for test purposes
   static void testRestIdCounter() => _idCounter = 0;
 
   // ...........................................................................
-  /// Returns the child scopes
-  Iterable<Scope> get children => _children.values;
+  /// Returns the child chains
+  Iterable<SupplyChain> get children => _children.values;
 
-  /// Returns the child scope with the given key
-  Scope? child(String key) => _children[key];
+  /// Returns the child chain with the given key
+  SupplyChain? child(String key) => _children[key];
 
-  /// The nodes of this scope
+  /// The nodes of this chain
   Iterable<Node<dynamic>> get nodes => _nodes.values;
 
   // ...........................................................................
-  /// Adds a node to the scope
+  /// Adds a node to the chain
   Node<T> createNode<T>({
     required T initialProduct,
     required Produce<T> produce,
@@ -61,12 +61,12 @@ class Scope {
   }
 
   // ...........................................................................
-  /// Adds an existing node to the scope
+  /// Adds an existing node to the chain
   void addNode(Node<dynamic> node) {
     // Throw if node with name already exists
     if (_nodes.containsKey(node.key)) {
       throw ArgumentError(
-        'Node with name ${node.key} already exists in scope "$key"',
+        'Node with name ${node.key} already exists in chain "$key"',
       );
     }
 
@@ -74,21 +74,21 @@ class Scope {
   }
 
   // ...........................................................................
-  /// Remove the node from the scope
+  /// Remove the node from the chain
   void removeNode(Node<dynamic> node) {
     _nodes.remove(node.key);
   }
 
   // ...........................................................................
-  /// Creates an example instance of Scope
-  factory Scope.example({ScmNodeInterface? scm}) => Scope(
+  /// Creates an example instance of Chain
+  factory SupplyChain.example({ScmNodeInterface? scm}) => SupplyChain(
         key: 'Example',
         scm: scm ?? Scm.testInstance,
       );
 
   // ...........................................................................
-  /// Overide this method to build the nodes belonging to this scope
-  Iterable<Scope> build() => [];
+  /// Overide this method to build the nodes belonging to this chain
+  Iterable<SupplyChain> build() => [];
 
   // ...........................................................................
   /// Call this method to create child hierarchies
@@ -101,14 +101,14 @@ class Scope {
   }
 
   // ...........................................................................
-  /// Returns true if this scope is an ancestor of the given scope
-  bool isAncestorOf(Scope scope) {
-    if (_children.containsKey(scope.key)) {
+  /// Returns true if this chain is an ancestor of the given chain
+  bool isAncestorOf(SupplyChain chain) {
+    if (_children.containsKey(chain.key)) {
       return true;
     }
 
     for (final child in _children.values) {
-      if (child.isAncestorOf(scope)) {
+      if (child.isAncestorOf(chain)) {
         return true;
       }
     }
@@ -117,13 +117,13 @@ class Scope {
   }
 
   // ...........................................................................
-  /// Returns true if this scope is a descendant of the given scope
-  bool isDescendantOf(Scope scope) {
-    if (scope._children.containsKey(key)) {
+  /// Returns true if this chain is a descendant of the given chain
+  bool isDescendantOf(SupplyChain chain) {
+    if (chain._children.containsKey(key)) {
       return true;
     }
 
-    for (final child in scope._children.values) {
+    for (final child in chain._children.values) {
       if (isDescendantOf(child)) {
         return true;
       }
@@ -175,8 +175,8 @@ class Scope {
   // Private
   // ######################
 
-  final Map<String, Scope> _children = {};
-  Scope? _parent;
+  final Map<String, SupplyChain> _children = {};
+  SupplyChain? _parent;
   final Map<String, Node<dynamic>> _nodes = {};
   final Map<String, Iterable<String>> _supplierStrings = {};
   static int _idCounter = 0;
@@ -187,15 +187,15 @@ class Scope {
     {
       var result = '';
 
-      final scopeId = '${key}_${this.id}';
+      final chainId = '${key}_${this.id}';
 
-      // Create a cluster for this scope
-      result += 'subgraph cluster_$scopeId { ';
+      // Create a cluster for this chain
+      result += 'subgraph cluster_$chainId { ';
       result += 'label = "$key"; ';
 
-      // Write the child scopes
-      for (final childScope in children) {
-        result += childScope._graph;
+      // Write the child chains
+      for (final childChain in children) {
+        result += childChain._graph;
       }
 
       String id(Node<dynamic> node) => '${node.key}_${node.id}';
@@ -228,7 +228,7 @@ class Scope {
       final supplier = findNode(supplierName);
       if (supplier == null) {
         throw ArgumentError(
-          'Scope "$key": Supplier with name "$supplierName" not found.',
+          'Chain "$key": Supplier with name "$supplierName" not found.',
         );
       }
 
@@ -238,16 +238,16 @@ class Scope {
 }
 
 // #############################################################################
-// Example scopes for test purposes
+// Example chains for test purposes
 
 // .............................................................................
-/// An example root scope
-class ExampleScopeRoot extends Scope {
+/// An example root chain
+class ExampleChainRoot extends SupplyChain {
   /// Constructor
-  ExampleScopeRoot({required super.scm, super.key = 'ExampleRoot'});
+  ExampleChainRoot({required super.scm, super.key = 'ExampleRoot'});
 
   @override
-  Iterable<Scope> build() {
+  Iterable<SupplyChain> build() {
     createNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1, // coveralls:ignore-line
@@ -261,20 +261,20 @@ class ExampleScopeRoot extends Scope {
     );
 
     return [
-      ExampleChildScope(key: 'ChildScopeA', scm: scm),
-      ExampleChildScope(key: 'ChildScopeB', scm: scm),
+      ExampleChildChain(key: 'ChildChainA', scm: scm),
+      ExampleChildChain(key: 'ChildChainB', scm: scm),
     ];
   }
 }
 
 // .............................................................................
-/// An example child scope
-class ExampleChildScope extends Scope {
+/// An example child chain
+class ExampleChildChain extends SupplyChain {
   /// Constructor
-  ExampleChildScope({required super.scm, required super.key});
+  ExampleChildChain({required super.scm, required super.key});
 
   @override
-  Iterable<Scope> build() {
+  Iterable<SupplyChain> build() {
     createNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1,
@@ -288,18 +288,18 @@ class ExampleChildScope extends Scope {
       name: 'ChildNodeB',
     );
 
-    return [ExampleGrandChildScope(key: 'GrandChildScope', scm: scm)];
+    return [ExampleGrandChildChain(key: 'GrandChildChain', scm: scm)];
   }
 }
 
 // .............................................................................
-/// An example child scope
-class ExampleGrandChildScope extends Scope {
+/// An example child chain
+class ExampleGrandChildChain extends SupplyChain {
   /// Constructor
-  ExampleGrandChildScope({required super.scm, required super.key});
+  ExampleGrandChildChain({required super.scm, required super.key});
 
   @override
-  Iterable<Scope> build() {
+  Iterable<SupplyChain> build() {
     createNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1,

@@ -9,14 +9,14 @@ import 'package:test/test.dart';
 
 void main() {
   late Scm scm;
-  late Scope scope;
+  late SupplyChain scope;
   late Node<int> node;
 
   setUp(
     () {
       Node.testRestIdCounter();
       scm = Scm(isTest: true);
-      scope = Scope.example(scm: scm);
+      scope = SupplyChain.example(scm: scm);
       node = exampleNode(scope: scope);
     },
   );

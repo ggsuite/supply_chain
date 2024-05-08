@@ -37,7 +37,7 @@ class ValueNode<T> extends Node<T> {
   /// Example instance for test purposes
   static ValueNode<int> get example => ValueNode<int>(
         initialProduct: 5,
-        scope: Scope.example(),
+        scope: SupplyChain.example(),
         key: 'ValueNode',
       );
 

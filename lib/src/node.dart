@@ -10,7 +10,7 @@ import 'keys.dart';
 import 'priority.dart';
 import 'scm.dart';
 import 'scm_node_interface.dart';
-import 'scope.dart';
+import 'supply_chain.dart';
 import 'tools.dart';
 
 /// A supplier delivers products to a node
@@ -259,7 +259,7 @@ class Node<T> {
   final ScmNodeInterface scm;
 
   /// The scope this node belongs to
-  final Scope scope;
+  final SupplyChain scope;
 
   /// The number of items in the cache
   final int cacheSize;
@@ -333,10 +333,10 @@ class Node<T> {
 Node<int> exampleNode({
   int initialProduct = 0,
   int Function(List<dynamic> components, int previousProduct)? produce,
-  Scope? scope,
+  SupplyChain? scope,
   String? key,
 }) {
-  scope ??= Scope.example(scm: Scm.testInstance);
+  scope ??= SupplyChain.example(scm: Scm.testInstance);
 
   final result = Node<int>(
     key: key,

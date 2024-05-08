@@ -29,7 +29,7 @@ void main() {
         isTest: true,
       );
 
-      scope = Scope.example(scm: scm);
+      scope = SupplyChain.example(scm: scm);
 
       scm.testRunFastTasks();
     },
@@ -621,7 +621,7 @@ void main() {
   test('Test with non test environment should work fine', () {
     fakeAsync((fake) {
       final scm = Scm.example(isTest: false);
-      final scope = Scope(key: 'Example', scm: scm);
+      final scope = SupplyChain(key: 'Example', scm: scm);
       final node = exampleNode(scope: scope);
       expect(node.product, 0);
       scm.nominate(node);
