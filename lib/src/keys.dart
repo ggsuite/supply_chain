@@ -4,7 +4,7 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-/// A list of default names used for nodes
+/// A list of default keys used for nodes
 const keys = [
   'Aaliyah',
   'Aaron',
@@ -382,10 +382,10 @@ const keys = [
   'Zoey',
 ];
 
-int _nameCounter = 0;
+int _keyCounter = 0;
 
-/// Returns the next name from the list of names
-String get nextKey => keys[_nameCounter++ % keys.length];
+/// Returns the next key from the list of keys
+String get nextKey => keys[_keyCounter++ % keys.length];
 
-/// Use this function to reset the next name in tests
-void testSetNextCounter(int counter) => _nameCounter = counter;
+/// Use this function to reset the next key in tests
+void testSetNextCounter(int counter) => _keyCounter = counter;

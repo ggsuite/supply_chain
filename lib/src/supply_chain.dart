@@ -43,14 +43,14 @@ class SupplyChain {
   Node<T> createNode<T>({
     required T initialProduct,
     required Produce<T> produce,
-    required String name,
+    required String key,
     Iterable<String> suppliers = const [],
   }) {
     final node = Node<T>(
       initialProduct: initialProduct,
       produce: produce,
       scope: this,
-      key: name,
+      key: key,
     );
 
     if (suppliers.isNotEmpty) {
@@ -63,10 +63,10 @@ class SupplyChain {
   // ...........................................................................
   /// Adds an existing node to the chain
   void addNode(Node<dynamic> node) {
-    // Throw if node with name already exists
+    // Throw if node with key already exists
     if (_nodes.containsKey(node.key)) {
       throw ArgumentError(
-        'Node with name ${node.key} already exists in chain "$key"',
+        'Node with key ${node.key} already exists in chain "$key"',
       );
     }
 
@@ -149,14 +149,14 @@ class SupplyChain {
   }
 
   // ...........................................................................
-  /// Returns the node of name in this or any parent nodes
-  Node<dynamic>? findNode(String name) {
-    final node = _nodes[name];
+  /// Returns the node of key in this or any parent nodes
+  Node<dynamic>? findNode(String key) {
+    final node = _nodes[key];
     if (node != null) {
       return node;
     }
 
-    return _parent?.findNode(name);
+    return _parent?.findNode(key);
   }
 
   // ...........................................................................
@@ -228,7 +228,7 @@ class SupplyChain {
       final supplier = findNode(supplierName);
       if (supplier == null) {
         throw ArgumentError(
-          'Chain "$key": Supplier with name "$supplierName" not found.',
+          'Chain "$key": Supplier with key "$supplierName" not found.',
         );
       }
 
@@ -251,13 +251,13 @@ class ExampleChainRoot extends SupplyChain {
     createNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1, // coveralls:ignore-line
-      name: 'RootA',
+      key: 'RootA',
     );
 
     createNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1, // coveralls:ignore-line
-      name: 'RootB',
+      key: 'RootB',
     );
 
     return [
@@ -278,14 +278,14 @@ class ExampleChildChain extends SupplyChain {
     createNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1,
-      name: 'ChildNodeA',
+      key: 'ChildNodeA',
       suppliers: ['RootA', 'RootB', 'ChildNodeB'],
     );
 
     createNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1,
-      name: 'ChildNodeB',
+      key: 'ChildNodeB',
     );
 
     return [ExampleGrandChildChain(key: 'GrandChildChain', scm: scm)];
@@ -303,7 +303,7 @@ class ExampleGrandChildChain extends SupplyChain {
     createNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1,
-      name: 'GrandChildNodeA',
+      key: 'GrandChildNodeA',
       suppliers: [
         'RootA',
       ],

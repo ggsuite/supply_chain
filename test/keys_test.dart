@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 void main() {
   group('Names', () {
     group('nextName', () {
-      test('should return the next name', () {
+      test('should return the next key', () {
         testSetNextCounter(0);
         expect(nextKey, keys[0]);
         expect(nextKey, keys[1]);

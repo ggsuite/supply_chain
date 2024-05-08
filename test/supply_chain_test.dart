@@ -20,7 +20,7 @@ void main() {
     node = scope.createNode(
       initialProduct: 0,
       produce: (components, previousProduct) => previousProduct,
-      name: 'Node',
+      key: 'Node',
     );
   });
 
@@ -49,12 +49,12 @@ void main() {
         expect(node.scm, scope.scm);
       });
 
-      test('should throw if a node with the same name already exists', () {
+      test('should throw if a node with the same key already exists', () {
         expect(
           () => scope.createNode(
             initialProduct: 0,
             produce: (components, previousProduct) => previousProduct,
-            name: 'Node',
+            key: 'Node',
           ),
           throwsA(
             predicate<ArgumentError>(
@@ -208,8 +208,8 @@ void main() {
       });
     });
 
-    group('findSupplier(name)', () {
-      test('should return the supplier with the given name or null', () {
+    group('findSupplier(key)', () {
+      test('should return the supplier with the given key or null', () {
         final rootChain = ExampleChainRoot(scm: Scm.testInstance);
         rootChain.createHierarchy();
 
@@ -270,7 +270,7 @@ void main() {
         final scope = SupplyChain.example(scm: scm);
 
         scope.createNode<int>(
-          name: 'Node',
+          key: 'Node',
           suppliers: ['Unknown'],
           initialProduct: 0,
           produce: (components, previous) => previous,
@@ -281,7 +281,7 @@ void main() {
           throwsA(
             predicate<ArgumentError>(
               (e) => e.toString().contains(
-                    'Chain "Example": Supplier with name "Unknown" not found.',
+                    'Chain "Example": Supplier with key "Unknown" not found.',
                   ),
             ),
           ),
