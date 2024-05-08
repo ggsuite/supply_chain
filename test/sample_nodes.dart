@@ -112,11 +112,26 @@ void initMusicExampleNodes() {
   );
 }
 
+class NodeTimingOut extends Node<int> {
+  /// Constructor
+  NodeTimingOut({
+    required super.initialProduct,
+    required String super.key,
+    required super.chain,
+    required super.produce,
+  });
+
+  @override
+  void produce() {
+    // Produce does nothing -> will cause a timeout
+  }
+}
+
 // ...........................................................................
 void initTimeoutExampleNodes() {
   // ............................
   // SupplierA, SupplierB, Producer
-  supplierA = Supplier<int>(
+  supplierA = Node<int>(
     initialProduct: 0,
     key: 'SupplierA',
     chain: chain,
@@ -126,7 +141,7 @@ void initTimeoutExampleNodes() {
     },
   );
 
-  supplierB = Supplier<int>(
+  supplierB = NodeTimingOut(
     initialProduct: 0,
     key: 'SupplierB',
     chain: chain,

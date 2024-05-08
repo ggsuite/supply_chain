@@ -214,28 +214,43 @@ void main() {
         rootChain.createHierarchy();
 
         // Find a node directly contained in chain
-        final rootA = rootChain.findNode('RootA');
+        final rootA = rootChain.findNode<int>('RootA');
         expect(rootA?.key, 'RootA');
 
-        final rootB = rootChain.findNode('RootB');
+        final rootB = rootChain.findNode<int>('RootB');
         expect(rootB?.key, 'RootB');
 
         // Unknown node? Return null
-        final unknownNode = rootChain.findNode('Unknown');
+        final unknownNode = rootChain.findNode<int>('Unknown');
         expect(unknownNode, isNull);
 
         // Should not return child nodes
-        final childNodeA = rootChain.findNode('ChildNodeA');
+        final childNodeA = rootChain.findNode<int>('ChildNodeA');
         expect(childNodeA, isNull);
 
         // Should return nodes from parent chain
         final childChainA = rootChain.child('ChildChainA')!;
-        final rootAFromChild = childChainA.findNode('RootA');
+        final rootAFromChild = childChainA.findNode<int>('RootA');
         expect(rootAFromChild?.key, 'RootA');
 
         // Child nodes should find their own nodes
-        final childNodeAFromChild = childChainA.findNode('ChildNodeA');
+        final childNodeAFromChild = childChainA.findNode<int>('ChildNodeA');
         expect(childNodeAFromChild?.key, 'ChildNodeA');
+      });
+
+      test('should throw if the type does not match', () {
+        final rootChain = ExampleChainRoot(scm: Scm.testInstance);
+        rootChain.createHierarchy();
+        expect(
+          () => rootChain.findNode<String>('RootA'),
+          throwsA(
+            predicate<ArgumentError>(
+              (e) => e
+                  .toString()
+                  .contains('Node with key "RootA" is not of type String'),
+            ),
+          ),
+        );
       });
     });
 
@@ -249,15 +264,15 @@ void main() {
           rootChain.initSuppliers();
 
           // The root node has no suppliers
-          final rootA = rootChain.findNode('RootA');
-          final rootB = rootChain.findNode('RootB');
+          final rootA = rootChain.findNode<int>('RootA');
+          final rootB = rootChain.findNode<int>('RootB');
           expect(rootA?.suppliers, isEmpty);
           expect(rootB?.suppliers, isEmpty);
 
           /// The child node a should have the root nodes as suppliers
           final childChainA = rootChain.child('ChildChainA')!;
-          final childNodeA = childChainA.findNode('ChildNodeA');
-          final childNodeB = childChainA.findNode('ChildNodeB');
+          final childNodeA = childChainA.findNode<int>('ChildNodeA');
+          final childNodeB = childChainA.findNode<int>('ChildNodeB');
           expect(childNodeA?.suppliers, hasLength(3));
           expect(childNodeA?.suppliers, contains(rootA));
           expect(childNodeA?.suppliers, contains(rootB));

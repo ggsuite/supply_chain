@@ -150,13 +150,18 @@ class SupplyChain {
 
   // ...........................................................................
   /// Returns the node of key in this or any parent nodes
-  Node<dynamic>? findNode(String key) {
+  Node<T>? findNode<T>(String key) {
     final node = _nodes[key];
-    if (node != null) {
-      return node;
+
+    if (node == null) {
+      return _parent?.findNode(key);
     }
 
-    return _parent?.findNode(key);
+    if (node is! Node<T>) {
+      throw ArgumentError('Node with key "$key" is not of type $T');
+    }
+
+    return node;
   }
 
   // ...........................................................................
@@ -225,7 +230,7 @@ class SupplyChain {
   // ...........................................................................
   void _addSuppliers(Node<dynamic> node, Iterable<String> suppliers) {
     for (final supplierName in suppliers) {
-      final supplier = findNode(supplierName);
+      final supplier = findNode<dynamic>(supplierName);
       if (supplier == null) {
         throw ArgumentError(
           'Chain "$key": Supplier with key "$supplierName" not found.',

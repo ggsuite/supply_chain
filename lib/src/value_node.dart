@@ -28,10 +28,8 @@ class ValueNode<T> extends Node<T> {
   /// Produces the value set before
   @override
   void produce() {
-    if (_value != product) {
-      product = _value;
-      scm.hasNewProduct(this);
-    }
+    product = _value;
+    scm.hasNewProduct(this);
   }
 
   /// Example instance for test purposes

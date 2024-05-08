@@ -17,6 +17,7 @@ void main() {
         expect(valueNode.key, 'ValueNode');
         expect(valueNode.chain.key, 'Example');
         expect(valueNode.product, 5);
+        expect(valueNode.isReady, isTrue);
       });
 
       test('should allow to set values from the outside', () {

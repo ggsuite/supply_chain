@@ -158,10 +158,8 @@ class Node<T> {
     final newProduct =
         _produce(suppliers.map((s) => s.product).toList(), product);
 
-    if (newProduct != product) {
-      product = newProduct;
-      scm.hasNewProduct(this);
-    }
+    product = newProduct;
+    scm.hasNewProduct(this);
   }
 
   /// Returns true, if node is staged for production
@@ -188,13 +186,13 @@ class Node<T> {
   // Customers
 
   /// The customers of the node
-  Iterable<Node<T>> get customers => _customers;
+  Iterable<Node<dynamic>> get customers => _customers;
 
   /// Add a customer to the node
-  void addCustomer(Customer<T> customer) => _addCustomer(customer);
+  void addCustomer(Customer<dynamic> customer) => _addCustomer(customer);
 
   /// Remove a customer from the node
-  void removeCustomer(Customer<T> customer) => _removeCustomer(customer);
+  void removeCustomer(Customer<dynamic> customer) => _removeCustomer(customer);
 
   // ...........................................................................
   // Timeouts
@@ -273,7 +271,7 @@ class Node<T> {
 
   // ...........................................................................
   final List<Supplier<dynamic>> _suppliers = [];
-  final List<Supplier<T>> _customers = [];
+  final List<Customer<dynamic>> _customers = [];
 
   // ...........................................................................
   void _addSupplier(Supplier<dynamic> supplier) {
@@ -304,7 +302,7 @@ class Node<T> {
   }
 
   // ...........................................................................
-  void _addCustomer(Customer<T> customer) {
+  void _addCustomer(Customer<dynamic> customer) {
     if (_customers.contains(customer)) {
       return;
     }
@@ -314,7 +312,7 @@ class Node<T> {
   }
 
   // ...........................................................................
-  void _removeCustomer(Customer<T> customer) {
+  void _removeCustomer(Customer<dynamic> customer) {
     if (!_customers.contains(customer)) {
       return;
     }
