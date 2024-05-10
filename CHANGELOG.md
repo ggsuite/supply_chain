@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.10] - 2024-05-10
+
+- Add `equalsGraph`
+
 ## [1.0.9] - 2024-05-10
 
 ### Changed
@@ -11,7 +15,7 @@
 
 ### Added
 
-- Add option  to findNode
+- Add option to findNode
 
 ## [1.0.7] - 2024-05-08
 
@@ -72,11 +76,11 @@
 
 ### Changed
 
-- Rename gg\_supply\_chain into supply\_chain
+- Rename gg_supply_chain into supply_chain
 - Updated version
-- Upgraded gg\_fake\_timer
+- Upgraded gg_fake_timer
 - 'Pipline: Disable cache'
-- 'publish\_to: none for private repositories'
+- 'publish_to: none for private repositories'
 - Rework changelog
 - 'Github Actions Pipeline'
 - 'Github Actions Pipeline: Add SDK file containing flutter into .github/workflows to make github installing flutter and not dart SDK'

@@ -1,5 +1,5 @@
 digraph unix {
-  subgraph cluster_Example_1 {
+  subgraph cluster_Example_2 {
     label = "Example";
     Node_0 [label = "Node";];
     Supplier_1 [label = "Supplier";];

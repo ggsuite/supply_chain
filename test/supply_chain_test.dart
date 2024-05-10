@@ -113,27 +113,18 @@ void main() {
 
     group('graph', () {
       // .......................................................................
-      void shouldMatchFile(String graph, String fileName) {
+      void shouldMatchFile(SupplyChain chain, String fileName) {
         final cwd = Directory.current.path;
         final graphFile = File('$cwd/test/graphs/$fileName');
-        final graphFileContent = (graphFile.readAsStringSync())
-            .replaceAll('\n', '')
-            .replaceAll(' ', '')
-            .replaceAll(';', '');
-
-        graph = graph.replaceAll('\n', '').replaceAll(' ', '').replaceAll(
-              ';',
-              '',
-            );
-
-        expect(graph, graphFileContent);
+        final graphFileContent = (graphFile.readAsStringSync());
+        expect(chain.equalsGraph(graphFileContent), isTrue);
       }
 
       // .......................................................................
       test('should print a simple graph correctly', () {
         initSupplierProducerCustomer();
         createSimpleChain();
-        shouldMatchFile(chain.graph, 'simple_graph.dot');
+        shouldMatchFile(chain, 'simple_graph.dot');
       });
 
       test('should print a more advanced graph correctly', () {
@@ -151,15 +142,13 @@ void main() {
         key.addCustomer(screen);
         synth.addCustomer(audio);
         screen.addCustomer(grid);
-        final graph = chain.graph;
-        shouldMatchFile(graph, 'advanced_graph.dot');
+        shouldMatchFile(chain, 'advanced_graph.dot');
       });
 
       test('should print chains correctly', () {
         final root = ExampleChainRoot(scm: Scm.testInstance);
         root.initSuppliers();
-        final graph = root.graph;
-        shouldMatchFile(graph, 'graphs_with_chains.dot');
+        shouldMatchFile(root, 'graphs_with_chains.dot');
       });
     });
 

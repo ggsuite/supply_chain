@@ -230,6 +230,20 @@ class SupplyChain {
     return result;
   }
 
+  // ...........................................................................
+  /// Returns true if the given graph is equal to the graph of this chain
+  bool equalsGraph(String graph) {
+    String reduce(String s) => s
+        .replaceAll('\n', '')
+        .replaceAll(' ', '')
+        .replaceAll(';', '')
+        .replaceAll(RegExp(r'_\d+'), '');
+
+    final a = reduce(this.graph);
+    final b = reduce(graph);
+    return a == b;
+  }
+
   // ######################
   // Private
   // ######################
