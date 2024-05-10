@@ -252,6 +252,18 @@ void main() {
           ),
         );
       });
+
+      test('should throw if throwIfNotFound is true and node is not found', () {
+        final supplyChain = SupplyChain.example();
+        expect(
+          () => supplyChain.findNode<int>('Unknown', throwIfNotFound: true),
+          throwsA(
+            predicate<ArgumentError>(
+              (e) => e.toString().contains('Node with key "Unknown" not found'),
+            ),
+          ),
+        );
+      });
     });
 
     group('hasNode(key)', () {

@@ -161,11 +161,15 @@ class SupplyChain {
 
   // ...........................................................................
   /// Returns the node of key in this or any parent nodes
-  Node<T>? findNode<T>(String key) {
+  Node<T>? findNode<T>(String key, {bool throwIfNotFound = false}) {
     final node = _nodes[key];
 
     if (node == null) {
-      return _parent?.findNode(key);
+      final result = _parent?.findNode<T>(key);
+      if (throwIfNotFound && result == null) {
+        throw ArgumentError('Node with key "$key" not found.');
+      }
+      return result;
     }
 
     if (node is! Node<T>) {
