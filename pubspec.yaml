@@ -1,6 +1,6 @@
 name: supply_chain
 description: Supply Chain (SC) is a data flow and state management architecture.
-version: 1.0.8
+version: 1.0.9
 repository: https://github.com/inlavigo/supply_chain
 
 environment:
