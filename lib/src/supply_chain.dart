@@ -91,12 +91,19 @@ class SupplyChain {
   Iterable<SupplyChain> build() => [];
 
   // ...........................................................................
+  /// Creates and returns child chain
+  SupplyChain createChildChain({required String key}) {
+    final child = SupplyChain(key: key, scm: scm);
+    _addChildChain(child);
+    return child;
+  }
+
+  // ...........................................................................
   /// Call this method to create child hierarchies
   void createHierarchy() {
     for (final child in build()) {
-      _children[child.key] = child;
+      _addChildChain(child);
       child.createHierarchy();
-      child._parent = this;
     }
   }
 
@@ -161,15 +168,26 @@ class SupplyChain {
 
   // ...........................................................................
   /// Returns the node of key in this or any parent nodes
-  Node<T>? findNode<T>(String key, {bool throwIfNotFound = false}) {
-    final node = _nodes[key];
+  Node<T>? findNode<T>(
+    String key, {
+    bool throwIfNotFound = false,
+  }) {
+    final node = _findNodeInOwnNode<T>(key) ??
+        _findNodeNodeInParentNodes(key) ??
+        _findNodeInDirectSiblingNodes(key);
 
+    if (node == null && throwIfNotFound) {
+      throw ArgumentError('Node with key "$key" not found.');
+    }
+
+    return node;
+  }
+
+  // ...........................................................................
+  Node<T>? _findNodeInOwnNode<T>(String key) {
+    final node = _nodes[key];
     if (node == null) {
-      final result = _parent?.findNode<T>(key);
-      if (throwIfNotFound && result == null) {
-        throw ArgumentError('Node with key "$key" not found.');
-      }
-      return result;
+      return null;
     }
 
     if (node is! Node<T>) {
@@ -177,6 +195,28 @@ class SupplyChain {
     }
 
     return node;
+  }
+
+  // ...........................................................................
+  Node<T>? _findNodeNodeInParentNodes<T>(String key) {
+    return _parent?._findNodeInOwnNode<T>(key) ??
+        _parent?._findNodeNodeInParentNodes<T>(key);
+  }
+
+  // ...........................................................................
+  Node<T>? _findNodeInDirectSiblingNodes<T>(String key) {
+    if (_parent == null) {
+      return null;
+    }
+
+    for (final sibling in _parent!._children.values) {
+      final node = sibling._findNodeInOwnNode<T>(key);
+      if (node != null) {
+        return node;
+      }
+    }
+
+    return null;
   }
 
   // ...........................................................................
@@ -254,6 +294,15 @@ class SupplyChain {
 
       node.addSupplier(supplier);
     }
+  }
+
+  // ...........................................................................
+  // Adds a child chain to this chain
+  void _addChildChain(SupplyChain child) {
+    assert(child.scm == scm, 'Child chain must have the same scm as parent.');
+    assert(child._parent == null, 'Child chain must not have a parent.');
+    _children[child.key] = child;
+    child._parent = this;
   }
 }
 

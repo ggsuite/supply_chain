@@ -209,60 +209,105 @@ void main() {
     });
 
     group('findNode(key)', () {
-      test('should return the supplier with the given key or null', () {
-        final rootChain = ExampleChainRoot(scm: Scm.testInstance);
-        rootChain.createHierarchy();
+      group('returns', () {
+        group('the right node', () {
+          late final ExampleChainRoot rootChain;
 
-        // Find a node directly contained in chain
-        final rootA = rootChain.findNode<int>('RootA');
-        expect(rootA?.key, 'RootA');
+          setUpAll(() {
+            rootChain = ExampleChainRoot(scm: Scm.testInstance);
+            rootChain.createHierarchy();
+          });
 
-        final rootB = rootChain.findNode<int>('RootB');
-        expect(rootB?.key, 'RootB');
+          test('when the node is contained in own chain', () {
+            // Find a node directly contained in chain
+            final rootA = rootChain.findNode<int>('RootA');
+            expect(rootA?.key, 'RootA');
 
-        // Unknown node? Return null
-        final unknownNode = rootChain.findNode<int>('Unknown');
-        expect(unknownNode, isNull);
+            final rootB = rootChain.findNode<int>('RootB');
+            expect(rootB?.key, 'RootB');
 
-        // Should not return child nodes
-        final childNodeA = rootChain.findNode<int>('ChildNodeA');
-        expect(childNodeA, isNull);
+            // Should not return child nodes
+            final childNodeA = rootChain.findNode<int>('ChildNodeA');
+            expect(childNodeA, isNull);
 
-        // Should return nodes from parent chain
-        final childChainA = rootChain.child('ChildChainA')!;
-        final rootAFromChild = childChainA.findNode<int>('RootA');
-        expect(rootAFromChild?.key, 'RootA');
+            // Child nodes should find their own nodes
+            final childChainA = rootChain.child('ChildChainA')!;
+            final childNodeAFromChild = childChainA.findNode<int>('ChildNodeA');
+            expect(childNodeAFromChild?.key, 'ChildNodeA');
+          });
 
-        // Child nodes should find their own nodes
-        final childNodeAFromChild = childChainA.findNode<int>('ChildNodeA');
-        expect(childNodeAFromChild?.key, 'ChildNodeA');
+          test('when the node is contained in parent chain', () {
+            // Should return nodes from parent chain
+            final childChainA = rootChain.child('ChildChainA')!;
+            final rootAFromChild = childChainA.findNode<int>('RootA');
+            expect(rootAFromChild?.key, 'RootA');
+          });
+
+          test('when the node is contained in sibling chain', () {
+            // Create a new chain
+            final root = SupplyChain.example();
+
+            // Create two child chains
+            root.createChildChain(key: 'ChildChainA');
+            final b = root.createChildChain(key: 'ChildChainB');
+
+            // Add a NodeA to ChildChainA
+            final nodeA = root.child('ChildChainA')!.createNode<int>(
+                  key: 'NodeA',
+                  initialProduct: 0,
+                  produce: (components, previous) => previous,
+                );
+
+            // ChildChainB should find the node in ChildChainA
+            final foundNodeA = b.findNode<int>('NodeA');
+            expect(foundNodeA, nodeA);
+          });
+        });
+
+        group('null', () {
+          group('when node cannot be found', () {
+            test('and throwIfNotFound is false or not defined', () {
+              final unknownNode = chain.findNode<int>(
+                'Unknown',
+                throwIfNotFound: false,
+              );
+              expect(unknownNode, isNull);
+
+              final unknownNode1 = chain.findNode<int>('Unknown');
+              expect(unknownNode1, isNull);
+            });
+          });
+        });
       });
 
-      test('should throw if the type does not match', () {
-        final rootChain = ExampleChainRoot(scm: Scm.testInstance);
-        rootChain.createHierarchy();
-        expect(
-          () => rootChain.findNode<String>('RootA'),
-          throwsA(
-            predicate<ArgumentError>(
-              (e) => e
-                  .toString()
-                  .contains('Node with key "RootA" is not of type String'),
+      group('throws', () {
+        test('if the type does not match', () {
+          final rootChain = ExampleChainRoot(scm: Scm.testInstance);
+          rootChain.createHierarchy();
+          expect(
+            () => rootChain.findNode<String>('RootA'),
+            throwsA(
+              predicate<ArgumentError>(
+                (e) => e
+                    .toString()
+                    .contains('Node with key "RootA" is not of type String'),
+              ),
             ),
-          ),
-        );
-      });
+          );
+        });
 
-      test('should throw if throwIfNotFound is true and node is not found', () {
-        final supplyChain = SupplyChain.example();
-        expect(
-          () => supplyChain.findNode<int>('Unknown', throwIfNotFound: true),
-          throwsA(
-            predicate<ArgumentError>(
-              (e) => e.toString().contains('Node with key "Unknown" not found'),
+        test('if throwIfNotFound is true and node is not found', () {
+          final supplyChain = SupplyChain.example();
+          expect(
+            () => supplyChain.findNode<int>('Unknown', throwIfNotFound: true),
+            throwsA(
+              predicate<ArgumentError>(
+                (e) =>
+                    e.toString().contains('Node with key "Unknown" not found'),
+              ),
             ),
-          ),
-        );
+          );
+        });
       });
     });
 
