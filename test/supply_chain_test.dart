@@ -14,14 +14,16 @@ import 'sample_nodes.dart';
 void main() {
   late Node<int> node;
 
+  int produce(List<dynamic> components, int previousProduct) => previousProduct;
+
   setUp(() {
     Node.testRestIdCounter();
     SupplyChain.testRestIdCounter();
     chain = SupplyChain.example();
 
-    node = chain.createNode(
+    node = chain.findOrCreateNode(
       initialProduct: 0,
-      produce: (components, previousProduct) => previousProduct,
+      produce: produce,
       key: 'Node',
     );
   });
@@ -45,7 +47,58 @@ void main() {
       });
     });
 
-    group('createNode(), addNode()', () {
+    group('findOrCreateNode()', () {
+      test('should return an existing node when possible', () {
+        expect(
+          chain.findOrCreateNode(
+            initialProduct: 0,
+            produce: produce,
+            key: 'Node',
+          ),
+          node,
+        );
+      });
+
+      group('should throw', () {
+        group('when existing node exists', () {
+          test('but have a different produce method', () {
+            expect(
+              () => chain.findOrCreateNode<int>(
+                initialProduct: 0,
+                produce: (components, previousProduct) => 0,
+                key: 'Node',
+              ),
+              throwsA(
+                predicate<AssertionError>(
+                  (e) => e.toString().contains(
+                        'Existing node has different production method',
+                      ),
+                ),
+              ),
+            );
+          });
+
+          test('but has a different type', () {
+            expect(
+              () => chain.findOrCreateNode<String>(
+                initialProduct: 'hello',
+                produce: (components, previousProduct) => 'world',
+                key: 'Node',
+              ),
+              throwsA(
+                predicate<AssertionError>(
+                  (e) => e.toString().contains(
+                        'Existing node is of differnt type',
+                      ),
+                ),
+              ),
+            );
+          });
+        });
+      });
+    });
+
+    group('addNode()', () {
       test('should create a node and set the chain and SCM correctly', () {
         expect(node.chain, chain);
         expect(node.scm, chain.scm);
@@ -53,10 +106,13 @@ void main() {
 
       test('should throw if a node with the same key already exists', () {
         expect(
-          () => chain.createNode(
-            initialProduct: 0,
-            produce: (components, previousProduct) => previousProduct,
-            key: 'Node',
+          () => chain.addNode(
+            Node<int>(
+              initialProduct: 0,
+              produce: (components, previousProduct) => previousProduct,
+              key: 'Node',
+              chain: chain,
+            ),
           ),
           throwsA(
             predicate<ArgumentError>(
@@ -191,7 +247,7 @@ void main() {
             final b = SupplyChain(key: 'ChildChainB', parent: root);
 
             // Add a NodeA to ChildChainA
-            final nodeA = root.child('ChildChainA')!.createNode<int>(
+            final nodeA = root.child('ChildChainA')!.findOrCreateNode<int>(
                   key: 'NodeA',
                   initialProduct: 0,
                   produce: (components, previous) => previous,
@@ -327,7 +383,7 @@ void main() {
         final scm = Scm.testInstance;
         final chain = SupplyChain.example(scm: scm);
 
-        chain.createNode<int>(
+        chain.findOrCreateNode<int>(
           key: 'Node',
           suppliers: ['Unknown'],
           initialProduct: 0,

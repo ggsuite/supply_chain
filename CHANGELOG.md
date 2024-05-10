@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.12] - 2024-05-10
+
+### Changed
+
+- Rename createNode into findOrCreateNode
+
 ## [1.0.11] - 2024-05-10
 
 - Add `equalsGraph`
@@ -96,6 +102,7 @@
 - 'Github Actions Pipeline'
 - 'Github Actions Pipeline: Add SDK file containing flutter into .github/workflows to make github installing flutter and not dart SDK'
 
+[1.0.12]: https://github.com/inlavigo/supply_chain/compare/1.0.11...1.0.12
 [1.0.11]: https://github.com/inlavigo/supply_chain/compare/1.0.10...1.0.11
 [1.0.10]: https://github.com/inlavigo/supply_chain/compare/1.0.9...1.0.10
 [1.0.9]: https://github.com/inlavigo/supply_chain/compare/1.0.8...1.0.9

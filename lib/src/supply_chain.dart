@@ -50,13 +50,26 @@ class SupplyChain {
   Iterable<Node<dynamic>> get nodes => _nodes.values;
 
   // ...........................................................................
-  /// Adds a node to the chain
-  Node<T> createNode<T>({
+  /// Returns the node with key. If not available in chain the node is created.
+  Node<T> findOrCreateNode<T>({
     required T initialProduct,
     required Produce<T> produce,
     required String key,
     Iterable<String> suppliers = const [],
   }) {
+    // Return existing node when already existing
+    final existingNode = _nodes[key];
+    if (existingNode != null) {
+      assert(existingNode is Node<T>, 'Existing node is of differnt type');
+      final result = existingNode as Node<T>;
+      assert(
+        result.produceCore == produce,
+        'Existing node has different production method',
+      );
+      return result;
+    }
+
+    // Create a new node
     final node = Node<T>(
       initialProduct: initialProduct,
       produce: produce,
@@ -336,13 +349,13 @@ class ExampleChainRoot extends SupplyChain {
     required super.scm,
     super.key = 'ExampleRoot',
   }) : super.root() {
-    createNode(
+    findOrCreateNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1, // coveralls:ignore-line
       key: 'RootA',
     );
 
-    createNode(
+    findOrCreateNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1, // coveralls:ignore-line
       key: 'RootB',
@@ -362,14 +375,14 @@ class ExampleChildChain extends SupplyChain {
     required super.parent,
   }) {
     /// Create a node
-    createNode(
+    findOrCreateNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1,
       key: 'ChildNodeA',
       suppliers: ['RootA', 'RootB', 'ChildNodeB'],
     );
 
-    createNode(
+    findOrCreateNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1,
       key: 'ChildNodeB',
@@ -391,7 +404,7 @@ class ExampleGrandChildChain extends SupplyChain {
     required super.key,
     required super.parent,
   }) {
-    createNode(
+    findOrCreateNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1,
       key: 'GrandChildNodeA',

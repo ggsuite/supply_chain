@@ -51,7 +51,7 @@ class Node<T> {
         product = initialProduct,
         assert(key == null || key.isPascalCase),
         key = key ?? nextKey,
-        _produce = produce {
+        produceCore = produce {
     _init();
   }
 
@@ -155,11 +155,14 @@ class Node<T> {
   /// Produces the product.
   void produce() {
     final newProduct =
-        _produce(suppliers.map((s) => s.product).toList(), product);
+        produceCore(suppliers.map((s) => s.product).toList(), product);
 
     product = newProduct;
     scm.hasNewProduct(this);
   }
+
+  /// The core production function
+  final Produce<T> produceCore;
 
   /// Returns true, if node is staged for production
   bool isStaged = false;
@@ -248,7 +251,6 @@ class Node<T> {
   final List<void Function()> _dispose = [];
 
   // ...........................................................................
-  final Produce<T> _produce;
   Priority _ownPriority = Priority.frame;
 
   // ...........................................................................
