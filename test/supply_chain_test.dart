@@ -169,10 +169,6 @@ void main() {
             final rootB = rootChain.findNode<int>('RootB');
             expect(rootB?.key, 'RootB');
 
-            // Should not return child nodes
-            final childNodeA = rootChain.findNode<int>('ChildNodeA');
-            expect(childNodeA, isNull);
-
             // Child nodes should find their own nodes
             final childChainA = rootChain.child('ChildChainA')!;
             final childNodeAFromChild = childChainA.findNode<int>('ChildNodeA');
@@ -204,6 +200,25 @@ void main() {
             // ChildChainB should find the node in ChildChainA
             final foundNodeA = b.findNode<int>('NodeA');
             expect(foundNodeA, nodeA);
+          });
+
+          test('when the node is contained somewhere else', () {
+            final root = ExampleChainRoot(scm: Scm.testInstance);
+
+            // Create a node somewhere deep in the hierarchy
+            final grandChildChain =
+                root.child('ChildChainA')!.child('GrandChildChain')!;
+
+            final grandChildNodeX = Node<int>(
+              key: 'GrandChildNodeX',
+              chain: grandChildChain,
+              initialProduct: 0,
+              produce: (components, previousProduct) => 0,
+            );
+
+            // Search the node from the root
+            final foundGRandChildNodeX = root.findNode<int>('GrandChildNodeX');
+            expect(foundGRandChildNodeX, grandChildNodeX);
           });
         });
 
@@ -246,6 +261,21 @@ void main() {
               predicate<ArgumentError>(
                 (e) =>
                     e.toString().contains('Node with key "Unknown" not found'),
+              ),
+            ),
+          );
+        });
+
+        test('if multiple nodes of the same key and type are found', () {
+          final supplyChain = ExampleChainRoot(scm: Scm.testInstance);
+          expect(
+            () => supplyChain.findNode<int>('GrandChildNodeA'),
+            throwsA(
+              predicate<ArgumentError>(
+                (e) => e.toString().contains(
+                      'More than one node with key "GrandChildNodeA" and '
+                      'Type<int> found.',
+                    ),
               ),
             ),
           );

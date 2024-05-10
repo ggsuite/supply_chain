@@ -517,6 +517,53 @@ void main() {
         expect(producer.product, supplierA.product + supplierB.product);
       });
     });
+
+    group('nodesWithKey<T>(key)', () {
+      test('should return all nodes with a given key and type', () {
+        final root = SupplyChain.root(key: 'Example', scm: Scm.testInstance);
+        final scm = root.scm;
+        final chain0 = SupplyChain(key: '0', parent: root);
+        final chain1 = SupplyChain(key: '1', parent: root);
+        final chain2 = SupplyChain(key: '2', parent: root);
+
+        // Create some nodes
+        final intNodeA0 = Node<int>(
+          key: 'A',
+          produce: (c, p) => 1,
+          initialProduct: 1,
+          chain: chain0,
+        );
+
+        final intNodeA1 = Node<int>(
+          key: 'A',
+          produce: (c, p) => 1,
+          initialProduct: 1,
+          chain: chain1,
+        );
+
+        final stringNodeA = Node<String>(
+          key: 'A',
+          produce: (c, p) => 'A',
+          initialProduct: 'A',
+          chain: chain2,
+        );
+
+        final stringNodeB = Node<String>(
+          key: 'B',
+          produce: (c, p) => 'B',
+          initialProduct: 'B',
+          chain: chain2,
+        );
+
+        expect(scm.nodesWithKey<int>('A'), [intNodeA0, intNodeA1]);
+        expect(scm.nodesWithKey<String>('A'), [stringNodeA]);
+        expect(scm.nodesWithKey<String>('B'), [stringNodeB]);
+        expect(
+          scm.nodesWithKey<dynamic>('A').toSet(),
+          {intNodeA0, intNodeA1, stringNodeA},
+        );
+      });
+    });
   });
 
   // ###########################################################################

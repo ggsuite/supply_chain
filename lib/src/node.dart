@@ -9,7 +9,6 @@ import 'package:gg_cache/gg_cache.dart';
 import 'keys.dart';
 import 'priority.dart';
 import 'scm.dart';
-import 'scm_node_interface.dart';
 import 'supply_chain.dart';
 import 'tools.dart';
 
@@ -254,7 +253,7 @@ class Node<T> {
 
   // ...........................................................................
   /// The supply chain manager
-  final ScmNodeInterface scm;
+  final Scm scm;
 
   /// The chain this node belongs to
   final SupplyChain chain;

@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 
 void main() {
   final valueNode = ValueNode.example;
-  final scm = valueNode.scm as Scm;
+  final scm = valueNode.scm;
 
   group('ValueNode', () {
     group('example', () {

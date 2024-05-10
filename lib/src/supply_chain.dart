@@ -5,7 +5,6 @@
 // found in the LICENSE file in the root of this package.
 
 import '../supply_chain.dart';
-import 'scm_node_interface.dart';
 
 /// A supply chain is a container for connected nodes
 class SupplyChain {
@@ -29,7 +28,7 @@ class SupplyChain {
 
   // ...........................................................................
   /// The supply chain manager
-  final ScmNodeInterface scm;
+  final Scm scm;
 
   /// The key of the chain
   final String key;
@@ -97,7 +96,7 @@ class SupplyChain {
 
   // ...........................................................................
   /// Creates an example instance of Chain
-  factory SupplyChain.example({ScmNodeInterface? scm}) {
+  factory SupplyChain.example({Scm? scm}) {
     scm ??= Scm.testInstance;
 
     return SupplyChain(
@@ -173,7 +172,8 @@ class SupplyChain {
   }) {
     final node = _findNodeInOwnNode<T>(key) ??
         _findNodeNodeInParentNodes(key) ??
-        _findNodeInDirectSiblingNodes(key);
+        _findNodeInDirectSiblingNodes(key) ??
+        _findAnyUniqueNode<T>(key);
 
     if (node == null && throwIfNotFound) {
       throw ArgumentError('Node with key "$key" not found.');
@@ -213,6 +213,22 @@ class SupplyChain {
       if (node != null) {
         return node;
       }
+    }
+
+    return null;
+  }
+
+  // ...........................................................................
+  Node<T>? _findAnyUniqueNode<T>(String key) {
+    final nodes = scm.nodesWithKey<T>(key);
+    if (nodes.length == 1) {
+      return nodes.first;
+    }
+
+    if (nodes.length > 1) {
+      throw ArgumentError(
+        'More than one node with key "$key" and Type<$T> found.',
+      );
     }
 
     return null;

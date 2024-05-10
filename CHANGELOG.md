@@ -4,6 +4,12 @@
 
 - Add `equalsGraph`
 
+## [Unreleased]
+
+### Removed
+
+- Remove ScmNodeInterface, find arbitrary nodes by SupplyChain:findNode
+
 ## [1.0.10] - 2024-05-10
 
 ## [1.0.9] - 2024-05-10
@@ -87,6 +93,7 @@
 - 'Github Actions Pipeline'
 - 'Github Actions Pipeline: Add SDK file containing flutter into .github/workflows to make github installing flutter and not dart SDK'
 
+[Unreleased]: https://github.com/inlavigo/supply_chain/compare/1.0.10...HEAD
 [1.0.10]: https://github.com/inlavigo/supply_chain/compare/1.0.9...1.0.10
 [1.0.9]: https://github.com/inlavigo/supply_chain/compare/1.0.8...1.0.9
 [1.0.8]: https://github.com/inlavigo/supply_chain/compare/1.0.7...1.0.8

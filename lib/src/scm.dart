@@ -10,10 +10,9 @@ import 'package:gg_fake_timer/gg_fake_timer.dart';
 import 'package:gg_once_per_cycle/gg_once_per_cycle.dart';
 import '../supply_chain.dart';
 import 'schedule_task.dart';
-import 'scm_node_interface.dart';
 
 /// SCM - Supply Chain Manager: Controls the data flow in the supply chain.
-class Scm implements ScmNodeInterface {
+class Scm {
   // ######################
   // Public
   // ######################
@@ -35,31 +34,33 @@ class Scm implements ScmNodeInterface {
   late final SupplyChain rootChain;
 
   // ...........................................................................
-  // ScmNodeInterface
-
   /// Returns iterable of all nodes
   Iterable<Node<dynamic>> get nodes => _nodes;
 
+  /// Returns all nodes having a given key
+  Iterable<Node<T>> nodesWithKey<T>(String key) {
+    return _nodes
+        .whereType<Node<T>>()
+        .where((element) => element.key == key)
+        .map((e) => e);
+  }
+
   /// Adds a node to scm
-  @override
   void addNode(Node<dynamic> node) {
     _nodes.add(node);
     nominate(node);
   }
 
   /// Removes the node from scm
-  @override
   void removeNode(Node<dynamic> node) => _nodes.remove(node);
 
   /// Nominate node for production
-  @override
   void nominate(Node<dynamic> node) {
     _nominatedNodes.add(node);
     _schedulePreparation.trigger();
   }
 
   /// Inform scm about an update
-  @override
   void hasNewProduct(Node<dynamic> node) {
     // Node is not in producing nodes?
     // Throw an exception. Only producing nodes should call hasNewProduct()
@@ -79,11 +80,9 @@ class Scm implements ScmNodeInterface {
   Iterable<Node<dynamic>> get animatedNodes => _animatedNodes;
 
   /// Starts to animate node
-  @override
   void animateNode(Node<dynamic> node) => _animatedNodes.add(node);
 
   /// Stops to animate node
-  @override
   void deanimateNode(Node<dynamic> node) => _animatedNodes.remove(node);
 
   /// Call this method to trigger animation frame calculation
@@ -103,7 +102,8 @@ class Scm implements ScmNodeInterface {
 
   // ...........................................................................
   // Priority
-  @override
+
+  /// Inform the scm that a node's priority has changed
   void priorityHasChanged(Node<dynamic> node) {
     _schedulePriorityUpdate.trigger();
   }
