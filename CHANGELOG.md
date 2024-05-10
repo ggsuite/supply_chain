@@ -1,8 +1,10 @@
 # Changelog
 
-## [1.0.10] - 2024-05-10
+## \[1.0.10\] - 2024-05-10
 
 - Add `equalsGraph`
+
+## [1.0.10] - 2024-05-10
 
 ## [1.0.9] - 2024-05-10
 
@@ -76,15 +78,16 @@
 
 ### Changed
 
-- Rename gg_supply_chain into supply_chain
+- Rename gg\_supply\_chain into supply\_chain
 - Updated version
-- Upgraded gg_fake_timer
+- Upgraded gg\_fake\_timer
 - 'Pipline: Disable cache'
-- 'publish_to: none for private repositories'
+- 'publish\_to: none for private repositories'
 - Rework changelog
 - 'Github Actions Pipeline'
 - 'Github Actions Pipeline: Add SDK file containing flutter into .github/workflows to make github installing flutter and not dart SDK'
 
+[1.0.10]: https://github.com/inlavigo/supply_chain/compare/1.0.9...1.0.10
 [1.0.9]: https://github.com/inlavigo/supply_chain/compare/1.0.8...1.0.9
 [1.0.8]: https://github.com/inlavigo/supply_chain/compare/1.0.7...1.0.8
 [1.0.7]: https://github.com/inlavigo/supply_chain/compare/1.0.6...1.0.7
