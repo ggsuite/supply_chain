@@ -9,11 +9,23 @@ import 'scm_node_interface.dart';
 
 /// A supply chain is a container for connected nodes
 class SupplyChain {
+  // ...........................................................................
   /// Creates a chain with a key. Key must be lower camel case.
   SupplyChain({
     required this.key,
+    required this.parent,
+  })  : scm = parent!.scm,
+        assert(key.isPascalCase) {
+    parent!._children[key] = this;
+  }
+
+  // ...........................................................................
+  /// Create a root supply chain having no parent
+  SupplyChain.root({
+    required this.key,
     required this.scm,
-  }) : assert(key.isPascalCase);
+  })  : parent = null,
+        assert(key.isPascalCase);
 
   // ...........................................................................
   /// The supply chain manager
@@ -61,6 +73,10 @@ class SupplyChain {
   }
 
   // ...........................................................................
+  /// The parent supply chain
+  SupplyChain? parent;
+
+  // ...........................................................................
   /// Adds an existing node to the chain
   void addNode(Node<dynamic> node) {
     // Throw if node with key already exists
@@ -81,30 +97,13 @@ class SupplyChain {
 
   // ...........................................................................
   /// Creates an example instance of Chain
-  factory SupplyChain.example({ScmNodeInterface? scm}) => SupplyChain(
-        key: 'Example',
-        scm: scm ?? Scm.testInstance,
-      );
+  factory SupplyChain.example({ScmNodeInterface? scm}) {
+    scm ??= Scm.testInstance;
 
-  // ...........................................................................
-  /// Overide this method to build the nodes belonging to this chain
-  Iterable<SupplyChain> build() => [];
-
-  // ...........................................................................
-  /// Creates and returns child chain
-  SupplyChain createChildChain({required String key}) {
-    final child = SupplyChain(key: key, scm: scm);
-    _addChildChain(child);
-    return child;
-  }
-
-  // ...........................................................................
-  /// Call this method to create child hierarchies
-  void createHierarchy() {
-    for (final child in build()) {
-      _addChildChain(child);
-      child.createHierarchy();
-    }
+    return SupplyChain(
+      key: 'Example',
+      parent: SupplyChain.root(key: 'Root', scm: scm),
+    );
   }
 
   // ...........................................................................
@@ -163,7 +162,7 @@ class SupplyChain {
       return true;
     }
 
-    return _parent?.hasNode(key) ?? false;
+    return parent?.hasNode(key) ?? false;
   }
 
   // ...........................................................................
@@ -199,17 +198,17 @@ class SupplyChain {
 
   // ...........................................................................
   Node<T>? _findNodeNodeInParentNodes<T>(String key) {
-    return _parent?._findNodeInOwnNode<T>(key) ??
-        _parent?._findNodeNodeInParentNodes<T>(key);
+    return parent?._findNodeInOwnNode<T>(key) ??
+        parent?._findNodeNodeInParentNodes<T>(key);
   }
 
   // ...........................................................................
   Node<T>? _findNodeInDirectSiblingNodes<T>(String key) {
-    if (_parent == null) {
+    if (parent == null) {
       return null;
     }
 
-    for (final sibling in _parent!._children.values) {
+    for (final sibling in parent!._children.values) {
       final node = sibling._findNodeInOwnNode<T>(key);
       if (node != null) {
         return node;
@@ -236,7 +235,6 @@ class SupplyChain {
   // ######################
 
   final Map<String, SupplyChain> _children = {};
-  SupplyChain? _parent;
   final Map<String, Node<dynamic>> _nodes = {};
   final Map<String, Iterable<String>> _supplierStrings = {};
   static int _idCounter = 0;
@@ -295,15 +293,6 @@ class SupplyChain {
       node.addSupplier(supplier);
     }
   }
-
-  // ...........................................................................
-  // Adds a child chain to this chain
-  void _addChildChain(SupplyChain child) {
-    assert(child.scm == scm, 'Child chain must have the same scm as parent.');
-    assert(child._parent == null, 'Child chain must not have a parent.');
-    _children[child.key] = child;
-    child._parent = this;
-  }
 }
 
 // #############################################################################
@@ -313,10 +302,10 @@ class SupplyChain {
 /// An example root chain
 class ExampleChainRoot extends SupplyChain {
   /// Constructor
-  ExampleChainRoot({required super.scm, super.key = 'ExampleRoot'});
-
-  @override
-  Iterable<SupplyChain> build() {
+  ExampleChainRoot({
+    required super.scm,
+    super.key = 'ExampleRoot',
+  }) : super.root() {
     createNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1, // coveralls:ignore-line
@@ -329,10 +318,8 @@ class ExampleChainRoot extends SupplyChain {
       key: 'RootB',
     );
 
-    return [
-      ExampleChildChain(key: 'ChildChainA', scm: scm),
-      ExampleChildChain(key: 'ChildChainB', scm: scm),
-    ];
+    ExampleChildChain(key: 'ChildChainA', parent: this);
+    ExampleChildChain(key: 'ChildChainB', parent: this);
   }
 }
 
@@ -340,10 +327,11 @@ class ExampleChainRoot extends SupplyChain {
 /// An example child chain
 class ExampleChildChain extends SupplyChain {
   /// Constructor
-  ExampleChildChain({required super.scm, required super.key});
-
-  @override
-  Iterable<SupplyChain> build() {
+  ExampleChildChain({
+    required super.key,
+    required super.parent,
+  }) {
+    /// Create a node
     createNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1,
@@ -357,7 +345,11 @@ class ExampleChildChain extends SupplyChain {
       key: 'ChildNodeB',
     );
 
-    return [ExampleGrandChildChain(key: 'GrandChildChain', scm: scm)];
+    /// Create two example child chains
+    ExampleGrandChildChain(
+      key: 'GrandChildChain',
+      parent: this,
+    );
   }
 }
 
@@ -365,10 +357,10 @@ class ExampleChildChain extends SupplyChain {
 /// An example child chain
 class ExampleGrandChildChain extends SupplyChain {
   /// Constructor
-  ExampleGrandChildChain({required super.scm, required super.key});
-
-  @override
-  Iterable<SupplyChain> build() {
+  ExampleGrandChildChain({
+    required super.key,
+    required super.parent,
+  }) {
     createNode(
       initialProduct: 0,
       produce: (components, previous) => previous + 1,
@@ -377,7 +369,5 @@ class ExampleGrandChildChain extends SupplyChain {
         'RootA',
       ],
     );
-
-    return [];
   }
 }

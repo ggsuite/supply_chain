@@ -8,9 +8,7 @@ import 'dart:async' show scheduleMicrotask, Timer;
 import 'package:gg_fake_stopwatch/gg_fake_stopwatch.dart';
 import 'package:gg_fake_timer/gg_fake_timer.dart';
 import 'package:gg_once_per_cycle/gg_once_per_cycle.dart';
-
-import 'node.dart';
-import 'priority.dart';
+import '../supply_chain.dart';
 import 'schedule_task.dart';
 import 'scm_node_interface.dart';
 
@@ -31,6 +29,10 @@ class Scm implements ScmNodeInterface {
   // ...........................................................................
   /// Default supply chain manager
   static final Scm testInstance = Scm(isTest: true);
+
+  // ...........................................................................
+  /// The root supply chain
+  late final SupplyChain rootChain;
 
   // ...........................................................................
   // ScmNodeInterface
@@ -186,6 +188,7 @@ class Scm implements ScmNodeInterface {
     _initSchedulePreparation();
     _initScheduleProduction();
     _initSchedulePriorityUpdate();
+    _initRootChain();
   }
 
   // ...........................................................................
@@ -231,6 +234,11 @@ class Scm implements ScmNodeInterface {
       task: _updatePriorities,
       scheduleTask: _scheduleFast,
     );
+  }
+
+  // ...........................................................................
+  void _initRootChain() {
+    rootChain = SupplyChain.root(key: 'Root', scm: this);
   }
 
   // ...........................................................................

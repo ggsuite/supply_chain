@@ -621,7 +621,7 @@ void main() {
   test('Test with non test environment should work fine', () {
     fakeAsync((fake) {
       final scm = Scm.example(isTest: false);
-      final chain = SupplyChain(key: 'Example', scm: scm);
+      final chain = SupplyChain.root(key: 'Example', scm: scm);
       final node = exampleNode(chain: chain);
       expect(node.product, 0);
       scm.nominate(node);

@@ -1,10 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.9] - 2024-05-10
 
 ### Changed
 
 - Nodes can be found in direct children
+- Supply chains need a parent chain from beginning
 
 ## [1.0.8] - 2024-05-10
 
@@ -80,7 +81,7 @@
 - 'Github Actions Pipeline'
 - 'Github Actions Pipeline: Add SDK file containing flutter into .github/workflows to make github installing flutter and not dart SDK'
 
-[Unreleased]: https://github.com/inlavigo/supply_chain/compare/1.0.8...HEAD
+[1.0.9]: https://github.com/inlavigo/supply_chain/compare/1.0.8...1.0.9
 [1.0.8]: https://github.com/inlavigo/supply_chain/compare/1.0.7...1.0.8
 [1.0.7]: https://github.com/inlavigo/supply_chain/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/inlavigo/supply_chain/compare/1.0.5...1.0.6

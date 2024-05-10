@@ -1,0 +1,15 @@
+digraph unix {
+  subgraph cluster_Example_1 {
+    label = "Example";
+    Node_0 [label = "Node";];
+    Key_1 [label = "Key";];
+    Synth_2 [label = "Synth";];
+    Audio_3 [label = "Audio";];
+    Screen_4 [label = "Screen";];
+    Grid_5 [label = "Grid";];
+    "Key_1" -> "Synth_2";
+    "Key_1" -> "Screen_4";
+    "Synth_2" -> "Audio_3";
+    "Screen_4" -> "Grid_5";
+  }
+}

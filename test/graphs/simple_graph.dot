@@ -1,0 +1,11 @@
+digraph unix {
+  subgraph cluster_Example_1 {
+    label = "Example";
+    Node_0 [label = "Node";];
+    Supplier_1 [label = "Supplier";];
+    Producer_2 [label = "Producer";];
+    Customer_3 [label = "Customer";];
+    "Supplier_1" -> "Producer_2";
+    "Producer_2" -> "Customer_3";
+  }
+}

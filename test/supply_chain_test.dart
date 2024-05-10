@@ -4,6 +4,8 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'dart:io';
+
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
@@ -81,7 +83,6 @@ void main() {
       test('should allow to create a hierarchy of chains', () {
         final scm = Scm.testInstance;
         final root = ExampleChainRoot(scm: scm);
-        root.createHierarchy();
         expect(root.nodes.map((n) => n.key), ['RootA', 'RootB']);
         for (var element in root.nodes) {
           scm.nominate(element);
@@ -110,29 +111,29 @@ void main() {
       });
     });
 
-    group('build', () {
-      test('should return an empty array by default', () {
-        expect(chain.build(), isEmpty);
-      });
-    });
-
     group('graph', () {
+      // .......................................................................
+      void shouldMatchFile(String graph, String fileName) {
+        final cwd = Directory.current.path;
+        final graphFile = File('$cwd/test/graphs/$fileName');
+        final graphFileContent = (graphFile.readAsStringSync())
+            .replaceAll('\n', '')
+            .replaceAll(' ', '')
+            .replaceAll(';', '');
+
+        graph = graph.replaceAll('\n', '').replaceAll(' ', '').replaceAll(
+              ';',
+              '',
+            );
+
+        expect(graph, graphFileContent);
+      }
+
+      // .......................................................................
       test('should print a simple graph correctly', () {
         initSupplierProducerCustomer();
         createSimpleChain();
-        final graph = chain.graph;
-        expect(
-          graph,
-          'digraph unix { '
-          'subgraph cluster_Example_0 '
-          '{ label = "Example"; '
-          'Node_0 [label="Node"]; '
-          'Supplier_1 [label="Supplier"]; '
-          'Producer_2 [label="Producer"]; '
-          'Customer_3 [label="Customer"]; '
-          '"Supplier_1" -> "Producer_2"; '
-          '"Producer_2" -> "Customer_3"; }}',
-        );
+        shouldMatchFile(chain.graph, 'simple_graph.dot');
       });
 
       test('should print a more advanced graph correctly', () {
@@ -151,60 +152,14 @@ void main() {
         synth.addCustomer(audio);
         screen.addCustomer(grid);
         final graph = chain.graph;
-        expect(
-          graph,
-          'digraph unix { '
-          'subgraph cluster_Example_0 { '
-          'label = "Example";'
-          ' Node_0 [label="Node"];'
-          ' Key_1 [label="Key"];'
-          ' Synth_2 [label="Synth"];'
-          ' Audio_3 [label="Audio"];'
-          ' Screen_4 [label="Screen"];'
-          ' Grid_5 [label="Grid"]; '
-          '"Key_1" -> "Synth_2";'
-          ' "Key_1" -> "Screen_4";'
-          ' "Synth_2" -> "Audio_3";'
-          ' "Screen_4" -> "Grid_5";'
-          ' }}',
-        );
+        shouldMatchFile(graph, 'advanced_graph.dot');
       });
 
       test('should print chains correctly', () {
         final root = ExampleChainRoot(scm: Scm.testInstance);
-        root.createHierarchy();
         root.initSuppliers();
         final graph = root.graph;
-        expect(
-          graph,
-          'digraph unix '
-          '{ subgraph cluster_ExampleRoot_1 '
-          '{ label = "ExampleRoot"; '
-          'subgraph cluster_ChildChainA_2 '
-          '{ label = "ChildChainA"; '
-          'subgraph cluster_GrandChildChain_4 '
-          '{ label = "GrandChildChain"; '
-          'GrandChildNodeA_5 [label="GrandChildNodeA"]; '
-          '}ChildNodeA_3 [label="ChildNodeA"]; '
-          'ChildNodeB_4 [label="ChildNodeB"]; '
-          '"ChildNodeB_4" -> "ChildNodeA_3"; '
-          '}subgraph cluster_ChildChainB_3 '
-          '{ label = "ChildChainB"; '
-          'subgraph cluster_GrandChildChain_5 '
-          '{ label = "GrandChildChain"; '
-          'GrandChildNodeA_8 [label="GrandChildNodeA"]; '
-          '}ChildNodeA_6 [label="ChildNodeA"]; '
-          'ChildNodeB_7 [label="ChildNodeB"]; '
-          '"ChildNodeB_7" -> "ChildNodeA_6"; '
-          '}RootA_1 [label="RootA"]; RootB_2 [label="RootB"]; '
-          '"RootA_1" -> "ChildNodeA_3"; '
-          '"RootA_1" -> "GrandChildNodeA_5"; '
-          '"RootA_1" -> "ChildNodeA_6"; '
-          '"RootA_1" -> "GrandChildNodeA_8"; '
-          '"RootB_2" -> "ChildNodeA_3"; '
-          '"RootB_2" -> "ChildNodeA_6"; '
-          '}}',
-        );
+        shouldMatchFile(graph, 'graphs_with_chains.dot');
       });
     });
 
@@ -215,7 +170,6 @@ void main() {
 
           setUpAll(() {
             rootChain = ExampleChainRoot(scm: Scm.testInstance);
-            rootChain.createHierarchy();
           });
 
           test('when the node is contained in own chain', () {
@@ -248,8 +202,8 @@ void main() {
             final root = SupplyChain.example();
 
             // Create two child chains
-            root.createChildChain(key: 'ChildChainA');
-            final b = root.createChildChain(key: 'ChildChainB');
+            SupplyChain(key: 'ChildChainA', parent: root);
+            final b = SupplyChain(key: 'ChildChainB', parent: root);
 
             // Add a NodeA to ChildChainA
             final nodeA = root.child('ChildChainA')!.createNode<int>(
@@ -283,7 +237,6 @@ void main() {
       group('throws', () {
         test('if the type does not match', () {
           final rootChain = ExampleChainRoot(scm: Scm.testInstance);
-          rootChain.createHierarchy();
           expect(
             () => rootChain.findNode<String>('RootA'),
             throwsA(
@@ -314,7 +267,6 @@ void main() {
     group('hasNode(key)', () {
       test('should return true if the chain has a node with the given key', () {
         final rootChain = ExampleChainRoot(scm: Scm.testInstance);
-        rootChain.createHierarchy();
         expect(rootChain.hasNode('RootA'), isTrue);
         expect(rootChain.hasNode('RootB'), isTrue);
         expect(rootChain.hasNode('Unknown'), isFalse);
@@ -333,7 +285,6 @@ void main() {
         () {
           final scm = Scm.testInstance;
           final rootChain = ExampleChainRoot(scm: scm);
-          rootChain.createHierarchy();
           rootChain.initSuppliers();
 
           // The root node has no suppliers
@@ -379,7 +330,6 @@ void main() {
       group('isAncestorOf(node)', () {
         test('should return true if the chain is an ancestor', () {
           final rootChain = ExampleChainRoot(scm: Scm.testInstance);
-          rootChain.createHierarchy();
           final childChainA = rootChain.child('ChildChainA')!;
           final childChainB = rootChain.child('ChildChainB')!;
           final grandChildChain = childChainA.child('GrandChildChain')!;
@@ -394,7 +344,6 @@ void main() {
       group('isDescendantOf(node)', () {
         test('should return true if the chain is a descendant', () {
           final rootChain = ExampleChainRoot(scm: Scm.testInstance);
-          rootChain.createHierarchy();
           final childChainA = rootChain.child('ChildChainA')!;
           final childChainB = rootChain.child('ChildChainB')!;
           final grandChildChain = childChainA.child('GrandChildChain')!;
