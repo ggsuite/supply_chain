@@ -108,6 +108,33 @@ void main() {
       });
     });
 
+    group('findOrCreatedNodes(nodeConfigs)', () {
+      test('should return a list of nodes', () {
+        final nodeConfigs = [
+          NodeConfig(
+            initialProduct: 0,
+            produce: produce,
+            key: 'Node1',
+          ),
+          NodeConfig(
+            initialProduct: 0,
+            produce: produce,
+            key: 'Node2',
+          ),
+          NodeConfig(
+            initialProduct: 0,
+            produce: produce,
+            key: 'Node2',
+          ),
+        ];
+
+        final nodes = chain.findOrCreateNodes(nodeConfigs);
+        expect(nodes, hasLength(3));
+        expect(nodes[0].key, 'Node1');
+        expect(nodes[1].key, 'Node2');
+        expect(nodes[2], nodes[1]);
+      });
+    });
     group('addNode()', () {
       test('should create a node and set the chain and SCM correctly', () {
         expect(node.chain, chain);

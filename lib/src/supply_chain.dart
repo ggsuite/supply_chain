@@ -72,6 +72,17 @@ class SupplyChain {
   }
 
   // ...........................................................................
+  /// Find or create nodes with the given node configurations
+  List<Node<T>> findOrCreateNodes<T>(Iterable<NodeConfig<T>> nodeConfigs) {
+    final result = <Node<T>>[];
+    for (final nodeConfig in nodeConfigs) {
+      result.add(findOrCreateNode(nodeConfig));
+    }
+
+    return result;
+  }
+
+  // ...........................................................................
   /// The parent supply chain
   SupplyChain? parent;
 

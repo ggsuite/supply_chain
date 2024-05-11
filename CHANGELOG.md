@@ -6,6 +6,7 @@
 
 - Add class NodeConfig
 - Add NodeConfig to Node
+- Add SupplyChain:findOrCreateNodes
 
 ### Changed
 
