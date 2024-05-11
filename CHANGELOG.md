@@ -14,6 +14,10 @@
 - A node's product can now be set from the outside
 - SupplyChain finds or creates nodes based on config
 
+### Removed
+
+- Remove findOrCreateNodes because type cannot be inferred
+
 ## [1.0.12] - 2024-05-10
 
 ### Changed
