@@ -242,23 +242,10 @@ class SupplyChain {
   String get graph {
     var result = '';
     result += 'digraph unix { ';
-    result += _graph;
+    result += _graphNodes;
+    result += _graphEdges;
     result += '}';
     return result;
-  }
-
-  // ...........................................................................
-  /// Returns true if the given graph is equal to the graph of this chain
-  bool equalsGraph(String graph) {
-    String reduce(String s) => s
-        .replaceAll('\n', '')
-        .replaceAll(' ', '')
-        .replaceAll(';', '')
-        .replaceAll(RegExp(r'_\d+'), '');
-
-    final a = reduce(this.graph);
-    final b = reduce(graph);
-    return a == b;
   }
 
   // ######################
@@ -270,12 +257,15 @@ class SupplyChain {
   static int _idCounter = 0;
 
   // ...........................................................................
+  String _nodeId(Node<dynamic> node) => '${node.key}_${node.id}';
+
+  // ...........................................................................
   // Graph
-  String get _graph {
+  String get _graphNodes {
     {
       var result = '';
 
-      final chainId = '${key}_${this.id}';
+      final chainId = '${key}_$id';
 
       // Create a cluster for this chain
       result += 'subgraph cluster_$chainId { ';
@@ -283,28 +273,40 @@ class SupplyChain {
 
       // Write the child chains
       for (final childChain in children) {
-        result += childChain._graph;
+        result += childChain._graphNodes;
       }
-
-      String id(Node<dynamic> node) => '${node.key}_${node.id}';
 
       // Write each node
       for (final node in nodes) {
-        final nodeId = id(node);
+        final nodeId = _nodeId(node);
         result += '$nodeId [label="${node.key}"]; ';
       }
+
+      result += '}'; // cluster
+
+      return result;
+    }
+  }
+
+  // ...........................................................................
+  String get _graphEdges {
+    {
+      var result = '';
 
       // Write dependencies
       for (final node in nodes) {
         for (final customer in node.customers) {
-          final from = id(node);
-          final to = id(customer);
+          final from = _nodeId(node);
+          final to = _nodeId(customer);
 
           result += '"$from" -> "$to"; ';
         }
       }
 
-      result += '}'; // cluster
+      // Write the child chains
+      for (final childChain in children) {
+        result += childChain._graphEdges;
+      }
 
       return result;
     }

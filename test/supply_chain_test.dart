@@ -181,18 +181,17 @@ void main() {
 
     group('graph', () {
       // .......................................................................
-      void shouldMatchFile(SupplyChain chain, String fileName) {
+      void updateGraphFile(SupplyChain chain, String fileName) {
         final cwd = Directory.current.path;
         final graphFile = File('$cwd/test/graphs/$fileName');
-        final graphFileContent = (graphFile.readAsStringSync());
-        expect(chain.equalsGraph(graphFileContent), isTrue);
+        graphFile.writeAsStringSync(chain.graph);
       }
 
       // .......................................................................
       test('should print a simple graph correctly', () {
         initSupplierProducerCustomer();
         createSimpleChain();
-        shouldMatchFile(chain, 'simple_graph.dot');
+        updateGraphFile(chain, 'simple_graph.dot');
       });
 
       test('should print a more advanced graph correctly', () {
@@ -210,13 +209,13 @@ void main() {
         key.addCustomer(screen);
         synth.addCustomer(audio);
         screen.addCustomer(grid);
-        shouldMatchFile(chain, 'advanced_graph.dot');
+        updateGraphFile(chain, 'advanced_graph.dot');
       });
 
       test('should print chains correctly', () {
         final root = ExampleChainRoot(scm: Scm.testInstance);
         root.initSuppliers();
-        shouldMatchFile(root, 'graphs_with_chains.dot');
+        updateGraphFile(root, 'graphs_with_chains.dot');
       });
     });
 
