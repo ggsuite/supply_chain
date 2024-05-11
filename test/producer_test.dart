@@ -10,7 +10,7 @@ class DerivedProducer extends Producer<int> {
   @override
   Node<int> get input => _input;
 
-  final Node<int> _input = exampleNode();
+  final Node<int> _input = Node.example();
 }
 
 // #############################################################################
@@ -29,11 +29,11 @@ void main() {
     // .........................................................................
     test('addSupplier, removeSupplier, addCustomer, removeCustomer', () {
       // Create a producer where input != output
-      final producer = DerivedProducer(worker: exampleNode());
+      final producer = DerivedProducer(worker: Node.example());
       expect(producer.input, isNot(producer.output));
 
       // addSupplier should add supplier to input
-      final supplier = exampleNode();
+      final supplier = Node.example();
       producer.addSupplier(supplier);
       expect(producer.output.suppliers, <Node<dynamic>>[]);
       expect(producer.input.suppliers, [supplier]);
@@ -43,7 +43,7 @@ void main() {
       expect(producer.input.suppliers, <Node<dynamic>>[]);
 
       // addCustomer/removeCustomer should add/remove customer to output
-      final customer = exampleNode();
+      final customer = Node.example();
       producer.addCustomer(customer);
       expect(producer.input.customers, <Node<dynamic>>[]);
       expect(producer.output.customers, [customer]);

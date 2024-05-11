@@ -108,9 +108,11 @@ void main() {
         expect(
           () => chain.addNode(
             Node<int>(
-              initialProduct: 0,
-              produce: (components, previousProduct) => previousProduct,
-              key: 'Node',
+              nodeConfig: NodeConfig<int>(
+                initialProduct: 0,
+                produce: (components, previousProduct) => previousProduct,
+                key: 'Node',
+              ),
               chain: chain,
             ),
           ),
@@ -266,10 +268,12 @@ void main() {
                 root.child('ChildChainA')!.child('GrandChildChain')!;
 
             final grandChildNodeX = Node<int>(
-              key: 'GrandChildNodeX',
+              nodeConfig: NodeConfig<int>(
+                key: 'GrandChildNodeX',
+                initialProduct: 0,
+                produce: (components, previousProduct) => 0,
+              ),
               chain: grandChildChain,
-              initialProduct: 0,
-              produce: (components, previousProduct) => 0,
             );
 
             // Search the node from the root

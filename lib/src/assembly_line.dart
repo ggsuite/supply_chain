@@ -124,6 +124,6 @@ AssemblyLine<int> exampleAssemblyLine({
   Node<int>? output,
 }) =>
     AssemblyLine<int>(
-      input: input ?? exampleNode(),
-      output: output ?? exampleNode(),
+      input: input ?? Node.example(),
+      output: output ?? Node.example(),
     );

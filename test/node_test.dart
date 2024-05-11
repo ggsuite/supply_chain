@@ -17,7 +17,7 @@ void main() {
       Node.testRestIdCounter();
       scm = Scm(isTest: true);
       chain = SupplyChain.example(scm: scm);
-      node = exampleNode(chain: chain);
+      node = Node.example(chain: chain);
     },
   );
 
@@ -40,7 +40,7 @@ void main() {
       expect(node.toString(), 'Aaliyah');
 
       // If now scm is given, then the testInstance will be used
-      final node2 = exampleNode();
+      final node2 = Node.example();
       expect(node2.scm, Scm.testInstance);
     });
 
@@ -61,8 +61,8 @@ void main() {
 
     // #########################################################################
     test('suppliers, addSupplier(), removeSupplier()', () {
-      final supplier0 = exampleNode(chain: chain);
-      final supplier1 = exampleNode(chain: chain);
+      final supplier0 = Node.example(chain: chain);
+      final supplier1 = Node.example(chain: chain);
 
       // Add supplier the first time
       expect(scm.nominatedNodes, [node, supplier0, supplier1]);
@@ -113,8 +113,8 @@ void main() {
 
     // #########################################################################
     test('customers, addSupplier(), removeSupplier()', () {
-      final customer0 = exampleNode(chain: chain);
-      final customer1 = exampleNode(chain: chain);
+      final customer0 = Node.example(chain: chain);
+      final customer1 = Node.example(chain: chain);
 
       // Add customer the first time
       node.addCustomer(customer0);
@@ -153,9 +153,18 @@ void main() {
     // #########################################################################
     test('dispose() should work fine', () {
       // Create a supplier -> producer -> customer chain
-      final supplier = exampleNode(chain: chain, key: 'Supplier');
-      final producer = exampleNode(chain: chain, key: 'Producer');
-      final customer = exampleNode(chain: chain, key: 'Customer');
+      final supplier = Node.example(
+        chain: chain,
+        nodeConfig: NodeConfig.example(key: 'Supplier'),
+      );
+      final producer = Node.example(
+        chain: chain,
+        nodeConfig: NodeConfig.example(key: 'Producer'),
+      );
+      final customer = Node.example(
+        chain: chain,
+        nodeConfig: NodeConfig.example(key: 'Customer'),
+      );
       producer.addCustomer(customer);
       producer.addSupplier(supplier);
 

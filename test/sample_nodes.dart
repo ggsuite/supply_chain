@@ -32,28 +32,34 @@ void initSupplierProducerCustomer() {
   // ............................
   // Supplier, Producer, Customer
   supplier = Supplier<int>(
-    initialProduct: 0,
-    key: 'Supplier',
+    nodeConfig: NodeConfig<int>(
+      initialProduct: 0,
+      key: 'Supplier',
+      produce: (components, previousProduct) => previousProduct + 1,
+    ),
     chain: chain,
-    produce: (components, previousProduct) => previousProduct + 1,
   );
 
   producer = Node<int>(
-    initialProduct: 0,
-    key: 'Producer',
+    nodeConfig: NodeConfig<int>(
+      initialProduct: 0,
+      key: 'Producer',
+      produce: (List<dynamic> components, int previousProduct) {
+        return (components.first as int) * 10;
+      },
+    ),
     chain: chain,
-    produce: (components, previousProduct) {
-      return (components.first as int) * 10;
-    },
   );
 
   customer = Node<int>(
-    initialProduct: 0,
-    key: 'Customer',
+    nodeConfig: NodeConfig<int>(
+      initialProduct: 0,
+      key: 'Customer',
+      produce: (List<dynamic> components, int previousProduct) {
+        return (components.first as int) + 1;
+      },
+    ),
     chain: chain,
-    produce: (components, previousProduct) {
-      return (components.first as int) + 1;
-    },
   );
 }
 
@@ -63,63 +69,80 @@ void initMusicExampleNodes() {
   // Key, Synth, Audio
 
   key = Node<int>(
-    initialProduct: 0,
-    key: 'Key',
+    nodeConfig: NodeConfig<int>(
+      initialProduct: 0,
+      key: 'Key',
+      produce: (List<dynamic> components, int previousProduct) {
+        return previousProduct + 1;
+      },
+    ),
     chain: chain,
-    produce: (components, previousProduct) {
-      return previousProduct + 1;
-    },
   );
 
   synth = Node<int>(
-    initialProduct: 0,
-    key: 'Synth',
+    nodeConfig: NodeConfig<int>(
+      initialProduct: 0,
+      key: 'Synth',
+      produce: (List<dynamic> components, int previousProduct) {
+        // Produce
+        return (components.first as int) * 10;
+      },
+    ),
     chain: chain,
-    produce: (components, previousProduct) {
-      // Produce
-      return (components.first as int) * 10;
-    },
   );
 
   audio = Node<int>(
-    initialProduct: 0,
-    key: 'Audio',
+    nodeConfig: NodeConfig<int>(
+      initialProduct: 0,
+      key: 'Audio',
+      produce: (List<dynamic> components, int previousProduct) {
+        // Produce
+        return (components.first as int) + 1;
+      },
+    ),
     chain: chain,
-    produce: (components, previousProduct) {
-      // Produce
-      return (components.first as int) + 1;
-    },
   );
 
   screen = Node<int>(
-    initialProduct: 0,
-    key: 'Screen',
+    nodeConfig: NodeConfig<int>(
+      initialProduct: 0,
+      key: 'Screen',
+      produce: (List<dynamic> components, int previousProduct) {
+        // Produce
+        return (components.first as int) * 100;
+      },
+    ),
     chain: chain,
-    produce: (components, previousProduct) {
-      // Produce
-      return (components.first as int) * 100;
-    },
   );
 
   grid = Node<int>(
-    initialProduct: 0,
-    key: 'Grid',
+    nodeConfig: NodeConfig<int>(
+      initialProduct: 0,
+      key: 'Grid',
+      produce: (List<dynamic> components, int previousProduct) {
+        // Produce
+        return (components.first as int) + 2;
+      },
+    ),
     chain: chain,
-    produce: (components, previousProduct) {
-      // Produce
-      return (components.first as int) + 2;
-    },
   );
 }
 
 class NodeTimingOut extends Node<int> {
   /// Constructor
   NodeTimingOut({
-    required super.initialProduct,
-    required String super.key,
+    required int initialProduct,
+    required String key,
     required super.chain,
-    required super.produce,
-  });
+    required int Function(List<dynamic> components, int previousProduct)
+        produce,
+  }) : super(
+          nodeConfig: NodeConfig<int>(
+            initialProduct: initialProduct,
+            key: key,
+            produce: produce,
+          ),
+        );
 
   @override
   void produce() {
@@ -132,32 +155,35 @@ void initTimeoutExampleNodes() {
   // ............................
   // SupplierA, SupplierB, Producer
   supplierA = Node<int>(
-    initialProduct: 0,
-    key: 'SupplierA',
+    nodeConfig: NodeConfig<int>(
+      initialProduct: 0,
+      key: 'SupplierA',
+      produce: (List<dynamic> components, int previousProduct) {
+        // Produce
+        return previousProduct + 1;
+      },
+    ),
     chain: chain,
-    produce: (components, previousProduct) {
-      // Produce
-      return previousProduct + 1;
-    },
   );
 
   supplierB = NodeTimingOut(
     initialProduct: 0,
     key: 'SupplierB',
     chain: chain,
-    produce: (components, previousProduct) {
+    produce: (List<dynamic> components, int previousProduct) {
       return previousProduct; // No change. No announcement.
     },
   );
 
   producer = Node<int>(
-    initialProduct: 0,
-    key: 'Producer',
+    nodeConfig: NodeConfig<int>(
+      initialProduct: 0,
+      key: 'Producer',
+      produce: (List<dynamic> components, int previousProduct) {
+        return (components.first as int) + (components.last as int);
+      },
+    ),
     chain: chain,
-    produce: (components, previousProduct) {
-      // Produce
-      return (components.first as int) + (components.last as int);
-    },
   );
 }
 

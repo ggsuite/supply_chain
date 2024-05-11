@@ -12,10 +12,10 @@ void main() {
   final assemblyLine = exampleAssemblyLine();
   final input = assemblyLine.input;
   final output = assemblyLine.output;
-  final worker0 = exampleNode();
-  final worker1 = exampleNode();
-  final worker2 = exampleNode();
-  final worker3 = exampleNode();
+  final worker0 = Node.example();
+  final worker1 = Node.example();
+  final worker2 = Node.example();
+  final worker3 = Node.example();
   final workers = assemblyLine.workers;
 
   group('AssemblyLine', () {

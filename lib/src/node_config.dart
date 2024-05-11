@@ -12,8 +12,8 @@ class NodeConfig<T> {
   const NodeConfig({
     required this.key,
     required this.initialProduct,
-    required this.suppliers,
     required this.produce,
+    this.suppliers = const <String>[],
   });
 
   /// The initial product of the node
@@ -23,16 +23,16 @@ class NodeConfig<T> {
   final String key;
 
   /// A list of supplier keys
-  final List<String> suppliers;
+  final Iterable<String> suppliers;
 
   /// The produce function
   final Produce<T> produce;
 
   /// An example instance for test purposes
-  static final example = NodeConfig<int>(
-    key: 'Node',
-    initialProduct: 0,
-    suppliers: ['Supplier'],
-    produce: (components, previousProduct) => previousProduct + 1,
-  );
+  static NodeConfig<int> example({String? key}) => NodeConfig<int>(
+        key: key ?? nextKey,
+        initialProduct: 0,
+        suppliers: ['Supplier'],
+        produce: (components, previousProduct) => previousProduct + 1,
+      );
 }

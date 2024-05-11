@@ -10,9 +10,17 @@ import 'package:test/test.dart';
 void main() {
   group('NodeConfig', () {
     group('example', () {
-      test('should work', () {
-        final nodeConfig = NodeConfig.example;
+      test('with key', () {
+        final nodeConfig = NodeConfig.example(key: 'Node');
         expect(nodeConfig.key, 'Node');
+        expect(nodeConfig.initialProduct, 0);
+        expect(nodeConfig.suppliers, ['Supplier']);
+        expect(nodeConfig.produce([], 0), 1);
+      });
+
+      test('without key', () {
+        final nodeConfig = NodeConfig.example();
+        expect(nodeConfig.key, 'Aaliyah');
         expect(nodeConfig.initialProduct, 0);
         expect(nodeConfig.suppliers, ['Supplier']);
         expect(nodeConfig.produce([], 0), 1);

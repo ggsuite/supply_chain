@@ -17,4 +17,4 @@ class Plant<T> extends Producer<T> {
 // #############################################################################
 /// Creates an example plant
 Plant<int> examplePlant({Node<int>? worker}) =>
-    Plant(worker: worker ?? exampleNode());
+    Plant(worker: worker ?? Node.example());

@@ -36,15 +36,11 @@ class Node<T> {
   /// - [cacheSize]: The number of items in the cache
 
   Node({
-    required T initialProduct,
-    required Produce<T> produce,
+    required this.nodeConfig,
     required this.chain,
-    String? key,
   })  : scm = chain.scm,
-        product = initialProduct,
-        assert(key == null || key.isPascalCase),
-        key = key ?? nextKey,
-        produceCore = produce {
+        product = nodeConfig.initialProduct,
+        assert(nodeConfig.key.isPascalCase) {
     _init();
   }
 
@@ -57,9 +53,13 @@ class Node<T> {
   }
 
   // ...........................................................................
+  /// The configuration of this node
+  final NodeConfig<T> nodeConfig;
+
+  // ...........................................................................
   // Identification
   /// The key of the node
-  final String key;
+  String get key => nodeConfig.key;
 
   /// The unique id of the node
   final int id = _idCounter++;
@@ -148,14 +148,11 @@ class Node<T> {
   /// Produces the product.
   void produce() {
     final newProduct =
-        produceCore(suppliers.map((s) => s.product).toList(), product);
+        nodeConfig.produce(suppliers.map((s) => s.product).toList(), product);
 
     product = newProduct;
     scm.hasNewProduct(this);
   }
-
-  /// The core production function
-  final Produce<T> produceCore;
 
   /// Returns true, if node is staged for production
   bool isStaged = false;
@@ -198,9 +195,31 @@ class Node<T> {
   /// Milliseconds showing the production start time.
   Duration productionStartTime = Duration.zero;
 
+  // ...........................................................................
+  /// Example node for test purposes
+  static Node<int> example({
+    NodeConfig<int>? nodeConfig,
+    SupplyChain? chain,
+  }) {
+    chain ??= SupplyChain.example(scm: Scm.testInstance);
+    nodeConfig ??= NodeConfig.example();
+
+    final result = Node<int>(
+      nodeConfig: nodeConfig,
+      chain: chain,
+    );
+
+    // Realtime nodes will produce immediately
+    result.ownPriority = Priority.realtime;
+
+    return result;
+  }
+
   // ######################
   // Private
   // ######################
+
+  // ...........................................................................
 
   /// Reset Id counter for tests
   static void testRestIdCounter() => _idCounter = 0;
@@ -312,30 +331,4 @@ class Node<T> {
   // ...........................................................................
   // Tick & Animation
   bool _isAnimated = false;
-}
-
-// #############################################################################
-/// Example node for test purposes
-Node<int> exampleNode({
-  int initialProduct = 0,
-  int Function(List<dynamic> components, int previousProduct)? produce,
-  SupplyChain? chain,
-  String? key,
-}) {
-  chain ??= SupplyChain.example(scm: Scm.testInstance);
-
-  final result = Node<int>(
-    key: key,
-    initialProduct: initialProduct,
-    produce: produce ??
-        (List<dynamic> components, int previousProduct) {
-          return previousProduct + 1;
-        },
-    chain: chain,
-  );
-
-  // Realtime nodes will produce immediately
-  result.ownPriority = Priority.realtime;
-
-  return result;
 }

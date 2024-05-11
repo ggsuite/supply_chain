@@ -390,7 +390,7 @@ void main() {
     test('should throw if hasNewProduct(node) is called without nomination',
         () {
       // Create a node
-      final node = exampleNode(chain: chain);
+      final node = Node.example(chain: chain);
 
       // Call hasNewProduct() without nomination.
       // Throws.
@@ -528,30 +528,38 @@ void main() {
 
         // Create some nodes
         final intNodeA0 = Node<int>(
-          key: 'A',
-          produce: (c, p) => 1,
-          initialProduct: 1,
+          nodeConfig: NodeConfig(
+            key: 'A',
+            produce: (c, p) => 1,
+            initialProduct: 1,
+          ),
           chain: chain0,
         );
 
         final intNodeA1 = Node<int>(
-          key: 'A',
-          produce: (c, p) => 1,
-          initialProduct: 1,
+          nodeConfig: NodeConfig(
+            key: 'A',
+            produce: (c, p) => 1,
+            initialProduct: 1,
+          ),
           chain: chain1,
         );
 
         final stringNodeA = Node<String>(
-          key: 'A',
-          produce: (c, p) => 'A',
-          initialProduct: 'A',
+          nodeConfig: NodeConfig(
+            key: 'A',
+            produce: (c, p) => 'A',
+            initialProduct: 'A',
+          ),
           chain: chain2,
         );
 
         final stringNodeB = Node<String>(
-          key: 'B',
-          produce: (c, p) => 'B',
-          initialProduct: 'B',
+          nodeConfig: NodeConfig(
+            key: 'B',
+            produce: (c, p) => 'B',
+            initialProduct: 'B',
+          ),
           chain: chain2,
         );
 
@@ -626,7 +634,7 @@ void main() {
     group('removeNode', () {
       test('should remove the node', () {
         final scm = Scm.testInstance;
-        final node = exampleNode(chain: chain);
+        final node = Node.example(chain: chain);
         scm.addNode(node);
         expect(scm.nodes, contains(node));
 
@@ -640,7 +648,7 @@ void main() {
       test('should clear nominated, prepared and producing nodes', () {
         fakeAsync((fake) {
           final scm = Scm.testInstance;
-          final node = exampleNode(chain: chain);
+          final node = Node.example(chain: chain);
           scm.addNode(node);
 
           (scm.nominatedNodes as Set<Node>).add(node);
@@ -669,7 +677,7 @@ void main() {
     fakeAsync((fake) {
       final scm = Scm.example(isTest: false);
       final chain = SupplyChain.root(key: 'Example', scm: scm);
-      final node = exampleNode(chain: chain);
+      final node = Node.example(chain: chain);
       expect(node.product, 0);
       scm.nominate(node);
       fake.flushMicrotasks();

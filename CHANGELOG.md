@@ -5,6 +5,7 @@
 ### Added
 
 - Add class NodeConfig
+- Add NodeConfig to Node
 
 ### Changed
 

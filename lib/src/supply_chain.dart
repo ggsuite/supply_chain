@@ -63,7 +63,7 @@ class SupplyChain {
       assert(existingNode is Node<T>, 'Existing node is of differnt type');
       final result = existingNode as Node<T>;
       assert(
-        result.produceCore == produce,
+        result.nodeConfig.produce == produce,
         'Existing node has different production method',
       );
       return result;
@@ -71,10 +71,13 @@ class SupplyChain {
 
     // Create a new node
     final node = Node<T>(
-      initialProduct: initialProduct,
-      produce: produce,
+      nodeConfig: NodeConfig(
+        initialProduct: initialProduct,
+        produce: produce,
+        key: key,
+        suppliers: suppliers,
+      ),
       chain: this,
-      key: key,
     );
 
     if (suppliers.isNotEmpty) {

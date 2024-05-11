@@ -14,4 +14,3 @@ export 'src/producer.dart';
 export 'src/scm.dart';
 export 'src/supply_chain.dart';
 export 'src/tools.dart';
-export 'src/value_node.dart';
