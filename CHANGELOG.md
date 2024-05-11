@@ -11,6 +11,7 @@
 
 - Switch to absolute imports
 - A node's product can now be set from the outside
+- SupplyChain finds or creates nodes based on config
 
 ## [1.0.12] - 2024-05-10
 

@@ -51,32 +51,20 @@ class SupplyChain {
 
   // ...........................................................................
   /// Returns the node with key. If not available in chain the node is created.
-  Node<T> findOrCreateNode<T>({
-    required T initialProduct,
-    required Produce<T> produce,
-    required String key,
-    Iterable<String> suppliers = const [],
-  }) {
+  Node<T> findOrCreateNode<T>(NodeConfig<T> nodeConfig) {
     // Return existing node when already existing
-    final existingNode = _nodes[key];
+    final existingNode = _nodes[nodeConfig.key];
     if (existingNode != null) {
-      assert(existingNode is Node<T>, 'Existing node is of differnt type');
-      final result = existingNode as Node<T>;
       assert(
-        result.nodeConfig.produce == produce,
-        'Existing node has different production method',
+        existingNode.nodeConfig == nodeConfig,
+        'Node with key "$key" already exists with different configuration',
       );
-      return result;
+      return existingNode as Node<T>;
     }
 
     // Create a new node
     final node = Node<T>(
-      nodeConfig: NodeConfig(
-        initialProduct: initialProduct,
-        produce: produce,
-        key: key,
-        suppliers: suppliers,
-      ),
+      nodeConfig: nodeConfig,
       chain: this,
     );
 
@@ -348,15 +336,21 @@ class ExampleChainRoot extends SupplyChain {
     super.key = 'ExampleRoot',
   }) : super.root() {
     findOrCreateNode(
-      initialProduct: 0,
-      produce: (components, previous) => previous + 1, // coveralls:ignore-line
-      key: 'RootA',
+      NodeConfig(
+        initialProduct: 0,
+        produce: (components, previous) =>
+            previous + 1, // coveralls:ignore-line
+        key: 'RootA',
+      ),
     );
 
     findOrCreateNode(
-      initialProduct: 0,
-      produce: (components, previous) => previous + 1, // coveralls:ignore-line
-      key: 'RootB',
+      NodeConfig(
+        initialProduct: 0,
+        produce: (components, previous) =>
+            previous + 1, // coveralls:ignore-line
+        key: 'RootB',
+      ),
     );
 
     ExampleChildChain(key: 'ChildChainA', parent: this);
@@ -374,16 +368,20 @@ class ExampleChildChain extends SupplyChain {
   }) {
     /// Create a node
     findOrCreateNode(
-      initialProduct: 0,
-      produce: (components, previous) => previous + 1,
-      key: 'ChildNodeA',
-      suppliers: ['RootA', 'RootB', 'ChildNodeB'],
+      NodeConfig(
+        initialProduct: 0,
+        produce: (components, previous) => previous + 1,
+        key: 'ChildNodeA',
+        suppliers: ['RootA', 'RootB', 'ChildNodeB'],
+      ),
     );
 
     findOrCreateNode(
-      initialProduct: 0,
-      produce: (components, previous) => previous + 1,
-      key: 'ChildNodeB',
+      NodeConfig(
+        initialProduct: 0,
+        produce: (components, previous) => previous + 1,
+        key: 'ChildNodeB',
+      ),
     );
 
     /// Create two example child chains
@@ -403,12 +401,14 @@ class ExampleGrandChildChain extends SupplyChain {
     required super.parent,
   }) {
     findOrCreateNode(
-      initialProduct: 0,
-      produce: (components, previous) => previous + 1,
-      key: 'GrandChildNodeA',
-      suppliers: [
-        'RootA',
-      ],
+      NodeConfig(
+        initialProduct: 0,
+        produce: (components, previous) => previous + 1,
+        key: 'GrandChildNodeA',
+        suppliers: [
+          'RootA',
+        ],
+      ),
     );
   }
 }

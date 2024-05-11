@@ -44,4 +44,41 @@ class NodeConfig<T> {
         suppliers: ['Supplier'],
         produce: (components, previousProduct) => previousProduct + 1,
       );
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+
+    if (other is NodeConfig<T>) {
+      if (suppliers.length != other.suppliers.length) {
+        return false;
+      }
+
+      for (int i = 0; i < suppliers.length; i++) {
+        if (suppliers.elementAt(i) != other.suppliers.elementAt(i)) {
+          return false;
+        }
+      }
+
+      return key == other.key &&
+          initialProduct == other.initialProduct &&
+          other.produce == produce;
+    }
+    return false;
+  }
+
+  @override
+  int get hashCode {
+    final suppliersHash = suppliers.fold<int>(
+      0,
+      (previousValue, element) => previousValue ^ element.hashCode,
+    );
+
+    return key.hashCode ^
+        initialProduct.hashCode ^
+        produce.hashCode ^
+        suppliersHash;
+  }
 }

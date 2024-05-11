@@ -22,9 +22,11 @@ void main() {
     chain = SupplyChain.example();
 
     node = chain.findOrCreateNode(
-      initialProduct: 0,
-      produce: produce,
-      key: 'Node',
+      NodeConfig(
+        initialProduct: 0,
+        produce: produce,
+        key: 'Node',
+      ),
     );
   });
 
@@ -51,9 +53,11 @@ void main() {
       test('should return an existing node when possible', () {
         expect(
           chain.findOrCreateNode(
-            initialProduct: 0,
-            produce: produce,
-            key: 'Node',
+            NodeConfig(
+              initialProduct: 0,
+              produce: produce,
+              key: 'Node',
+            ),
           ),
           node,
         );
@@ -64,14 +68,17 @@ void main() {
           test('but have a different produce method', () {
             expect(
               () => chain.findOrCreateNode<int>(
-                initialProduct: 0,
-                produce: (components, previousProduct) => 0,
-                key: 'Node',
+                NodeConfig(
+                  initialProduct: 0,
+                  produce: (components, previousProduct) => 0,
+                  key: 'Node',
+                ),
               ),
               throwsA(
                 predicate<AssertionError>(
                   (e) => e.toString().contains(
-                        'Existing node has different production method',
+                        'Node with key "Example" already exists '
+                        'with different configuration',
                       ),
                 ),
               ),
@@ -81,14 +88,17 @@ void main() {
           test('but has a different type', () {
             expect(
               () => chain.findOrCreateNode<String>(
-                initialProduct: 'hello',
-                produce: (components, previousProduct) => 'world',
-                key: 'Node',
+                NodeConfig(
+                  initialProduct: 'hello',
+                  produce: (components, previousProduct) => 'world',
+                  key: 'Node',
+                ),
               ),
               throwsA(
                 predicate<AssertionError>(
                   (e) => e.toString().contains(
-                        'Existing node is of differnt type',
+                        'Node with key "Example" already exists '
+                        'with different configuration',
                       ),
                 ),
               ),
@@ -250,13 +260,15 @@ void main() {
 
             // Add a NodeA to ChildChainA
             final nodeA = root.child('ChildChainA')!.findOrCreateNode<int>(
-                  key: 'NodeA',
-                  initialProduct: 0,
-                  produce: (components, previous) => previous,
+                  NodeConfig(
+                    key: 'NodeA',
+                    initialProduct: 0,
+                    produce: (components, previous) => previous,
+                  ),
                 );
 
             // ChildChainB should find the node in ChildChainA
-            final foundNodeA = b.findNode<int>('NodeA');
+            final Node<int>? foundNodeA = b.findNode<int>('NodeA');
             expect(foundNodeA, nodeA);
           });
 
@@ -388,10 +400,12 @@ void main() {
         final chain = SupplyChain.example(scm: scm);
 
         chain.findOrCreateNode<int>(
-          key: 'Node',
-          suppliers: ['Unknown'],
-          initialProduct: 0,
-          produce: (components, previous) => previous,
+          NodeConfig(
+            key: 'Node',
+            suppliers: ['Unknown'],
+            initialProduct: 0,
+            produce: (components, previous) => previous,
+          ),
         );
 
         expect(
