@@ -9,6 +9,7 @@ library;
 export 'src/scm.dart';
 export 'src/supply_chain.dart';
 export 'src/node.dart';
+export 'src/node_config.dart';
 export 'src/priority.dart';
 export 'src/tools.dart';
 export 'src/value_node.dart';

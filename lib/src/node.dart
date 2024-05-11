@@ -46,7 +46,6 @@ class Node<T> {
     required Produce<T> produce,
     required this.chain,
     String? key,
-    this.cacheSize = 0,
   })  : scm = chain.scm,
         product = initialProduct,
         assert(key == null || key.isPascalCase),
@@ -259,9 +258,6 @@ class Node<T> {
 
   /// The chain this node belongs to
   final SupplyChain chain;
-
-  /// The number of items in the cache
-  final int cacheSize;
 
   /// The cache to be used
   Cache<T> cache = Cache<T>();
