@@ -217,5 +217,48 @@ void main() {
         expect(node.priority, Priority.highest);
       });
     });
+
+    // #########################################################################
+    group('set and get product', () {
+      test('should possible if no suppliers and produce function is given', () {
+        // Create a node -> customer chain
+        final chain = SupplyChain.example(scm: scm);
+
+        final node = Node<int>(
+          chain: chain,
+          nodeConfig: NodeConfig<int>(
+            key: 'Node',
+            initialProduct: 0,
+          ),
+        );
+
+        final customer = Node<int>(
+          chain: chain,
+          nodeConfig: NodeConfig<int>(
+            key: 'Customer',
+            initialProduct: 0,
+            suppliers: ['Node'],
+            produce: (components, previousProduct) =>
+                (components[0] as int) * 10,
+          ),
+        );
+
+        chain.initSuppliers();
+
+        // Check initial values
+        expect(node.product, 0);
+
+        // Set a product from the outside
+        node.product = 1;
+        expect(node.product, 1);
+
+        // Let the chain run
+        chain.scm.tick();
+        chain.scm.testFlushTasks();
+
+        // Check if customer got the new component
+        expect(customer.product, 10);
+      });
+    });
   });
 }

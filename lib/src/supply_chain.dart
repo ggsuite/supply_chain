@@ -80,10 +80,6 @@ class SupplyChain {
       chain: this,
     );
 
-    if (suppliers.isNotEmpty) {
-      _supplierStrings[node.key] = suppliers;
-    }
-
     return node;
   }
 
@@ -158,8 +154,8 @@ class SupplyChain {
   /// But not before the whole hierarchy has been created
   void initSuppliers() {
     for (final node in _nodes.values) {
-      final suppliers = _supplierStrings[node.key];
-      if (suppliers != null) {
+      final suppliers = node.nodeConfig.suppliers;
+      if (suppliers.isNotEmpty) {
         _addSuppliers(node, suppliers);
       }
     }
@@ -282,7 +278,6 @@ class SupplyChain {
 
   final Map<String, SupplyChain> _children = {};
   final Map<String, Node<dynamic>> _nodes = {};
-  final Map<String, Iterable<String>> _supplierStrings = {};
   static int _idCounter = 0;
 
   // ...........................................................................

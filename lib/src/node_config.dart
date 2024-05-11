@@ -6,15 +6,24 @@
 
 import 'package:supply_chain/supply_chain.dart';
 
+/// Produce delegate that does nothing
+T doNothing<T>(List<dynamic> components, T previousProduct) => previousProduct;
+
 /// The configuration of a node
 class NodeConfig<T> {
   /// Constructor of the node
-  const NodeConfig({
+  NodeConfig({
     required this.key,
     required this.initialProduct,
-    required this.produce,
     this.suppliers = const <String>[],
-  });
+    Produce<T>? produce,
+  })  : produce = produce ?? doNothing,
+        assert(key.isNotEmpty, 'The key must not be empty'),
+        assert(key.isPascalCase, 'The key must be in PascalCase'),
+        assert(
+          !(suppliers.isNotEmpty && produce == doNothing),
+          'If suppliers are not empty, a produce function must be provided',
+        );
 
   /// The initial product of the node
   final T initialProduct;

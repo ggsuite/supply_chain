@@ -39,7 +39,7 @@ class Node<T> {
     required this.nodeConfig,
     required this.chain,
   })  : scm = chain.scm,
-        product = nodeConfig.initialProduct,
+        _product = nodeConfig.initialProduct,
         assert(nodeConfig.key.isPascalCase) {
     _init();
   }
@@ -68,6 +68,22 @@ class Node<T> {
   @override
   String toString() {
     return key;
+  }
+
+  // ...........................................................................
+  // Product
+
+  /// The product of the node
+  T get product => _product;
+
+  /// The product of the node
+  set product(T v) {
+    assert(
+      nodeConfig.produce == doNothing<T>,
+      'Product can only be set if nodeConfig.produce is doNothing',
+    );
+    _product = v;
+    scm.nominate(this);
   }
 
   // ...........................................................................
@@ -143,14 +159,14 @@ class Node<T> {
   // Production
 
   /// The product produced by this node
-  T product;
+  T _product;
 
   /// Produces the product.
   void produce() {
     final newProduct =
         nodeConfig.produce(suppliers.map((s) => s.product).toList(), product);
 
-    product = newProduct;
+    _product = newProduct;
     scm.hasNewProduct(this);
   }
 

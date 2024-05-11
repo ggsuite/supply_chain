@@ -10,6 +10,7 @@
 ### Changed
 
 - Switch to absolute imports
+- A node's product can now be set from the outside
 
 ## [1.0.12] - 2024-05-10
 

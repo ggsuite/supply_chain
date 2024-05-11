@@ -27,4 +27,10 @@ void main() {
       });
     });
   });
+
+  group('doNothing', () {
+    test('returns previousProduct', () {
+      expect(doNothing([], 11), 11);
+    });
+  });
 }
