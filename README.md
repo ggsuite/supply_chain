@@ -85,7 +85,7 @@ Supply Chain (SC) is a data flow and state management architecture.
 
 ### Visualize the Node Graph
 
-- Use `Scm.graph` to get a `Graphviz` graph that can be turned into an svg file
+- Use `SupplyChain.graph` to get a `Graphviz` graph that can be turned into an svg file
 
 ## Features and bugs
 

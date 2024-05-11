@@ -179,22 +179,28 @@ void main() {
       });
     });
 
-    group('graph', () {
+    group('graph, saveGraphToFile', () {
       // .......................................................................
-      void updateGraphFile(SupplyChain chain, String fileName) {
+      Future<void> updateGraphFile(SupplyChain chain, String fileName) async {
         final cwd = Directory.current.path;
-        final graphFile = File('$cwd/test/graphs/$fileName');
-        graphFile.writeAsStringSync(chain.graph);
+        final graphFile = '$cwd/test/graphs/$fileName';
+
+        // Save dot file
+        await chain.saveGraphToFile(graphFile);
+
+        // Save webp file
+        final webpFile = graphFile.replaceAll('.dot', '.webp');
+        await chain.saveGraphToFile(webpFile);
       }
 
       // .......................................................................
-      test('should print a simple graph correctly', () {
+      test('should print a simple graph correctly', () async {
         initSupplierProducerCustomer();
         createSimpleChain();
-        updateGraphFile(chain, 'simple_graph.dot');
+        await updateGraphFile(chain, 'simple_graph.dot');
       });
 
-      test('should print a more advanced graph correctly', () {
+      test('should print a more advanced graph correctly', () async {
         initMusicExampleNodes();
 
         // .................................
@@ -209,13 +215,13 @@ void main() {
         key.addCustomer(screen);
         synth.addCustomer(audio);
         screen.addCustomer(grid);
-        updateGraphFile(chain, 'advanced_graph.dot');
+        await updateGraphFile(chain, 'advanced_graph.dot');
       });
 
-      test('should print chains correctly', () {
+      test('should print chains correctly', () async {
         final root = ExampleChainRoot(scm: Scm.testInstance);
         root.initSuppliers();
-        updateGraphFile(root, 'graphs_with_chains.dot');
+        await updateGraphFile(root, 'graphs_with_chains.dot');
       });
     });
 

@@ -4,6 +4,9 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'dart:io';
+
+import 'package:gg_is_github/gg_is_github.dart';
 import 'package:supply_chain/supply_chain.dart';
 
 /// A supply chain is a container for connected nodes
@@ -246,6 +249,46 @@ class SupplyChain {
     result += _graphEdges;
     result += '}';
     return result;
+  }
+
+  /// Save the graph to a file
+  ///
+  /// The format can be
+  /// bmp canon cgimage cmap cmapx cmapx_np dot dot_json eps exr fig gd gd2 gif
+  /// gv icns ico imap imap_np ismap jp2 jpe jpeg jpg json json0 kitty kittyz
+  /// mp pct pdf pic pict plain plain-ext png pov ps ps2 psd sgi svg svgz tga
+  /// tif tiff tk vrml vt vt-24bit wbmp webp xdot xdot1.2 xdot1.4 xdot_json
+  Future<void> saveGraphToFile(
+    String path,
+  ) async {
+    final format = path.split('.').last;
+
+    final content = graph;
+    final file = File(path);
+    if (format == 'dot') {
+      await file.writeAsString(content);
+      return;
+    }
+    // coveralls:ignore-start
+    else {
+      if (!isGitHub) {
+        // Write dot file to tmp
+        final fileName = path.split('/').last;
+        final tempDir = await Directory.systemTemp.createTemp();
+        final tempPath = '${tempDir.path}/$fileName.dot';
+        final tempFile = File(tempPath);
+        tempFile.writeAsStringSync(content);
+
+        // Convert dot file to target format
+        final process = await Process.run(
+          'dot',
+          ['-T$format', tempPath, '-o$path'],
+        );
+        await tempDir.delete(recursive: true);
+        assert(process.exitCode == 0, process.stderr);
+      }
+    }
+    // coveralls:ignore-end
   }
 
   // ######################

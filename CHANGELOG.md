@@ -14,6 +14,7 @@
 - A node's product can now be set from the outside
 - SupplyChain finds or creates nodes based on config
 - Update graph files on disk, separate nodes and edges in dot file
+- Write graphs to webp
 
 ### Removed
 
