@@ -4,7 +4,7 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-import 'node.dart';
+import 'package:supply_chain/supply_chain.dart';
 
 /// Organizes a linear chain of workers
 class AssemblyLine<T> {

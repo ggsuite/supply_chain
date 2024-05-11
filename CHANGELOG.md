@@ -6,6 +6,10 @@
 
 - Add class NodeConfig
 
+### Changed
+
+- Switch to absolute imports
+
 ## [1.0.12] - 2024-05-10
 
 ### Changed

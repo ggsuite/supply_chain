@@ -4,13 +4,7 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-import 'package:gg_cache/gg_cache.dart';
-
-import 'keys.dart';
-import 'priority.dart';
-import 'scm.dart';
-import 'supply_chain.dart';
-import 'tools.dart';
+import 'package:supply_chain/supply_chain.dart';
 
 /// A supplier delivers products to a node
 typedef Supplier<T> = Node<T>;
@@ -258,9 +252,6 @@ class Node<T> {
 
   /// The chain this node belongs to
   final SupplyChain chain;
-
-  /// The cache to be used
-  Cache<T> cache = Cache<T>();
 
   // ######################
   // Private

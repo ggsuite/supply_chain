@@ -8,7 +8,7 @@ import 'dart:async' show scheduleMicrotask, Timer;
 import 'package:gg_fake_stopwatch/gg_fake_stopwatch.dart';
 import 'package:gg_fake_timer/gg_fake_timer.dart';
 import 'package:gg_once_per_cycle/gg_once_per_cycle.dart';
-import '../supply_chain.dart';
+import 'package:supply_chain/supply_chain.dart';
 import 'schedule_task.dart';
 
 /// SCM - Supply Chain Manager: Controls the data flow in the supply chain.
