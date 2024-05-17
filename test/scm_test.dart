@@ -29,7 +29,7 @@ void main() {
         isTest: true,
       );
 
-      chain = SupplyChain.example(scm: scm);
+      scope = Scope.example(scm: scm);
 
       scm.testRunFastTasks();
     },
@@ -390,7 +390,7 @@ void main() {
     test('should throw if hasNewProduct(node) is called without nomination',
         () {
       // Create a node
-      final node = Node.example(chain: chain);
+      final node = Node.example(scope: scope);
 
       // Call hasNewProduct() without nomination.
       // Throws.
@@ -520,11 +520,11 @@ void main() {
 
     group('nodesWithKey<T>(key)', () {
       test('should return all nodes with a given key and type', () {
-        final root = SupplyChain.root(key: 'Example', scm: Scm.testInstance);
+        final root = Scope.root(key: 'Example', scm: Scm.testInstance);
         final scm = root.scm;
-        final chain0 = SupplyChain(key: '0', parent: root);
-        final chain1 = SupplyChain(key: '1', parent: root);
-        final chain2 = SupplyChain(key: '2', parent: root);
+        final chain0 = Scope(key: '0', parent: root);
+        final chain1 = Scope(key: '1', parent: root);
+        final chain2 = Scope(key: '2', parent: root);
 
         // Create some nodes
         final intNodeA0 = Node<int>(
@@ -533,7 +533,7 @@ void main() {
             produce: (c, p) => 1,
             initialProduct: 1,
           ),
-          chain: chain0,
+          scope: chain0,
         );
 
         final intNodeA1 = Node<int>(
@@ -542,7 +542,7 @@ void main() {
             produce: (c, p) => 1,
             initialProduct: 1,
           ),
-          chain: chain1,
+          scope: chain1,
         );
 
         final stringNodeA = Node<String>(
@@ -551,7 +551,7 @@ void main() {
             produce: (c, p) => 'A',
             initialProduct: 'A',
           ),
-          chain: chain2,
+          scope: chain2,
         );
 
         final stringNodeB = Node<String>(
@@ -560,7 +560,7 @@ void main() {
             produce: (c, p) => 'B',
             initialProduct: 'B',
           ),
-          chain: chain2,
+          scope: chain2,
         );
 
         expect(scm.nodesWithKey<int>('A'), [intNodeA0, intNodeA1]);
@@ -634,7 +634,7 @@ void main() {
     group('removeNode', () {
       test('should remove the node', () {
         final scm = Scm.testInstance;
-        final node = Node.example(chain: chain);
+        final node = Node.example(scope: scope);
         scm.addNode(node);
         expect(scm.nodes, contains(node));
 
@@ -648,7 +648,7 @@ void main() {
       test('should clear nominated, prepared and producing nodes', () {
         fakeAsync((fake) {
           final scm = Scm.testInstance;
-          final node = Node.example(chain: chain);
+          final node = Node.example(scope: scope);
           scm.addNode(node);
 
           (scm.nominatedNodes as Set<Node>).add(node);
@@ -676,8 +676,8 @@ void main() {
   test('Test with non test environment should work fine', () {
     fakeAsync((fake) {
       final scm = Scm.example(isTest: false);
-      final chain = SupplyChain.root(key: 'Example', scm: scm);
-      final node = Node.example(chain: chain);
+      final chain = Scope.root(key: 'Example', scm: scm);
+      final node = Node.example(scope: chain);
       expect(node.product, 0);
       scm.nominate(node);
       fake.flushMicrotasks();

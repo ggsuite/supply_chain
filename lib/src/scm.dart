@@ -31,7 +31,7 @@ class Scm {
 
   // ...........................................................................
   /// The root supply chain
-  late final SupplyChain rootChain;
+  late final Scope rootScope;
 
   // ...........................................................................
   /// Returns iterable of all nodes
@@ -188,7 +188,7 @@ class Scm {
     _initSchedulePreparation();
     _initScheduleProduction();
     _initSchedulePriorityUpdate();
-    _initRootChain();
+    _initRootScope();
   }
 
   // ...........................................................................
@@ -237,8 +237,8 @@ class Scm {
   }
 
   // ...........................................................................
-  void _initRootChain() {
-    rootChain = SupplyChain.root(key: 'Root', scm: this);
+  void _initRootScope() {
+    rootScope = Scope.root(key: 'Root', scm: this);
   }
 
   // ...........................................................................

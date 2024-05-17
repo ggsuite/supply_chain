@@ -21,7 +21,7 @@ typedef Produce<T> = T Function(
   T previousProduct,
 );
 
-/// A node in the supply chain
+/// A node in a scope
 class Node<T> {
   // ...........................................................................
 
@@ -31,14 +31,14 @@ class Node<T> {
   ///   Important: Call node.reportUpdate() after production.
   /// - [hasUpdates]: Is called after the product has been updated
   /// - [needsUpdates]: Is called when the product needs to be updated
-  /// - [chain]: The chain the node belongs to
+  /// - [scope]: The scope the node belongs to
   /// - [key]: The key of the node
   /// - [cacheSize]: The number of items in the cache
 
   Node({
     required this.nodeConfig,
-    required this.chain,
-  })  : scm = chain.scm,
+    required this.scope,
+  })  : scm = scope.scm,
         _product = nodeConfig.initialProduct,
         assert(nodeConfig.key.isPascalCase) {
     _init();
@@ -215,14 +215,14 @@ class Node<T> {
   /// Example node for test purposes
   static Node<int> example({
     NodeConfig<int>? nodeConfig,
-    SupplyChain? chain,
+    Scope? scope,
   }) {
-    chain ??= SupplyChain.example(scm: Scm.testInstance);
+    scope ??= Scope.example(scm: Scm.testInstance);
     nodeConfig ??= NodeConfig.example();
 
     final result = Node<int>(
       nodeConfig: nodeConfig,
-      chain: chain,
+      scope: scope,
     );
 
     // Realtime nodes will produce immediately
@@ -245,7 +245,7 @@ class Node<T> {
   // ...........................................................................
   // Init & Dispose
   void _init() {
-    _initChain();
+    _initScope();
     _initScm();
   }
 
@@ -268,10 +268,10 @@ class Node<T> {
   }
 
   // ...........................................................................
-  void _initChain() {
-    chain.addNode(this);
+  void _initScope() {
+    scope.addNode(this);
     _dispose.add(() {
-      chain.removeNode(this);
+      scope.removeNode(this);
     });
   }
 
@@ -286,7 +286,7 @@ class Node<T> {
   final Scm scm;
 
   /// The chain this node belongs to
-  final SupplyChain chain;
+  final Scope scope;
 
   // ######################
   // Private

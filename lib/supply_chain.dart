@@ -12,5 +12,5 @@ export 'src/node.dart';
 export 'src/priority.dart';
 export 'src/producer.dart';
 export 'src/scm.dart';
-export 'src/supply_chain.dart';
+export 'src/scope.dart';
 export 'src/tools.dart';

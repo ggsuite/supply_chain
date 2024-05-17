@@ -9,11 +9,11 @@ import 'dart:io';
 import 'package:gg_is_github/gg_is_github.dart';
 import 'package:supply_chain/supply_chain.dart';
 
-/// A supply chain is a container for connected nodes
-class SupplyChain {
+/// A supply scope is a container for connected nodes
+class Scope {
   // ...........................................................................
-  /// Creates a chain with a key. Key must be lower camel case.
-  SupplyChain({
+  /// Creates a scope with a key. Key must be lower camel case.
+  Scope({
     required this.key,
     required this.parent,
   })  : scm = parent!.scm,
@@ -22,38 +22,38 @@ class SupplyChain {
   }
 
   // ...........................................................................
-  /// Create a root supply chain having no parent
-  SupplyChain.root({
+  /// Create a root supply scope having no parent
+  Scope.root({
     required this.key,
     required this.scm,
   })  : parent = null,
         assert(key.isPascalCase);
 
   // ...........................................................................
-  /// The supply chain manager
+  /// The supply scope manager
   final Scm scm;
 
-  /// The key of the chain
+  /// The key of the scope
   final String key;
 
-  /// The uinquie id of the chain
+  /// The uinquie id of the scope
   final int id = _idCounter++;
 
   /// Reset id counter for test purposes
   static void testRestIdCounter() => _idCounter = 0;
 
   // ...........................................................................
-  /// Returns the child chains
-  Iterable<SupplyChain> get children => _children.values;
+  /// Returns the child scopes
+  Iterable<Scope> get children => _children.values;
 
-  /// Returns the child chain with the given key
-  SupplyChain? child(String key) => _children[key];
+  /// Returns the child scope with the given key
+  Scope? child(String key) => _children[key];
 
-  /// The nodes of this chain
+  /// The nodes of this scope
   Iterable<Node<dynamic>> get nodes => _nodes.values;
 
   // ...........................................................................
-  /// Returns the node with key. If not available in chain the node is created.
+  /// Returns the node with key. If not available in scope the node is created.
   Node<T> findOrCreateNode<T>(NodeConfig<T> nodeConfig) {
     // Return existing node when already existing
     final existingNode = _nodes[nodeConfig.key];
@@ -68,24 +68,24 @@ class SupplyChain {
     // Create a new node
     final node = Node<T>(
       nodeConfig: nodeConfig,
-      chain: this,
+      scope: this,
     );
 
     return node;
   }
 
   // ...........................................................................
-  /// The parent supply chain
-  SupplyChain? parent;
+  /// The parent supply scope
+  Scope? parent;
 
   // ...........................................................................
-  /// Adds an existing node to the chain
+  /// Adds an existing node to the scope
   void addNode<T>(Node<T> node) {
     assert(node.runtimeType != Node<dynamic>);
     // Throw if node with key already exists
     if (_nodes.containsKey(node.key)) {
       throw ArgumentError(
-        'Node with key ${node.key} already exists in chain "$key"',
+        'Node with key ${node.key} already exists in scope "$key"',
       );
     }
 
@@ -93,31 +93,31 @@ class SupplyChain {
   }
 
   // ...........................................................................
-  /// Remove the node from the chain
+  /// Remove the node from the scope
   void removeNode(Node<dynamic> node) {
     _nodes.remove(node.key);
   }
 
   // ...........................................................................
-  /// Creates an example instance of Chain
-  factory SupplyChain.example({Scm? scm}) {
+  /// Creates an example instance of Scope
+  factory Scope.example({Scm? scm}) {
     scm ??= Scm.testInstance;
 
-    return SupplyChain(
+    return Scope(
       key: 'Example',
-      parent: SupplyChain.root(key: 'Root', scm: scm),
+      parent: Scope.root(key: 'Root', scm: scm),
     );
   }
 
   // ...........................................................................
-  /// Returns true if this chain is an ancestor of the given chain
-  bool isAncestorOf(SupplyChain chain) {
-    if (_children.containsKey(chain.key)) {
+  /// Returns true if this scope is an ancestor of the given scope
+  bool isAncestorOf(Scope scope) {
+    if (_children.containsKey(scope.key)) {
       return true;
     }
 
     for (final child in _children.values) {
-      if (child.isAncestorOf(chain)) {
+      if (child.isAncestorOf(scope)) {
         return true;
       }
     }
@@ -126,13 +126,13 @@ class SupplyChain {
   }
 
   // ...........................................................................
-  /// Returns true if this chain is a descendant of the given chain
-  bool isDescendantOf(SupplyChain chain) {
-    if (chain._children.containsKey(key)) {
+  /// Returns true if this scope is a descendant of the given scope
+  bool isDescendantOf(Scope scope) {
+    if (scope._children.containsKey(key)) {
       return true;
     }
 
-    for (final child in chain._children.values) {
+    for (final child in scope._children.values) {
       if (isDescendantOf(child)) {
         return true;
       }
@@ -159,7 +159,7 @@ class SupplyChain {
 
   // ...........................................................................
   /// Returns true if a node with the given key exists in this or a
-  /// parent supply chain
+  /// parent supply scope
   bool hasNode(String key) {
     if (_nodes.containsKey(key)) {
       return true;
@@ -295,7 +295,7 @@ class SupplyChain {
   // Private
   // ######################
 
-  final Map<String, SupplyChain> _children = {};
+  final Map<String, Scope> _children = {};
   final Map<String, Node<dynamic>> _nodes = {};
   static int _idCounter = 0;
 
@@ -308,15 +308,15 @@ class SupplyChain {
     {
       var result = '';
 
-      final chainId = '${key}_$id';
+      final scopeId = '${key}_$id';
 
-      // Create a cluster for this chain
-      result += 'subgraph cluster_$chainId { ';
+      // Create a cluster for this scope
+      result += 'subgraph cluster_$scopeId { ';
       result += 'label = "$key"; ';
 
-      // Write the child chains
-      for (final childChain in children) {
-        result += childChain._graphNodes;
+      // Write the child scopes
+      for (final childScope in children) {
+        result += childScope._graphNodes;
       }
 
       // Write each node
@@ -346,9 +346,9 @@ class SupplyChain {
         }
       }
 
-      // Write the child chains
-      for (final childChain in children) {
-        result += childChain._graphEdges;
+      // Write the child scopes
+      for (final childScope in children) {
+        result += childScope._graphEdges;
       }
 
       return result;
@@ -361,7 +361,7 @@ class SupplyChain {
       final supplier = findNode<dynamic>(supplierName);
       if (supplier == null) {
         throw ArgumentError(
-          'Chain "$key": Supplier with key "$supplierName" not found.',
+          'Scope "$key": Supplier with key "$supplierName" not found.',
         );
       }
 
@@ -371,13 +371,13 @@ class SupplyChain {
 }
 
 // #############################################################################
-// Example chains for test purposes
+// Example scopes for test purposes
 
 // .............................................................................
-/// An example root chain
-class ExampleChainRoot extends SupplyChain {
+/// An example root scope
+class ExampleScopeRoot extends Scope {
   /// Constructor
-  ExampleChainRoot({
+  ExampleScopeRoot({
     required super.scm,
     super.key = 'ExampleRoot',
   }) : super.root() {
@@ -399,16 +399,16 @@ class ExampleChainRoot extends SupplyChain {
       ),
     );
 
-    ExampleChildChain(key: 'ChildChainA', parent: this);
-    ExampleChildChain(key: 'ChildChainB', parent: this);
+    ExampleChildScope(key: 'ChildScopeA', parent: this);
+    ExampleChildScope(key: 'ChildScopeB', parent: this);
   }
 }
 
 // .............................................................................
-/// An example child chain
-class ExampleChildChain extends SupplyChain {
+/// An example child scope
+class ExampleChildScope extends Scope {
   /// Constructor
-  ExampleChildChain({
+  ExampleChildScope({
     required super.key,
     required super.parent,
   }) {
@@ -430,19 +430,19 @@ class ExampleChildChain extends SupplyChain {
       ),
     );
 
-    /// Create two example child chains
-    ExampleGrandChildChain(
-      key: 'GrandChildChain',
+    /// Create two example child scopes
+    ExampleGrandChildScope(
+      key: 'GrandChildScope',
       parent: this,
     );
   }
 }
 
 // .............................................................................
-/// An example child chain
-class ExampleGrandChildChain extends SupplyChain {
+/// An example child scope
+class ExampleGrandChildScope extends Scope {
   /// Constructor
-  ExampleGrandChildChain({
+  ExampleGrandChildScope({
     required super.key,
     required super.parent,
   }) {

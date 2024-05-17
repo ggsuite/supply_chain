@@ -9,15 +9,15 @@ import 'package:test/test.dart';
 
 void main() {
   late Scm scm;
-  late SupplyChain chain;
+  late Scope chain;
   late Node<int> node;
 
   setUp(
     () {
       Node.testRestIdCounter();
       scm = Scm(isTest: true);
-      chain = SupplyChain.example(scm: scm);
-      node = Node.example(chain: chain);
+      chain = Scope.example(scm: scm);
+      node = Node.example(scope: chain);
     },
   );
 
@@ -61,8 +61,8 @@ void main() {
 
     // #########################################################################
     test('suppliers, addSupplier(), removeSupplier()', () {
-      final supplier0 = Node.example(chain: chain);
-      final supplier1 = Node.example(chain: chain);
+      final supplier0 = Node.example(scope: chain);
+      final supplier1 = Node.example(scope: chain);
 
       // Add supplier the first time
       expect(scm.nominatedNodes, [node, supplier0, supplier1]);
@@ -113,8 +113,8 @@ void main() {
 
     // #########################################################################
     test('customers, addSupplier(), removeSupplier()', () {
-      final customer0 = Node.example(chain: chain);
-      final customer1 = Node.example(chain: chain);
+      final customer0 = Node.example(scope: chain);
+      final customer1 = Node.example(scope: chain);
 
       // Add customer the first time
       node.addCustomer(customer0);
@@ -154,15 +154,15 @@ void main() {
     test('dispose() should work fine', () {
       // Create a supplier -> producer -> customer chain
       final supplier = Node.example(
-        chain: chain,
+        scope: chain,
         nodeConfig: NodeConfig.example(key: 'Supplier'),
       );
       final producer = Node.example(
-        chain: chain,
+        scope: chain,
         nodeConfig: NodeConfig.example(key: 'Producer'),
       );
       final customer = Node.example(
-        chain: chain,
+        scope: chain,
         nodeConfig: NodeConfig.example(key: 'Customer'),
       );
       producer.addCustomer(customer);
@@ -222,10 +222,10 @@ void main() {
     group('set and get product', () {
       test('should possible if no suppliers and produce function is given', () {
         // Create a node -> customer chain
-        final chain = SupplyChain.example(scm: scm);
+        final chain = Scope.example(scm: scm);
 
         final node = Node<int>(
-          chain: chain,
+          scope: chain,
           nodeConfig: NodeConfig<int>(
             key: 'Node',
             initialProduct: 0,
@@ -233,7 +233,7 @@ void main() {
         );
 
         final customer = Node<int>(
-          chain: chain,
+          scope: chain,
           nodeConfig: NodeConfig<int>(
             key: 'Customer',
             initialProduct: 0,

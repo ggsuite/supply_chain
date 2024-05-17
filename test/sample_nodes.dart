@@ -25,7 +25,7 @@ late Supplier<int> supplierA;
 late Supplier<int> supplierB;
 
 late Scm scm;
-late SupplyChain chain;
+late Scope scope;
 
 // ...........................................................................
 void initSupplierProducerCustomer() {
@@ -37,7 +37,7 @@ void initSupplierProducerCustomer() {
       key: 'Supplier',
       produce: (components, previousProduct) => previousProduct + 1,
     ),
-    chain: chain,
+    scope: scope,
   );
 
   producer = Node<int>(
@@ -48,7 +48,7 @@ void initSupplierProducerCustomer() {
         return (components.first as int) * 10;
       },
     ),
-    chain: chain,
+    scope: scope,
   );
 
   customer = Node<int>(
@@ -59,7 +59,7 @@ void initSupplierProducerCustomer() {
         return (components.first as int) + 1;
       },
     ),
-    chain: chain,
+    scope: scope,
   );
 }
 
@@ -76,7 +76,7 @@ void initMusicExampleNodes() {
         return previousProduct + 1;
       },
     ),
-    chain: chain,
+    scope: scope,
   );
 
   synth = Node<int>(
@@ -88,7 +88,7 @@ void initMusicExampleNodes() {
         return (components.first as int) * 10;
       },
     ),
-    chain: chain,
+    scope: scope,
   );
 
   audio = Node<int>(
@@ -100,7 +100,7 @@ void initMusicExampleNodes() {
         return (components.first as int) + 1;
       },
     ),
-    chain: chain,
+    scope: scope,
   );
 
   screen = Node<int>(
@@ -112,7 +112,7 @@ void initMusicExampleNodes() {
         return (components.first as int) * 100;
       },
     ),
-    chain: chain,
+    scope: scope,
   );
 
   grid = Node<int>(
@@ -124,7 +124,7 @@ void initMusicExampleNodes() {
         return (components.first as int) + 2;
       },
     ),
-    chain: chain,
+    scope: scope,
   );
 }
 
@@ -133,7 +133,7 @@ class NodeTimingOut extends Node<int> {
   NodeTimingOut({
     required int initialProduct,
     required String key,
-    required super.chain,
+    required super.scope,
     required int Function(List<dynamic> components, int previousProduct)
         produce,
   }) : super(
@@ -163,13 +163,13 @@ void initTimeoutExampleNodes() {
         return previousProduct + 1;
       },
     ),
-    chain: chain,
+    scope: scope,
   );
 
   supplierB = NodeTimingOut(
     initialProduct: 0,
     key: 'SupplierB',
-    chain: chain,
+    scope: scope,
     produce: (List<dynamic> components, int previousProduct) {
       return previousProduct; // No change. No announcement.
     },
@@ -183,7 +183,7 @@ void initTimeoutExampleNodes() {
         return (components.first as int) + (components.last as int);
       },
     ),
-    chain: chain,
+    scope: scope,
   );
 }
 
