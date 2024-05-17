@@ -68,6 +68,7 @@ class ScopeBluePrint {
   Scope instantiate({
     required Scope parentScope,
     bool fakeMissingDependencies = false,
+    bool createOwnScope = true,
   }) {
     // Get the example blue print
     final scopeBluePrint = this;
@@ -78,7 +79,8 @@ class ScopeBluePrint {
     }
 
     // Create an inner scope
-    final innerScope = Scope(parent: parentScope, key: 'Inner');
+    final innerScope =
+        createOwnScope ? Scope(parent: parentScope, key: 'Inner') : parentScope;
 
     // Add nodes to the inner scope
     innerScope.findOrCreateNodes(scopeBluePrint.nodes);

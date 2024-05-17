@@ -48,6 +48,19 @@ void main() {
             expect(node, isNotNull);
           });
         });
+
+        group('without creating an inner scope', () {
+          test('when createOwnScope is false', () {
+            final bluePrint = ScopeBluePrint.example();
+            final parentScope = Scope.root(key: 'Root', scm: Scm.example());
+            bluePrint.instantiate(
+              parentScope: parentScope,
+              createOwnScope: false,
+            );
+            final node = parentScope.findNode<int>('Node');
+            expect(node, isNotNull);
+          });
+        });
       });
     });
 

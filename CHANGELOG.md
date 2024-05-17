@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Add possibility to instantiate a scope blue print right within parent scope
+
 ## [1.0.13] - 2024-05-17
 
 ### Added
@@ -125,6 +131,7 @@
 - 'Github Actions Pipeline'
 - 'Github Actions Pipeline: Add SDK file containing flutter into .github/workflows to make github installing flutter and not dart SDK'
 
+[Unreleased]: https://github.com/inlavigo/supply_chain/compare/1.0.13...HEAD
 [1.0.13]: https://github.com/inlavigo/supply_chain/compare/1.0.12...1.0.13
 [1.0.12]: https://github.com/inlavigo/supply_chain/compare/1.0.11...1.0.12
 [1.0.11]: https://github.com/inlavigo/supply_chain/compare/1.0.10...1.0.11
