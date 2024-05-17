@@ -22,7 +22,7 @@ void main() {
     scope = Scope.example();
 
     node = scope.findOrCreateNode(
-      NodeConfig(
+      NodeBluePrint(
         initialProduct: 0,
         produce: produce,
         key: 'Node',
@@ -53,7 +53,7 @@ void main() {
       test('should return an existing node when possible', () {
         expect(
           scope.findOrCreateNode(
-            NodeConfig(
+            NodeBluePrint(
               initialProduct: 0,
               produce: produce,
               key: 'Node',
@@ -68,7 +68,7 @@ void main() {
           test('but have a different produce method', () {
             expect(
               () => scope.findOrCreateNode<int>(
-                NodeConfig(
+                NodeBluePrint(
                   initialProduct: 0,
                   produce: (components, previousProduct) => 0,
                   key: 'Node',
@@ -88,7 +88,7 @@ void main() {
           test('but has a different type', () {
             expect(
               () => scope.findOrCreateNode<String>(
-                NodeConfig(
+                NodeBluePrint(
                   initialProduct: 'hello',
                   produce: (components, previousProduct) => 'world',
                   key: 'Node',
@@ -118,7 +118,7 @@ void main() {
         expect(
           () => scope.addNode(
             Node<int>(
-              nodeConfig: NodeConfig<int>(
+              nodeConfig: NodeBluePrint<int>(
                 initialProduct: 0,
                 produce: (components, previousProduct) => previousProduct,
                 key: 'Node',
@@ -265,7 +265,7 @@ void main() {
 
             // Add a NodeA to ChildScopeA
             final nodeA = root.child('ChildScopeA')!.findOrCreateNode<int>(
-                  NodeConfig(
+                  NodeBluePrint(
                     key: 'NodeA',
                     initialProduct: 0,
                     produce: (components, previous) => previous,
@@ -285,7 +285,7 @@ void main() {
                 root.child('ChildScopeA')!.child('GrandChildScope')!;
 
             final grandChildNodeX = Node<int>(
-              nodeConfig: NodeConfig<int>(
+              nodeConfig: NodeBluePrint<int>(
                 key: 'GrandChildNodeX',
                 initialProduct: 0,
                 produce: (components, previousProduct) => 0,
@@ -405,7 +405,7 @@ void main() {
         final scope = Scope.example(scm: scm);
 
         scope.findOrCreateNode<int>(
-          NodeConfig(
+          NodeBluePrint(
             key: 'Node',
             suppliers: ['Unknown'],
             initialProduct: 0,

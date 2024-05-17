@@ -10,9 +10,9 @@ import 'package:supply_chain/supply_chain.dart';
 T doNothing<T>(List<dynamic> components, T previousProduct) => previousProduct;
 
 /// The configuration of a node
-class NodeConfig<T> {
+class NodeBluePrint<T> {
   /// Constructor of the node
-  NodeConfig({
+  NodeBluePrint({
     required this.key,
     required this.initialProduct,
     this.suppliers = const <String>[],
@@ -38,7 +38,7 @@ class NodeConfig<T> {
   final Produce<T> produce;
 
   /// An example instance for test purposes
-  static NodeConfig<int> example({String? key}) => NodeConfig<int>(
+  static NodeBluePrint<int> example({String? key}) => NodeBluePrint<int>(
         key: key ?? nextKey,
         initialProduct: 0,
         suppliers: ['Supplier'],
@@ -51,7 +51,7 @@ class NodeConfig<T> {
       return false;
     }
 
-    if (other is NodeConfig<T>) {
+    if (other is NodeBluePrint<T>) {
       if (suppliers.length != other.suppliers.length) {
         return false;
       }

@@ -54,7 +54,7 @@ class Scope {
 
   // ...........................................................................
   /// Returns the node with key. If not available in scope the node is created.
-  Node<T> findOrCreateNode<T>(NodeConfig<T> nodeConfig) {
+  Node<T> findOrCreateNode<T>(NodeBluePrint<T> nodeConfig) {
     // Return existing node when already existing
     final existingNode = _nodes[nodeConfig.key];
     if (existingNode != null) {
@@ -382,7 +382,7 @@ class ExampleScopeRoot extends Scope {
     super.key = 'ExampleRoot',
   }) : super.root() {
     findOrCreateNode(
-      NodeConfig(
+      NodeBluePrint(
         initialProduct: 0,
         produce: (components, previous) =>
             previous + 1, // coveralls:ignore-line
@@ -391,7 +391,7 @@ class ExampleScopeRoot extends Scope {
     );
 
     findOrCreateNode(
-      NodeConfig(
+      NodeBluePrint(
         initialProduct: 0,
         produce: (components, previous) =>
             previous + 1, // coveralls:ignore-line
@@ -414,7 +414,7 @@ class ExampleChildScope extends Scope {
   }) {
     /// Create a node
     findOrCreateNode(
-      NodeConfig(
+      NodeBluePrint(
         initialProduct: 0,
         produce: (components, previous) => previous + 1,
         key: 'ChildNodeA',
@@ -423,7 +423,7 @@ class ExampleChildScope extends Scope {
     );
 
     findOrCreateNode(
-      NodeConfig(
+      NodeBluePrint(
         initialProduct: 0,
         produce: (components, previous) => previous + 1,
         key: 'ChildNodeB',
@@ -447,7 +447,7 @@ class ExampleGrandChildScope extends Scope {
     required super.parent,
   }) {
     findOrCreateNode(
-      NodeConfig(
+      NodeBluePrint(
         initialProduct: 0,
         produce: (components, previous) => previous + 1,
         key: 'GrandChildNodeA',

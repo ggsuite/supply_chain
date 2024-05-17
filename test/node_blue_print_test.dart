@@ -8,10 +8,10 @@ import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('NodeConfig', () {
+  group('NodeBluePrint', () {
     group('example', () {
       test('with key', () {
-        final nodeConfig = NodeConfig.example(key: 'Node');
+        final nodeConfig = NodeBluePrint.example(key: 'Node');
         expect(nodeConfig.key, 'Node');
         expect(nodeConfig.initialProduct, 0);
         expect(nodeConfig.suppliers, ['Supplier']);
@@ -19,7 +19,7 @@ void main() {
       });
 
       test('without key', () {
-        final nodeConfig = NodeConfig.example();
+        final nodeConfig = NodeBluePrint.example();
         expect(nodeConfig.key, 'Aaliyah');
         expect(nodeConfig.initialProduct, 0);
         expect(nodeConfig.suppliers, ['Supplier']);
@@ -33,13 +33,13 @@ void main() {
           int produce(List<dynamic> components, int previousProduct) =>
               previousProduct + 1;
 
-          final nodeConfig1 = NodeConfig<int>(
+          final nodeConfig1 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],
             produce: produce,
           );
-          final nodeConfig2 = NodeConfig<int>(
+          final nodeConfig2 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],
@@ -55,13 +55,13 @@ void main() {
           int produce(List<dynamic> components, int previousProduct) =>
               previousProduct + 1;
 
-          final nodeConfig1 = NodeConfig<int>(
+          final nodeConfig1 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],
             produce: produce,
           );
-          final nodeConfig2 = NodeConfig<int>(
+          final nodeConfig2 = NodeBluePrint<int>(
             key: 'Node2',
             initialProduct: 0,
             suppliers: ['Supplier'],
@@ -75,13 +75,13 @@ void main() {
           int produce(List<dynamic> components, int previousProduct) =>
               previousProduct + 1;
 
-          final nodeConfig1 = NodeConfig<int>(
+          final nodeConfig1 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],
             produce: produce,
           );
-          final nodeConfig2 = NodeConfig<int>(
+          final nodeConfig2 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 1,
             suppliers: ['Supplier'],
@@ -95,13 +95,13 @@ void main() {
           int produce(List<dynamic> components, int previousProduct) =>
               previousProduct + 1;
 
-          final nodeConfig1 = NodeConfig<int>(
+          final nodeConfig1 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],
             produce: produce,
           );
-          final nodeConfig2 = NodeConfig<int>(
+          final nodeConfig2 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier2'],
@@ -117,13 +117,13 @@ void main() {
           int produce2(List<dynamic> components, int previousProduct) =>
               previousProduct + 2;
 
-          final nodeConfig1 = NodeConfig<int>(
+          final nodeConfig1 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],
             produce: produce1,
           );
-          final nodeConfig2 = NodeConfig<int>(
+          final nodeConfig2 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],

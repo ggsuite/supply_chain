@@ -7,7 +7,7 @@
 library;
 
 export 'src/keys.dart';
-export 'src/node_config.dart';
+export 'src/node_blue_print.dart';
 export 'src/node.dart';
 export 'src/priority.dart';
 export 'src/producer.dart';

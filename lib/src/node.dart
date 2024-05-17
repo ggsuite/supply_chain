@@ -54,7 +54,7 @@ class Node<T> {
 
   // ...........................................................................
   /// The configuration of this node
-  final NodeConfig<T> nodeConfig;
+  final NodeBluePrint<T> nodeConfig;
 
   // ...........................................................................
   // Identification
@@ -214,11 +214,11 @@ class Node<T> {
   // ...........................................................................
   /// Example node for test purposes
   static Node<int> example({
-    NodeConfig<int>? nodeConfig,
+    NodeBluePrint<int>? nodeConfig,
     Scope? scope,
   }) {
     scope ??= Scope.example(scm: Scm.testInstance);
-    nodeConfig ??= NodeConfig.example();
+    nodeConfig ??= NodeBluePrint.example();
 
     final result = Node<int>(
       nodeConfig: nodeConfig,

@@ -16,6 +16,7 @@
 - Update graph files on disk, separate nodes and edges in dot file
 - Write graphs to webp
 - Rename SupplyChain into Scope
+- Rename NodeConfig into NodeBluePrint
 
 ### Removed
 
