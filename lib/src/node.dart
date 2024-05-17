@@ -36,11 +36,11 @@ class Node<T> {
   /// - [cacheSize]: The number of items in the cache
 
   Node({
-    required this.nodeConfig,
+    required this.bluePrint,
     required this.scope,
   })  : scm = scope.scm,
-        _product = nodeConfig.initialProduct,
-        assert(nodeConfig.key.isPascalCase) {
+        _product = bluePrint.initialProduct,
+        assert(bluePrint.key.isPascalCase) {
     _init();
   }
 
@@ -54,12 +54,12 @@ class Node<T> {
 
   // ...........................................................................
   /// The configuration of this node
-  final NodeBluePrint<T> nodeConfig;
+  final NodeBluePrint<T> bluePrint;
 
   // ...........................................................................
   // Identification
   /// The key of the node
-  String get key => nodeConfig.key;
+  String get key => bluePrint.key;
 
   /// The unique id of the node
   final int id = _idCounter++;
@@ -79,8 +79,8 @@ class Node<T> {
   /// The product of the node
   set product(T v) {
     assert(
-      nodeConfig.produce == doNothing<T>,
-      'Product can only be set if nodeConfig.produce is doNothing',
+      bluePrint.produce == doNothing<T>,
+      'Product can only be set if bluePrint.produce is doNothing',
     );
     _product = v;
     scm.nominate(this);
@@ -164,7 +164,7 @@ class Node<T> {
   /// Produces the product.
   void produce() {
     final newProduct =
-        nodeConfig.produce(suppliers.map((s) => s.product).toList(), product);
+        bluePrint.produce(suppliers.map((s) => s.product).toList(), product);
 
     _product = newProduct;
     scm.hasNewProduct(this);
@@ -214,14 +214,14 @@ class Node<T> {
   // ...........................................................................
   /// Example node for test purposes
   static Node<int> example({
-    NodeBluePrint<int>? nodeConfig,
+    NodeBluePrint<int>? bluePrint,
     Scope? scope,
   }) {
     scope ??= Scope.example(scm: Scm.testInstance);
-    nodeConfig ??= NodeBluePrint.example();
+    bluePrint ??= NodeBluePrint.example();
 
     final result = Node<int>(
-      nodeConfig: nodeConfig,
+      bluePrint: bluePrint,
       scope: scope,
     );
 

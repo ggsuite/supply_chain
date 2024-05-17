@@ -54,12 +54,12 @@ class Scope {
 
   // ...........................................................................
   /// Returns the node with key. If not available in scope the node is created.
-  Node<T> findOrCreateNode<T>(NodeBluePrint<T> nodeConfig) {
+  Node<T> findOrCreateNode<T>(NodeBluePrint<T> bluePrint) {
     // Return existing node when already existing
-    final existingNode = _nodes[nodeConfig.key];
+    final existingNode = _nodes[bluePrint.key];
     if (existingNode != null) {
       assert(
-        existingNode.nodeConfig == nodeConfig,
+        existingNode.bluePrint == bluePrint,
         'Node with key "$key" already exists with different configuration',
       );
       return existingNode as Node<T>;
@@ -67,11 +67,23 @@ class Scope {
 
     // Create a new node
     final node = Node<T>(
-      nodeConfig: nodeConfig,
+      bluePrint: bluePrint,
       scope: this,
     );
 
     return node;
+  }
+
+  // ...........................................................................
+  /// Returns the node with key. If not available in scope the node is created.
+  List<Node<dynamic>> findOrCreateNodes(
+    List<NodeBluePrint<dynamic>> bluePrints,
+  ) {
+    final result = <Node<dynamic>>[];
+    for (final bluePrint in bluePrints) {
+      result.add(bluePrint.instantiate(scope: this));
+    }
+    return result;
   }
 
   // ...........................................................................
@@ -146,7 +158,7 @@ class Scope {
   /// But not before the whole hierarchy has been created
   void initSuppliers() {
     for (final node in _nodes.values) {
-      final suppliers = node.nodeConfig.suppliers;
+      final suppliers = node.bluePrint.suppliers;
       if (suppliers.isNotEmpty) {
         _addSuppliers(node, suppliers);
       }

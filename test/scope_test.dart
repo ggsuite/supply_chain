@@ -19,7 +19,8 @@ void main() {
   setUp(() {
     Node.testRestIdCounter();
     Scope.testRestIdCounter();
-    scope = Scope.example();
+    scm = Scm.example();
+    scope = Scope.example(scm: scm);
 
     node = scope.findOrCreateNode(
       NodeBluePrint(
@@ -37,7 +38,7 @@ void main() {
       });
 
       test('scm', () {
-        expect(scope.scm, Scm.testInstance);
+        expect(scope.scm, scm);
       });
 
       test('key', () {
@@ -108,6 +109,15 @@ void main() {
       });
     });
 
+    group('findOrCreateNodes', () {
+      test('should return a list of nodes', () {
+        final bluePrint = ScopeBluePrint.example();
+        final nodes = scope.findOrCreateNodes(bluePrint.nodes);
+        expect(nodes, hasLength(2));
+        expect(nodes[0].key, 'Node');
+        expect(nodes[1].key, 'Customer');
+      });
+    });
     group('addNode()', () {
       test('should create a node and set the scope and SCM correctly', () {
         expect(node.scope, scope);
@@ -118,7 +128,7 @@ void main() {
         expect(
           () => scope.addNode(
             Node<int>(
-              nodeConfig: NodeBluePrint<int>(
+              bluePrint: NodeBluePrint<int>(
                 initialProduct: 0,
                 produce: (components, previousProduct) => previousProduct,
                 key: 'Node',
@@ -285,7 +295,7 @@ void main() {
                 root.child('ChildScopeA')!.child('GrandChildScope')!;
 
             final grandChildNodeX = Node<int>(
-              nodeConfig: NodeBluePrint<int>(
+              bluePrint: NodeBluePrint<int>(
                 key: 'GrandChildNodeX',
                 initialProduct: 0,
                 produce: (components, previousProduct) => 0,

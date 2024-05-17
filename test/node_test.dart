@@ -155,15 +155,15 @@ void main() {
       // Create a supplier -> producer -> customer chain
       final supplier = Node.example(
         scope: chain,
-        nodeConfig: NodeBluePrint.example(key: 'Supplier'),
+        bluePrint: NodeBluePrint.example(key: 'Supplier'),
       );
       final producer = Node.example(
         scope: chain,
-        nodeConfig: NodeBluePrint.example(key: 'Producer'),
+        bluePrint: NodeBluePrint.example(key: 'Producer'),
       );
       final customer = Node.example(
         scope: chain,
-        nodeConfig: NodeBluePrint.example(key: 'Customer'),
+        bluePrint: NodeBluePrint.example(key: 'Customer'),
       );
       producer.addCustomer(customer);
       producer.addSupplier(supplier);
@@ -226,7 +226,7 @@ void main() {
 
         final node = Node<int>(
           scope: chain,
-          nodeConfig: NodeBluePrint<int>(
+          bluePrint: NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
           ),
@@ -234,7 +234,7 @@ void main() {
 
         final customer = Node<int>(
           scope: chain,
-          nodeConfig: NodeBluePrint<int>(
+          bluePrint: NodeBluePrint<int>(
             key: 'Customer',
             initialProduct: 0,
             suppliers: ['Node'],

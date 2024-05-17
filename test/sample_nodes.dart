@@ -32,7 +32,7 @@ void initSupplierProducerCustomer() {
   // ............................
   // Supplier, Producer, Customer
   supplier = Supplier<int>(
-    nodeConfig: NodeBluePrint<int>(
+    bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
       key: 'Supplier',
       produce: (components, previousProduct) => previousProduct + 1,
@@ -41,7 +41,7 @@ void initSupplierProducerCustomer() {
   );
 
   producer = Node<int>(
-    nodeConfig: NodeBluePrint<int>(
+    bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
       key: 'Producer',
       produce: (List<dynamic> components, int previousProduct) {
@@ -52,7 +52,7 @@ void initSupplierProducerCustomer() {
   );
 
   customer = Node<int>(
-    nodeConfig: NodeBluePrint<int>(
+    bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
       key: 'Customer',
       produce: (List<dynamic> components, int previousProduct) {
@@ -69,7 +69,7 @@ void initMusicExampleNodes() {
   // Key, Synth, Audio
 
   key = Node<int>(
-    nodeConfig: NodeBluePrint<int>(
+    bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
       key: 'Key',
       produce: (List<dynamic> components, int previousProduct) {
@@ -80,7 +80,7 @@ void initMusicExampleNodes() {
   );
 
   synth = Node<int>(
-    nodeConfig: NodeBluePrint<int>(
+    bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
       key: 'Synth',
       produce: (List<dynamic> components, int previousProduct) {
@@ -92,7 +92,7 @@ void initMusicExampleNodes() {
   );
 
   audio = Node<int>(
-    nodeConfig: NodeBluePrint<int>(
+    bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
       key: 'Audio',
       produce: (List<dynamic> components, int previousProduct) {
@@ -104,7 +104,7 @@ void initMusicExampleNodes() {
   );
 
   screen = Node<int>(
-    nodeConfig: NodeBluePrint<int>(
+    bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
       key: 'Screen',
       produce: (List<dynamic> components, int previousProduct) {
@@ -116,7 +116,7 @@ void initMusicExampleNodes() {
   );
 
   grid = Node<int>(
-    nodeConfig: NodeBluePrint<int>(
+    bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
       key: 'Grid',
       produce: (List<dynamic> components, int previousProduct) {
@@ -137,7 +137,7 @@ class NodeTimingOut extends Node<int> {
     required int Function(List<dynamic> components, int previousProduct)
         produce,
   }) : super(
-          nodeConfig: NodeBluePrint<int>(
+          bluePrint: NodeBluePrint<int>(
             initialProduct: initialProduct,
             key: key,
             produce: produce,
@@ -155,7 +155,7 @@ void initTimeoutExampleNodes() {
   // ............................
   // SupplierA, SupplierB, Producer
   supplierA = Node<int>(
-    nodeConfig: NodeBluePrint<int>(
+    bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
       key: 'SupplierA',
       produce: (List<dynamic> components, int previousProduct) {
@@ -176,7 +176,7 @@ void initTimeoutExampleNodes() {
   );
 
   producer = Node<int>(
-    nodeConfig: NodeBluePrint<int>(
+    bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
       key: 'Producer',
       produce: (List<dynamic> components, int previousProduct) {

@@ -528,7 +528,7 @@ void main() {
 
         // Create some nodes
         final intNodeA0 = Node<int>(
-          nodeConfig: NodeBluePrint(
+          bluePrint: NodeBluePrint(
             key: 'A',
             produce: (c, p) => 1,
             initialProduct: 1,
@@ -537,7 +537,7 @@ void main() {
         );
 
         final intNodeA1 = Node<int>(
-          nodeConfig: NodeBluePrint(
+          bluePrint: NodeBluePrint(
             key: 'A',
             produce: (c, p) => 1,
             initialProduct: 1,
@@ -546,7 +546,7 @@ void main() {
         );
 
         final stringNodeA = Node<String>(
-          nodeConfig: NodeBluePrint(
+          bluePrint: NodeBluePrint(
             key: 'A',
             produce: (c, p) => 'A',
             initialProduct: 'A',
@@ -555,7 +555,7 @@ void main() {
         );
 
         final stringNodeB = Node<String>(
-          nodeConfig: NodeBluePrint(
+          bluePrint: NodeBluePrint(
             key: 'B',
             produce: (c, p) => 'B',
             initialProduct: 'B',

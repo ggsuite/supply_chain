@@ -45,6 +45,22 @@ class NodeBluePrint<T> {
         produce: (components, previousProduct) => previousProduct + 1,
       );
 
+  /// Instantiates the blue print in the given scope
+  Node<T> instantiate({
+    required Scope scope,
+  }) {
+    final node = scope.findNode<T>(key);
+    if (node != null) {
+      return node;
+    }
+
+    return Node<T>(
+      bluePrint: this,
+      scope: scope,
+    );
+  }
+
+  /// Provites an operator =
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
@@ -81,4 +97,7 @@ class NodeBluePrint<T> {
         produce.hashCode ^
         suppliersHash;
   }
+
+  @override
+  String toString() => key;
 }

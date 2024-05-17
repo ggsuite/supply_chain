@@ -11,19 +11,19 @@ void main() {
   group('NodeBluePrint', () {
     group('example', () {
       test('with key', () {
-        final nodeConfig = NodeBluePrint.example(key: 'Node');
-        expect(nodeConfig.key, 'Node');
-        expect(nodeConfig.initialProduct, 0);
-        expect(nodeConfig.suppliers, ['Supplier']);
-        expect(nodeConfig.produce([], 0), 1);
+        final bluePrint = NodeBluePrint.example(key: 'Node');
+        expect(bluePrint.key, 'Node');
+        expect(bluePrint.initialProduct, 0);
+        expect(bluePrint.suppliers, ['Supplier']);
+        expect(bluePrint.produce([], 0), 1);
       });
 
       test('without key', () {
-        final nodeConfig = NodeBluePrint.example();
-        expect(nodeConfig.key, 'Aaliyah');
-        expect(nodeConfig.initialProduct, 0);
-        expect(nodeConfig.suppliers, ['Supplier']);
-        expect(nodeConfig.produce([], 0), 1);
+        final bluePrint = NodeBluePrint.example();
+        expect(bluePrint.key, 'Aaliyah');
+        expect(bluePrint.initialProduct, 0);
+        expect(bluePrint.suppliers, ['Supplier']);
+        expect(bluePrint.produce([], 0), 1);
       });
     });
 
@@ -33,20 +33,20 @@ void main() {
           int produce(List<dynamic> components, int previousProduct) =>
               previousProduct + 1;
 
-          final nodeConfig1 = NodeBluePrint<int>(
+          final bluePrint1 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],
             produce: produce,
           );
-          final nodeConfig2 = NodeBluePrint<int>(
+          final bluePrint2 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],
             produce: produce,
           );
-          expect(nodeConfig1 == nodeConfig2, true);
-          expect(nodeConfig1.hashCode == nodeConfig2.hashCode, true);
+          expect(bluePrint1 == bluePrint2, true);
+          expect(bluePrint1.hashCode == bluePrint2.hashCode, true);
         });
       });
 
@@ -55,60 +55,60 @@ void main() {
           int produce(List<dynamic> components, int previousProduct) =>
               previousProduct + 1;
 
-          final nodeConfig1 = NodeBluePrint<int>(
+          final bluePrint1 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],
             produce: produce,
           );
-          final nodeConfig2 = NodeBluePrint<int>(
+          final bluePrint2 = NodeBluePrint<int>(
             key: 'Node2',
             initialProduct: 0,
             suppliers: ['Supplier'],
             produce: produce,
           );
-          expect(nodeConfig1 == nodeConfig2, false);
-          expect(nodeConfig1.hashCode == nodeConfig2.hashCode, false);
+          expect(bluePrint1 == bluePrint2, false);
+          expect(bluePrint1.hashCode == bluePrint2.hashCode, false);
         });
 
         test('when initialProduct is different', () {
           int produce(List<dynamic> components, int previousProduct) =>
               previousProduct + 1;
 
-          final nodeConfig1 = NodeBluePrint<int>(
+          final bluePrint1 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],
             produce: produce,
           );
-          final nodeConfig2 = NodeBluePrint<int>(
+          final bluePrint2 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 1,
             suppliers: ['Supplier'],
             produce: produce,
           );
-          expect(nodeConfig1 == nodeConfig2, false);
-          expect(nodeConfig1.hashCode == nodeConfig2.hashCode, false);
+          expect(bluePrint1 == bluePrint2, false);
+          expect(bluePrint1.hashCode == bluePrint2.hashCode, false);
         });
 
         test('when suppliers are different', () {
           int produce(List<dynamic> components, int previousProduct) =>
               previousProduct + 1;
 
-          final nodeConfig1 = NodeBluePrint<int>(
+          final bluePrint1 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],
             produce: produce,
           );
-          final nodeConfig2 = NodeBluePrint<int>(
+          final bluePrint2 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier2'],
             produce: produce,
           );
-          expect(nodeConfig1 == nodeConfig2, false);
-          expect(nodeConfig1.hashCode == nodeConfig2.hashCode, false);
+          expect(bluePrint1 == bluePrint2, false);
+          expect(bluePrint1.hashCode == bluePrint2.hashCode, false);
         });
 
         test('when produce is different', () {
@@ -117,21 +117,52 @@ void main() {
           int produce2(List<dynamic> components, int previousProduct) =>
               previousProduct + 2;
 
-          final nodeConfig1 = NodeBluePrint<int>(
+          final bluePrint1 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],
             produce: produce1,
           );
-          final nodeConfig2 = NodeBluePrint<int>(
+          final bluePrint2 = NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
             suppliers: ['Supplier'],
             produce: produce2,
           );
-          expect(nodeConfig1 == nodeConfig2, false);
-          expect(nodeConfig1.hashCode == nodeConfig2.hashCode, false);
+          expect(bluePrint1 == bluePrint2, false);
+          expect(bluePrint1.hashCode == bluePrint2.hashCode, false);
         });
+      });
+    });
+
+    group('toString()', () {
+      test('returns key', () {
+        final bluePrint = NodeBluePrint.example(key: 'Aaliyah');
+        expect(bluePrint.toString(), 'Aaliyah');
+      });
+    });
+    group('findOrCreateNode(scope)', () {
+      test('returns existing node', () {
+        testSetNextCounter(0);
+        final bluePrint = NodeBluePrint.example();
+        final scope = Scope.example();
+        final node = Node<int>(
+          bluePrint: bluePrint,
+          scope: scope,
+        );
+        expect(bluePrint.instantiate(scope: scope), node);
+      });
+
+      test('creates new node', () {
+        final scope = Scope.example();
+        final node = Node<int>(
+          bluePrint: NodeBluePrint.example(),
+          scope: scope,
+        );
+        expect(
+          NodeBluePrint.example(key: 'Node2').instantiate(scope: scope),
+          isNot(node),
+        );
       });
     });
   });
