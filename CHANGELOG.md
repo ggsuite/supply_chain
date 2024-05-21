@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add SubChainManagerBluePrint
+
 ### Changed
 
 - Turn NodeBluePrint into const constructor
