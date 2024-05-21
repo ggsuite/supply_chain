@@ -12,18 +12,23 @@ T doNothing<T>(List<dynamic> components, T previousProduct) => previousProduct;
 /// The configuration of a node
 class NodeBluePrint<T> {
   /// Constructor of the node
-  NodeBluePrint({
+  const NodeBluePrint({
     required this.key,
     required this.initialProduct,
     this.suppliers = const <String>[],
     Produce<T>? produce,
-  })  : produce = produce ?? doNothing,
-        assert(key.isNotEmpty, 'The key must not be empty'),
-        assert(key.isPascalCase, 'The key must be in PascalCase'),
-        assert(
-          !(suppliers.isNotEmpty && produce == doNothing),
-          'If suppliers are not empty, a produce function must be provided',
-        );
+  }) : produce = produce ?? doNothing<T>;
+
+  /// Checks if the configuration is valid
+  void check() {
+    assert(key.isNotEmpty, 'The key must not be empty');
+    assert(key.isPascalCase, 'The key must be in PascalCase');
+    produce([], initialProduct);
+    assert(
+      !(suppliers.isNotEmpty && produce == doNothing<T>),
+      'If suppliers are not empty, a produce function must be provided',
+    );
+  }
 
   /// The initial product of the node
   final T initialProduct;

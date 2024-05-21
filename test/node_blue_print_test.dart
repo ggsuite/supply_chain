@@ -27,6 +27,62 @@ void main() {
       });
     });
 
+    group('check', () {
+      test('asserts that key is not empty', () {
+        expect(
+          () => const NodeBluePrint<int>(
+            key: '',
+            initialProduct: 0,
+            suppliers: [],
+          ).check(),
+          throwsA(
+            isA<AssertionError>().having(
+              (e) => e.message,
+              'message',
+              'The key must not be empty',
+            ),
+          ),
+        );
+      });
+
+      test('asserts key being pascal case', () {
+        expect(
+          () => const NodeBluePrint<int>(
+            key: 'helloWorld',
+            initialProduct: 0,
+            suppliers: [],
+          ).check(),
+          throwsA(
+            isA<AssertionError>().having(
+              (e) => e.message,
+              'message',
+              'The key must be in PascalCase',
+            ),
+          ),
+        );
+      });
+
+      test('asserts that produce is provided if suppliers are not empty', () {
+        expect(
+          () => const NodeBluePrint<int>(
+            key: 'Node',
+            initialProduct: 0,
+            suppliers: ['Supplier'],
+            produce: null,
+          ).check(),
+          throwsA(
+            isA<AssertionError>().having(
+              (e) => e.message,
+              'message',
+              contains(
+                'If suppliers are not empty, '
+                'a produce function must be provided',
+              ),
+            ),
+          ),
+        );
+      });
+    });
     group('operator==, hashCode', () {
       group('should return true', () {
         test('with same suppliers', () {

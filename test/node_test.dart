@@ -226,7 +226,7 @@ void main() {
 
         final node = Node<int>(
           scope: chain,
-          bluePrint: NodeBluePrint<int>(
+          bluePrint: const NodeBluePrint<int>(
             key: 'Node',
             initialProduct: 0,
           ),

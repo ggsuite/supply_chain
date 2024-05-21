@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Turn NodeBluePrint into const constructor
+
 ### Removed
 
 - Removed plant

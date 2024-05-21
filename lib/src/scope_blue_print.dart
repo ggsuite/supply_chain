@@ -28,7 +28,7 @@ class ScopeBluePrint {
   /// Creates an example instance for test purposes
   factory ScopeBluePrint.example() {
     /// Fake an external dependency
-    final dependency = NodeBluePrint<int>(
+    const dependency = NodeBluePrint<int>(
       key: 'Dependency',
       initialProduct: 0,
       suppliers: [],
