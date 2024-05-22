@@ -168,6 +168,10 @@ void main() {
       producer.addCustomer(customer);
       producer.addSupplier(supplier);
 
+      // Before node is managed by SCM and part of it's scope
+      expect(scm.nodes, contains(producer));
+      expect(chain.findNode<int>('Producer'), producer);
+
       // Dispose supplier
       // It should be removed from suppliers's customer list
       // It should be removed from customers's supplier list
@@ -176,6 +180,12 @@ void main() {
       expect(producer.customers, isEmpty);
       expect(supplier.customers, isEmpty);
       expect(customer.suppliers, isEmpty);
+
+      // Should remove the node from the scm
+      expect(scm.nodes, isNot(contains(producer)));
+
+      // Should remove the node from the scope
+      expect(chain.findNode<int>('Producer'), isNull);
     });
 
     // #########################################################################

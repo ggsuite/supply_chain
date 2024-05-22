@@ -11,6 +11,7 @@
 ### Changed
 
 - Turn NodeBluePrint into const constructor
+- Make sure disposing a node removes it from the SCM and it's scope
 
 ### Removed
 
