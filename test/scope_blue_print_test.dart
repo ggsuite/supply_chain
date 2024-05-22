@@ -14,8 +14,7 @@ void main() {
         final scopeBluePrint = ScopeBluePrint.example();
         final [node0 as NodeBluePrint<int>, node1 as NodeBluePrint<int>] =
             scopeBluePrint.nodes;
-        final [dependency as NodeBluePrint<int>] =
-            scopeBluePrint.fakeDependencies;
+        final [dependency as NodeBluePrint<int>] = scopeBluePrint.dependencies;
         expect(dependency.key, 'Dependency');
         expect(node0.key, 'Node');
         expect(node1.key, 'Customer');
@@ -64,8 +63,7 @@ void main() {
       });
     });
 
-    group('create a graph', () {
-      // .......................................................................
+    group('saveGraphToFile', () {
       test('should print a simple graph correctly', () async {
         final bluePrint = ScopeBluePrint.example();
         final parentScope = Scope.root(key: 'Outer', scm: Scm.example());
@@ -76,6 +74,67 @@ void main() {
         parentScope.initSuppliers();
 
         await parentScope.saveGraphToFile('test/graphs/scope_blue_print.svg');
+      });
+    });
+
+    group('findNode(key)', () {
+      test('should return null if no key with node is found', () {
+        final bluePrint = ScopeBluePrint.example();
+        final node = bluePrint.findNode<int>('Unknown');
+        expect(node, isNull);
+      });
+
+      test('should return the node with the given key', () {
+        final bluePrint = ScopeBluePrint.example();
+        final node = bluePrint.findNode<int>('Node');
+        expect(node, isNotNull);
+      });
+
+      test('should throw if the type does not match', () {
+        final bluePrint = ScopeBluePrint.example();
+
+        expect(
+          () => bluePrint.findNode<String>('Node'),
+          throwsA(
+            isA<ArgumentError>().having(
+              (e) => e.toString(),
+              'toString()',
+              contains('Node with key "Node" is not of type String.'),
+            ),
+          ),
+        );
+      });
+    });
+
+    group('copyWith', () {
+      group('should return a copy of the ScopeBluePrint', () {
+        test('with the given key', () {
+          final bluePrint = ScopeBluePrint.example();
+          final copy = bluePrint.copyWith(key: 'Copy');
+          expect(copy.key, 'Copy');
+        });
+
+        test('with the given nodes', () {
+          final bluePrint = ScopeBluePrint.example();
+          final copy = bluePrint.copyWith(nodes: []);
+          expect(copy.nodes, isEmpty);
+        });
+
+        test('with the given dependencies', () {
+          final bluePrint = ScopeBluePrint.example();
+          final copy = bluePrint.copyWith(dependencies: []);
+          expect(copy.dependencies, isEmpty);
+        });
+
+        test('with the given overrides', () {
+          final bluePrint = ScopeBluePrint.example();
+          const overriddenNode = NodeBluePrint<int>(
+            key: 'Node',
+            initialProduct: 5,
+          );
+          final copy = bluePrint.copyWith(overrides: [overriddenNode]);
+          expect(copy.findNode<int>('Node'), overriddenNode);
+        });
       });
     });
   });

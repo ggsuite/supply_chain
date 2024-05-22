@@ -5,6 +5,7 @@
 ### Added
 
 - Add SubChainManagerBluePrint
+- Add SubScopeManager
 
 ### Changed
 
