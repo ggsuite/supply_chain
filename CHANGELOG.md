@@ -6,6 +6,7 @@
 
 - Add SubChainManagerBluePrint
 - Add SubScopeManager
+- Add boilerplate for SubScopeManager
 
 ### Changed
 
