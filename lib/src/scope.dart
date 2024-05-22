@@ -18,7 +18,7 @@ class Scope {
     required this.parent,
   })  : scm = parent!.scm,
         assert(key.isPascalCase) {
-    parent!._children[key] = this;
+    _init();
   }
 
   // ...........................................................................
@@ -28,6 +28,14 @@ class Scope {
     required this.scm,
   })  : parent = null,
         assert(key.isPascalCase);
+
+  // ...........................................................................
+  /// Disposes the scope
+  void dispose() {
+    for (final d in _dispose.reversed) {
+      d();
+    }
+  }
 
   // ...........................................................................
   /// The supply scope manager
@@ -307,9 +315,44 @@ class Scope {
   // Private
   // ######################
 
+  // ...........................................................................
+  final List<void Function()> _dispose = [];
+
+  // ...........................................................................
   final Map<String, Scope> _children = {};
   final Map<String, Node<dynamic>> _nodes = {};
   static int _idCounter = 0;
+
+  // ...........................................................................
+  void _init() {
+    _initParent();
+    _initNodes();
+  }
+
+  // ...........................................................................
+  void _initParent() {
+    if (parent == null) {
+      return;
+    }
+
+    // Add scope to parent scope
+    parent!._children[key] = this;
+
+    // Remove scope from parent scope on dispose
+    _dispose.add(() {
+      parent!._children.remove(key);
+    });
+  }
+
+  // ...........................................................................
+  void _initNodes() {
+    // On dispose, all nodes should be disposed
+    _dispose.add(() {
+      for (final node in [..._nodes.values]) {
+        node.dispose();
+      }
+    });
+  }
 
   // ...........................................................................
   String _nodeId(Node<dynamic> node) => '${node.key}_${node.id}';

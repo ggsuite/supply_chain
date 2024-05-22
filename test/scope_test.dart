@@ -50,6 +50,37 @@ void main() {
       });
     });
 
+    group('dispose', () {
+      test('should remove the scope from its parent', () {
+        // Before dispose the scope belongs to it's parent
+        expect(scope.parent!.children, contains(scope));
+
+        // Dispose the scope
+        scope.dispose();
+
+        // After dispose the scope is removed from it's parent
+        expect(scope.parent!.children, isNot(contains(scope)));
+      });
+
+      test('should dispose all nodes', () {
+        // Before dispose the scope has nodes.
+        // These nodes are part of the scm
+        expect(scope.nodes, isNotEmpty);
+        for (final node in scope.nodes) {
+          expect(scm.nodes, contains(node));
+        }
+
+        // Dispose the scope
+        scope.dispose();
+
+        // After dispose the scope's nodes are removed
+        // from the scope and also the SCM
+        expect(scope.nodes, isEmpty);
+        for (final node in scope.nodes) {
+          expect(scm.nodes, isNot(contains(node)));
+        }
+      });
+    });
     group('findOrCreateNode()', () {
       test('should return an existing node when possible', () {
         expect(

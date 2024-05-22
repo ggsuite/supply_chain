@@ -7,6 +7,7 @@
 - Add SubChainManagerBluePrint
 - Add SubScopeManager
 - Add boilerplate for SubScopeManager
+- Add Scope.dispose
 
 ### Changed
 
