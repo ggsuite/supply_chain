@@ -17,7 +17,7 @@ void main() {
   int produce(List<dynamic> components, int previousProduct) => previousProduct;
 
   setUp(() {
-    Node.testRestIdCounter();
+    Node.testResetIdCounter();
     Scope.testRestIdCounter();
     scm = Scm.example();
     scope = Scope.example(scm: scm);
@@ -47,6 +47,10 @@ void main() {
 
       test('children', () {
         expect(scope.children, isEmpty);
+      });
+
+      test('string', () {
+        expect(scope.toString(), scope.key);
       });
     });
 
@@ -79,6 +83,29 @@ void main() {
         for (final node in scope.nodes) {
           expect(scm.nodes, isNot(contains(node)));
         }
+      });
+    });
+
+    group('node(key)', () {
+      test('should return the node with the given key', () {
+        expect(scope.node<int>(key: 'Node'), node);
+      });
+
+      test('should return null if the node does not exist', () {
+        expect(scope.node<int>(key: 'Unknown'), isNull);
+      });
+
+      test('should throw if the type does not match', () {
+        expect(
+          () => scope.node<String>(key: 'Node'),
+          throwsA(
+            predicate<ArgumentError>(
+              (e) => e.toString().contains(
+                    'Node with key "Node" is not of type String',
+                  ),
+            ),
+          ),
+        );
       });
     });
     group('findOrCreateNode()', () {
@@ -180,6 +207,51 @@ void main() {
       });
     });
 
+    group('replaceNode()', () {
+      test('should replace the node with the given key', () {
+        final newNode = NodeBluePrint<int>(
+          initialProduct: 0,
+          produce: (components, previousProduct) => previousProduct,
+          key: 'Node',
+        );
+
+        scope.replaceNode(newNode);
+        expect(scope.node<int>(key: 'Node')?.bluePrint, newNode);
+      });
+
+      test('should throw if the node does not exist', () {
+        final newNode = NodeBluePrint<int>(
+          initialProduct: 0,
+          produce: (components, previousProduct) => previousProduct,
+          key: 'Unknown',
+        );
+
+        expect(
+          () => scope.replaceNode(newNode),
+          throwsA(
+            predicate<ArgumentError>(
+              (e) => e.toString().contains(
+                    'Node with key "Unknown" does not exist in scope "Example"',
+                  ),
+            ),
+          ),
+        );
+      });
+    });
+    group('removeNode()', () {
+      test('should remove the node with the given key', () {
+        expect(scope.node<int>(key: 'Node'), isNotNull);
+        scope.removeNode('Node');
+        expect(scope.node<int>(key: 'Node'), isNull);
+      });
+
+      test('should do nothing if node does not exist', () {
+        expect(
+          () => scope.removeNode('Unknown'),
+          returnsNormally,
+        );
+      });
+    });
     group('node.dispose(), removeNode()', () {
       test('should remove the node from the chain', () {
         expect(scope.nodes, isNotEmpty);

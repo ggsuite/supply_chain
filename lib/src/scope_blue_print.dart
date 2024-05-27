@@ -36,6 +36,12 @@ class ScopeBluePrint {
   }
 
   // ...........................................................................
+  @override
+  String toString() {
+    return key;
+  }
+
+  // ...........................................................................
   /// The key of the scope
   final String key;
 
@@ -66,10 +72,13 @@ class ScopeBluePrint {
 
     // Create an inner scope
     final innerScope =
-        createOwnScope ? Scope(parent: parentScope, key: 'Inner') : parentScope;
+        createOwnScope ? Scope(parent: parentScope, key: key) : parentScope;
 
     // Add nodes to the inner scope
     innerScope.findOrCreateNodes(scopeBluePrint.nodes);
+
+    // Init suppliers
+    innerScope.initSuppliers();
 
     /// Returns the created exampleScope
     return innerScope;

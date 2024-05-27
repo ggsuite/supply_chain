@@ -199,7 +199,7 @@ void main() {
     });
     group('findOrCreateNode(scope)', () {
       test('returns existing node', () {
-        testSetNextCounter(0);
+        testSetNextKeyCounter(0);
         final bluePrint = NodeBluePrint.example();
         final scope = Scope.example();
         final node = Node<int>(
@@ -219,6 +219,31 @@ void main() {
           NodeBluePrint.example(key: 'Node2').instantiate(scope: scope),
           isNot(node),
         );
+      });
+    });
+
+    group('copyWith()', () {
+      test('returns a new instance with the given values', () {
+        final bluePrint = NodeBluePrint.example();
+        final newBluePrint = bluePrint.copyWith(
+          initialProduct: 1,
+          key: 'Node2',
+          suppliers: ['Supplier2'],
+          produce: (components, previousProduct) => 2,
+        );
+        expect(newBluePrint.initialProduct, 1);
+        expect(newBluePrint.key, 'Node2');
+        expect(newBluePrint.suppliers, ['Supplier2']);
+        expect(newBluePrint.produce([], 0), 2);
+      });
+
+      test('returns a new instance with the same values', () {
+        final bluePrint = NodeBluePrint.example();
+        final newBluePrint = bluePrint.copyWith();
+        expect(newBluePrint.initialProduct, bluePrint.initialProduct);
+        expect(newBluePrint.key, bluePrint.key);
+        expect(newBluePrint.suppliers, bluePrint.suppliers);
+        expect(newBluePrint.produce([], 0), 1);
       });
     });
   });

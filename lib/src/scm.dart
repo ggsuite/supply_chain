@@ -47,15 +47,25 @@ class Scm {
 
   /// Adds a node to scm
   void addNode(Node<dynamic> node) {
+    _assertNodeIsNotDisposed(node);
     _nodes.add(node);
     nominate(node);
   }
 
   /// Removes the node from scm
-  void removeNode(Node<dynamic> node) => _nodes.remove(node);
+  void removeNode(Node<dynamic> node) {
+    _nodes.remove(node);
+    _animatedNodes.remove(node);
+    _nominatedNodes.remove(node);
+    _preparedNodes.remove(node);
+    _producingNodes.remove(node);
+
+    _assertNoNodeIsDisposed(nodes: _nominatedNodes);
+  }
 
   /// Nominate node for production
   void nominate(Node<dynamic> node) {
+    _assertNodeIsNotDisposed(node);
     _nominatedNodes.add(node);
     _schedulePreparation.trigger();
   }
@@ -257,6 +267,7 @@ class Scm {
     }
 
     // Nominate all animated nodes
+    _assertNoNodeIsDisposed(nodes: _animatedNodes);
     _nominatedNodes.addAll(_animatedNodes);
 
     // Start preparation
@@ -276,6 +287,7 @@ class Scm {
 
     // All nominated nodes have been prepared.
     // Add it to prepared nodes
+    _assertNoNodeIsDisposed(nodes: _nominatedNodes);
     _preparedNodes.addAll(_nominatedNodes);
 
     // Clear nominated nodes
@@ -323,6 +335,8 @@ class Scm {
 
   /// Produce all nodes
   void _produce() {
+    _assertNoNodeIsDisposed(nodes: _preparedNodes);
+
     // For all nodes that are ready to produce
     final nodesReadyToProduce = preparedNodes
         .where(
@@ -351,6 +365,12 @@ class Scm {
       if (nodesOfPriority.isEmpty) {
         continue;
       }
+
+      assert(
+        !nodesOfPriority.any(
+          (element) => element.isDisposed,
+        ),
+      );
 
       for (final node in nodesOfPriority) {
         // Remove node from preparedNodes
@@ -543,4 +563,21 @@ class Scm {
 
   GgFakeTimer? _testTimer;
   late GgFakeStopwatch _testStopwatch;
+
+  // ...........................................................................
+  static void _assertNodeIsNotDisposed(Node<dynamic> node) {
+    assert(
+      !node.isDisposed,
+      '${node.scope}/${node.key} with id ${node.id} is disposed.',
+    );
+  }
+
+  // ...........................................................................
+  static void _assertNoNodeIsDisposed({
+    required Iterable<Node<dynamic>> nodes,
+  }) {
+    for (final node in nodes) {
+      _assertNodeIsNotDisposed(node);
+    }
+  }
 }

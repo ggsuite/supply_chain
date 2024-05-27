@@ -36,25 +36,51 @@ class Node<T> {
   /// - [cacheSize]: The number of items in the cache
 
   Node({
-    required this.bluePrint,
+    required NodeBluePrint<T> bluePrint,
     required this.scope,
   })  : scm = scope.scm,
         _product = bluePrint.initialProduct,
-        assert(bluePrint.key.isPascalCase) {
+        assert(bluePrint.key.isPascalCase),
+        _bluePrint = bluePrint {
     _init();
   }
 
   // ...........................................................................
   /// Disposes the node
   void dispose() {
+    _isDisposed = true;
     for (final d in _dispose.reversed) {
       d();
+    }
+    _dispose.clear();
+  }
+
+  /// Returns true if node is disposed
+  bool get isDisposed => _isDisposed;
+
+  // ...........................................................................
+  /// Updates the node with a new bluePrint
+  void update(NodeBluePrint<T> bluePrint) {
+    final oldBluePrint = this.bluePrint;
+
+    if (bluePrint == oldBluePrint) {
+      return;
+    }
+
+    assert(bluePrint.key == this.bluePrint.key);
+
+    // Update the bluePrint
+    this._bluePrint = bluePrint;
+
+    // If the produce function has changed, we need to produce again
+    if (bluePrint.produce != oldBluePrint.produce) {
+      scm.nominate(this);
     }
   }
 
   // ...........................................................................
   /// The configuration of this node
-  final NodeBluePrint<T> bluePrint;
+  NodeBluePrint<T> get bluePrint => _bluePrint;
 
   // ...........................................................................
   // Identification
@@ -162,12 +188,16 @@ class Node<T> {
   T _product;
 
   /// Produces the product.
-  void produce() {
+  void produce({bool announce = true}) {
+    assert(!isDisposed);
+
     final newProduct =
         bluePrint.produce(suppliers.map((s) => s.product).toList(), product);
 
     _product = newProduct;
-    scm.hasNewProduct(this);
+    if (announce) {
+      scm.hasNewProduct(this);
+    }
   }
 
   /// Returns true, if node is staged for production
@@ -238,7 +268,7 @@ class Node<T> {
   // ...........................................................................
 
   /// Reset Id counter for tests
-  static void testRestIdCounter() => _idCounter = 0;
+  static void testResetIdCounter() => _idCounter = 0;
 
   static int _idCounter = 0;
 
@@ -271,7 +301,7 @@ class Node<T> {
   void _initScope() {
     scope.addNode(this);
     _dispose.add(() {
-      scope.removeNode(this);
+      scope.removeNode(this.key);
     });
   }
 
@@ -288,6 +318,11 @@ class Node<T> {
 
   // ...........................................................................
   final List<void Function()> _dispose = [];
+
+  bool _isDisposed = false;
+
+  // ...........................................................................
+  NodeBluePrint<T> _bluePrint;
 
   // ...........................................................................
   Priority _ownPriority = Priority.frame;
@@ -321,7 +356,9 @@ class Node<T> {
 
     _suppliers.remove(supplier);
     supplier.removeCustomer(this);
-    scm.nominate(this);
+    if (!isDisposed) {
+      scm.nominate(this);
+    }
   }
 
   // ...........................................................................

@@ -388,4 +388,4 @@ int _keyCounter = 0;
 String get nextKey => keys[_keyCounter++ % keys.length];
 
 /// Use this function to reset the next key in tests
-void testSetNextCounter(int counter) => _keyCounter = counter;
+void testSetNextKeyCounter(int counter) => _keyCounter = counter;

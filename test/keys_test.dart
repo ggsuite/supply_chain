@@ -11,17 +11,17 @@ void main() {
   group('Names', () {
     group('nextName', () {
       test('should return the next key', () {
-        testSetNextCounter(0);
+        testSetNextKeyCounter(0);
         expect(nextKey, keys[0]);
         expect(nextKey, keys[1]);
         expect(nextKey, keys[2]);
 
-        testSetNextCounter(0);
+        testSetNextKeyCounter(0);
         expect(nextKey, keys[0]);
         expect(nextKey, keys[1]);
         expect(nextKey, keys[2]);
 
-        testSetNextCounter(keys.length - 1);
+        testSetNextKeyCounter(keys.length - 1);
         expect(nextKey, keys.last);
         expect(nextKey, keys.first);
       });

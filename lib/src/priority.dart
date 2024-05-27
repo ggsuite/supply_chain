@@ -10,7 +10,11 @@ enum Priority {
   frame(1),
 
   /// Nodes with realtime priority are updated immediately
-  realtime(2);
+  realtime(2),
+
+  /// Nodes with structure priority are update before all others.
+  /// Use this priority for dynamic chain structure updtes.
+  structure(3);
 
   /// Returns the lowest priority
   static Priority get lowest => Priority.frame;

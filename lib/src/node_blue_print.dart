@@ -4,6 +4,7 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'package:collection/collection.dart';
 import 'package:supply_chain/supply_chain.dart';
 
 /// Produce delegate that does nothing
@@ -54,14 +55,31 @@ class NodeBluePrint<T> {
   Node<T> instantiate({
     required Scope scope,
   }) {
-    final node = scope.findNode<T>(key);
+    final node = scope.nodes.firstWhereOrNull((n) => n.key == key);
+
     if (node != null) {
-      return node;
+      assert(node is Node<T>, 'The node must be of type Node<T>');
+      return node as Node<T>;
     }
 
     return Node<T>(
       bluePrint: this,
       scope: scope,
+    );
+  }
+
+  /// Create a modified copy of the blue print
+  NodeBluePrint<T> copyWith({
+    T? initialProduct,
+    String? key,
+    Iterable<String>? suppliers,
+    Produce<T>? produce,
+  }) {
+    return NodeBluePrint<T>(
+      initialProduct: initialProduct ?? this.initialProduct,
+      key: key ?? this.key,
+      suppliers: suppliers ?? this.suppliers,
+      produce: produce ?? this.produce,
     );
   }
 

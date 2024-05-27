@@ -25,6 +25,8 @@ void main() {
   // ...........................................................................
   setUp(
     () {
+      testSetNextKeyCounter(0);
+      Node.testResetIdCounter();
       scm = Scm(
         isTest: true,
       );
@@ -631,7 +633,7 @@ void main() {
     });
 
     // #########################################################################
-    group('removeNode', () {
+    group('addNode, removeNode', () {
       test('should remove the node', () {
         final scm = Scm.testInstance;
         final node = Node.example(scope: scope);
@@ -640,6 +642,28 @@ void main() {
 
         scm.removeNode(node);
         expect(scm.nodes, isNot(contains(node)));
+      });
+
+      test('should assert that the node is not disposed', () {
+        final scm = Scm.testInstance;
+
+        final node = Node.example(scope: scope);
+        node.dispose();
+
+        expect(
+          () => scm.addNode(node),
+          throwsA(
+            predicate(
+              (AssertionError p0) {
+                expect(
+                  p0.message,
+                  contains('Example/Aaliyah with id 0 is disposed.'),
+                );
+                return true;
+              },
+            ),
+          ),
+        );
       });
     });
 

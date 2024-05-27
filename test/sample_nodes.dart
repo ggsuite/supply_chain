@@ -145,7 +145,7 @@ class NodeTimingOut extends Node<int> {
         );
 
   @override
-  void produce() {
+  void produce({bool announce = true}) {
     // Produce does nothing -> will cause a timeout
   }
 }

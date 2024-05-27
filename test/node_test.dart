@@ -14,7 +14,7 @@ void main() {
 
   setUp(
     () {
-      Node.testRestIdCounter();
+      Node.testResetIdCounter();
       scm = Scm(isTest: true);
       chain = Scope.example(scm: scm);
       node = Node.example(scope: chain);
@@ -44,7 +44,6 @@ void main() {
       expect(node2.scm, Scm.testInstance);
     });
 
-    // .........................................................................
     test('product, produce(), reportUpdate()', () {
       // Check initial values
       expect(node.product, 0);
@@ -59,7 +58,6 @@ void main() {
       expect(node.product, productBefore + 1);
     });
 
-    // #########################################################################
     test('suppliers, addSupplier(), removeSupplier()', () {
       final supplier0 = Node.example(scope: chain);
       final supplier1 = Node.example(scope: chain);
@@ -111,7 +109,6 @@ void main() {
       expect(scm.nominatedNodes, [node]);
     });
 
-    // #########################################################################
     test('customers, addSupplier(), removeSupplier()', () {
       final customer0 = Node.example(scope: chain);
       final customer1 = Node.example(scope: chain);
@@ -150,7 +147,6 @@ void main() {
       expect(customer1.suppliers, <Node<dynamic>>[]);
     });
 
-    // #########################################################################
     test('dispose() should work fine', () {
       // Create a supplier -> producer -> customer chain
       final supplier = Node.example(
@@ -188,7 +184,6 @@ void main() {
       expect(chain.findNode<int>('Producer'), isNull);
     });
 
-    // #########################################################################
     group('isAnimated', () {
       test('should return true if node is animated', () {
         expect(node.isAnimated, false);
@@ -199,7 +194,6 @@ void main() {
       });
     });
 
-    // #########################################################################
     group('ownPriority, priority', () {
       test('should work as expected', () {
         // Initially node has lowest priority
@@ -228,7 +222,6 @@ void main() {
       });
     });
 
-    // #########################################################################
     group('set and get product', () {
       test('should possible if no suppliers and produce function is given', () {
         // Create a node -> customer chain
@@ -268,6 +261,42 @@ void main() {
 
         // Check if customer got the new component
         expect(customer.product, 10);
+      });
+    });
+
+    group('update(bluePrint)', () {
+      test('should do nothing, when bluePrint is the same as before', () {
+        node.update(node.bluePrint);
+      });
+
+      group('should throw an assertion error', () {
+        test('when key is different', () {
+          const otherBluePrint = NodeBluePrint<int>(
+            key: 'otherKey',
+            initialProduct: 6,
+          );
+
+          expect(
+            () => node.update(otherBluePrint),
+            throwsA(isA<AssertionError>()),
+          );
+        });
+      });
+
+      test('should replace the previous blue print and nominate the node', () {
+        final otherBluePrint = node.bluePrint.copyWith(
+          initialProduct: 6,
+          produce: (components, previousProduct) => 7,
+        );
+
+        node.update(otherBluePrint);
+
+        expect(
+          node.bluePrint,
+          otherBluePrint,
+        );
+
+        expect(scm.nominatedNodes, [node]);
       });
     });
   });

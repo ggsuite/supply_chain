@@ -15,6 +15,7 @@ void main() {
         final [node0 as NodeBluePrint<int>, node1 as NodeBluePrint<int>] =
             scopeBluePrint.nodes;
         final [dependency as NodeBluePrint<int>] = scopeBluePrint.dependencies;
+        expect(scopeBluePrint.toString(), scopeBluePrint.key);
         expect(dependency.key, 'Dependency');
         expect(node0.key, 'Node');
         expect(node1.key, 'Customer');
@@ -29,9 +30,19 @@ void main() {
           test('when fakeMissingDependencies == false', () {
             final bluePrint = ScopeBluePrint.example();
             final parentScope = Scope.root(key: 'Root', scm: Scm.example());
-            final scope = bluePrint.instantiate(parentScope: parentScope);
-            final node = scope.findNode<int>('Dependency');
-            expect(node, isNull);
+            expect(
+              () => bluePrint.instantiate(parentScope: parentScope),
+              throwsA(
+                isA<ArgumentError>().having(
+                  (e) => e.toString(),
+                  'toString()',
+                  contains(
+                    'Scope "Example": Supplier with key "Dependency" not '
+                    'found.',
+                  ),
+                ),
+              ),
+            );
           });
         });
 
@@ -55,6 +66,7 @@ void main() {
             bluePrint.instantiate(
               parentScope: parentScope,
               createOwnScope: false,
+              fakeMissingDependencies: true,
             );
             final node = parentScope.findNode<int>('Node');
             expect(node, isNotNull);

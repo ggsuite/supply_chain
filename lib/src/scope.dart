@@ -38,6 +38,11 @@ class Scope {
   }
 
   // ...........................................................................
+  /// Returns the node as string
+  @override
+  String toString() => key;
+
+  // ...........................................................................
   /// The supply scope manager
   final Scm scm;
 
@@ -59,6 +64,9 @@ class Scope {
 
   /// The nodes of this scope
   Iterable<Node<dynamic>> get nodes => _nodes.values;
+
+  /// Returns the own node for a given key or null if not found
+  Node<T>? node<T>({required String key}) => _findNodeInOwnNode<T>(key);
 
   // ...........................................................................
   /// Returns the node with key. If not available in scope the node is created.
@@ -89,7 +97,8 @@ class Scope {
   ) {
     final result = <Node<dynamic>>[];
     for (final bluePrint in bluePrints) {
-      result.add(bluePrint.instantiate(scope: this));
+      final newNode = bluePrint.instantiate(scope: this);
+      result.add(newNode);
     }
     return result;
   }
@@ -114,8 +123,21 @@ class Scope {
 
   // ...........................................................................
   /// Remove the node from the scope
-  void removeNode(Node<dynamic> node) {
-    _nodes.remove(node.key);
+  void removeNode(String key) {
+    _nodes.remove(key);
+  }
+
+  // ...........................................................................
+  /// Replace an existing node with the same key
+  void replaceNode(NodeBluePrint<dynamic> bluePrint) {
+    final existingNode = _nodes[bluePrint.key];
+    if (existingNode == null) {
+      throw ArgumentError(
+        'Node with key "${bluePrint.key}" does not exist in scope "$key"',
+      );
+    }
+
+    existingNode.update(bluePrint);
   }
 
   // ...........................................................................
