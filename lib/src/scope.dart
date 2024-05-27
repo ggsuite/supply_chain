@@ -27,7 +27,9 @@ class Scope {
     required this.key,
     required this.scm,
   })  : parent = null,
-        assert(key.isCamelCase);
+        assert(key.isCamelCase) {
+    _initPath();
+  }
 
   // ...........................................................................
   /// Disposes the scope
@@ -49,6 +51,9 @@ class Scope {
   /// The key of the scope
   final String key;
 
+  /// The path of the scope
+  String get path => _path;
+
   /// The uinquie id of the scope
   final int id = _idCounter++;
 
@@ -66,7 +71,7 @@ class Scope {
   Iterable<Node<dynamic>> get nodes => _nodes.values;
 
   /// Returns the own node for a given key or null if not found
-  Node<T>? node<T>({required String key}) => _findNodeInOwnNode<T>(key);
+  Node<T>? node<T>({required String key}) => _findNodeInOwnScope<T>(key, []);
 
   // ...........................................................................
   /// Returns the node with key. If not available in scope the node is created.
@@ -216,10 +221,14 @@ class Scope {
     String key, {
     bool throwIfNotFound = false,
   }) {
-    final node = _findNodeInOwnNode<T>(key) ??
-        _findNodeNodeInParentNodes(key) ??
-        _findNodeInDirectSiblingNodes(key) ??
-        _findAnyUniqueNode<T>(key);
+    final keyParts = key.split('/');
+    final nodeKey = keyParts.last;
+    final scopePath = keyParts.sublist(0, keyParts.length - 1);
+
+    final node = _findNodeInOwnScope<T>(nodeKey, scopePath) ??
+        _findNodeNodeInParentScopes(nodeKey, scopePath) ??
+        _findNodeInDirectSiblingScopes(nodeKey, scopePath) ??
+        _findAnyUniqueNode<T>(nodeKey, scopePath);
 
     if (node == null && throwIfNotFound) {
       throw ArgumentError('Node with key "$key" not found.');
@@ -229,33 +238,42 @@ class Scope {
   }
 
   // ...........................................................................
-  Node<T>? _findNodeInOwnNode<T>(String key) {
-    final node = _nodes[key];
+  Node<T>? _findNodeInOwnScope<T>(String nodeKey, List<String> scopePath) {
+    final node = _nodes[nodeKey];
     if (node == null) {
       return null;
     }
 
+    if (scopePath.isNotEmpty) {
+      if (!node.scope.path.endsWith(scopePath.join('/'))) {
+        return null;
+      }
+    }
+
     if (node is! Node<T>) {
-      throw ArgumentError('Node with key "$key" is not of type $T');
+      throw ArgumentError('Node with key "$nodeKey" is not of type $T');
     }
 
     return node;
   }
 
   // ...........................................................................
-  Node<T>? _findNodeNodeInParentNodes<T>(String key) {
-    return parent?._findNodeInOwnNode<T>(key) ??
-        parent?._findNodeNodeInParentNodes<T>(key);
+  Node<T>? _findNodeNodeInParentScopes<T>(String key, List<String> scopePath) {
+    return parent?._findNodeInOwnScope<T>(key, scopePath) ??
+        parent?._findNodeNodeInParentScopes<T>(key, scopePath);
   }
 
   // ...........................................................................
-  Node<T>? _findNodeInDirectSiblingNodes<T>(String key) {
+  Node<T>? _findNodeInDirectSiblingScopes<T>(
+    String key,
+    List<String> scopePath,
+  ) {
     if (parent == null) {
       return null;
     }
 
     for (final sibling in parent!._children.values) {
-      final node = sibling._findNodeInOwnNode<T>(key);
+      final node = sibling._findNodeInOwnScope<T>(key, scopePath);
       if (node != null) {
         return node;
       }
@@ -265,7 +283,7 @@ class Scope {
   }
 
   // ...........................................................................
-  Node<T>? _findAnyUniqueNode<T>(String key) {
+  Node<T>? _findAnyUniqueNode<T>(String key, List<String> scopePath) {
     final nodes = scm.nodesWithKey<T>(key);
     if (nodes.length == 1) {
       return nodes.first;
@@ -339,6 +357,7 @@ class Scope {
 
   // ...........................................................................
   final List<void Function()> _dispose = [];
+  late final String _path;
 
   // ...........................................................................
   final Map<String, Scope> _children = {};
@@ -348,6 +367,7 @@ class Scope {
   // ...........................................................................
   void _init() {
     _initParent();
+    _initPath();
     _initNodes();
   }
 
@@ -374,6 +394,11 @@ class Scope {
         node.dispose();
       }
     });
+  }
+
+  // ...........................................................................
+  void _initPath() {
+    _path = parent == null ? key : '${parent!.path}/$key';
   }
 
   // ...........................................................................
@@ -495,7 +520,7 @@ class ExampleChildScope extends Scope {
         initialProduct: 0,
         produce: (components, previous) => previous + 1,
         key: 'childNodeA',
-        suppliers: ['rootA', 'rootB', 'childNodeB'],
+        suppliers: ['rootA', 'rootB', 'childScopeA/childNodeB'],
       ),
     );
 

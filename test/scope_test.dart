@@ -86,6 +86,17 @@ void main() {
       });
     });
 
+    group('path', () {
+      test('should return the path of the scope', () {
+        final root = ExampleScopeRoot(scm: Scm.testInstance);
+        final childScopeA = root.child('childScopeA')!;
+        final grandChildScope = childScopeA.child('grandChildScope')!;
+        expect(root.path, 'exampleRoot');
+        expect(childScopeA.path, 'exampleRoot/childScopeA');
+        expect(grandChildScope.path, 'exampleRoot/childScopeA/grandChildScope');
+      });
+    });
+
     group('node(key)', () {
       test('should return the node with the given key', () {
         expect(scope.node<int>(key: 'node'), node);
@@ -108,6 +119,7 @@ void main() {
         );
       });
     });
+
     group('findOrCreateNode()', () {
       test('should return an existing node when possible', () {
         expect(
@@ -260,8 +272,8 @@ void main() {
       });
     });
 
-    group('createHierarchy()', () {
-      test('should allow to create a hierarchy of chains', () {
+    group('initSuppliers()', () {
+      test('should allow to create a hierarchy of scopes', () {
         final scm = Scm.testInstance;
         final root = ExampleScopeRoot(scm: scm);
         expect(root.nodes.map((n) => n.key), ['rootA', 'rootB']);
@@ -269,11 +281,15 @@ void main() {
           scm.nominate(element);
         }
         expect(root.children.map((e) => e.key), ['childScopeA', 'childScopeB']);
+        expect(root.path, 'exampleRoot');
 
         final childA = root.child('childScopeA')!;
         final childB = root.child('childScopeB')!;
         expect(childA.nodes.map((n) => n.key), ['childNodeA', 'childNodeB']);
         expect(childB.nodes.map((n) => n.key), ['childNodeA', 'childNodeB']);
+
+        expect(childA.path, 'exampleRoot/childScopeA');
+        expect(childB.path, 'exampleRoot/childScopeB');
 
         for (var element in childA.nodes) {
           scm.nominate(element);
@@ -287,6 +303,12 @@ void main() {
         for (final element in grandChild.nodes) {
           scm.nominate(element);
         }
+        expect(grandChild.path, 'exampleRoot/childScopeA/grandChildScope');
+        expect(
+          grandChild.nodes.first.path,
+          'exampleRoot/childScopeA/grandChildScope/grandChildNodeA',
+        );
+
         scm.tick();
         scm.testFlushTasks();
       });
@@ -331,7 +353,7 @@ void main() {
         await updateGraphFile(scope, 'advanced_graph.dot');
       });
 
-      test('should print chains correctly', () async {
+      test('should print scopes correctly', () async {
         final root = ExampleScopeRoot(scm: Scm.testInstance);
         root.initSuppliers();
         await updateGraphFile(root, 'graphs_with_scopes.dot');
@@ -339,90 +361,142 @@ void main() {
     });
 
     group('findNode(key)', () {
-      group('returns', () {
-        group('the right node', () {
-          late final ExampleScopeRoot rootScope;
+      group('without scope in key', () {
+        group('returns', () {
+          group('the right node', () {
+            late final ExampleScopeRoot rootScope;
 
-          setUpAll(() {
-            rootScope = ExampleScopeRoot(scm: Scm.testInstance);
+            setUpAll(() {
+              rootScope = ExampleScopeRoot(scm: Scm.testInstance);
+            });
+
+            test('when the node is contained in own scope', () {
+              // Find a node directly contained in chain
+              final rootA = rootScope.findNode<int>('rootA');
+              expect(rootA?.key, 'rootA');
+
+              final rootB = rootScope.findNode<int>('rootB');
+              expect(rootB?.key, 'rootB');
+
+              // Child nodes should find their own nodes
+              final childScopeA = rootScope.child('childScopeA')!;
+              final childNodeAFromChild =
+                  childScopeA.findNode<int>('childNodeA');
+              expect(childNodeAFromChild?.key, 'childNodeA');
+            });
+
+            test('when the node is contained in parent chain', () {
+              // Should return nodes from parent chain
+              final childScopeA = rootScope.child('childScopeA')!;
+              final rootAFromChild = childScopeA.findNode<int>('rootA');
+              expect(rootAFromChild?.key, 'rootA');
+            });
+
+            test('when the node is contained in sibling chain', () {
+              // Create a new chain
+              final root = Scope.example();
+
+              // Create two child scopes
+              Scope(key: 'childScopeA', parent: root);
+              final b = Scope(key: 'childScopeB', parent: root);
+
+              // Add a NodeA to ChildScopeA
+              final nodeA = root.child('childScopeA')!.findOrCreateNode<int>(
+                    NodeBluePrint(
+                      key: 'nodeA',
+                      initialProduct: 0,
+                      produce: (components, previous) => previous,
+                    ),
+                  );
+
+              // ChildScopeB should find the node in ChildScopeA
+              final Node<int>? foundNodeA = b.findNode<int>('nodeA');
+              expect(foundNodeA, nodeA);
+            });
+
+            test('when the node is contained somewhere else', () {
+              final root = ExampleScopeRoot(scm: Scm.testInstance);
+
+              // Create a node somewhere deep in the hierarchy
+              final grandChildScope =
+                  root.child('childScopeA')!.child('grandChildScope')!;
+
+              final grandChildNodeX = Node<int>(
+                bluePrint: NodeBluePrint<int>(
+                  key: 'grandChildNodeX',
+                  initialProduct: 0,
+                  produce: (components, previousProduct) => 0,
+                ),
+                scope: grandChildScope,
+              );
+
+              // Search the node from the root
+              final foundGRandChildNodeX =
+                  root.findNode<int>('grandChildNodeX');
+              expect(foundGRandChildNodeX, grandChildNodeX);
+            });
           });
 
-          test('when the node is contained in own chain', () {
-            // Find a node directly contained in chain
-            final rootA = rootScope.findNode<int>('rootA');
-            expect(rootA?.key, 'rootA');
-
-            final rootB = rootScope.findNode<int>('rootB');
-            expect(rootB?.key, 'rootB');
-
-            // Child nodes should find their own nodes
-            final childScopeA = rootScope.child('childScopeA')!;
-            final childNodeAFromChild = childScopeA.findNode<int>('childNodeA');
-            expect(childNodeAFromChild?.key, 'childNodeA');
-          });
-
-          test('when the node is contained in parent chain', () {
-            // Should return nodes from parent chain
-            final childScopeA = rootScope.child('childScopeA')!;
-            final rootAFromChild = childScopeA.findNode<int>('rootA');
-            expect(rootAFromChild?.key, 'rootA');
-          });
-
-          test('when the node is contained in sibling chain', () {
-            // Create a new chain
-            final root = Scope.example();
-
-            // Create two child chains
-            Scope(key: 'childScopeA', parent: root);
-            final b = Scope(key: 'childScopeB', parent: root);
-
-            // Add a NodeA to ChildScopeA
-            final nodeA = root.child('childScopeA')!.findOrCreateNode<int>(
-                  NodeBluePrint(
-                    key: 'nodeA',
-                    initialProduct: 0,
-                    produce: (components, previous) => previous,
-                  ),
+          group('null', () {
+            group('when node cannot be found', () {
+              test('and throwIfNotFound is false or not defined', () {
+                final unknownNode = scope.findNode<int>(
+                  'Unknown',
+                  throwIfNotFound: false,
                 );
+                expect(unknownNode, isNull);
 
-            // ChildScopeB should find the node in ChildScopeA
-            final Node<int>? foundNodeA = b.findNode<int>('nodeA');
-            expect(foundNodeA, nodeA);
-          });
-
-          test('when the node is contained somewhere else', () {
-            final root = ExampleScopeRoot(scm: Scm.testInstance);
-
-            // Create a node somewhere deep in the hierarchy
-            final grandChildScope =
-                root.child('childScopeA')!.child('grandChildScope')!;
-
-            final grandChildNodeX = Node<int>(
-              bluePrint: NodeBluePrint<int>(
-                key: 'grandChildNodeX',
-                initialProduct: 0,
-                produce: (components, previousProduct) => 0,
-              ),
-              scope: grandChildScope,
-            );
-
-            // Search the node from the root
-            final foundGRandChildNodeX = root.findNode<int>('grandChildNodeX');
-            expect(foundGRandChildNodeX, grandChildNodeX);
+                final unknownNode1 = scope.findNode<int>('Unknown');
+                expect(unknownNode1, isNull);
+              });
+            });
           });
         });
+      });
 
-        group('null', () {
-          group('when node cannot be found', () {
-            test('and throwIfNotFound is false or not defined', () {
-              final unknownNode = scope.findNode<int>(
-                'Unknown',
-                throwIfNotFound: false,
+      group('with scope in key', () {
+        group('return', () {
+          group('the right node', () {
+            test('when the node is contained in own scope', () {
+              final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
+              final childScopeA = rootScope.child('childScopeA')!;
+              final grandChildScope = childScopeA.child('grandChildScope')!;
+              final grandChildNodeAExpected = grandChildScope.findNode<int>(
+                'grandChildNodeA',
               );
-              expect(unknownNode, isNull);
 
-              final unknownNode1 = scope.findNode<int>('Unknown');
-              expect(unknownNode1, isNull);
+              final grandChildNodeReal = grandChildScope.findNode<int>(
+                'childScopeA/grandChildScope/grandChildNodeA',
+              );
+              expect(grandChildNodeReal, grandChildNodeAExpected);
+            });
+
+            test('when the node is contained in parent scope', () {
+              final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
+              final childScopeA = rootScope.child('childScopeA')!;
+              final grandChildScope = childScopeA.child('grandChildScope')!;
+              final childNodeAExpected = childScopeA.findNode<int>(
+                'childNodeA',
+              );
+
+              final childNodeAReal = grandChildScope.findNode<int>(
+                'childScopeA/childNodeA',
+              );
+              expect(childNodeAReal, childNodeAExpected);
+            });
+
+            test('when the node is contained in sibling scope', () {
+              final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
+              final childScopeA = rootScope.child('childScopeA')!;
+              final grandChildScope = childScopeA.child('grandChildScope')!;
+              final grandChildNodeBExpected = grandChildScope.findNode<int>(
+                'grandChildNodeB',
+              );
+
+              final grandChildNodeReal = grandChildScope.findNode<int>(
+                'childScopeA/grandChildScope/grandChildNodeB',
+              );
+              expect(grandChildNodeReal, grandChildNodeBExpected);
             });
           });
         });

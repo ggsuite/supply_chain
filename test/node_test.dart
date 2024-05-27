@@ -14,6 +14,7 @@ void main() {
 
   setUp(
     () {
+      testSetNextKeyCounter(0);
       Node.testResetIdCounter();
       scm = Scm(isTest: true);
       chain = Scope.example(scm: scm);
@@ -42,6 +43,12 @@ void main() {
       // If now scm is given, then the testInstance will be used
       final node2 = Node.example();
       expect(node2.scm, Scm.testInstance);
+    });
+
+    group('path', () {
+      test('should return the path of the node', () {
+        expect(node.path, 'root/example/aaliyah');
+      });
     });
 
     test('product, produce(), reportUpdate()', () {

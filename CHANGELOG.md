@@ -8,6 +8,7 @@
 - Add SubScopeManager
 - Add boilerplate for SubScopeManager
 - Add Scope.dispose
+- Add path to node and scope. Allow to specify a scope in supplier keys
 
 ### Changed
 
