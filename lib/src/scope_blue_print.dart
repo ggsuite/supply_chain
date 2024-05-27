@@ -89,16 +89,16 @@ class ScopeBluePrint {
   factory ScopeBluePrint.example() {
     /// Fake an external dependency
     const dependency = NodeBluePrint<int>(
-      key: 'Dependency',
+      key: 'dependency',
       initialProduct: 0,
       suppliers: [],
     );
 
     /// Create a node that depends on the external dependency
     final node = NodeBluePrint<int>(
-      key: 'Node',
+      key: 'node',
       initialProduct: 1,
-      suppliers: ['Dependency'],
+      suppliers: ['dependency'],
       produce: (components, previousProduct) {
         final [int dependency] = components;
         return dependency + 1;
@@ -107,9 +107,9 @@ class ScopeBluePrint {
 
     /// Create a customer that depends on the external dependency
     final customer = NodeBluePrint<int>(
-      key: 'Customer',
+      key: 'customer',
       initialProduct: 1,
-      suppliers: ['Node'],
+      suppliers: ['node'],
       produce: (components, previousProduct) {
         final [int node0] = components;
         return node0 + 1;
@@ -118,7 +118,7 @@ class ScopeBluePrint {
 
     /// return the result
     return ScopeBluePrint(
-      key: 'Example',
+      key: 'example',
       nodes: [node, customer],
       dependencies: [dependency],
     );

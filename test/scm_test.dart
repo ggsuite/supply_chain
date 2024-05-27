@@ -522,16 +522,16 @@ void main() {
 
     group('nodesWithKey<T>(key)', () {
       test('should return all nodes with a given key and type', () {
-        final root = Scope.root(key: 'Example', scm: Scm.testInstance);
+        final root = Scope.root(key: 'example', scm: Scm.testInstance);
         final scm = root.scm;
-        final chain0 = Scope(key: '0', parent: root);
-        final chain1 = Scope(key: '1', parent: root);
-        final chain2 = Scope(key: '2', parent: root);
+        final chain0 = Scope(key: 's0', parent: root);
+        final chain1 = Scope(key: 's1', parent: root);
+        final chain2 = Scope(key: 's2', parent: root);
 
         // Create some nodes
         final intNodeA0 = Node<int>(
           bluePrint: NodeBluePrint(
-            key: 'A',
+            key: 'a',
             produce: (c, p) => 1,
             initialProduct: 1,
           ),
@@ -540,7 +540,7 @@ void main() {
 
         final intNodeA1 = Node<int>(
           bluePrint: NodeBluePrint(
-            key: 'A',
+            key: 'a',
             produce: (c, p) => 1,
             initialProduct: 1,
           ),
@@ -549,27 +549,27 @@ void main() {
 
         final stringNodeA = Node<String>(
           bluePrint: NodeBluePrint(
-            key: 'A',
-            produce: (c, p) => 'A',
-            initialProduct: 'A',
+            key: 'a',
+            produce: (c, p) => 'a',
+            initialProduct: 'a',
           ),
           scope: chain2,
         );
 
         final stringNodeB = Node<String>(
           bluePrint: NodeBluePrint(
-            key: 'B',
-            produce: (c, p) => 'B',
-            initialProduct: 'B',
+            key: 'b',
+            produce: (c, p) => 'b',
+            initialProduct: 'b',
           ),
           scope: chain2,
         );
 
-        expect(scm.nodesWithKey<int>('A'), [intNodeA0, intNodeA1]);
-        expect(scm.nodesWithKey<String>('A'), [stringNodeA]);
-        expect(scm.nodesWithKey<String>('B'), [stringNodeB]);
+        expect(scm.nodesWithKey<int>('a'), [intNodeA0, intNodeA1]);
+        expect(scm.nodesWithKey<String>('a'), [stringNodeA]);
+        expect(scm.nodesWithKey<String>('b'), [stringNodeB]);
         expect(
-          scm.nodesWithKey<dynamic>('A').toSet(),
+          scm.nodesWithKey<dynamic>('a').toSet(),
           {intNodeA0, intNodeA1, stringNodeA},
         );
       });
@@ -657,7 +657,7 @@ void main() {
               (AssertionError p0) {
                 expect(
                   p0.message,
-                  contains('Example/Aaliyah with id 0 is disposed.'),
+                  contains('example/aaliyah with id 0 is disposed.'),
                 );
                 return true;
               },
@@ -700,7 +700,7 @@ void main() {
   test('Test with non test environment should work fine', () {
     fakeAsync((fake) {
       final scm = Scm.example(isTest: false);
-      final chain = Scope.root(key: 'Example', scm: scm);
+      final chain = Scope.root(key: 'example', scm: scm);
       final node = Node.example(scope: chain);
       expect(node.product, 0);
       scm.nominate(node);

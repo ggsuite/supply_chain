@@ -9,15 +9,15 @@ import 'package:test/test.dart';
 
 void main() {
   group('Tools', () {
-    group('IsPascalCaseExtension', () {
-      test('should return true if a string has pascal case format', () {
-        expect('HelloWorld'.isPascalCase, isTrue);
-        expect('Hello85'.isPascalCase, isTrue);
-        expect('Hello'.isPascalCase, isTrue);
-        expect('hello'.isPascalCase, isFalse);
-        expect('helloWorld'.isPascalCase, isFalse);
-        expect('Hello World'.isPascalCase, isFalse);
-        expect('Hello-World'.isPascalCase, isFalse);
+    group('IsCamelCaseExtension', () {
+      test('should return true if a string has camel case format', () {
+        expect('helloWorld'.isCamelCase, isTrue);
+        expect('hello85'.isCamelCase, isTrue);
+        expect('hello'.isCamelCase, isTrue);
+        expect('Hello'.isCamelCase, isFalse);
+        expect('HelloWorld'.isCamelCase, isFalse);
+        expect('hello World'.isCamelCase, isFalse);
+        expect('hello-World'.isCamelCase, isFalse);
       });
     });
   });

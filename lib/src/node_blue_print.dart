@@ -23,7 +23,7 @@ class NodeBluePrint<T> {
   /// Checks if the configuration is valid
   void check() {
     assert(key.isNotEmpty, 'The key must not be empty');
-    assert(key.isPascalCase, 'The key must be in PascalCase');
+    assert(key.isCamelCase, 'The key must be in CamelCase');
     produce([], initialProduct);
     assert(
       !(suppliers.isNotEmpty && produce == doNothing<T>),
@@ -47,7 +47,7 @@ class NodeBluePrint<T> {
   static NodeBluePrint<int> example({String? key}) => NodeBluePrint<int>(
         key: key ?? nextKey,
         initialProduct: 0,
-        suppliers: ['Supplier'],
+        suppliers: ['supplier'],
         produce: (components, previousProduct) => previousProduct + 1,
       );
 

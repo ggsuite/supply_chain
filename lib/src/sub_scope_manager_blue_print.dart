@@ -24,8 +24,8 @@ class SubScopeManagerBluePrint extends NodeBluePrint<List<ScopeBluePrint>> {
   /// into a list of scopes for each row.
   factory SubScopeManagerBluePrint.example() {
     final rowSubScopeManager = SubScopeManagerBluePrint(
-      key: 'SubScopeManager',
-      suppliers: ['RowHeights'],
+      key: 'subScopeManager',
+      suppliers: ['rowHeights'],
       produce: (List<dynamic> components, _) {
         // Get the rowHeights from the suppliers
         final [List<int> rowHeights] = components;
@@ -40,9 +40,9 @@ class SubScopeManagerBluePrint extends NodeBluePrint<List<ScopeBluePrint>> {
 
           // Create a node produce the row height for the specific row.
           final rowHeightNode = NodeBluePrint<int>(
-            key: 'RowHeight',
+            key: 'rowHeight',
             initialProduct: rowHeight,
-            suppliers: ['RowHeights'],
+            suppliers: ['rowHeights'],
             produce: (components, previousProduct) {
               final [List<int> rowHeights] = components;
               return rowHeights[iCopy];
@@ -51,7 +51,7 @@ class SubScopeManagerBluePrint extends NodeBluePrint<List<ScopeBluePrint>> {
 
           // Create the scope for the row
           final scope = ScopeBluePrint(
-            key: 'Row$iCopy',
+            key: 'row$iCopy',
             nodes: [rowHeightNode],
             dependencies: [],
           );

@@ -40,7 +40,7 @@ class Node<T> {
     required this.scope,
   })  : scm = scope.scm,
         _product = bluePrint.initialProduct,
-        assert(bluePrint.key.isPascalCase),
+        assert(bluePrint.key.isCamelCase),
         _bluePrint = bluePrint {
     _init();
   }

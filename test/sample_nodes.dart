@@ -34,7 +34,7 @@ void initSupplierProducerCustomer() {
   supplier = Supplier<int>(
     bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
-      key: 'Supplier',
+      key: 'supplier',
       produce: (components, previousProduct) => previousProduct + 1,
     ),
     scope: scope,
@@ -43,7 +43,7 @@ void initSupplierProducerCustomer() {
   producer = Node<int>(
     bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
-      key: 'Producer',
+      key: 'producer',
       produce: (List<dynamic> components, int previousProduct) {
         return (components.first as int) * 10;
       },
@@ -54,7 +54,7 @@ void initSupplierProducerCustomer() {
   customer = Node<int>(
     bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
-      key: 'Customer',
+      key: 'customer',
       produce: (List<dynamic> components, int previousProduct) {
         return (components.first as int) + 1;
       },
@@ -71,7 +71,7 @@ void initMusicExampleNodes() {
   key = Node<int>(
     bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
-      key: 'Key',
+      key: 'key',
       produce: (List<dynamic> components, int previousProduct) {
         return previousProduct + 1;
       },
@@ -82,7 +82,7 @@ void initMusicExampleNodes() {
   synth = Node<int>(
     bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
-      key: 'Synth',
+      key: 'synth',
       produce: (List<dynamic> components, int previousProduct) {
         // Produce
         return (components.first as int) * 10;
@@ -94,7 +94,7 @@ void initMusicExampleNodes() {
   audio = Node<int>(
     bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
-      key: 'Audio',
+      key: 'audio',
       produce: (List<dynamic> components, int previousProduct) {
         // Produce
         return (components.first as int) + 1;
@@ -106,7 +106,7 @@ void initMusicExampleNodes() {
   screen = Node<int>(
     bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
-      key: 'Screen',
+      key: 'screen',
       produce: (List<dynamic> components, int previousProduct) {
         // Produce
         return (components.first as int) * 100;
@@ -118,7 +118,7 @@ void initMusicExampleNodes() {
   grid = Node<int>(
     bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
-      key: 'Grid',
+      key: 'grid',
       produce: (List<dynamic> components, int previousProduct) {
         // Produce
         return (components.first as int) + 2;
@@ -157,7 +157,7 @@ void initTimeoutExampleNodes() {
   supplierA = Node<int>(
     bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
-      key: 'SupplierA',
+      key: 'supplierA',
       produce: (List<dynamic> components, int previousProduct) {
         // Produce
         return previousProduct + 1;
@@ -168,7 +168,7 @@ void initTimeoutExampleNodes() {
 
   supplierB = NodeTimingOut(
     initialProduct: 0,
-    key: 'SupplierB',
+    key: 'supplierB',
     scope: scope,
     produce: (List<dynamic> components, int previousProduct) {
       return previousProduct; // No change. No announcement.
@@ -178,7 +178,7 @@ void initTimeoutExampleNodes() {
   producer = Node<int>(
     bluePrint: NodeBluePrint<int>(
       initialProduct: 0,
-      key: 'Producer',
+      key: 'producer',
       produce: (List<dynamic> components, int previousProduct) {
         return (components.first as int) + (components.last as int);
       },

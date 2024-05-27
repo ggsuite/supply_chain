@@ -26,7 +26,7 @@ void main() {
       NodeBluePrint(
         initialProduct: 0,
         produce: produce,
-        key: 'Node',
+        key: 'node',
       ),
     );
   });
@@ -42,7 +42,7 @@ void main() {
       });
 
       test('key', () {
-        expect(scope.key, 'Example');
+        expect(scope.key, 'example');
       });
 
       test('children', () {
@@ -88,20 +88,20 @@ void main() {
 
     group('node(key)', () {
       test('should return the node with the given key', () {
-        expect(scope.node<int>(key: 'Node'), node);
+        expect(scope.node<int>(key: 'node'), node);
       });
 
       test('should return null if the node does not exist', () {
-        expect(scope.node<int>(key: 'Unknown'), isNull);
+        expect(scope.node<int>(key: 'unknown'), isNull);
       });
 
       test('should throw if the type does not match', () {
         expect(
-          () => scope.node<String>(key: 'Node'),
+          () => scope.node<String>(key: 'node'),
           throwsA(
             predicate<ArgumentError>(
               (e) => e.toString().contains(
-                    'Node with key "Node" is not of type String',
+                    'Node with key "node" is not of type String',
                   ),
             ),
           ),
@@ -115,7 +115,7 @@ void main() {
             NodeBluePrint(
               initialProduct: 0,
               produce: produce,
-              key: 'Node',
+              key: 'node',
             ),
           ),
           node,
@@ -130,13 +130,13 @@ void main() {
                 NodeBluePrint(
                   initialProduct: 0,
                   produce: (components, previousProduct) => 0,
-                  key: 'Node',
+                  key: 'node',
                 ),
               ),
               throwsA(
                 predicate<AssertionError>(
                   (e) => e.toString().contains(
-                        'Node with key "Example" already exists '
+                        'Node with key "example" already exists '
                         'with different configuration',
                       ),
                 ),
@@ -150,13 +150,13 @@ void main() {
                 NodeBluePrint(
                   initialProduct: 'hello',
                   produce: (components, previousProduct) => 'world',
-                  key: 'Node',
+                  key: 'node',
                 ),
               ),
               throwsA(
                 predicate<AssertionError>(
                   (e) => e.toString().contains(
-                        'Node with key "Example" already exists '
+                        'Node with key "example" already exists '
                         'with different configuration',
                       ),
                 ),
@@ -172,8 +172,8 @@ void main() {
         final bluePrint = ScopeBluePrint.example();
         final nodes = scope.findOrCreateNodes(bluePrint.nodes);
         expect(nodes, hasLength(2));
-        expect(nodes[0].key, 'Node');
-        expect(nodes[1].key, 'Customer');
+        expect(nodes[0].key, 'node');
+        expect(nodes[1].key, 'customer');
       });
     });
     group('addNode()', () {
@@ -189,7 +189,7 @@ void main() {
               bluePrint: NodeBluePrint<int>(
                 initialProduct: 0,
                 produce: (components, previousProduct) => previousProduct,
-                key: 'Node',
+                key: 'node',
               ),
               scope: scope,
             ),
@@ -212,18 +212,18 @@ void main() {
         final newNode = NodeBluePrint<int>(
           initialProduct: 0,
           produce: (components, previousProduct) => previousProduct,
-          key: 'Node',
+          key: 'node',
         );
 
         scope.replaceNode(newNode);
-        expect(scope.node<int>(key: 'Node')?.bluePrint, newNode);
+        expect(scope.node<int>(key: 'node')?.bluePrint, newNode);
       });
 
       test('should throw if the node does not exist', () {
         final newNode = NodeBluePrint<int>(
           initialProduct: 0,
           produce: (components, previousProduct) => previousProduct,
-          key: 'Unknown',
+          key: 'unknown',
         );
 
         expect(
@@ -231,7 +231,7 @@ void main() {
           throwsA(
             predicate<ArgumentError>(
               (e) => e.toString().contains(
-                    'Node with key "Unknown" does not exist in scope "Example"',
+                    'Node with key "unknown" does not exist in scope "example"',
                   ),
             ),
           ),
@@ -240,9 +240,9 @@ void main() {
     });
     group('removeNode()', () {
       test('should remove the node with the given key', () {
-        expect(scope.node<int>(key: 'Node'), isNotNull);
-        scope.removeNode('Node');
-        expect(scope.node<int>(key: 'Node'), isNull);
+        expect(scope.node<int>(key: 'node'), isNotNull);
+        scope.removeNode('node');
+        expect(scope.node<int>(key: 'node'), isNull);
       });
 
       test('should do nothing if node does not exist', () {
@@ -264,16 +264,16 @@ void main() {
       test('should allow to create a hierarchy of chains', () {
         final scm = Scm.testInstance;
         final root = ExampleScopeRoot(scm: scm);
-        expect(root.nodes.map((n) => n.key), ['RootA', 'RootB']);
+        expect(root.nodes.map((n) => n.key), ['rootA', 'rootB']);
         for (var element in root.nodes) {
           scm.nominate(element);
         }
-        expect(root.children.map((e) => e.key), ['ChildScopeA', 'ChildScopeB']);
+        expect(root.children.map((e) => e.key), ['childScopeA', 'childScopeB']);
 
-        final childA = root.child('ChildScopeA')!;
-        final childB = root.child('ChildScopeB')!;
-        expect(childA.nodes.map((n) => n.key), ['ChildNodeA', 'ChildNodeB']);
-        expect(childB.nodes.map((n) => n.key), ['ChildNodeA', 'ChildNodeB']);
+        final childA = root.child('childScopeA')!;
+        final childB = root.child('childScopeB')!;
+        expect(childA.nodes.map((n) => n.key), ['childNodeA', 'childNodeB']);
+        expect(childB.nodes.map((n) => n.key), ['childNodeA', 'childNodeB']);
 
         for (var element in childA.nodes) {
           scm.nominate(element);
@@ -283,7 +283,7 @@ void main() {
           scm.nominate(element);
         }
 
-        final grandChild = childA.child('GrandChildScope')!;
+        final grandChild = childA.child('grandChildScope')!;
         for (final element in grandChild.nodes) {
           scm.nominate(element);
         }
@@ -349,23 +349,23 @@ void main() {
 
           test('when the node is contained in own chain', () {
             // Find a node directly contained in chain
-            final rootA = rootScope.findNode<int>('RootA');
-            expect(rootA?.key, 'RootA');
+            final rootA = rootScope.findNode<int>('rootA');
+            expect(rootA?.key, 'rootA');
 
-            final rootB = rootScope.findNode<int>('RootB');
-            expect(rootB?.key, 'RootB');
+            final rootB = rootScope.findNode<int>('rootB');
+            expect(rootB?.key, 'rootB');
 
             // Child nodes should find their own nodes
-            final childScopeA = rootScope.child('ChildScopeA')!;
-            final childNodeAFromChild = childScopeA.findNode<int>('ChildNodeA');
-            expect(childNodeAFromChild?.key, 'ChildNodeA');
+            final childScopeA = rootScope.child('childScopeA')!;
+            final childNodeAFromChild = childScopeA.findNode<int>('childNodeA');
+            expect(childNodeAFromChild?.key, 'childNodeA');
           });
 
           test('when the node is contained in parent chain', () {
             // Should return nodes from parent chain
-            final childScopeA = rootScope.child('ChildScopeA')!;
-            final rootAFromChild = childScopeA.findNode<int>('RootA');
-            expect(rootAFromChild?.key, 'RootA');
+            final childScopeA = rootScope.child('childScopeA')!;
+            final rootAFromChild = childScopeA.findNode<int>('rootA');
+            expect(rootAFromChild?.key, 'rootA');
           });
 
           test('when the node is contained in sibling chain', () {
@@ -373,20 +373,20 @@ void main() {
             final root = Scope.example();
 
             // Create two child chains
-            Scope(key: 'ChildScopeA', parent: root);
-            final b = Scope(key: 'ChildScopeB', parent: root);
+            Scope(key: 'childScopeA', parent: root);
+            final b = Scope(key: 'childScopeB', parent: root);
 
             // Add a NodeA to ChildScopeA
-            final nodeA = root.child('ChildScopeA')!.findOrCreateNode<int>(
+            final nodeA = root.child('childScopeA')!.findOrCreateNode<int>(
                   NodeBluePrint(
-                    key: 'NodeA',
+                    key: 'nodeA',
                     initialProduct: 0,
                     produce: (components, previous) => previous,
                   ),
                 );
 
             // ChildScopeB should find the node in ChildScopeA
-            final Node<int>? foundNodeA = b.findNode<int>('NodeA');
+            final Node<int>? foundNodeA = b.findNode<int>('nodeA');
             expect(foundNodeA, nodeA);
           });
 
@@ -395,11 +395,11 @@ void main() {
 
             // Create a node somewhere deep in the hierarchy
             final grandChildScope =
-                root.child('ChildScopeA')!.child('GrandChildScope')!;
+                root.child('childScopeA')!.child('grandChildScope')!;
 
             final grandChildNodeX = Node<int>(
               bluePrint: NodeBluePrint<int>(
-                key: 'GrandChildNodeX',
+                key: 'grandChildNodeX',
                 initialProduct: 0,
                 produce: (components, previousProduct) => 0,
               ),
@@ -407,7 +407,7 @@ void main() {
             );
 
             // Search the node from the root
-            final foundGRandChildNodeX = root.findNode<int>('GrandChildNodeX');
+            final foundGRandChildNodeX = root.findNode<int>('grandChildNodeX');
             expect(foundGRandChildNodeX, grandChildNodeX);
           });
         });
@@ -432,12 +432,12 @@ void main() {
         test('if the type does not match', () {
           final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
           expect(
-            () => rootScope.findNode<String>('RootA'),
+            () => rootScope.findNode<String>('rootA'),
             throwsA(
               predicate<ArgumentError>(
                 (e) => e
                     .toString()
-                    .contains('Node with key "RootA" is not of type String'),
+                    .contains('Node with key "rootA" is not of type String'),
               ),
             ),
           );
@@ -446,11 +446,11 @@ void main() {
         test('if throwIfNotFound is true and node is not found', () {
           final supplyScope = Scope.example();
           expect(
-            () => supplyScope.findNode<int>('Unknown', throwIfNotFound: true),
+            () => supplyScope.findNode<int>('unknown', throwIfNotFound: true),
             throwsA(
               predicate<ArgumentError>(
                 (e) =>
-                    e.toString().contains('Node with key "Unknown" not found'),
+                    e.toString().contains('Node with key "unknown" not found'),
               ),
             ),
           );
@@ -459,11 +459,11 @@ void main() {
         test('if multiple nodes of the same key and type are found', () {
           final supplyScope = ExampleScopeRoot(scm: Scm.testInstance);
           expect(
-            () => supplyScope.findNode<int>('GrandChildNodeA'),
+            () => supplyScope.findNode<int>('grandChildNodeA'),
             throwsA(
               predicate<ArgumentError>(
                 (e) => e.toString().contains(
-                      'More than one node with key "GrandChildNodeA" and '
+                      'More than one node with key "grandChildNodeA" and '
                       'Type<int> found.',
                     ),
               ),
@@ -476,15 +476,15 @@ void main() {
     group('hasNode(key)', () {
       test('should return true if the scope has a node with the given key', () {
         final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
-        expect(rootScope.hasNode('RootA'), isTrue);
-        expect(rootScope.hasNode('RootB'), isTrue);
+        expect(rootScope.hasNode('rootA'), isTrue);
+        expect(rootScope.hasNode('rootB'), isTrue);
         expect(rootScope.hasNode('Unknown'), isFalse);
 
-        final childScope = rootScope.child('ChildScopeA')!;
-        expect(childScope.hasNode('ChildNodeA'), isTrue);
-        expect(childScope.hasNode('ChildNodeB'), isTrue);
+        final childScope = rootScope.child('childScopeA')!;
+        expect(childScope.hasNode('childNodeA'), isTrue);
+        expect(childScope.hasNode('childNodeB'), isTrue);
         expect(childScope.hasNode('Unknown'), isFalse);
-        expect(childScope.hasNode('RootA'), isTrue);
+        expect(childScope.hasNode('rootA'), isTrue);
       });
     });
 
@@ -497,15 +497,15 @@ void main() {
           rootScope.initSuppliers();
 
           // The root node has no suppliers
-          final rootA = rootScope.findNode<int>('RootA');
-          final rootB = rootScope.findNode<int>('RootB');
+          final rootA = rootScope.findNode<int>('rootA');
+          final rootB = rootScope.findNode<int>('rootB');
           expect(rootA?.suppliers, isEmpty);
           expect(rootB?.suppliers, isEmpty);
 
           /// The child node a should have the root nodes as suppliers
-          final childScopeA = rootScope.child('ChildScopeA')!;
-          final childNodeA = childScopeA.findNode<int>('ChildNodeA');
-          final childNodeB = childScopeA.findNode<int>('ChildNodeB');
+          final childScopeA = rootScope.child('childScopeA')!;
+          final childNodeA = childScopeA.findNode<int>('childNodeA');
+          final childNodeB = childScopeA.findNode<int>('childNodeB');
           expect(childNodeA?.suppliers, hasLength(3));
           expect(childNodeA?.suppliers, contains(rootA));
           expect(childNodeA?.suppliers, contains(rootB));
@@ -519,8 +519,8 @@ void main() {
 
         scope.findOrCreateNode<int>(
           NodeBluePrint(
-            key: 'Node',
-            suppliers: ['Unknown'],
+            key: 'node',
+            suppliers: ['unknown'],
             initialProduct: 0,
             produce: (components, previous) => previous,
           ),
@@ -531,7 +531,7 @@ void main() {
           throwsA(
             predicate<ArgumentError>(
               (e) => e.toString().contains(
-                    'Scope "Example": Supplier with key "Unknown" not found.',
+                    'Scope "example": Supplier with key "unknown" not found.',
                   ),
             ),
           ),
@@ -541,9 +541,9 @@ void main() {
       group('isAncestorOf(node)', () {
         test('should return true if the scope is an ancestor', () {
           final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
-          final childScopeA = rootScope.child('ChildScopeA')!;
-          final childScopeB = rootScope.child('ChildScopeB')!;
-          final grandChildScope = childScopeA.child('GrandChildScope')!;
+          final childScopeA = rootScope.child('childScopeA')!;
+          final childScopeB = rootScope.child('childScopeB')!;
+          final grandChildScope = childScopeA.child('grandChildScope')!;
           expect(rootScope.isAncestorOf(childScopeA), isTrue);
           expect(rootScope.isAncestorOf(childScopeB), isTrue);
           expect(childScopeA.isAncestorOf(childScopeB), isFalse);
@@ -555,9 +555,9 @@ void main() {
       group('isDescendantOf(node)', () {
         test('should return true if the scope is a descendant', () {
           final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
-          final childScopeA = rootScope.child('ChildScopeA')!;
-          final childScopeB = rootScope.child('ChildScopeB')!;
-          final grandChildScope = childScopeA.child('GrandChildScope')!;
+          final childScopeA = rootScope.child('childScopeA')!;
+          final childScopeB = rootScope.child('childScopeB')!;
+          final grandChildScope = childScopeA.child('grandChildScope')!;
           expect(childScopeA.isDescendantOf(rootScope), isTrue);
           expect(childScopeB.isDescendantOf(rootScope), isTrue);
           expect(childScopeA.isDescendantOf(childScopeB), isFalse);

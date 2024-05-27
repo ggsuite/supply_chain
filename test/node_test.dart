@@ -22,7 +22,7 @@ void main() {
   );
 
   // #########################################################################
-  group('Node', () {
+  group('node', () {
     // .........................................................................
 
     test('exampleNdoe', () {
@@ -36,8 +36,8 @@ void main() {
 
       // Production should be done
       expect(node.product, 1);
-      expect(node.key, 'Aaliyah');
-      expect(node.toString(), 'Aaliyah');
+      expect(node.key, 'aaliyah');
+      expect(node.toString(), 'aaliyah');
 
       // If now scm is given, then the testInstance will be used
       final node2 = Node.example();
@@ -151,22 +151,22 @@ void main() {
       // Create a supplier -> producer -> customer chain
       final supplier = Node.example(
         scope: chain,
-        bluePrint: NodeBluePrint.example(key: 'Supplier'),
+        bluePrint: NodeBluePrint.example(key: 'supplier'),
       );
       final producer = Node.example(
         scope: chain,
-        bluePrint: NodeBluePrint.example(key: 'Producer'),
+        bluePrint: NodeBluePrint.example(key: 'producer'),
       );
       final customer = Node.example(
         scope: chain,
-        bluePrint: NodeBluePrint.example(key: 'Customer'),
+        bluePrint: NodeBluePrint.example(key: 'customer'),
       );
       producer.addCustomer(customer);
       producer.addSupplier(supplier);
 
       // Before node is managed by SCM and part of it's scope
       expect(scm.nodes, contains(producer));
-      expect(chain.findNode<int>('Producer'), producer);
+      expect(chain.findNode<int>('producer'), producer);
 
       // Dispose supplier
       // It should be removed from suppliers's customer list
@@ -181,7 +181,7 @@ void main() {
       expect(scm.nodes, isNot(contains(producer)));
 
       // Should remove the node from the scope
-      expect(chain.findNode<int>('Producer'), isNull);
+      expect(chain.findNode<int>('producer'), isNull);
     });
 
     group('isAnimated', () {
@@ -230,7 +230,7 @@ void main() {
         final node = Node<int>(
           scope: chain,
           bluePrint: const NodeBluePrint<int>(
-            key: 'Node',
+            key: 'node',
             initialProduct: 0,
           ),
         );
@@ -238,9 +238,9 @@ void main() {
         final customer = Node<int>(
           scope: chain,
           bluePrint: NodeBluePrint<int>(
-            key: 'Customer',
+            key: 'customer',
             initialProduct: 0,
-            suppliers: ['Node'],
+            suppliers: ['node'],
             produce: (components, previousProduct) =>
                 (components[0] as int) * 10,
           ),

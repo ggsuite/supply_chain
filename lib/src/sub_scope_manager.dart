@@ -71,11 +71,11 @@ class SubScopeManager extends Node<List<ScopeBluePrint>> {
   /// See documentation of [SubScopeManagerBluePrint.example]
   factory SubScopeManager.example() {
     // Create a root scope
-    final scope = Scope.root(key: 'Table', scm: Scm.example());
+    final scope = Scope.root(key: 'table', scm: Scm.example());
 
     // Create a blue print for row heights
     const rowHeightsBluePrint = NodeBluePrint<List<int>>(
-      key: 'RowHeights',
+      key: 'rowHeights',
       initialProduct: [],
     );
 

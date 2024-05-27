@@ -4,10 +4,10 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-final _pascalCase = RegExp(r'^[A-Z0-9][a-z0-9]*(?:[A-Z0-9][a-z0-9]*)*$');
+final _camelCase = RegExp(r'^[a-z][a-z0-9]*([A-Z0-9][a-z0-9]*)*$');
 
 /// Extension for lower camel case
-extension IsPascalCaseExtension on String {
+extension IsCamelCaseExtension on String {
   /// Returns true if the string is lower camel case
-  bool get isPascalCase => _pascalCase.hasMatch(this);
+  bool get isCamelCase => _camelCase.hasMatch(this);
 }

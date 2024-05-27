@@ -16,9 +16,9 @@ void main() {
             scopeBluePrint.nodes;
         final [dependency as NodeBluePrint<int>] = scopeBluePrint.dependencies;
         expect(scopeBluePrint.toString(), scopeBluePrint.key);
-        expect(dependency.key, 'Dependency');
-        expect(node0.key, 'Node');
-        expect(node1.key, 'Customer');
+        expect(dependency.key, 'dependency');
+        expect(node0.key, 'node');
+        expect(node1.key, 'customer');
         expect(node0.produce(<dynamic>[5], 0), 6);
         expect(node1.produce(<dynamic>[6], 0), 7);
       });
@@ -29,7 +29,7 @@ void main() {
         group('with fake dependencies', () {
           test('when fakeMissingDependencies == false', () {
             final bluePrint = ScopeBluePrint.example();
-            final parentScope = Scope.root(key: 'Root', scm: Scm.example());
+            final parentScope = Scope.root(key: 'root', scm: Scm.example());
             expect(
               () => bluePrint.instantiate(parentScope: parentScope),
               throwsA(
@@ -37,7 +37,7 @@ void main() {
                   (e) => e.toString(),
                   'toString()',
                   contains(
-                    'Scope "Example": Supplier with key "Dependency" not '
+                    'Scope "example": Supplier with key "dependency" not '
                     'found.',
                   ),
                 ),
@@ -49,12 +49,12 @@ void main() {
         group('without fake dependencies', () {
           test('when fakeMissingDependencies == true', () {
             final bluePrint = ScopeBluePrint.example();
-            final parentScope = Scope.root(key: 'Root', scm: Scm.example());
+            final parentScope = Scope.root(key: 'root', scm: Scm.example());
             final scope = bluePrint.instantiate(
               parentScope: parentScope,
               fakeMissingDependencies: true,
             );
-            final node = scope.findNode<int>('Dependency');
+            final node = scope.findNode<int>('dependency');
             expect(node, isNotNull);
           });
         });
@@ -62,13 +62,13 @@ void main() {
         group('without creating an inner scope', () {
           test('when createOwnScope is false', () {
             final bluePrint = ScopeBluePrint.example();
-            final parentScope = Scope.root(key: 'Root', scm: Scm.example());
+            final parentScope = Scope.root(key: 'root', scm: Scm.example());
             bluePrint.instantiate(
               parentScope: parentScope,
               createOwnScope: false,
               fakeMissingDependencies: true,
             );
-            final node = parentScope.findNode<int>('Node');
+            final node = parentScope.findNode<int>('node');
             expect(node, isNotNull);
           });
         });
@@ -78,7 +78,7 @@ void main() {
     group('saveGraphToFile', () {
       test('should print a simple graph correctly', () async {
         final bluePrint = ScopeBluePrint.example();
-        final parentScope = Scope.root(key: 'Outer', scm: Scm.example());
+        final parentScope = Scope.root(key: 'outer', scm: Scm.example());
         bluePrint.instantiate(
           parentScope: parentScope,
           fakeMissingDependencies: true,
@@ -98,7 +98,7 @@ void main() {
 
       test('should return the node with the given key', () {
         final bluePrint = ScopeBluePrint.example();
-        final node = bluePrint.findNode<int>('Node');
+        final node = bluePrint.findNode<int>('node');
         expect(node, isNotNull);
       });
 
@@ -106,12 +106,12 @@ void main() {
         final bluePrint = ScopeBluePrint.example();
 
         expect(
-          () => bluePrint.findNode<String>('Node'),
+          () => bluePrint.findNode<String>('node'),
           throwsA(
             isA<ArgumentError>().having(
               (e) => e.toString(),
               'toString()',
-              contains('Node with key "Node" is not of type String.'),
+              contains('Node with key "node" is not of type String.'),
             ),
           ),
         );
@@ -122,8 +122,8 @@ void main() {
       group('should return a copy of the ScopeBluePrint', () {
         test('with the given key', () {
           final bluePrint = ScopeBluePrint.example();
-          final copy = bluePrint.copyWith(key: 'Copy');
-          expect(copy.key, 'Copy');
+          final copy = bluePrint.copyWith(key: 'copy');
+          expect(copy.key, 'copy');
         });
 
         test('with the given nodes', () {
@@ -141,11 +141,11 @@ void main() {
         test('with the given overrides', () {
           final bluePrint = ScopeBluePrint.example();
           const overriddenNode = NodeBluePrint<int>(
-            key: 'Node',
+            key: 'node',
             initialProduct: 5,
           );
           final copy = bluePrint.copyWith(overrides: [overriddenNode]);
-          expect(copy.findNode<int>('Node'), overriddenNode);
+          expect(copy.findNode<int>('node'), overriddenNode);
         });
       });
     });

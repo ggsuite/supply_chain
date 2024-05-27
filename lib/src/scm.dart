@@ -248,7 +248,7 @@ class Scm {
 
   // ...........................................................................
   void _initRootScope() {
-    rootScope = Scope.root(key: 'Root', scm: this);
+    rootScope = Scope.root(key: 'root', scm: this);
   }
 
   // ...........................................................................

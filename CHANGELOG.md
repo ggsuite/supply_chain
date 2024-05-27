@@ -14,6 +14,7 @@
 - Turn NodeBluePrint into const constructor
 - Make sure disposing a node removes it from the SCM and it's scope
 - SubScopeManager can dynamically create new sub scopes
+- Node and scope names must be camel case now
 
 ### Removed
 

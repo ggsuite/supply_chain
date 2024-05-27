@@ -11,18 +11,18 @@ void main() {
   group('NodeBluePrint', () {
     group('example', () {
       test('with key', () {
-        final bluePrint = NodeBluePrint.example(key: 'Node');
-        expect(bluePrint.key, 'Node');
+        final bluePrint = NodeBluePrint.example(key: 'node');
+        expect(bluePrint.key, 'node');
         expect(bluePrint.initialProduct, 0);
-        expect(bluePrint.suppliers, ['Supplier']);
+        expect(bluePrint.suppliers, ['supplier']);
         expect(bluePrint.produce([], 0), 1);
       });
 
       test('without key', () {
         final bluePrint = NodeBluePrint.example();
-        expect(bluePrint.key, 'Aaliyah');
+        expect(bluePrint.key, 'aaliyah');
         expect(bluePrint.initialProduct, 0);
-        expect(bluePrint.suppliers, ['Supplier']);
+        expect(bluePrint.suppliers, ['supplier']);
         expect(bluePrint.produce([], 0), 1);
       });
     });
@@ -45,10 +45,10 @@ void main() {
         );
       });
 
-      test('asserts key being pascal case', () {
+      test('asserts key being camel case', () {
         expect(
           () => const NodeBluePrint<int>(
-            key: 'helloWorld',
+            key: 'HelloWorld',
             initialProduct: 0,
             suppliers: [],
           ).check(),
@@ -56,7 +56,7 @@ void main() {
             isA<AssertionError>().having(
               (e) => e.message,
               'message',
-              'The key must be in PascalCase',
+              'The key must be in CamelCase',
             ),
           ),
         );
@@ -65,9 +65,9 @@ void main() {
       test('asserts that produce is provided if suppliers are not empty', () {
         expect(
           () => const NodeBluePrint<int>(
-            key: 'Node',
+            key: 'node',
             initialProduct: 0,
-            suppliers: ['Supplier'],
+            suppliers: ['supplier'],
             produce: null,
           ).check(),
           throwsA(
@@ -90,15 +90,15 @@ void main() {
               previousProduct + 1;
 
           final bluePrint1 = NodeBluePrint<int>(
-            key: 'Node',
+            key: 'node',
             initialProduct: 0,
-            suppliers: ['Supplier'],
+            suppliers: ['supplier'],
             produce: produce,
           );
           final bluePrint2 = NodeBluePrint<int>(
-            key: 'Node',
+            key: 'node',
             initialProduct: 0,
-            suppliers: ['Supplier'],
+            suppliers: ['supplier'],
             produce: produce,
           );
           expect(bluePrint1 == bluePrint2, true);
@@ -112,15 +112,15 @@ void main() {
               previousProduct + 1;
 
           final bluePrint1 = NodeBluePrint<int>(
-            key: 'Node',
+            key: 'node',
             initialProduct: 0,
-            suppliers: ['Supplier'],
+            suppliers: ['supplier'],
             produce: produce,
           );
           final bluePrint2 = NodeBluePrint<int>(
-            key: 'Node2',
+            key: 'node2',
             initialProduct: 0,
-            suppliers: ['Supplier'],
+            suppliers: ['supplier'],
             produce: produce,
           );
           expect(bluePrint1 == bluePrint2, false);
@@ -132,15 +132,15 @@ void main() {
               previousProduct + 1;
 
           final bluePrint1 = NodeBluePrint<int>(
-            key: 'Node',
+            key: 'node',
             initialProduct: 0,
-            suppliers: ['Supplier'],
+            suppliers: ['supplier'],
             produce: produce,
           );
           final bluePrint2 = NodeBluePrint<int>(
-            key: 'Node',
+            key: 'node',
             initialProduct: 1,
-            suppliers: ['Supplier'],
+            suppliers: ['supplier'],
             produce: produce,
           );
           expect(bluePrint1 == bluePrint2, false);
@@ -152,15 +152,15 @@ void main() {
               previousProduct + 1;
 
           final bluePrint1 = NodeBluePrint<int>(
-            key: 'Node',
+            key: 'node',
             initialProduct: 0,
-            suppliers: ['Supplier'],
+            suppliers: ['supplier'],
             produce: produce,
           );
           final bluePrint2 = NodeBluePrint<int>(
-            key: 'Node',
+            key: 'node',
             initialProduct: 0,
-            suppliers: ['Supplier2'],
+            suppliers: ['supplier2'],
             produce: produce,
           );
           expect(bluePrint1 == bluePrint2, false);
@@ -174,15 +174,15 @@ void main() {
               previousProduct + 2;
 
           final bluePrint1 = NodeBluePrint<int>(
-            key: 'Node',
+            key: 'node',
             initialProduct: 0,
-            suppliers: ['Supplier'],
+            suppliers: ['supplier'],
             produce: produce1,
           );
           final bluePrint2 = NodeBluePrint<int>(
-            key: 'Node',
+            key: 'node',
             initialProduct: 0,
-            suppliers: ['Supplier'],
+            suppliers: ['supplier'],
             produce: produce2,
           );
           expect(bluePrint1 == bluePrint2, false);
@@ -193,8 +193,8 @@ void main() {
 
     group('toString()', () {
       test('returns key', () {
-        final bluePrint = NodeBluePrint.example(key: 'Aaliyah');
-        expect(bluePrint.toString(), 'Aaliyah');
+        final bluePrint = NodeBluePrint.example(key: 'aaliyah');
+        expect(bluePrint.toString(), 'aaliyah');
       });
     });
     group('findOrCreateNode(scope)', () {
@@ -216,7 +216,7 @@ void main() {
           scope: scope,
         );
         expect(
-          NodeBluePrint.example(key: 'Node2').instantiate(scope: scope),
+          NodeBluePrint.example(key: 'node2').instantiate(scope: scope),
           isNot(node),
         );
       });
@@ -227,13 +227,13 @@ void main() {
         final bluePrint = NodeBluePrint.example();
         final newBluePrint = bluePrint.copyWith(
           initialProduct: 1,
-          key: 'Node2',
-          suppliers: ['Supplier2'],
+          key: 'node2',
+          suppliers: ['supplier2'],
           produce: (components, previousProduct) => 2,
         );
         expect(newBluePrint.initialProduct, 1);
-        expect(newBluePrint.key, 'Node2');
-        expect(newBluePrint.suppliers, ['Supplier2']);
+        expect(newBluePrint.key, 'node2');
+        expect(newBluePrint.suppliers, ['supplier2']);
         expect(newBluePrint.produce([], 0), 2);
       });
 

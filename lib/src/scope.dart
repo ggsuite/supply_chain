@@ -17,7 +17,7 @@ class Scope {
     required this.key,
     required this.parent,
   })  : scm = parent!.scm,
-        assert(key.isPascalCase) {
+        assert(key.isCamelCase) {
     _init();
   }
 
@@ -27,7 +27,7 @@ class Scope {
     required this.key,
     required this.scm,
   })  : parent = null,
-        assert(key.isPascalCase);
+        assert(key.isCamelCase);
 
   // ...........................................................................
   /// Disposes the scope
@@ -146,8 +146,8 @@ class Scope {
     scm ??= Scm.testInstance;
 
     return Scope(
-      key: 'Example',
-      parent: Scope.root(key: 'Root', scm: scm),
+      key: 'example',
+      parent: Scope.root(key: 'root', scm: scm),
     );
   }
 
@@ -456,14 +456,14 @@ class ExampleScopeRoot extends Scope {
   /// Constructor
   ExampleScopeRoot({
     required super.scm,
-    super.key = 'ExampleRoot',
+    super.key = 'exampleRoot',
   }) : super.root() {
     findOrCreateNode(
       NodeBluePrint(
         initialProduct: 0,
         produce: (components, previous) =>
             previous + 1, // coveralls:ignore-line
-        key: 'RootA',
+        key: 'rootA',
       ),
     );
 
@@ -472,12 +472,12 @@ class ExampleScopeRoot extends Scope {
         initialProduct: 0,
         produce: (components, previous) =>
             previous + 1, // coveralls:ignore-line
-        key: 'RootB',
+        key: 'rootB',
       ),
     );
 
-    ExampleChildScope(key: 'ChildScopeA', parent: this);
-    ExampleChildScope(key: 'ChildScopeB', parent: this);
+    ExampleChildScope(key: 'childScopeA', parent: this);
+    ExampleChildScope(key: 'childScopeB', parent: this);
   }
 }
 
@@ -494,8 +494,8 @@ class ExampleChildScope extends Scope {
       NodeBluePrint(
         initialProduct: 0,
         produce: (components, previous) => previous + 1,
-        key: 'ChildNodeA',
-        suppliers: ['RootA', 'RootB', 'ChildNodeB'],
+        key: 'childNodeA',
+        suppliers: ['rootA', 'rootB', 'childNodeB'],
       ),
     );
 
@@ -503,13 +503,13 @@ class ExampleChildScope extends Scope {
       NodeBluePrint(
         initialProduct: 0,
         produce: (components, previous) => previous + 1,
-        key: 'ChildNodeB',
+        key: 'childNodeB',
       ),
     );
 
     /// Create two example child scopes
     ExampleGrandChildScope(
-      key: 'GrandChildScope',
+      key: 'grandChildScope',
       parent: this,
     );
   }
@@ -527,9 +527,9 @@ class ExampleGrandChildScope extends Scope {
       NodeBluePrint(
         initialProduct: 0,
         produce: (components, previous) => previous + 1,
-        key: 'GrandChildNodeA',
+        key: 'grandChildNodeA',
         suppliers: [
-          'RootA',
+          'rootA',
         ],
       ),
     );
