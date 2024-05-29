@@ -80,7 +80,7 @@ class ScopeBluePrint {
   // ...........................................................................
   /// Turns the blue print into a scope and adds it to the parent scope.
   Scope instantiate({
-    required Scope parentScope,
+    required Scope scope,
     bool fakeMissingDependencies = false,
     bool createOwnScope = true,
   }) {
@@ -89,12 +89,11 @@ class ScopeBluePrint {
 
     // Add dependencies to the outer scope
     if (fakeMissingDependencies) {
-      parentScope.findOrCreateNodes(scopeBluePrint.dependencies);
+      scope.findOrCreateNodes(scopeBluePrint.dependencies);
     }
 
     // Create an inner scope
-    final innerScope =
-        createOwnScope ? Scope(parent: parentScope, key: key) : parentScope;
+    final innerScope = createOwnScope ? Scope(parent: scope, key: key) : scope;
 
     final (
       List<NodeBluePrint<dynamic>> additionalNodes,
@@ -109,7 +108,7 @@ class ScopeBluePrint {
     final allSubScopes = [...subScopes, ...additionalSubScopes];
     for (final subScope in allSubScopes) {
       subScope.instantiate(
-        parentScope: innerScope,
+        scope: innerScope,
         fakeMissingDependencies: fakeMissingDependencies,
         createOwnScope: createOwnScope,
       );

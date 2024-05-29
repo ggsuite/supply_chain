@@ -31,7 +31,7 @@ void main() {
             final bluePrint = ScopeBluePrint.example();
             final parentScope = Scope.root(key: 'root', scm: Scm.example());
             expect(
-              () => bluePrint.instantiate(parentScope: parentScope),
+              () => bluePrint.instantiate(scope: parentScope),
               throwsA(
                 isA<ArgumentError>().having(
                   (e) => e.toString(),
@@ -51,7 +51,7 @@ void main() {
             final bluePrint = ScopeBluePrint.example();
             final parentScope = Scope.root(key: 'root', scm: Scm.example());
             final scope = bluePrint.instantiate(
-              parentScope: parentScope,
+              scope: parentScope,
               fakeMissingDependencies: true,
             );
             final node = scope.findNode<int>('dependency');
@@ -64,7 +64,7 @@ void main() {
             final bluePrint = ScopeBluePrint.example();
             final parentScope = Scope.root(key: 'root', scm: Scm.example());
             bluePrint.instantiate(
-              parentScope: parentScope,
+              scope: parentScope,
               createOwnScope: false,
               fakeMissingDependencies: true,
             );
@@ -78,7 +78,7 @@ void main() {
         test('when build() returns a list of scopes and nodes', () async {
           final bluePrint = ExampleScopeBluePrint();
           final rootScope = Scope.root(key: 'root', scm: Scm.example());
-          final scope = bluePrint.instantiate(parentScope: rootScope);
+          final scope = bluePrint.instantiate(scope: rootScope);
 
           // Check if all nodes were instantiated
           expect(
@@ -116,7 +116,7 @@ void main() {
         final bluePrint = ScopeBluePrint.example();
         final parentScope = Scope.root(key: 'outer', scm: Scm.example());
         bluePrint.instantiate(
-          parentScope: parentScope,
+          scope: parentScope,
           fakeMissingDependencies: true,
         );
         parentScope.initSuppliers();

@@ -51,7 +51,7 @@ class SubScopeManager extends Node<List<ScopeBluePrint>> {
 
     // Add added scopes
     for (final addedScope in addedScopes) {
-      addedScope.instantiate(parentScope: scope);
+      addedScope.instantiate(scope: scope);
     }
 
     // Update changed scopes
