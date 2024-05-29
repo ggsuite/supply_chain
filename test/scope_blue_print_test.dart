@@ -58,20 +58,6 @@ void main() {
             expect(node, isNotNull);
           });
         });
-
-        group('without creating an inner scope', () {
-          test('when createOwnScope is false', () {
-            final bluePrint = ScopeBluePrint.example();
-            final parentScope = Scope.root(key: 'root', scm: Scm.example());
-            bluePrint.instantiate(
-              scope: parentScope,
-              createOwnScope: false,
-              fakeMissingDependencies: true,
-            );
-            final node = parentScope.findNode<int>('node');
-            expect(node, isNotNull);
-          });
-        });
       });
 
       group('should instantiate scopes and nodes returned in build()', () {

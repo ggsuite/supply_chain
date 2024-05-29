@@ -82,7 +82,6 @@ class ScopeBluePrint {
   Scope instantiate({
     required Scope scope,
     bool fakeMissingDependencies = false,
-    bool createOwnScope = true,
   }) {
     // Get the example blue print
     final scopeBluePrint = this;
@@ -93,7 +92,7 @@ class ScopeBluePrint {
     }
 
     // Create an inner scope
-    final innerScope = createOwnScope ? Scope(parent: scope, key: key) : scope;
+    final innerScope = Scope(parent: scope, key: key);
 
     final (
       List<NodeBluePrint<dynamic>> additionalNodes,
@@ -110,7 +109,6 @@ class ScopeBluePrint {
       subScope.instantiate(
         scope: innerScope,
         fakeMissingDependencies: fakeMissingDependencies,
-        createOwnScope: createOwnScope,
       );
     }
 
