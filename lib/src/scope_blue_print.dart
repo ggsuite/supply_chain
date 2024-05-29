@@ -21,7 +21,6 @@ class ScopeBluePrint {
     required this.key,
     this.nodes = const [],
     this.subScopes = const [],
-    required this.dependencies,
   });
 
   // ...........................................................................
@@ -29,7 +28,6 @@ class ScopeBluePrint {
   ScopeBluePrint copyWith({
     String? key,
     List<NodeBluePrint<dynamic>>? nodes,
-    List<NodeBluePrint<dynamic>>? dependencies,
     List<ScopeBluePrint>? subScopes,
     List<NodeBluePrint<dynamic>> overrides = const [],
   }) {
@@ -40,7 +38,6 @@ class ScopeBluePrint {
       key: key ?? this.key,
       nodes: nodes,
       subScopes: subScopes ?? this.subScopes,
-      dependencies: dependencies ?? this.dependencies,
     );
   }
 
@@ -70,9 +67,6 @@ class ScopeBluePrint {
   /// The children of the scope
   final List<ScopeBluePrint> subScopes;
 
-  /// The dependencies of the scope.
-  final List<NodeBluePrint<dynamic>> dependencies;
-
   // ...........................................................................
   /// Returns the node for a given key
   NodeBluePrint<T>? findNode<T>(String key) => _findNodeByKey<T>(key, nodes);
@@ -81,16 +75,7 @@ class ScopeBluePrint {
   /// Turns the blue print into a scope and adds it to the parent scope.
   Scope instantiate({
     required Scope scope,
-    bool fakeMissingDependencies = false,
   }) {
-    // Get the example blue print
-    final scopeBluePrint = this;
-
-    // Add dependencies to the outer scope
-    if (fakeMissingDependencies) {
-      scope.findOrCreateNodes(scopeBluePrint.dependencies);
-    }
-
     // Create an inner scope
     final innerScope = Scope(parent: scope, key: key);
 
@@ -108,7 +93,6 @@ class ScopeBluePrint {
     for (final subScope in allSubScopes) {
       subScope.instantiate(
         scope: innerScope,
-        fakeMissingDependencies: fakeMissingDependencies,
       );
     }
 
@@ -153,9 +137,19 @@ class ScopeBluePrint {
 
     /// return the result
     return ScopeBluePrint(
-      key: 'example',
-      nodes: [node, customer],
-      dependencies: [dependency],
+      key: 'scope',
+      nodes: [
+        dependency,
+      ],
+      subScopes: [
+        ScopeBluePrint(
+          key: 'childScope',
+          nodes: [
+            node,
+            customer,
+          ],
+        ),
+      ],
     );
   }
 
@@ -169,7 +163,6 @@ class ScopeBluePrint {
     required this.key,
     required this.nodes,
     required this.subScopes,
-    required this.dependencies,
   });
 
   // ...........................................................................
@@ -234,7 +227,6 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
   /// Constructor
   ExampleScopeBluePrint({
     super.key = 'parentScope',
-    super.dependencies = const [],
   }) : super(
           nodes: [
             const NodeBluePrint<int>(
@@ -246,7 +238,6 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
           subScopes: [
             const ScopeBluePrint(
               key: 'childScopeConstructedByParent',
-              dependencies: [],
               nodes: [
                 NodeBluePrint<int>(
                   key: 'nodeConstructedByChildScope',
@@ -271,7 +262,6 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
       [
         const ScopeBluePrint(
           key: 'childScopeBuiltByParent',
-          dependencies: [],
           nodes: [
             NodeBluePrint<int>(
               key: 'nodeBuiltByChildScope',

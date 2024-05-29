@@ -12,54 +12,20 @@ void main() {
     group('example', () {
       test('should provide a blue print with to nodes and one dependency', () {
         final scopeBluePrint = ScopeBluePrint.example();
-        final [node0 as NodeBluePrint<int>, node1 as NodeBluePrint<int>] =
-            scopeBluePrint.nodes;
-        final [dependency as NodeBluePrint<int>] = scopeBluePrint.dependencies;
+        final dependency = scopeBluePrint.nodes.first;
+        final subScope = scopeBluePrint.subScopes.first;
+        final node = subScope.nodes.first as NodeBluePrint<int>;
+        final customer = subScope.nodes.last as NodeBluePrint<int>;
         expect(scopeBluePrint.toString(), scopeBluePrint.key);
         expect(dependency.key, 'dependency');
-        expect(node0.key, 'node');
-        expect(node1.key, 'customer');
-        expect(node0.produce(<dynamic>[5], 0), 6);
-        expect(node1.produce(<dynamic>[6], 0), 7);
+        expect(node.key, 'node');
+        expect(customer.key, 'customer');
+        expect(node.produce(<dynamic>[5], 0), 6);
+        expect(customer.produce(<dynamic>[6], 0), 7);
       });
     });
 
     group('instantiate(scope)', () {
-      group('should instantiate the scope', () {
-        group('with fake dependencies', () {
-          test('when fakeMissingDependencies == false', () {
-            final bluePrint = ScopeBluePrint.example();
-            final parentScope = Scope.root(key: 'root', scm: Scm.example());
-            expect(
-              () => bluePrint.instantiate(scope: parentScope),
-              throwsA(
-                isA<ArgumentError>().having(
-                  (e) => e.toString(),
-                  'toString()',
-                  contains(
-                    'Scope "example": Supplier with key "dependency" not '
-                    'found.',
-                  ),
-                ),
-              ),
-            );
-          });
-        });
-
-        group('without fake dependencies', () {
-          test('when fakeMissingDependencies == true', () {
-            final bluePrint = ScopeBluePrint.example();
-            final parentScope = Scope.root(key: 'root', scm: Scm.example());
-            final scope = bluePrint.instantiate(
-              scope: parentScope,
-              fakeMissingDependencies: true,
-            );
-            final node = scope.findNode<int>('dependency');
-            expect(node, isNotNull);
-          });
-        });
-      });
-
       group('should instantiate scopes and nodes returned in build()', () {
         test('when build() returns a list of scopes and nodes', () async {
           final bluePrint = ExampleScopeBluePrint();
@@ -103,7 +69,6 @@ void main() {
         final parentScope = Scope.root(key: 'outer', scm: Scm.example());
         bluePrint.instantiate(
           scope: parentScope,
-          fakeMissingDependencies: true,
         );
         parentScope.initSuppliers();
 
@@ -119,13 +84,13 @@ void main() {
       });
 
       test('should return the node with the given key', () {
-        final bluePrint = ScopeBluePrint.example();
+        final bluePrint = ScopeBluePrint.example().subScopes.first;
         final node = bluePrint.findNode<int>('node');
         expect(node, isNotNull);
       });
 
       test('should throw if the type does not match', () {
-        final bluePrint = ScopeBluePrint.example();
+        final bluePrint = ScopeBluePrint.example().subScopes.first;
 
         expect(
           () => bluePrint.findNode<String>('node'),
@@ -154,14 +119,15 @@ void main() {
           expect(copy.nodes, isEmpty);
         });
 
-        test('with the given dependencies', () {
+        test('with the given subScopes', () {
           final bluePrint = ScopeBluePrint.example();
-          final copy = bluePrint.copyWith(dependencies: []);
-          expect(copy.dependencies, isEmpty);
+          final otherSubScopes = <ScopeBluePrint>[];
+          final copy = bluePrint.copyWith(subScopes: otherSubScopes);
+          expect(copy.subScopes, same(otherSubScopes));
         });
 
         test('with the given overrides', () {
-          final bluePrint = ScopeBluePrint.example();
+          final bluePrint = ScopeBluePrint.example().subScopes.first;
           const overriddenNode = NodeBluePrint<int>(
             key: 'node',
             initialProduct: 5,

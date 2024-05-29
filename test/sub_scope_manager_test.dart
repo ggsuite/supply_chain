@@ -111,7 +111,6 @@ void main() {
               produce: (components, previousProduct) => 10,
             ),
           ],
-          dependencies: [],
         ),
       ];
 
@@ -136,7 +135,6 @@ void main() {
               produce: (components, previousProduct) => 20,
             ),
           ],
-          dependencies: [],
         ),
       ];
 
@@ -155,7 +153,6 @@ void main() {
               produce: (components, previousProduct) => 10,
             ),
           ],
-          dependencies: [],
         ),
       ];
       subScopeManager.produce(announce: false);

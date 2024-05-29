@@ -23,6 +23,7 @@
 ### Removed
 
 - Removed plant
+- Remove dependencies from ScopeBluePrint
 
 ## [1.0.13] - 2024-05-17
 
