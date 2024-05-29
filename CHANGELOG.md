@@ -9,6 +9,7 @@
 - Add boilerplate for SubScopeManager
 - Add Scope.dispose
 - Add path to node and scope. Allow to specify a scope in supplier keys
+- Add built method to ScopeBluePrint
 
 ### Changed
 

@@ -8,12 +8,19 @@ import 'package:supply_chain/supply_chain.dart';
 
 /// A scope blue print is a collection of related node blue prints.
 /// that can form or build a scope.
+///
+/// - [key]: The key of the blue print
+/// - [nodes]: The nodes of the blue print.
+///   Can also be specified in build()
+/// - [children]: The children of the blue print.
+///   Can also be specified in build().
 class ScopeBluePrint {
   // ...........................................................................
   /// Constructor of the scope
   const ScopeBluePrint({
     required this.key,
-    required this.nodes,
+    this.nodes = const [],
+    this.subScopes = const [],
     required this.dependencies,
   });
 
@@ -23,6 +30,7 @@ class ScopeBluePrint {
     String? key,
     List<NodeBluePrint<dynamic>>? nodes,
     List<NodeBluePrint<dynamic>>? dependencies,
+    List<ScopeBluePrint>? subScopes,
     List<NodeBluePrint<dynamic>> overrides = const [],
   }) {
     nodes = nodes ?? this.nodes;
@@ -31,6 +39,7 @@ class ScopeBluePrint {
     return ScopeBluePrint._private(
       key: key ?? this.key,
       nodes: nodes,
+      subScopes: subScopes ?? this.subScopes,
       dependencies: dependencies ?? this.dependencies,
     );
   }
@@ -42,11 +51,24 @@ class ScopeBluePrint {
   }
 
   // ...........................................................................
+  /// Override this method in sub classes to define the nodes and the children
+  /// of the scope.
+  (
+    List<NodeBluePrint<dynamic>> nodes,
+    List<ScopeBluePrint> subScopes,
+  ) build() {
+    return ([], []);
+  }
+
+  // ...........................................................................
   /// The key of the scope
   final String key;
 
   /// The nodes of the scope
   final List<NodeBluePrint<dynamic>> nodes;
+
+  /// The children of the scope
+  final List<ScopeBluePrint> subScopes;
 
   /// The dependencies of the scope.
   final List<NodeBluePrint<dynamic>> dependencies;
@@ -74,8 +96,24 @@ class ScopeBluePrint {
     final innerScope =
         createOwnScope ? Scope(parent: parentScope, key: key) : parentScope;
 
+    final (
+      List<NodeBluePrint<dynamic>> additionalNodes,
+      List<ScopeBluePrint> additionalSubScopes
+    ) = build();
+
     // Add nodes to the inner scope
-    innerScope.findOrCreateNodes(scopeBluePrint.nodes);
+    final allNodes = <NodeBluePrint<dynamic>>[...nodes, ...additionalNodes];
+    innerScope.findOrCreateNodes(allNodes);
+
+    // Init sub scopes
+    final allSubScopes = [...subScopes, ...additionalSubScopes];
+    for (final subScope in allSubScopes) {
+      subScope.instantiate(
+        parentScope: innerScope,
+        fakeMissingDependencies: fakeMissingDependencies,
+        createOwnScope: createOwnScope,
+      );
+    }
 
     // Init suppliers
     innerScope.initSuppliers();
@@ -133,6 +171,7 @@ class ScopeBluePrint {
   ScopeBluePrint._private({
     required this.key,
     required this.nodes,
+    required this.subScopes,
     required this.dependencies,
   });
 
@@ -174,5 +213,77 @@ class ScopeBluePrint {
       }
     }
     return result;
+  }
+}
+
+// #############################################################################
+/// An example scope blue print.
+///
+/// Hierarchy:
+/// ```
+///     |-parentScope
+///        |- nodeConstructedByParent
+///        |
+///        |- nodeBuiltByParent
+///        |
+///        |- childScopeConstructedByParent
+///        |  |- nodeConstructedByChildScope
+///        |
+///        |- childScopeBuiltByParent
+///        |  |- nodeBuiltByChildScope
+/// ```
+///
+class ExampleScopeBluePrint extends ScopeBluePrint {
+  /// Constructor
+  ExampleScopeBluePrint({
+    super.key = 'parentScope',
+    super.dependencies = const [],
+  }) : super(
+          nodes: [
+            const NodeBluePrint<int>(
+              key: 'nodeConstructedByParent',
+              initialProduct: 0,
+              suppliers: [],
+            ),
+          ],
+          subScopes: [
+            const ScopeBluePrint(
+              key: 'childScopeConstructedByParent',
+              dependencies: [],
+              nodes: [
+                NodeBluePrint<int>(
+                  key: 'nodeConstructedByChildScope',
+                  initialProduct: 0,
+                  suppliers: [],
+                ),
+              ],
+            ),
+          ],
+        );
+
+  @override
+  (List<NodeBluePrint<dynamic>>, List<ScopeBluePrint>) build() {
+    return (
+      [
+        const NodeBluePrint<int>(
+          key: 'nodeBuiltByParent',
+          initialProduct: 0,
+          suppliers: [],
+        ),
+      ],
+      [
+        const ScopeBluePrint(
+          key: 'childScopeBuiltByParent',
+          dependencies: [],
+          nodes: [
+            NodeBluePrint<int>(
+              key: 'nodeBuiltByChildScope',
+              initialProduct: 0,
+              suppliers: [],
+            ),
+          ],
+        ),
+      ]
+    );
   }
 }

@@ -73,6 +73,42 @@ void main() {
           });
         });
       });
+
+      group('should instantiate scopes and nodes returned in build()', () {
+        test('when build() returns a list of scopes and nodes', () async {
+          final bluePrint = ExampleScopeBluePrint();
+          final rootScope = Scope.root(key: 'root', scm: Scm.example());
+          final scope = bluePrint.instantiate(parentScope: rootScope);
+
+          // Check if all nodes were instantiated
+          expect(
+            scope.findNode<int>('parentScope/nodeBuiltByParent'),
+            isNotNull,
+          );
+
+          expect(
+            scope.findNode<int>('parentScope/nodeConstructedByParent'),
+            isNotNull,
+          );
+
+          expect(
+            scope.findNode<int>(
+              'parentScope/childScopeBuiltByParent/nodeBuiltByChildScope',
+            ),
+            isNotNull,
+          );
+
+          expect(
+            scope.findNode<int>(
+              'parentScope/childScopeConstructedByParent/nodeConstructedByChildScope',
+            ),
+            isNotNull,
+          );
+
+          await scope
+              .saveGraphToFile('test/graphs/example_scope_blue_print.svg');
+        });
+      });
     });
 
     group('saveGraphToFile', () {
