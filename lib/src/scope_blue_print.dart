@@ -20,7 +20,7 @@ class ScopeBluePrint {
   const ScopeBluePrint({
     required this.key,
     this.nodes = const [],
-    this.subScopes = const [],
+    this.childScopes = const [],
   });
 
   // ...........................................................................
@@ -37,7 +37,7 @@ class ScopeBluePrint {
     return ScopeBluePrint._private(
       key: key ?? this.key,
       nodes: nodes,
-      subScopes: subScopes ?? this.subScopes,
+      childScopes: subScopes ?? childScopes,
     );
   }
 
@@ -65,7 +65,7 @@ class ScopeBluePrint {
   final List<NodeBluePrint<dynamic>> nodes;
 
   /// The children of the scope
-  final List<ScopeBluePrint> subScopes;
+  final List<ScopeBluePrint> childScopes;
 
   // ...........................................................................
   /// Returns the node for a given key
@@ -89,7 +89,7 @@ class ScopeBluePrint {
     innerScope.findOrCreateNodes(allNodes);
 
     // Init sub scopes
-    final allSubScopes = [...subScopes, ...additionalSubScopes];
+    final allSubScopes = [...childScopes, ...additionalSubScopes];
     for (final subScope in allSubScopes) {
       subScope.instantiate(
         scope: innerScope,
@@ -141,7 +141,7 @@ class ScopeBluePrint {
       nodes: [
         dependency,
       ],
-      subScopes: [
+      childScopes: [
         ScopeBluePrint(
           key: 'childScope',
           nodes: [
@@ -162,7 +162,7 @@ class ScopeBluePrint {
   ScopeBluePrint._private({
     required this.key,
     required this.nodes,
-    required this.subScopes,
+    required this.childScopes,
   });
 
   // ...........................................................................
@@ -235,7 +235,7 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
               suppliers: [],
             ),
           ],
-          subScopes: [
+          childScopes: [
             const ScopeBluePrint(
               key: 'childScopeConstructedByParent',
               nodes: [

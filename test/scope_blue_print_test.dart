@@ -13,7 +13,7 @@ void main() {
       test('should provide a blue print with to nodes and one dependency', () {
         final scopeBluePrint = ScopeBluePrint.example();
         final dependency = scopeBluePrint.nodes.first;
-        final subScope = scopeBluePrint.subScopes.first;
+        final subScope = scopeBluePrint.childScopes.first;
         final node = subScope.nodes.first as NodeBluePrint<int>;
         final customer = subScope.nodes.last as NodeBluePrint<int>;
         expect(scopeBluePrint.toString(), scopeBluePrint.key);
@@ -84,13 +84,13 @@ void main() {
       });
 
       test('should return the node with the given key', () {
-        final bluePrint = ScopeBluePrint.example().subScopes.first;
+        final bluePrint = ScopeBluePrint.example().childScopes.first;
         final node = bluePrint.findNode<int>('node');
         expect(node, isNotNull);
       });
 
       test('should throw if the type does not match', () {
-        final bluePrint = ScopeBluePrint.example().subScopes.first;
+        final bluePrint = ScopeBluePrint.example().childScopes.first;
 
         expect(
           () => bluePrint.findNode<String>('node'),
@@ -123,11 +123,11 @@ void main() {
           final bluePrint = ScopeBluePrint.example();
           final otherSubScopes = <ScopeBluePrint>[];
           final copy = bluePrint.copyWith(subScopes: otherSubScopes);
-          expect(copy.subScopes, same(otherSubScopes));
+          expect(copy.childScopes, same(otherSubScopes));
         });
 
         test('with the given overrides', () {
-          final bluePrint = ScopeBluePrint.example().subScopes.first;
+          final bluePrint = ScopeBluePrint.example().childScopes.first;
           const overriddenNode = NodeBluePrint<int>(
             key: 'node',
             initialProduct: 5,

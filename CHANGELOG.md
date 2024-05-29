@@ -19,6 +19,7 @@
 - Node and scope names must be camel case now
 - Scope:instantiate: Rename parentScope param into scope
 - ScopeBluePrints will alwas create a scope
+- Rename subScope to childScope
 
 ### Removed
 
