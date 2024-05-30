@@ -25,6 +25,7 @@
 - Breaking change: Use . instead / for scope notation
 - Ignore code not executed on GitHub
 - Allow to embedd real ScopeBluePrints into mockContent
+- Rework example
 
 ### Removed
 

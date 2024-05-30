@@ -28,7 +28,7 @@ class Scope {
     required this.scm,
   })  : parent = null,
         assert(key.isCamelCase) {
-    _initPath();
+    _init();
   }
 
   // ...........................................................................
@@ -316,13 +316,12 @@ class Scope {
 
   // ...........................................................................
   /// Creates an example instance of Scope
-  factory Scope.example({Scm? scm}) {
+  factory Scope.example({
+    Scm? scm,
+    String key = 'example',
+  }) {
     scm ??= Scm.testInstance;
-
-    return Scope(
-      key: 'example',
-      parent: Scope.root(key: 'root', scm: scm),
-    );
+    return Scope.root(key: key, scm: scm);
   }
 
   // ...........................................................................

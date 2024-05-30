@@ -62,6 +62,10 @@ void main() {
 
     group('dispose', () {
       test('should remove the scope from its parent', () {
+        final parent = Scope.example(scm: scm);
+        final scope =
+            const ScopeBluePrint(key: 'child').instantiate(scope: parent);
+
         // Before dispose the scope belongs to it's parent
         expect(scope.parent!.children, contains(scope));
 
