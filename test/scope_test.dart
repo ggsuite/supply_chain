@@ -756,6 +756,7 @@ void main() {
                 const ScopeBluePrint(key: 'e'),
                 const ScopeBluePrint(key: 'f'),
               ],
+              'g': const ScopeBluePrint(key: 'g'),
             },
           },
         });
@@ -769,6 +770,7 @@ void main() {
         expect(scope.findScope('a.b.c.d')!.key, 'd');
         expect(scope.findScope('a.b.c.e')!.key, 'e');
         expect(scope.findScope('a.b.c.f')!.key, 'f');
+        expect(scope.findScope('a.b.g')!.key, 'g');
       });
 
       group('should throw', () {

@@ -383,6 +383,12 @@ class Scope {
       }
 
       // If value is a ScopeBluePrint, instantiate the scope
+      else if (value is ScopeBluePrint) {
+        assert(value.key == key);
+        value.instantiate(scope: this);
+      }
+
+      // If value is a ScopeBluePrint, instantiate the scope
       else if (value is List) {
         final scope = ScopeBluePrint(key: key).instantiate(scope: this);
 

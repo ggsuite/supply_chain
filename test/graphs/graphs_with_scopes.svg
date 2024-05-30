@@ -14,16 +14,6 @@
 <polygon fill="none" stroke="black" points="8,-8 8,-326.5 778,-326.5 778,-8 8,-8"/>
 <text text-anchor="middle" x="393" y="-309.2" font-family="Times,serif" font-size="14.00">exampleRoot</text>
 </g>
-<g id="clust4" class="cluster">
-<title>cluster_childScopeB_5</title>
-<polygon fill="none" stroke="black" points="16,-16 16,-133 448,-133 448,-16 16,-16"/>
-<text text-anchor="middle" x="232" y="-115.7" font-family="Times,serif" font-size="14.00">childScopeB</text>
-</g>
-<g id="clust5" class="cluster">
-<title>cluster_grandChildScope_6</title>
-<polygon fill="none" stroke="black" points="144,-24 144,-100.5 318,-100.5 318,-24 144,-24"/>
-<text text-anchor="middle" x="231" y="-83.2" font-family="Times,serif" font-size="14.00">grandChildScope</text>
-</g>
 <g id="clust2" class="cluster">
 <title>cluster_childScopeA_3</title>
 <polygon fill="none" stroke="black" points="456,-24 456,-250 766,-250 766,-24 456,-24"/>
@@ -33,6 +23,16 @@
 <title>cluster_grandChildScope_4</title>
 <polygon fill="none" stroke="black" points="584,-141 584,-217.5 758,-217.5 758,-141 584,-141"/>
 <text text-anchor="middle" x="671" y="-200.2" font-family="Times,serif" font-size="14.00">grandChildScope</text>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_childScopeB_5</title>
+<polygon fill="none" stroke="black" points="16,-16 16,-133 448,-133 448,-16 16,-16"/>
+<text text-anchor="middle" x="232" y="-115.7" font-family="Times,serif" font-size="14.00">childScopeB</text>
+</g>
+<g id="clust5" class="cluster">
+<title>cluster_grandChildScope_6</title>
+<polygon fill="none" stroke="black" points="144,-24 144,-100.5 318,-100.5 318,-24 144,-24"/>
+<text text-anchor="middle" x="231" y="-83.2" font-family="Times,serif" font-size="14.00">grandChildScope</text>
 </g>
 <!-- grandChildNodeA_5 -->
 <g id="node1" class="node">

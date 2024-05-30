@@ -27,6 +27,7 @@
 - Ignore code not executed on GitHub
 - Allow to embedd real ScopeBluePrints into mockContent
 - Rework example
+- Allow to embed ScopeBluePrints directly in mocked content
 
 ### Removed
 
