@@ -11,6 +11,12 @@ import 'package:test/test.dart';
 
 import 'sample_nodes.dart';
 
+enum TestEnum {
+  a,
+  b,
+  c,
+}
+
 void main() {
   late Node<int> node;
 
@@ -638,6 +644,52 @@ void main() {
           expect(childScopeB.isDescendantOf(childScopeA), isFalse);
           expect(grandChildScope.isDescendantOf(rootScope), isTrue);
         });
+      });
+    });
+
+    group('mockContent', () {
+      test('should create a mock content', () {
+        final scope = Scope.example();
+        scope.mockContent({
+          'a': {
+            'int': 5,
+            'b': {
+              'int': 10,
+              'double': 3.14,
+              'string': 'hello',
+              'bool': true,
+              'enum': const NodeBluePrint<TestEnum>(
+                key: 'enum',
+                initialProduct: TestEnum.a,
+              ),
+            },
+          },
+        });
+
+        expect(scope.findNode<int>('a.int')?.product, 5);
+        expect(scope.findNode<int>('a.b.int')?.product, 10);
+        expect(scope.findNode<double>('a.b.double')?.product, 3.14);
+        expect(scope.findNode<bool>('a.b.bool')?.product, true);
+        expect(scope.findNode<TestEnum>('a.b.enum')?.product, TestEnum.a);
+      });
+
+      test('should throw if an unsupported type is mocked', () {
+        final scope = Scope.example();
+        expect(
+          () => scope.mockContent({
+            'a': {
+              'unsupported': TestEnum.a,
+            },
+          }),
+          throwsA(
+            predicate<ArgumentError>(
+              (e) => e.toString().contains(
+                    'Type TestEnum not supported. '
+                    'Use NodeBluePrint<TestEnum> instead.',
+                  ),
+            ),
+          ),
+        );
       });
     });
   });

@@ -146,17 +146,6 @@ class Scope {
   }
 
   // ...........................................................................
-  /// Creates an example instance of Scope
-  factory Scope.example({Scm? scm}) {
-    scm ??= Scm.testInstance;
-
-    return Scope(
-      key: 'example',
-      parent: Scope.root(key: 'root', scm: scm),
-    );
-  }
-
-  // ...........................................................................
   /// Returns true if this scope is an ancestor of the given scope
   bool isAncestorOf(Scope scope) {
     if (_children.containsKey(scope.key)) {
@@ -237,73 +226,9 @@ class Scope {
     return node;
   }
 
-  // ...........................................................................
-  Node<T>? _findNodeInOwnScope<T>(String nodeKey, List<String> scopePath) {
-    final node = _nodes[nodeKey];
-    if (node == null) {
-      return null;
-    }
-
-    if (scopePath.isNotEmpty) {
-      if (!node.scope.path.endsWith(scopePath.join('.'))) {
-        return null;
-      }
-    }
-
-    if (node is! Node<T>) {
-      throw ArgumentError('Node with key "$nodeKey" is not of type $T');
-    }
-
-    return node;
-  }
-
-  // ...........................................................................
-  Node<T>? _findNodeNodeInParentScopes<T>(String key, List<String> scopePath) {
-    return parent?._findNodeInOwnScope<T>(key, scopePath) ??
-        parent?._findNodeNodeInParentScopes<T>(key, scopePath);
-  }
-
-  // ...........................................................................
-  Node<T>? _findNodeInDirectSiblingScopes<T>(
-    String key,
-    List<String> scopePath,
-  ) {
-    if (parent == null) {
-      return null;
-    }
-
-    for (final sibling in parent!._children.values) {
-      final node = sibling._findNodeInOwnScope<T>(key, scopePath);
-      if (node != null) {
-        return node;
-      }
-    }
-
-    return null;
-  }
-
-  // ...........................................................................
-  Node<T>? _findAnyUniqueNode<T>(String key, List<String> scopePath) {
-    final scopePathString = scopePath.join('.');
-    final nodes = scm.nodesWithKey<T>(key).where(
-          (element) => element.scope.path.endsWith(scopePathString),
-        );
-    if (nodes.length == 1) {
-      return nodes.first;
-    }
-
-    if (nodes.length > 1) {
-      throw ArgumentError(
-        'More than one node with key "$key" and Type<$T> found.',
-      );
-    }
-
-    return null;
-  }
-
-  // ...........................................................................
   // Print graph
 
+  // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz
   String get graph {
     var result = '';
@@ -352,6 +277,93 @@ class Scope {
       }
     }
     // coveralls:ignore-end
+  }
+
+  // Test helpers
+
+  // ...........................................................................
+  /// Creates an example instance of Scope
+  factory Scope.example({Scm? scm}) {
+    scm ??= Scm.testInstance;
+
+    return Scope(
+      key: 'example',
+      parent: Scope.root(key: 'root', scm: scm),
+    );
+  }
+
+  // ...........................................................................
+  /// Allows to mock the content of the scope
+  ///
+  /// ```dart
+  /// final scope = Scope.example();
+  /// scope.mockContent({
+  ///   'a': {
+  ///     'int': 5,
+  ///     'b': {
+  ///       'int': 10,
+  ///       'double': 3.14,
+  ///       'string': 'hello',
+  ///       'bool': true,
+  ///       'enum': const NodeBluePrint<TestEnum>(
+  ///         key: 'enum',
+  ///         initialProduct: TestEnum.a,
+  ///       ),
+  ///     },
+  ///   },
+  /// });
+  ///
+  /// ```
+  void mockContent(Object content) {
+    assert(content is Map<String, dynamic>);
+    final map = content as Map<String, dynamic>;
+
+    // Iterate all entries of the map
+    for (final key in map.keys) {
+      final value = map[key];
+
+      // If the entry is a map, create a child scope
+      if (value is Map<String, dynamic>) {
+        final bluePrint = ScopeBluePrint(key: key);
+        final child = bluePrint.instantiate(scope: this);
+
+        // Forward child content to child
+        child.mockContent(value);
+      }
+
+      // If value is a NodeBluePrint, create a child node
+      else if (value is NodeBluePrint) {
+        value.instantiate(scope: this);
+      }
+
+      // If value is a basic type, create a node
+      else {
+        final bluePrint = switch (value.runtimeType) {
+          const (int) => NodeBluePrint<int>(
+              key: key,
+              initialProduct: value as int,
+            ),
+          const (double) => NodeBluePrint<double>(
+              initialProduct: value as double,
+              key: key,
+            ),
+          const (String) => NodeBluePrint<String>(
+              initialProduct: value as String,
+              key: key,
+            ),
+          const (bool) => NodeBluePrint<bool>(
+              initialProduct: value as bool,
+              key: key,
+            ),
+          _ => throw ArgumentError(
+              'Type ${value.runtimeType} not supported. '
+              'Use NodeBluePrint<${value.runtimeType}> instead.',
+            ),
+        };
+
+        bluePrint.instantiate(scope: this);
+      }
+    }
   }
 
   // ######################
@@ -472,6 +484,70 @@ class Scope {
 
       node.addSupplier(supplier);
     }
+  }
+
+  // ...........................................................................
+  Node<T>? _findNodeInOwnScope<T>(String nodeKey, List<String> scopePath) {
+    final node = _nodes[nodeKey];
+    if (node == null) {
+      return null;
+    }
+
+    if (scopePath.isNotEmpty) {
+      if (!node.scope.path.endsWith(scopePath.join('.'))) {
+        return null;
+      }
+    }
+
+    if (node is! Node<T>) {
+      throw ArgumentError('Node with key "$nodeKey" is not of type $T');
+    }
+
+    return node;
+  }
+
+  // ...........................................................................
+  Node<T>? _findNodeNodeInParentScopes<T>(String key, List<String> scopePath) {
+    return parent?._findNodeInOwnScope<T>(key, scopePath) ??
+        parent?._findNodeNodeInParentScopes<T>(key, scopePath);
+  }
+
+  // ...........................................................................
+  Node<T>? _findNodeInDirectSiblingScopes<T>(
+    String key,
+    List<String> scopePath,
+  ) {
+    if (parent == null) {
+      return null;
+    }
+
+    for (final sibling in parent!._children.values) {
+      final node = sibling._findNodeInOwnScope<T>(key, scopePath);
+      if (node != null) {
+        return node;
+      }
+    }
+
+    return null;
+  }
+
+  // ...........................................................................
+  Node<T>? _findAnyUniqueNode<T>(String key, List<String> scopePath) {
+    final scopePathString = scopePath.join('.');
+    final nodes = scm.nodesWithKey<T>(key).where(
+          (element) => element.scope.path.endsWith(scopePathString),
+        );
+    if (nodes.length == 1) {
+      return nodes.first;
+    }
+
+    if (nodes.length > 1) {
+      throw ArgumentError(
+        'More than one node with key "$key" and Type<$T> found.',
+      );
+    }
+
+    return null;
   }
 }
 
