@@ -126,6 +126,69 @@ void main() {
       });
     });
 
+    group('findScope(path)', () {
+      group('should return the scope with the given path', () {
+        test('when the path has the name of the scope', () {
+          final scope = Scope.example();
+          expect(scope.findScope('example'), scope);
+        });
+        test('when the path has the name of a child node', () {
+          final scope = Scope.example();
+          scope.mockContent({
+            'a': {
+              'b': {
+                'c': 0,
+              },
+            },
+          });
+          expect(scope.findScope('a')?.key, 'a');
+          expect(scope.findScope('b')?.key, 'b');
+          expect(scope.findScope('c')?.key, null);
+        });
+        test('when the path contains multiple path segments', () {
+          final scope = Scope.example();
+          scope.mockContent({
+            'a': {
+              'b': {
+                'c': {
+                  'd': 0,
+                },
+              },
+            },
+          });
+          expect(scope.findScope('a.b')?.key, 'b');
+          expect(scope.findScope('a.b.c')?.key, 'c');
+          expect(scope.findScope('a.b.c.d'), isNull);
+        });
+      });
+      group('should return null', () {
+        test('if the scope does not exist', () {
+          final root = ExampleScopeRoot(scm: Scm.testInstance);
+          expect(root.findScope('unknown'), isNull);
+        });
+        test('if the key is empty', () {
+          final root = ExampleScopeRoot(scm: Scm.testInstance);
+          expect(root.findScope(''), isNull);
+        });
+      });
+
+      test('should throw if multiple scopes with the path exist', () {
+        final scope = Scope.example();
+        scope.mockContent(
+          {
+            'a': {
+              'duplicate': {
+                'c': 0,
+                'duplicate': {
+                  'd': 0,
+                },
+              },
+            },
+          },
+        );
+      });
+    });
+
     group('findOrCreateNode()', () {
       test('should return an existing node when possible', () {
         expect(

@@ -109,6 +109,37 @@ class Scope {
   }
 
   // ...........................................................................
+  /// Returns the first scope with the given path.
+  /// Throws if multiple scopes with the same path exist.
+  Scope? findScope(String path) {
+    return _findScope(path.split('.'));
+  }
+
+  // ...........................................................................
+  Scope? _findScope(List<String> path) {
+    if (path.isEmpty) {
+      return null;
+    }
+
+    if (path.length == 1 && path.first == key) {
+      return this;
+    }
+
+    if (path.first == key) {
+      return _findScope(path.sublist(1));
+    }
+
+    for (final child in _children.values) {
+      final result = child._findScope(path);
+      if (result != null) {
+        return result;
+      }
+    }
+
+    return null;
+  }
+
+  // ...........................................................................
   /// The parent supply scope
   Scope? parent;
 
