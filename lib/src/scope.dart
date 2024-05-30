@@ -143,6 +143,15 @@ class Scope {
   /// The parent supply scope
   Scope? parent;
 
+  /// Returns the root scope of this scope
+  Scope get root {
+    var result = this;
+    while (result.parent != null) {
+      result = result.parent!;
+    }
+    return result;
+  }
+
   // ...........................................................................
   /// Adds an existing node to the scope
   void addNode<T>(Node<T> node) {

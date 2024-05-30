@@ -60,6 +60,28 @@ void main() {
       });
     });
 
+    group('root', () {
+      test('should return the scope itself, if scope is the root', () {
+        final root = Scope.example();
+        expect(root.root, root);
+      });
+
+      test('should return the root node', () {
+        final root = Scope.example();
+        root.mockContent({
+          'a': {
+            'b': {
+              'c': {
+                'd': 0,
+              },
+            },
+          },
+        });
+        final c = root.findScope('a.b.c')!;
+        expect(c.root, root);
+      });
+    });
+
     group('dispose', () {
       test('should remove the scope from its parent', () {
         final parent = Scope.example(scm: scm);

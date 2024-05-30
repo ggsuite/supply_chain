@@ -12,6 +12,7 @@
 - Add built method to ScopeBluePrint
 - Add Scope.mockContent
 - Add Scope.findScope
+- Add Scope.root
 
 ### Changed
 
