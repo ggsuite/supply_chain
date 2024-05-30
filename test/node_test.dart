@@ -47,7 +47,7 @@ void main() {
 
     group('path', () {
       test('should return the path of the node', () {
-        expect(node.path, 'root/example/aaliyah');
+        expect(node.path, 'root.example.aaliyah');
       });
     });
 

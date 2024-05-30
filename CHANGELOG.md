@@ -20,6 +20,7 @@
 - Scope:instantiate: Rename parentScope param into scope
 - ScopeBluePrints will alwas create a scope
 - Rename subScope to childScope
+- Breaking change: Use . instead / for scope notation
 
 ### Removed
 

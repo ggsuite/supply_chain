@@ -88,7 +88,7 @@ class Node<T> {
   String get key => bluePrint.key;
 
   /// The key of the node
-  String get path => '${scope.path}/$key';
+  String get path => '${scope.path}.$key';
 
   /// The unique id of the node
   final int id = _idCounter++;

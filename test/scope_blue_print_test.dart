@@ -34,31 +34,32 @@ void main() {
 
           // Check if all nodes were instantiated
           expect(
-            scope.findNode<int>('parentScope/nodeBuiltByParent'),
+            scope.findNode<int>('parentScope.nodeBuiltByParent'),
             isNotNull,
           );
 
           expect(
-            scope.findNode<int>('parentScope/nodeConstructedByParent'),
+            scope.findNode<int>('parentScope.nodeConstructedByParent'),
             isNotNull,
           );
 
           expect(
             scope.findNode<int>(
-              'parentScope/childScopeBuiltByParent/nodeBuiltByChildScope',
+              'parentScope.childScopeBuiltByParent.nodeBuiltByChildScope',
             ),
             isNotNull,
           );
 
           expect(
             scope.findNode<int>(
-              'parentScope/childScopeConstructedByParent/nodeConstructedByChildScope',
+              'parentScope.childScopeConstructedByParent.'
+              'nodeConstructedByChildScope',
             ),
             isNotNull,
           );
 
           await scope
-              .saveGraphToFile('test/graphs/example_scope_blue_print.svg');
+              .saveGraphToFile('test.graphs.example_scope_blue_print.svg');
         });
       });
     });

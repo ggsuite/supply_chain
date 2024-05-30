@@ -221,7 +221,7 @@ class Scope {
     String key, {
     bool throwIfNotFound = false,
   }) {
-    final keyParts = key.split('/');
+    final keyParts = key.split('.');
     final nodeKey = keyParts.last;
     final scopePath = keyParts.sublist(0, keyParts.length - 1);
 
@@ -245,7 +245,7 @@ class Scope {
     }
 
     if (scopePath.isNotEmpty) {
-      if (!node.scope.path.endsWith(scopePath.join('/'))) {
+      if (!node.scope.path.endsWith(scopePath.join('.'))) {
         return null;
       }
     }
@@ -284,7 +284,10 @@ class Scope {
 
   // ...........................................................................
   Node<T>? _findAnyUniqueNode<T>(String key, List<String> scopePath) {
-    final nodes = scm.nodesWithKey<T>(key);
+    final scopePathString = scopePath.join('.');
+    final nodes = scm.nodesWithKey<T>(key).where(
+          (element) => element.scope.path.endsWith(scopePathString),
+        );
     if (nodes.length == 1) {
       return nodes.first;
     }
@@ -398,7 +401,7 @@ class Scope {
 
   // ...........................................................................
   void _initPath() {
-    _path = parent == null ? key : '${parent!.path}/$key';
+    _path = parent == null ? key : '${parent!.path}.$key';
   }
 
   // ...........................................................................
@@ -520,7 +523,7 @@ class ExampleChildScope extends Scope {
         initialProduct: 0,
         produce: (components, previous) => previous + 1,
         key: 'childNodeA',
-        suppliers: ['rootA', 'rootB', 'childScopeA/childNodeB'],
+        suppliers: ['rootA', 'rootB', 'childScopeA.childNodeB'],
       ),
     );
 

@@ -92,8 +92,8 @@ void main() {
         final childScopeA = root.child('childScopeA')!;
         final grandChildScope = childScopeA.child('grandChildScope')!;
         expect(root.path, 'exampleRoot');
-        expect(childScopeA.path, 'exampleRoot/childScopeA');
-        expect(grandChildScope.path, 'exampleRoot/childScopeA/grandChildScope');
+        expect(childScopeA.path, 'exampleRoot.childScopeA');
+        expect(grandChildScope.path, 'exampleRoot.childScopeA.grandChildScope');
       });
     });
 
@@ -288,8 +288,8 @@ void main() {
         expect(childA.nodes.map((n) => n.key), ['childNodeA', 'childNodeB']);
         expect(childB.nodes.map((n) => n.key), ['childNodeA', 'childNodeB']);
 
-        expect(childA.path, 'exampleRoot/childScopeA');
-        expect(childB.path, 'exampleRoot/childScopeB');
+        expect(childA.path, 'exampleRoot.childScopeA');
+        expect(childB.path, 'exampleRoot.childScopeB');
 
         for (var element in childA.nodes) {
           scm.nominate(element);
@@ -303,10 +303,10 @@ void main() {
         for (final element in grandChild.nodes) {
           scm.nominate(element);
         }
-        expect(grandChild.path, 'exampleRoot/childScopeA/grandChildScope');
+        expect(grandChild.path, 'exampleRoot.childScopeA.grandChildScope');
         expect(
           grandChild.nodes.first.path,
-          'exampleRoot/childScopeA/grandChildScope/grandChildNodeA',
+          'exampleRoot.childScopeA.grandChildScope.grandChildNodeA',
         );
 
         scm.tick();
@@ -466,7 +466,7 @@ void main() {
               );
 
               final grandChildNodeReal = grandChildScope.findNode<int>(
-                'childScopeA/grandChildScope/grandChildNodeA',
+                'childScopeA.grandChildScope.grandChildNodeA',
               );
               expect(grandChildNodeReal, grandChildNodeAExpected);
             });
@@ -480,7 +480,7 @@ void main() {
               );
 
               final childNodeAReal = grandChildScope.findNode<int>(
-                'childScopeA/childNodeA',
+                'childScopeA.childNodeA',
               );
               expect(childNodeAReal, childNodeAExpected);
             });
