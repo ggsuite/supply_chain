@@ -291,6 +291,7 @@ class Scope {
     // coveralls:ignore-start
     else {
       if (!isGitHub) {
+        // coverage: ignore-start
         // Write dot file to tmp
         final fileName = path.split('/').last;
         final tempDir = await Directory.systemTemp.createTemp();
@@ -305,6 +306,7 @@ class Scope {
         );
         await tempDir.delete(recursive: true);
         assert(process.exitCode == 0, process.stderr);
+        // coverage: ignore-end
       }
     }
     // coveralls:ignore-end

@@ -23,6 +23,7 @@
 - ScopeBluePrints will alwas create a scope
 - Rename subScope to childScope
 - Breaking change: Use . instead / for scope notation
+- Ignore code not executed on GitHub
 
 ### Removed
 
