@@ -343,6 +343,11 @@ class Scope {
   ///         initialProduct: TestEnum.a,
   ///       ),
   ///     },
+  ///     'c': [
+  ///       const ScopeBluePrint(key: 'd'),
+  ///       const ScopeBluePrint(key: 'e'),
+  ///       const ScopeBluePrint(key: 'f'),
+  ///     ],
   ///   },
   /// });
   ///
@@ -367,6 +372,21 @@ class Scope {
       // If value is a NodeBluePrint, create a child node
       else if (value is NodeBluePrint) {
         value.instantiate(scope: this);
+      }
+
+      // If value is a ScopeBluePrint, instantiate the scope
+      else if (value is List) {
+        final scope = ScopeBluePrint(key: key).instantiate(scope: this);
+
+        for (final item in value) {
+          if (item is ScopeBluePrint) {
+            item.instantiate(scope: scope);
+          } else {
+            throw ArgumentError(
+              'Lists must only contain ScopeBluePrints.',
+            );
+          }
+        }
       }
 
       // If value is a basic type, create a node

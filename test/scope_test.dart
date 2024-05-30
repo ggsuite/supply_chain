@@ -725,6 +725,11 @@ void main() {
                 key: 'enum',
                 initialProduct: TestEnum.a,
               ),
+              'c': [
+                const ScopeBluePrint(key: 'd'),
+                const ScopeBluePrint(key: 'e'),
+                const ScopeBluePrint(key: 'f'),
+              ],
             },
           },
         });
@@ -734,25 +739,49 @@ void main() {
         expect(scope.findNode<double>('a.b.double')?.product, 3.14);
         expect(scope.findNode<bool>('a.b.bool')?.product, true);
         expect(scope.findNode<TestEnum>('a.b.enum')?.product, TestEnum.a);
+
+        expect(scope.findScope('a.b.c.d')!.key, 'd');
+        expect(scope.findScope('a.b.c.e')!.key, 'e');
+        expect(scope.findScope('a.b.c.f')!.key, 'f');
       });
 
-      test('should throw if an unsupported type is mocked', () {
-        final scope = Scope.example();
-        expect(
-          () => scope.mockContent({
-            'a': {
-              'unsupported': TestEnum.a,
-            },
-          }),
-          throwsA(
-            predicate<ArgumentError>(
-              (e) => e.toString().contains(
-                    'Type TestEnum not supported. '
-                    'Use NodeBluePrint<TestEnum> instead.',
-                  ),
+      group('should throw', () {
+        test('if an unsupported type is mocked', () {
+          final scope = Scope.example();
+          expect(
+            () => scope.mockContent({
+              'a': {
+                'unsupported': TestEnum.a,
+              },
+            }),
+            throwsA(
+              predicate<ArgumentError>(
+                (e) => e.toString().contains(
+                      'Type TestEnum not supported. '
+                      'Use NodeBluePrint<TestEnum> instead.',
+                    ),
+              ),
             ),
-          ),
-        );
+          );
+        });
+
+        test('if a list does not contain ScopeBluePrint', () {
+          final scope = Scope.example();
+          expect(
+            () => scope.mockContent({
+              'a': {
+                'b': [5],
+              },
+            }),
+            throwsA(
+              predicate<ArgumentError>(
+                (e) => e.toString().contains(
+                      'Lists must only contain ScopeBluePrints.',
+                    ),
+              ),
+            ),
+          );
+        });
       });
     });
   });
