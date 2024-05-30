@@ -28,6 +28,7 @@
 - Allow to embedd real ScopeBluePrints into mockContent
 - Rework example
 - Allow to embed ScopeBluePrints directly in mocked content
+- Move initialization of suppliers to SCM
 
 ### Removed
 

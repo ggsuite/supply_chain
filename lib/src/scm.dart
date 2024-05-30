@@ -63,6 +63,11 @@ class Scm {
     _assertNoNodeIsDisposed(nodes: _nominatedNodes);
   }
 
+  /// Adds node for initialization of suppliers
+  void initSuppliers(Node<dynamic> node) {
+    _nodesNeedingSupplierUpdate.add(node);
+  }
+
   /// Nominate node for production
   void nominate(Node<dynamic> node) {
     _assertNodeIsNotDisposed(node);
@@ -214,6 +219,10 @@ class Scm {
   final Set<Node<dynamic>> _animatedNodes = {};
 
   // ...........................................................................
+  // Nodes that need supplier update
+  final Set<Node<dynamic>> _nodesNeedingSupplierUpdate = {};
+
+  // ...........................................................................
   // Processing stages
   final Set<Node<dynamic>> _nominatedNodes = {};
   final Set<Node<dynamic>> _preparedNodes = {};
@@ -275,10 +284,38 @@ class Scm {
   }
 
   // ...........................................................................
+  void _initSuppliers() {
+    for (final node in _nodesNeedingSupplierUpdate) {
+      _addSuppliers(node);
+    }
+    _nodesNeedingSupplierUpdate.clear();
+  }
+
+  // ...........................................................................
+  void _addSuppliers(Node<dynamic> node) {
+    for (final supplierName in node.bluePrint.suppliers) {
+      final supplier = node.scope.findNode<dynamic>(supplierName);
+      if (supplier == null) {
+        throw ArgumentError(
+          'Scope "${node.scope.key}": Supplier with key "$supplierName" '
+          'not found.',
+        );
+      }
+
+      node.addSupplier(supplier);
+    }
+  }
+
+  // ...........................................................................
   // Preparation
 
   /// Prepares all nodes
   void _prepare() {
+    // Init suppliers
+    if (_nodesNeedingSupplierUpdate.isNotEmpty) {
+      _initSuppliers();
+    }
+
     // For all nominated nodes
     for (var node in [...nominatedNodes]) {
       // Prepare node

@@ -19,9 +19,6 @@ void main() {
         final rowHeightsNode = scope.findNode<List<int>>('rowHeights')!;
         expect(rowHeightsNode, isNotNull);
 
-        // Init suppliers
-        scope.initSuppliers();
-
         // Let the SCM produce
         scm.tick();
         scm.testFlushTasks();

@@ -26,7 +26,7 @@ void main() {
   group('node', () {
     // .........................................................................
 
-    test('exampleNdoe', () {
+    test('exampleNode', () {
       expect(node.product, 0);
 
       // Nominate the node for production
@@ -252,8 +252,6 @@ void main() {
                 (components[0] as int) * 10,
           ),
         );
-
-        chain.initSuppliers();
 
         // Check initial values
         expect(node.product, 0);

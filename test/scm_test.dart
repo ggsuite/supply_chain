@@ -69,7 +69,6 @@ void main() {
   }
 
   group('Scm', () {
-    // #########################################################################
     test('should initialize correctly', () {
       // ..............
       // Initialization
@@ -215,7 +214,39 @@ void main() {
       expect(scm.minProductionPriority, Priority.realtime);
     });
 
-    // #########################################################################
+    group('should throw', () {
+      test('if nodes with non existing suppliers exist', () {
+        final scope = Scope.example();
+        scope.mockContent({
+          'a': NodeBluePrint<int>(
+            key: 'a',
+            initialProduct: 0,
+            suppliers: ['b', 'unknown'],
+            produce: (c, p) => 1,
+          ),
+          'b': NodeBluePrint<int>(
+            key: 'b',
+            initialProduct: 0,
+            suppliers: [],
+            produce: (c, p) => 1,
+          ),
+        });
+
+        scope.scm.tick();
+
+        expect(
+          () => scope.scm.testFlushTasks(),
+          throwsA(
+            isA<ArgumentError>().having(
+              (e) => e.message,
+              'message',
+              'Scope "example": Supplier with key "unknown" not found.',
+            ),
+          ),
+        );
+      });
+    });
+
     test('should animate correctly', () {
       // Create a chain, containing a supplier, a producer and a customer
       initSupplierProducerCustomer();
@@ -272,7 +303,6 @@ void main() {
       expect(customer.product, 31);
     });
 
-    // #########################################################################
     test('should prefer realtime nodes', () {
       initMusicExampleNodes();
 
@@ -388,7 +418,6 @@ void main() {
       expectIsReady([screen, grid], true);
     });
 
-    // #########################################################################
     test('should throw if hasNewProduct(node) is called without nomination',
         () {
       // Create a node
@@ -412,7 +441,6 @@ void main() {
       );
     });
 
-    // #########################################################################
     group('should handle timeouts', () {
       test('with shouldTimeOut false', () {
         initTimeoutExampleNodes();
@@ -576,9 +604,7 @@ void main() {
     });
   });
 
-  // ###########################################################################
   group('test helpers', () {
-    // #########################################################################
     test('should be provided during testing', () {
       // Create some variables
       final scm = Scm.example();
@@ -624,7 +650,6 @@ void main() {
       expect(scm.testNormalTasks, isEmpty);
     });
 
-    // #########################################################################
     group('testInstance', () {
       test('should return a new instance with isTest == true', () {
         final scm = Scm.testInstance;
@@ -632,7 +657,6 @@ void main() {
       });
     });
 
-    // #########################################################################
     group('addNode, removeNode', () {
       test('should remove the node', () {
         final scm = Scm.testInstance;
@@ -667,7 +691,6 @@ void main() {
       });
     });
 
-    // #########################################################################
     group('clear()', () {
       test('should clear nominated, prepared and producing nodes', () {
         fakeAsync((fake) {
@@ -696,7 +719,6 @@ void main() {
     });
   });
 
-  // ###########################################################################
   test('Test with non test environment should work fine', () {
     fakeAsync((fake) {
       final scm = Scm.example(isTest: false);

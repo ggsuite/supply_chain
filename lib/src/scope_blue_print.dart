@@ -96,9 +96,6 @@ class ScopeBluePrint {
       );
     }
 
-    // Init suppliers
-    innerScope.initSuppliers();
-
     /// Returns the created exampleScope
     return innerScope;
   }

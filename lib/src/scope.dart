@@ -218,22 +218,6 @@ class Scope {
   }
 
   // ...........................................................................
-  /// Call this method to init the suppliers.
-  /// But not before the whole hierarchy has been created
-  void initSuppliers() {
-    for (final node in _nodes.values) {
-      final suppliers = node.bluePrint.suppliers;
-      if (suppliers.isNotEmpty) {
-        _addSuppliers(node, suppliers);
-      }
-    }
-
-    for (final child in _children.values) {
-      child.initSuppliers();
-    }
-  }
-
-  // ...........................................................................
   /// Returns true if a node with the given key exists in this or a
   /// parent supply scope
   bool hasNode(String key) {
@@ -329,7 +313,7 @@ class Scope {
     Scm? scm,
     String key = 'example',
   }) {
-    scm ??= Scm.testInstance;
+    scm ??= Scm.example();
     return Scope.root(key: key, scm: scm);
   }
 
@@ -536,20 +520,6 @@ class Scope {
       }
 
       return result;
-    }
-  }
-
-  // ...........................................................................
-  void _addSuppliers(Node<dynamic> node, Iterable<String> suppliers) {
-    for (final supplierName in suppliers) {
-      final supplier = findNode<dynamic>(supplierName);
-      if (supplier == null) {
-        throw ArgumentError(
-          'Scope "$key": Supplier with key "$supplierName" not found.',
-        );
-      }
-
-      node.addSupplier(supplier);
     }
   }
 

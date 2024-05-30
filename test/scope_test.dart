@@ -359,6 +359,31 @@ void main() {
         );
       });
     });
+
+    group('isAncestorOf(scope)', () {
+      test('should return true if the scope is an ancestor of the given scope',
+          () {
+        final root = ExampleScopeRoot(scm: Scm.testInstance);
+        final childScopeA = root.child('childScopeA')!;
+        final grandChildScope = childScopeA.child('grandChildScope')!;
+        expect(root.isAncestorOf(childScopeA), isTrue);
+        expect(root.isAncestorOf(grandChildScope), isTrue);
+        expect(childScopeA.isAncestorOf(grandChildScope), isTrue);
+      });
+    });
+
+    group('isDescendantOf(scope)', () {
+      test('should return true if the scope is a descendant of the given scope',
+          () {
+        final root = ExampleScopeRoot(scm: Scm.testInstance);
+        final childScopeA = root.child('childScopeA')!;
+        final grandChildScope = childScopeA.child('grandChildScope')!;
+        expect(childScopeA.isDescendantOf(root), isTrue);
+        expect(grandChildScope.isDescendantOf(root), isTrue);
+        expect(grandChildScope.isDescendantOf(childScopeA), isTrue);
+      });
+    });
+
     group('node.dispose(), removeNode()', () {
       test('should remove the node from the chain', () {
         expect(scope.nodes, isNotEmpty);
@@ -450,7 +475,6 @@ void main() {
 
       test('should print scopes correctly', () async {
         final root = ExampleScopeRoot(scm: Scm.testInstance);
-        root.initSuppliers();
         await updateGraphFile(root, 'graphs_with_scopes.dot');
       });
     });
@@ -654,85 +678,6 @@ void main() {
         expect(childScope.hasNode('childNodeB'), isTrue);
         expect(childScope.hasNode('Unknown'), isFalse);
         expect(childScope.hasNode('rootA'), isTrue);
-      });
-    });
-
-    group('initSuppliers()', () {
-      test(
-        'should find and add the suppliers added on createNode(....)',
-        () {
-          final scm = Scm.testInstance;
-          final rootScope = ExampleScopeRoot(scm: scm);
-          rootScope.initSuppliers();
-
-          // The root node has no suppliers
-          final rootA = rootScope.findNode<int>('rootA');
-          final rootB = rootScope.findNode<int>('rootB');
-          expect(rootA?.suppliers, isEmpty);
-          expect(rootB?.suppliers, isEmpty);
-
-          /// The child node a should have the root nodes as suppliers
-          final childScopeA = rootScope.child('childScopeA')!;
-          final childNodeA = childScopeA.findNode<int>('childNodeA');
-          final childNodeB = childScopeA.findNode<int>('childNodeB');
-          expect(childNodeA?.suppliers, hasLength(3));
-          expect(childNodeA?.suppliers, contains(rootA));
-          expect(childNodeA?.suppliers, contains(rootB));
-          expect(childNodeA?.suppliers, contains(childNodeB));
-        },
-      );
-
-      test('should throw if a supplier is not found', () {
-        final scm = Scm.testInstance;
-        final scope = Scope.example(scm: scm);
-
-        scope.findOrCreateNode<int>(
-          NodeBluePrint(
-            key: 'node',
-            suppliers: ['unknown'],
-            initialProduct: 0,
-            produce: (components, previous) => previous,
-          ),
-        );
-
-        expect(
-          () => scope.initSuppliers(),
-          throwsA(
-            predicate<ArgumentError>(
-              (e) => e.toString().contains(
-                    'Scope "example": Supplier with key "unknown" not found.',
-                  ),
-            ),
-          ),
-        );
-      });
-
-      group('isAncestorOf(node)', () {
-        test('should return true if the scope is an ancestor', () {
-          final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
-          final childScopeA = rootScope.child('childScopeA')!;
-          final childScopeB = rootScope.child('childScopeB')!;
-          final grandChildScope = childScopeA.child('grandChildScope')!;
-          expect(rootScope.isAncestorOf(childScopeA), isTrue);
-          expect(rootScope.isAncestorOf(childScopeB), isTrue);
-          expect(childScopeA.isAncestorOf(childScopeB), isFalse);
-          expect(childScopeB.isAncestorOf(childScopeA), isFalse);
-          expect(rootScope.isAncestorOf(grandChildScope), isTrue);
-        });
-      });
-
-      group('isDescendantOf(node)', () {
-        test('should return true if the scope is a descendant', () {
-          final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
-          final childScopeA = rootScope.child('childScopeA')!;
-          final childScopeB = rootScope.child('childScopeB')!;
-          final grandChildScope = childScopeA.child('grandChildScope')!;
-          expect(childScopeA.isDescendantOf(rootScope), isTrue);
-          expect(childScopeB.isDescendantOf(rootScope), isTrue);
-          expect(childScopeA.isDescendantOf(childScopeB), isFalse);
-          expect(childScopeB.isDescendantOf(childScopeA), isFalse);
-          expect(grandChildScope.isDescendantOf(rootScope), isTrue);
-        });
       });
     });
 

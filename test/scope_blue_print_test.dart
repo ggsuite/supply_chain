@@ -71,7 +71,6 @@ void main() {
         bluePrint.instantiate(
           scope: parentScope,
         );
-        parentScope.initSuppliers();
 
         await parentScope.saveGraphToFile('test/graphs/scope_blue_print.svg');
       });

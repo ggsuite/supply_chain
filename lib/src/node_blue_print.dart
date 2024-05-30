@@ -47,7 +47,7 @@ class NodeBluePrint<T> {
   static NodeBluePrint<int> example({String? key}) => NodeBluePrint<int>(
         key: key ?? nextKey,
         initialProduct: 0,
-        suppliers: ['supplier'],
+        suppliers: [],
         produce: (components, previousProduct) => previousProduct + 1,
       );
 

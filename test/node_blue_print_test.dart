@@ -14,7 +14,7 @@ void main() {
         final bluePrint = NodeBluePrint.example(key: 'node');
         expect(bluePrint.key, 'node');
         expect(bluePrint.initialProduct, 0);
-        expect(bluePrint.suppliers, ['supplier']);
+        expect(bluePrint.suppliers, <NodeBluePrint<dynamic>>[]);
         expect(bluePrint.produce([], 0), 1);
       });
 
@@ -22,7 +22,7 @@ void main() {
         final bluePrint = NodeBluePrint.example();
         expect(bluePrint.key, 'aaliyah');
         expect(bluePrint.initialProduct, 0);
-        expect(bluePrint.suppliers, ['supplier']);
+        expect(bluePrint.suppliers, <NodeBluePrint<dynamic>>[]);
         expect(bluePrint.produce([], 0), 1);
       });
     });
