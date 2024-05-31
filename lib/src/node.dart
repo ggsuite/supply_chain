@@ -242,11 +242,11 @@ class Node<T> {
   Iterable<Node<dynamic>> deepSuppliers({int depth = 1}) {
     if (depth < 0) depth = 100000;
 
-    final result = <Node<dynamic>>[...suppliers];
-
     if (depth == 0) {
-      return result;
+      return [];
     }
+
+    final result = <Node<dynamic>>[...suppliers];
 
     for (final supplier in suppliers) {
       result.addAll(supplier.deepSuppliers(depth: depth - 1));
@@ -256,11 +256,11 @@ class Node<T> {
 
   /// Get suppliers of the node of a given depth
   Iterable<Node<dynamic>> deepCustomers({int depth = 1}) {
-    final result = <Node<dynamic>>[...customers];
-
     if (depth == 0) {
-      return result;
+      return [];
     }
+
+    final result = <Node<dynamic>>[...customers];
 
     for (final customer in customers) {
       result.addAll(customer.deepCustomers(depth: depth - 1));
@@ -349,6 +349,11 @@ class Node<T> {
   /// The chain this node belongs to
   final Scope scope;
 
+  /// The common scope of two nodes
+  Scope commonParent(Node<dynamic> other) {
+    return scope.commonParent(other.scope);
+  }
+
   // ######################
   // Private
   // ######################
@@ -426,9 +431,37 @@ class Node<T> {
 /// Provides a deeply configured node sructure
 class ButterFlyExample {
   /// Constructor
-  ButterFlyExample() {
-    final scope = Scope.example(scm: Scm.example())
-      ..mockContent({
+  ButterFlyExample({bool withScopes = false}) {
+    final scope = Scope.example(scm: Scm.example(), key: 'butterFly');
+
+    if (withScopes) {
+      scope.mockContent({
+        'level3': {
+          's111': 's111',
+          'level2': {
+            's11': 's11',
+            's10': 's10',
+            's01': 's01',
+            's00': 's00',
+            'level1': {
+              's1': 's1',
+              's0': 's0',
+              'level0': {
+                'x': 'x',
+              },
+              'c0': 'c0',
+              'c1': '1',
+            },
+            'c00': 'c00',
+            'c01': 'c01',
+            'c10': 'c10',
+            'c11': 'c11',
+          },
+          'c111': 'c111',
+        },
+      });
+    } else {
+      scope.mockContent({
         's111': 's111',
         's11': 's11',
         's10': 's10',
@@ -445,6 +478,7 @@ class ButterFlyExample {
         'c11': 'c11',
         'c111': 'c111',
       });
+    }
 
     s111 = scope.findNode<String>('s111')!;
     s11 = scope.findNode<String>('s11')!;

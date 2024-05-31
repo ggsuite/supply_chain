@@ -9,9 +9,9 @@ void main() {
 
   for (final dotFile in dotFiles) {
     final dotFilePath = dotFile.path;
-    final svgFilePath = dotFilePath.replaceAll('.dot', '.svg');
+    final svgFilePath = dotFilePath.replaceAll('.dot', '.dot');
 
-    // Run the 'dot' command to convert .dot to .svg
+    // Run the 'dot' command to convert .dot to .dot
     final process =
         Process.runSync('dot', ['-Tsvg', dotFilePath, '-o', svgFilePath]);
 

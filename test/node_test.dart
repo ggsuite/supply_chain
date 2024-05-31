@@ -51,6 +51,28 @@ void main() {
       });
     });
 
+    group('commonParent', () {
+      test('should return the common parent of two nodes', () {
+        final parent = Scope.example(key: 'root');
+        parent.mockContent({
+          'k': {
+            'a': {
+              'b': 0,
+            },
+            'c': {
+              'd': 0,
+            },
+          },
+        });
+
+        final k = parent.findScope('k')!;
+        final b = parent.findNode<int>('b')!;
+        final c = parent.findNode<int>('d')!;
+
+        expect(b.commonParent(c), k);
+      });
+    });
+
     test('product, produce(), reportUpdate()', () {
       // Check initial values
       expect(node.product, 0);
@@ -155,50 +177,59 @@ void main() {
     });
 
     group('deepSuppliers, deepCustomers', () {
-      final ButterFlyExample(
-        :s111,
-        :s11,
-        :s10,
-        :s01,
-        :s00,
-        :s1,
-        :s0,
-        :x,
-        :c0,
-        :c1,
-        :c00,
-        :c01,
-        :c10,
-        :c11,
-        :c111,
-      ) = ButterFlyExample();
+      for (final withScopes in [true, false]) {
+        final ButterFlyExample(
+          :s111,
+          :s11,
+          :s10,
+          :s01,
+          :s00,
+          :s1,
+          :s0,
+          :x,
+          :c0,
+          :c1,
+          :c00,
+          :c01,
+          :c10,
+          :c11,
+          :c111,
+        ) = ButterFlyExample(withScopes: withScopes);
 
-      group('should only return own suppliers and customers', () {
-        test('when depth == 0', () {
-          expect(x.deepSuppliers(depth: 0), [s1, s0]);
-          expect(x.deepCustomers(depth: 0), [c0, c1]);
+        group('should empty arrays', () {
+          test('when depth == 0', () {
+            expect(x.deepSuppliers(depth: 0), <Node<dynamic>>[]);
+            expect(x.deepCustomers(depth: 0), <Node<dynamic>>[]);
+          });
         });
-      });
 
-      group('should return suppliers of supplier and customers of customers',
-          () {
-        test('when depth == 1', () {
-          expect(x.deepSuppliers(depth: 1), [s1, s0, s11, s10, s01, s00]);
-          expect(x.deepCustomers(depth: 1), [c0, c1, c00, c01, c10, c11]);
+        group('should only return own suppliers and customers', () {
+          test('when depth == 1', () {
+            expect(x.deepSuppliers(depth: 1), [s1, s0]);
+            expect(x.deepCustomers(depth: 1), [c0, c1]);
+          });
         });
-      });
 
-      group('should return all suppliers and customers', () {
-        test('when depth == 1000', () {
-          final expectedSuppliers = [s1, s0, s11, s10, s111, s01, s00];
-          final expectedCustomers = [c0, c1, c00, c01, c10, c11, c111];
-
-          expect(x.deepSuppliers(depth: 1000), expectedSuppliers);
-          expect(x.deepSuppliers(depth: -1), expectedSuppliers);
-          expect(x.deepCustomers(depth: 1000), expectedCustomers);
-          expect(x.deepCustomers(depth: -1), expectedCustomers);
+        group('should return suppliers of supplier and customers of customers',
+            () {
+          test('when depth == 2', () {
+            expect(x.deepSuppliers(depth: 2), [s1, s0, s11, s10, s01, s00]);
+            expect(x.deepCustomers(depth: 2), [c0, c1, c00, c01, c10, c11]);
+          });
         });
-      });
+
+        group('should return all suppliers and customers', () {
+          test('when depth == 1000', () {
+            final expectedSuppliers = [s1, s0, s11, s10, s111, s01, s00];
+            final expectedCustomers = [c0, c1, c00, c01, c10, c11, c111];
+
+            expect(x.deepSuppliers(depth: 1000), expectedSuppliers);
+            expect(x.deepSuppliers(depth: -1), expectedSuppliers);
+            expect(x.deepCustomers(depth: 1000), expectedCustomers);
+            expect(x.deepCustomers(depth: -1), expectedCustomers);
+          });
+        });
+      }
     });
 
     test('dispose() should work fine', () {

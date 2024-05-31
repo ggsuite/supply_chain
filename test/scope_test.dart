@@ -86,23 +86,31 @@ void main() {
 
         final x = scope.findScope('x')!;
 
+        test('should return empty array, when depth = 0', () {
+          final parents = x.deepParents(depth: 0).map((e) => e.key);
+          expect(parents, <Scope>[]);
+
+          final children = x.deepChildren(depth: 0).map((e) => e.key);
+          expect(children, <Scope>[]);
+        });
+
         group('should only return the direct parent / children', () {
           test('when depth = 0', () {
-            final parents = x.deepParents(depth: 0).map((e) => e.key);
+            final parents = x.deepParents(depth: 1).map((e) => e.key);
             expect(parents, ['p0']);
 
-            final children = x.deepChildren(depth: 0).map((e) => e.key);
+            final children = x.deepChildren(depth: 1).map((e) => e.key);
             expect(children, ['c0', 'c1']);
           });
         });
 
         group('should return parent of parents, children of children', () {
           test('when depth = 1', () {
-            final parents = x.deepParents(depth: 1).map((e) => e.key).toList();
+            final parents = x.deepParents(depth: 2).map((e) => e.key).toList();
             expect(parents, ['p0', 'p1']);
 
             final children =
-                x.deepChildren(depth: 1).map((e) => e.key).toList();
+                x.deepChildren(depth: 2).map((e) => e.key).toList();
             expect(children, ['c0', 'c1', 'c00', 'c01', 'c10', 'c11']);
           });
         });
@@ -152,6 +160,57 @@ void main() {
       });
     });
 
+    group(
+      'commonParent(scope)',
+      () {
+        test('should return the scope itself when the other scope is scope',
+            () {
+          final root = ExampleScopeRoot(scm: Scm.testInstance);
+          final childScopeA = root.child('childScopeA')!;
+          expect(childScopeA.commonParent(childScopeA), childScopeA);
+        });
+
+        test('should return the common parent scope', () {
+          final root = ExampleScopeRoot(scm: Scm.testInstance);
+          final childScopeA = root.child('childScopeA')!;
+          final childScopeB = root.child('childScopeB')!;
+          final grandChildScope = childScopeA.child('grandChildScope')!;
+          final grandChildNodeA =
+              grandChildScope.findNode<int>('grandChildNodeA')!;
+
+          var commonScope = root.commonParent(grandChildNodeA.scope);
+          expect(commonScope, root);
+
+          commonScope = childScopeA.commonParent(grandChildScope);
+          expect(commonScope, childScopeA);
+
+          commonScope = grandChildScope.commonParent(childScopeA);
+          expect(commonScope, childScopeA);
+
+          commonScope = grandChildScope.commonParent(root);
+          expect(commonScope, root);
+
+          commonScope = childScopeA.commonParent(childScopeB);
+          expect(commonScope, root);
+        });
+
+        test('should throw if no common parent is found', () {
+          final scope = Scope.example();
+          final scopeB = Scope.example();
+          expect(
+            () => scopeB.commonParent(scope),
+            throwsA(
+              isA<ArgumentError>().having(
+                (e) => e.message,
+                'message',
+                'No common parent found.',
+              ),
+            ),
+          );
+        });
+      },
+    );
+
     group('dispose', () {
       test('should remove the scope from its parent', () {
         final parent = Scope.example(scm: scm);
@@ -188,14 +247,19 @@ void main() {
       });
     });
 
-    group('path', () {
+    group('path, pathArray', () {
       test('should return the path of the scope', () {
         final root = ExampleScopeRoot(scm: Scm.testInstance);
         final childScopeA = root.child('childScopeA')!;
         final grandChildScope = childScopeA.child('grandChildScope')!;
         expect(root.path, 'exampleRoot');
         expect(childScopeA.path, 'exampleRoot.childScopeA');
+        expect(childScopeA.pathArray, ['exampleRoot', 'childScopeA']);
         expect(grandChildScope.path, 'exampleRoot.childScopeA.grandChildScope');
+        expect(
+          grandChildScope.pathArray,
+          ['exampleRoot', 'childScopeA', 'grandChildScope'],
+        );
       });
     });
 
@@ -656,9 +720,13 @@ void main() {
         // Save dot file
         await chain.saveGraphToFile(graphFile);
 
-        // Save webp file
+        // Save svg file
         final svgFile = graphFile.replaceAll('.dot', '.svg');
         await chain.saveGraphToFile(svgFile);
+
+        // Create graph directly
+        final graph = chain.graph();
+        expect(graph, isNotNull);
       }
 
       // .......................................................................

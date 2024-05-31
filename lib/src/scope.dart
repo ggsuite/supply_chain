@@ -4,9 +4,6 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-import 'dart:io';
-
-import 'package:gg_is_github/gg_is_github.dart';
 import 'package:supply_chain/supply_chain.dart';
 
 /// A supply scope is a container for connected nodes
@@ -57,6 +54,9 @@ class Scope {
   /// The path of the scope
   String get path => _path;
 
+  /// The path of the scope as array
+  List<String> get pathArray => _pathArray;
+
   /// The uinquie id of the scope
   final int id = _idCounter++;
 
@@ -67,13 +67,17 @@ class Scope {
   /// Returns the child scopes
   Iterable<Scope> get children => _children.values;
 
-  /// Returns children when depth = 0, children of children when depth = 1, ...
+  /// Returns
+  /// - empty array when depth = 0
+  /// - direct children when depth = 1
+  /// - direct children and children of children when depth = 2
+  /// - all nodes when depth = -1
   Iterable<Scope> deepChildren({int depth = 1}) {
-    final result = <Scope>[...children];
-
     if (depth == 0) {
-      return result;
+      return [];
     }
+
+    final result = <Scope>[...children];
 
     for (final child in children) {
       result.addAll(child.deepChildren(depth: depth - 1));
@@ -81,16 +85,17 @@ class Scope {
     return result;
   }
 
-  /// Returns parent when depth = 1, parent of parent when depth = 2, ...
+  /// Returns
+  /// - empty array when depth = 0 || parent == null
+  /// - direct parent when depth = 1
+  /// - parent and parent of parent when depth = 2
+  /// - all parents = -1
   Iterable<Scope> deepParents({int depth = 1}) {
-    if (parent == null) {
+    if (parent == null || depth == 0) {
       return <Scope>[];
     }
 
     final result = <Scope>[parent!];
-    if (depth == 0) {
-      return result;
-    }
 
     final parents = parent!.deepParents(depth: depth - 1);
     result.addAll(parents);
@@ -157,6 +162,36 @@ class Scope {
   Scope get root {
     var result = this;
     while (result.parent != null) {
+      result = result.parent!;
+    }
+    return result;
+  }
+
+  /// Returns the common root of this and the other scope
+  ///
+  /// Throws if no common parent is found.
+  Scope commonParent(Scope other) {
+    if (other == this) {
+      return this;
+    }
+
+    late final Scope a;
+    late final Scope b;
+
+    if (other.pathArray.length > pathArray.length) {
+      a = this;
+      b = other;
+    } else {
+      a = other;
+      b = this;
+    }
+
+    var result = a;
+    while (!result.isAncestorOf(b)) {
+      if (result.parent == null) {
+        throw ArgumentError('No common parent found.');
+      }
+
       result = result.parent!;
     }
     return result;
@@ -331,14 +366,19 @@ class Scope {
 
   // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz
-  String get graph {
-    var result = '';
-    result += 'digraph unix { ';
-    result += 'graph [nodesep = 0.5; ranksep=2]; ';
-    result += _graphNodes;
-    result += _graphEdges;
-    result += '}';
-    return result;
+  String graph({
+    int childScopeDepth = 0,
+    int parentScopeDepth = 0,
+    int supplierDepth = -1,
+    int customerDepth = 0,
+  }) {
+    return const Graph().fromScope(
+      this,
+      childScopeDepth: childScopeDepth,
+      parentScopeDepth: parentScopeDepth,
+      supplierDepth: -supplierDepth,
+      customerDepth: customerDepth,
+    );
   }
 
   /// Save the graph to a file
@@ -349,38 +389,20 @@ class Scope {
   /// mp pct pdf pic pict plain plain-ext png pov ps ps2 psd sgi svg svgz tga
   /// tif tiff tk vrml vt vt-24bit wbmp webp xdot xdot1.2 xdot1.4 xdot_json
   Future<void> saveGraphToFile(
-    String path,
-  ) async {
-    final format = path.split('.').last;
-
-    final content = graph;
-    final file = File(path);
-    if (format == 'dot') {
-      await file.writeAsString(content);
-      return;
-    }
-    // coveralls:ignore-start
-    else {
-      if (!isGitHub) {
-        // coverage:ignore-start
-        // Write dot file to tmp
-        final fileName = path.split('/').last;
-        final tempDir = await Directory.systemTemp.createTemp();
-        final tempPath = '${tempDir.path}/$fileName.dot';
-        final tempFile = File(tempPath);
-        tempFile.writeAsStringSync(content);
-
-        // Convert dot file to target format
-        final process = await Process.run(
-          'dot',
-          ['-T$format', tempPath, '-o$path'],
-        );
-        await tempDir.delete(recursive: true);
-        assert(process.exitCode == 0, process.stderr);
-        // coverage:ignore-end
-      }
-    }
-    // coveralls:ignore-end
+    String path, {
+    int childScopeDepth = 0,
+    int parentScopeDepth = 0,
+    int supplierDepth = -1,
+    int customerDepth = 0,
+  }) async {
+    await const Graph().writeScopeToFile(
+      this,
+      childScopeDepth: childScopeDepth,
+      parentScopeDepth: parentScopeDepth,
+      supplierDepth: supplierDepth,
+      customerDepth: customerDepth,
+      path,
+    );
   }
 
   // Test helpers
@@ -499,6 +521,7 @@ class Scope {
   // ...........................................................................
   final List<void Function()> _dispose = [];
   late final String _path;
+  late final List<String> _pathArray;
 
   // ...........................................................................
   final Map<String, Scope> _children = {};
@@ -545,62 +568,8 @@ class Scope {
   }
 
   void _initPath() {
+    _pathArray = parent == null ? [key] : [...parent!._pathArray, key];
     _path = parent == null ? key : '${parent!.path}.$key';
-  }
-
-  // ...........................................................................
-  String _nodeId(Node<dynamic> node) => '${node.key}_${node.id}';
-
-  // ...........................................................................
-  // Graph
-  String get _graphNodes {
-    {
-      var result = '';
-
-      final scopeId = '${key}_$id';
-
-      // Create a cluster for this scope
-      result += 'subgraph cluster_$scopeId { ';
-      result += 'label = "$key"; ';
-
-      // Write the child scopes
-      for (final childScope in children) {
-        result += childScope._graphNodes;
-      }
-
-      // Write each node
-      for (final node in nodes) {
-        final nodeId = _nodeId(node);
-        result += '$nodeId [label="${node.key}"]; ';
-      }
-
-      result += '}'; // cluster
-
-      return result;
-    }
-  }
-
-  String get _graphEdges {
-    {
-      var result = '';
-
-      // Write dependencies
-      for (final node in nodes) {
-        for (final customer in node.customers) {
-          final from = _nodeId(node);
-          final to = _nodeId(customer);
-
-          result += '"$from" -> "$to"; ';
-        }
-      }
-
-      // Write the child scopes
-      for (final childScope in children) {
-        result += childScope._graphEdges;
-      }
-
-      return result;
-    }
   }
 
   // ...........................................................................
@@ -741,8 +710,7 @@ class ExampleScopeRoot extends Scope {
     findOrCreateNode(
       NodeBluePrint(
         initialProduct: 0,
-        produce: (components, previous) =>
-            previous + 1, // coveralls:ignore-line
+        produce: (components, previous) => previous + 1, // coverage:ignore-line
         key: 'rootA',
       ),
     );
@@ -750,8 +718,7 @@ class ExampleScopeRoot extends Scope {
     findOrCreateNode(
       NodeBluePrint(
         initialProduct: 0,
-        produce: (components, previous) =>
-            previous + 1, // coveralls:ignore-line
+        produce: (components, previous) => previous + 1, // coverage:ignore-line
         key: 'rootB',
       ),
     );

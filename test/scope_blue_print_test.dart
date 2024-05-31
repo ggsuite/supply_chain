@@ -173,7 +173,7 @@ void main() {
           );
 
           await scope
-              .saveGraphToFile('test.graphs.example_scope_blue_print.svg');
+              .saveGraphToFile('test.graphs.example_scope_blue_print.dot');
         });
       });
     });
@@ -186,7 +186,7 @@ void main() {
           scope: parentScope,
         );
 
-        await parentScope.saveGraphToFile('test/graphs/scope_blue_print.svg');
+        await parentScope.saveGraphToFile('test/graphs/scope_blue_print.dot');
       });
     });
 
