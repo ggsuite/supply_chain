@@ -369,6 +369,7 @@ class Node<T> {
     int parentScopeDepth = 0,
     int supplierDepth = -1,
     int customerDepth = 0,
+    bool highLightNode = false,
   }) async {
     await const Graph().writeNodeToFile(
       this,
@@ -377,6 +378,7 @@ class Node<T> {
       supplierDepth: supplierDepth,
       customerDepth: customerDepth,
       path,
+      highLightNode: highLightNode,
     );
   }
 

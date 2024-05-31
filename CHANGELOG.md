@@ -16,6 +16,7 @@
 - Add Scope replaceChild(), addChild(), remove()
 - Add Scope deepParents, deepChildren
 - Add Node.graph and Node.saveGraphToFile
+- Add options to control if a node is highlighted or not
 
 ### Changed
 

@@ -394,6 +394,7 @@ class Scope {
     int parentScopeDepth = 0,
     int supplierDepth = -1,
     int customerDepth = 0,
+    bool highLightScope = false,
   }) async {
     await const Graph().writeScopeToFile(
       this,
@@ -402,6 +403,7 @@ class Scope {
       supplierDepth: supplierDepth,
       customerDepth: customerDepth,
       path,
+      highLightScope: highLightScope,
     );
   }
 

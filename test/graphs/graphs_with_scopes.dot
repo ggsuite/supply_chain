@@ -5,8 +5,6 @@ digraph unix {
     edge [fontname="Helvetica,Arial,sans-serif"]
     subgraph cluster_exampleRoot_2 {
         label = "exampleRoot";
-        style = filled;
-        fillcolor = "#DDDDDD";
         rootA_1 [
         label="rootA"
         ];

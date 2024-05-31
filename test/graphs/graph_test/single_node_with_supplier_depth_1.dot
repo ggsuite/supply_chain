@@ -3,27 +3,11 @@ digraph unix {
     fontname="Helvetica,Arial,sans-serif"
     node [fontname="Helvetica,Arial,sans-serif"]
     edge [fontname="Helvetica,Arial,sans-serif"]
-    subgraph cluster_level1_4 {
-        label = "level1";
-        subgraph cluster_level0_5 {
-            label = "level0";
-            style = filled;
-            fillcolor = "#DDDDDD";
-            x_7 [
-            label="x"
-            style = filled;
-            fillcolor = "#EEEEEE";
-            ];
-            
-        }
-        s1_5 [
-        label="s1"
-        ];
-        s0_6 [
-        label="s0"
+    subgraph cluster_level0_5 {
+        label = "level0";
+        x_7 [
+        label="x"
         ];
         
     }
-    "s1_5" -> "x_7";
-    "s0_6" -> "x_7";
 }

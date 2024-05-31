@@ -3,55 +3,11 @@ digraph unix {
     fontname="Helvetica,Arial,sans-serif"
     node [fontname="Helvetica,Arial,sans-serif"]
     edge [fontname="Helvetica,Arial,sans-serif"]
-    subgraph cluster_level3_62 {
-        label = "level3";
-        subgraph cluster_level2_63 {
-            label = "level2";
-            subgraph cluster_level1_64 {
-                label = "level1";
-                subgraph cluster_level0_65 {
-                    label = "level0";
-                    style = filled;
-                    fillcolor = "#DDDDDD";
-                    x_8 [
-                    label="x"
-                    style = filled;
-                    fillcolor = "#EEEEEE";
-                    ];
-                    
-                }
-                s1_6 [
-                label="s1"
-                ];
-                s0_7 [
-                label="s0"
-                ];
-                
-            }
-            s11_2 [
-            label="s11"
-            ];
-            s10_3 [
-            label="s10"
-            ];
-            s01_4 [
-            label="s01"
-            ];
-            s00_5 [
-            label="s00"
-            ];
-            
-        }
-        s111_1 [
-        label="s111"
+    subgraph cluster_level0_65 {
+        label = "level0";
+        x_8 [
+        label="x"
         ];
         
     }
-    "s111_1" -> "s11_2";
-    "s11_2" -> "s1_6";
-    "s10_3" -> "s1_6";
-    "s01_4" -> "s0_7";
-    "s00_5" -> "s0_7";
-    "s1_6" -> "x_8";
-    "s0_7" -> "x_8";
 }

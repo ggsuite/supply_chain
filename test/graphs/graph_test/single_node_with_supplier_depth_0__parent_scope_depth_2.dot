@@ -9,12 +9,8 @@ digraph unix {
             label = "level1";
             subgraph cluster_level0_5 {
                 label = "level0";
-                style = filled;
-                fillcolor = "#DDDDDD";
                 x_7 [
                 label="x"
-                style = filled;
-                fillcolor = "#EEEEEE";
                 ];
                 
             }

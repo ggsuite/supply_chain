@@ -89,14 +89,19 @@ class Graph {
       ...scope.deepChildren(depth: childScopeDepth),
     ];
 
-    for (final node in nodes) {
-      if (!scopes.contains(node.scope)) {
-        scopes.add(node.scope);
-      }
-    }
-
     // Get the common root of all scopes
     final commonParent = scopes.reduce((a, b) => a.commonParent(b));
+
+    // Get the intermediate scopes
+    for (final node in nodes) {
+      Scope? scope = node.scope;
+      do {
+        if (!scopes.contains(scope)) {
+          scopes.add(scope!);
+        }
+        scope = scope?.parent;
+      } while (scope != null && scope != commonParent);
+    }
 
     var result = '';
     result += 'digraph unix {\n';
@@ -130,6 +135,7 @@ class Graph {
     int parentScopeDepth = 1,
     int supplierDepth = 1,
     int customerDepth = 0,
+    bool highLightScope = false,
   }) async {
     await _writeScopeToFile(
       scope,
@@ -138,6 +144,8 @@ class Graph {
       parentScopeDepth: parentScopeDepth,
       supplierDepth: supplierDepth,
       customerDepth: customerDepth,
+      highLightNode: false,
+      highLightScope: highLightScope,
     );
   }
 
@@ -155,6 +163,7 @@ class Graph {
     int parentScopeDepth = 1,
     int supplierDepth = 1,
     int customerDepth = 0,
+    bool highLightNode = false,
   }) async {
     await _writeScopeToFile(
       node.scope,
@@ -164,6 +173,7 @@ class Graph {
       parentScopeDepth: parentScopeDepth,
       supplierDepth: supplierDepth,
       customerDepth: customerDepth,
+      highLightNode: highLightNode,
     );
   }
 
@@ -176,6 +186,8 @@ class Graph {
     int parentScopeDepth = 1,
     int supplierDepth = 1,
     int customerDepth = 0,
+    bool highLightScope = false,
+    bool highLightNode = false,
   }) async {
     final format = path.split('.').last;
 
@@ -186,8 +198,8 @@ class Graph {
       supplierDepth: supplierDepth,
       customerDepth: customerDepth,
       onlyNode: onlyNode,
-      highlightedNode: onlyNode,
-      highlightedScope: scope,
+      highlightedNode: highLightNode ? onlyNode : null,
+      highlightedScope: highLightScope ? scope : null,
     );
 
     final formattedContent = _indentDotGraph(content);
