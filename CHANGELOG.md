@@ -14,6 +14,7 @@
 - Add Scope.findScope
 - Add Scope.root
 - Add Scope replaceChild(), addChild(), remove()
+- Add Scope deepParents, deepChildren
 
 ### Changed
 

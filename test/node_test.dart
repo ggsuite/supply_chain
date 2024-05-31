@@ -155,55 +155,23 @@ void main() {
     });
 
     group('deepSuppliers, deepCustomers', () {
-      final scope = Scope.example(scm: Scm.example())
-        ..mockContent({
-          's111': 's111',
-          's11': 's11',
-          's10': 's10',
-          's01': 's01',
-          's00': 's00',
-          's1': 's1',
-          's0': 's0',
-          'x': 'x',
-          'c0': 'c0',
-          'c1': '1',
-          'c00': 'c00',
-          'c01': 'c01',
-          'c10': 'c10',
-          'c11': 'c11',
-          'c111': 'c111',
-        });
-
-      final s111 = scope.findNode<String>('s111')!;
-      final s11 = scope.findNode<String>('s11')!;
-      final s10 = scope.findNode<String>('s10')!;
-      final s01 = scope.findNode<String>('s01')!;
-      final s00 = scope.findNode<String>('s00')!;
-      final s1 = scope.findNode<String>('s1')!;
-      final s0 = scope.findNode<String>('s0')!;
-      final x = scope.findNode<String>('x')!;
-      final c0 = scope.findNode<String>('c0')!;
-      final c1 = scope.findNode<String>('c1')!;
-      final c00 = scope.findNode<String>('c00')!;
-      final c01 = scope.findNode<String>('c01')!;
-      final c10 = scope.findNode<String>('c10')!;
-      final c11 = scope.findNode<String>('c11')!;
-      final c111 = scope.findNode<String>('c111')!;
-
-      s11.addSupplier(s111);
-      s1.addSupplier(s11);
-      s1.addSupplier(s10);
-      s0.addSupplier(s01);
-      s0.addSupplier(s00);
-      x.addSupplier(s1);
-      x.addSupplier(s0);
-      x.addCustomer(c0);
-      x.addCustomer(c1);
-      c0.addCustomer(c00);
-      c0.addCustomer(c01);
-      c1.addCustomer(c10);
-      c1.addCustomer(c11);
-      c11.addCustomer(c111);
+      final ButterFlyExample(
+        :s111,
+        :s11,
+        :s10,
+        :s01,
+        :s00,
+        :s1,
+        :s0,
+        :x,
+        :c0,
+        :c1,
+        :c00,
+        :c01,
+        :c10,
+        :c11,
+        :c111,
+      ) = ButterFlyExample();
 
       group('should only return own suppliers and customers', () {
         test('when depth == 0', () {

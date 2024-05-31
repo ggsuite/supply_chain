@@ -55,9 +55,79 @@ void main() {
         expect(scope.children, isEmpty);
       });
 
-      test('string', () {
-        expect(scope.toString(), scope.key);
+      group('deepChildren, deepParents', () {
+        final scope = Scope.example()
+          ..mockContent({
+            'p2': {
+              'p1': {
+                'p0': {
+                  'x': {
+                    'c0': {
+                      'c00': {
+                        'c000': 0,
+                      },
+                      'c01': {
+                        'c010': 0,
+                      },
+                    },
+                    'c1': {
+                      'c10': {
+                        'c100': 0,
+                      },
+                      'c11': {
+                        'c110': 0,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+        final x = scope.findScope('x')!;
+
+        group('should only return the direct parent / children', () {
+          test('when depth = 0', () {
+            final parents = x.deepParents(depth: 0).map((e) => e.key);
+            expect(parents, ['p0']);
+
+            final children = x.deepChildren(depth: 0).map((e) => e.key);
+            expect(children, ['c0', 'c1']);
+          });
+        });
+
+        group('should return parent of parents, children of children', () {
+          test('when depth = 1', () {
+            final parents = x.deepParents(depth: 1).map((e) => e.key).toList();
+            expect(parents, ['p0', 'p1']);
+
+            final children =
+                x.deepChildren(depth: 1).map((e) => e.key).toList();
+            expect(children, ['c0', 'c1', 'c00', 'c01', 'c10', 'c11']);
+          });
+        });
+
+        group('should return all parents / children', () {
+          test('when depth = -1 or 1000', () {
+            var parents = x.deepParents(depth: 1000).map((e) => e.key).toList();
+            expect(parents, ['p0', 'p1', 'p2', 'example']);
+
+            parents = x.deepParents(depth: -1).map((e) => e.key).toList();
+            expect(parents, ['p0', 'p1', 'p2', 'example']);
+
+            var children =
+                x.deepChildren(depth: 1000).map((e) => e.key).toList();
+            expect(children, ['c0', 'c1', 'c00', 'c01', 'c10', 'c11']);
+
+            children = x.deepChildren(depth: -1).map((e) => e.key).toList();
+            expect(children, ['c0', 'c1', 'c00', 'c01', 'c10', 'c11']);
+          });
+        });
       });
+    });
+
+    test('string', () {
+      expect(scope.toString(), scope.key);
     });
 
     group('root', () {

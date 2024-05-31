@@ -67,6 +67,37 @@ class Scope {
   /// Returns the child scopes
   Iterable<Scope> get children => _children.values;
 
+  /// Returns children when depth = 0, children of children when depth = 1, ...
+  Iterable<Scope> deepChildren({int depth = 1}) {
+    final result = <Scope>[...children];
+
+    if (depth == 0) {
+      return result;
+    }
+
+    for (final child in children) {
+      result.addAll(child.deepChildren(depth: depth - 1));
+    }
+    return result;
+  }
+
+  /// Returns parent when depth = 1, parent of parent when depth = 2, ...
+  Iterable<Scope> deepParents({int depth = 1}) {
+    if (parent == null) {
+      return <Scope>[];
+    }
+
+    final result = <Scope>[parent!];
+    if (depth == 0) {
+      return result;
+    }
+
+    final parents = parent!.deepParents(depth: depth - 1);
+    result.addAll(parents);
+
+    return result;
+  }
+
   /// Returns the child scope with the given key
   Scope? child(String key) => _children[key];
 

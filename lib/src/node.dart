@@ -422,3 +422,104 @@ class Node<T> {
   // Tick & Animation
   bool _isAnimated = false;
 }
+
+/// Provides a deeply configured node sructure
+class ButterFlyExample {
+  /// Constructor
+  ButterFlyExample() {
+    final scope = Scope.example(scm: Scm.example())
+      ..mockContent({
+        's111': 's111',
+        's11': 's11',
+        's10': 's10',
+        's01': 's01',
+        's00': 's00',
+        's1': 's1',
+        's0': 's0',
+        'x': 'x',
+        'c0': 'c0',
+        'c1': '1',
+        'c00': 'c00',
+        'c01': 'c01',
+        'c10': 'c10',
+        'c11': 'c11',
+        'c111': 'c111',
+      });
+
+    s111 = scope.findNode<String>('s111')!;
+    s11 = scope.findNode<String>('s11')!;
+    s10 = scope.findNode<String>('s10')!;
+    s01 = scope.findNode<String>('s01')!;
+    s00 = scope.findNode<String>('s00')!;
+    s1 = scope.findNode<String>('s1')!;
+    s0 = scope.findNode<String>('s0')!;
+    x = scope.findNode<String>('x')!;
+    c0 = scope.findNode<String>('c0')!;
+    c1 = scope.findNode<String>('c1')!;
+    c00 = scope.findNode<String>('c00')!;
+    c01 = scope.findNode<String>('c01')!;
+    c10 = scope.findNode<String>('c10')!;
+    c11 = scope.findNode<String>('c11')!;
+    c111 = scope.findNode<String>('c111')!;
+
+    s11.addSupplier(s111);
+    s1.addSupplier(s11);
+    s1.addSupplier(s10);
+    s0.addSupplier(s01);
+    s0.addSupplier(s00);
+    x.addSupplier(s1);
+    x.addSupplier(s0);
+    x.addCustomer(c0);
+    x.addCustomer(c1);
+    c0.addCustomer(c00);
+    c0.addCustomer(c01);
+    c1.addCustomer(c10);
+    c1.addCustomer(c11);
+    c11.addCustomer(c111);
+  }
+
+  /// s111
+  late final Node<String> s111;
+
+  /// s11
+  late final Node<String> s11;
+
+  /// s10
+  late final Node<String> s10;
+
+  /// s01
+  late final Node<String> s01;
+
+  /// s00
+  late final Node<String> s00;
+
+  /// s1
+  late final Node<String> s1;
+
+  /// s0
+  late final Node<String> s0;
+
+  /// x
+  late final Node<String> x;
+
+  /// c0
+  late final Node<String> c0;
+
+  /// c1
+  late final Node<String> c1;
+
+  /// c00
+  late final Node<String> c00;
+
+  /// c01
+  late final Node<String> c01;
+
+  /// c10
+  late final Node<String> c10;
+
+  /// c11
+  late final Node<String> c11;
+
+  /// c111
+  late final Node<String> c111;
+}
