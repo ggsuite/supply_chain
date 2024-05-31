@@ -32,7 +32,7 @@ void main() {
       );
 
       scope = Scope.example(scm: scm);
-
+      scm.initSuppliers();
       scm.testRunFastTasks();
     },
   );
@@ -287,7 +287,6 @@ void main() {
       expect(customer.product, 21);
 
       // Each time tick() is called, the production starts again
-      scm.tick();
       scm.testFlushTasks();
       expect(supplier.product, 3);
       expect(producer.product, 30);
@@ -296,7 +295,6 @@ void main() {
       // Don't animate supplier anymore
       // Tick will not have an effect anymore.
       supplier.isAnimated = false;
-      scm.tick();
       scm.testFlushTasks();
       expect(supplier.product, 3);
       expect(producer.product, 30);
@@ -321,7 +319,7 @@ void main() {
 
       // .........................
       // Initially all nodes have initial values
-      scm.testFlushTasks();
+      scm.testFlushTasks(tick: false);
       expect(key.product, 0);
       expect(synth.product, 0);
       expect(audio.product, 0);
@@ -330,7 +328,7 @@ void main() {
 
       // Trigger the first frame to let all nodes produce
       scm.tick();
-      scm.testFlushTasks();
+      scm.testFlushTasks(tick: false);
       expect(key.product, 1);
       expect(synth.product, 10);
       expect(audio.product, 11);
@@ -397,7 +395,7 @@ void main() {
       expect(scm.preparedNodes, [screen]);
 
       // Lets flush all tasks
-      scm.testFlushTasks();
+      scm.testFlushTasks(tick: false);
 
       // screen and grid are not still ready
       // because minimum production priority is set to realtime
@@ -459,7 +457,7 @@ void main() {
         producer.ownPriority = Priority.realtime;
 
         // Flush all micro tasks -> Nodes should produce
-        scm.testFlushTasks();
+        scm.testFlushTasks(tick: false);
 
         // SupplierA is ready
         expect(supplierA.isReady, isTrue);
@@ -475,7 +473,7 @@ void main() {
 
         // Now assume producer b is ready
         scm.hasNewProduct(supplierB);
-        scm.testFlushTasks();
+        scm.testFlushTasks(tick: false);
 
         // Now everybody is ready
         expect(supplierA.isReady, isTrue);

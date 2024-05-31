@@ -429,7 +429,6 @@ void main() {
           'exampleRoot.childScopeA.grandChildScope.grandChildNodeA',
         );
 
-        scm.tick();
         scm.testFlushTasks();
       });
     });

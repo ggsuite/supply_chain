@@ -257,6 +257,7 @@ class Scope {
   String get graph {
     var result = '';
     result += 'digraph unix { ';
+    result += 'graph [nodesep = 0.5; ranksep=2]; ';
     result += _graphNodes;
     result += _graphEdges;
     result += '}';

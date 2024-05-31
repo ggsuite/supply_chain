@@ -20,7 +20,6 @@ void main() {
         expect(rowHeightsNode, isNotNull);
 
         // Let the SCM produce
-        scm.tick();
         scm.testFlushTasks();
 
         // Initially no row scopes should be created
@@ -28,7 +27,6 @@ void main() {
 
         // Assume some row heights are coming in
         rowHeightsNode.product = [10, 20, 30];
-        scm.tick();
         scm.testFlushTasks();
         expect(scm.nodes, hasLength(5));
 
@@ -46,9 +44,7 @@ void main() {
         // Update the row heights
         rowHeightsNode.product = [40, 50, 60, 70];
 
-        scm.tick();
         scm.testFlushTasks(); // Note: One flush should be enough. Check this.
-        scm.tick();
         scm.testFlushTasks();
         expect(scm.nodes, hasLength(6));
 
@@ -61,7 +57,6 @@ void main() {
 
         // Remove row heights
         rowHeightsNode.product = [10];
-        scm.tick();
         scm.testFlushTasks(); // Note: One flush should be enough. Check this.
         expect(scm.nodes, hasLength(3));
         expect(scope.children.length, 1);

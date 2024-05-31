@@ -34,6 +34,10 @@ class Scm {
   late final Scope rootScope;
 
   // ...........................................................................
+  /// Initializes suppliers
+  void initSuppliers() => _initSuppliers();
+
+  // ...........................................................................
   /// Returns iterable of all nodes
   Iterable<Node<dynamic>> get nodes => _nodes;
 
@@ -64,7 +68,7 @@ class Scm {
   }
 
   /// Adds node for initialization of suppliers
-  void initSuppliers(Node<dynamic> node) {
+  void needsInitSuppliers(Node<dynamic> node) {
     _nodesNeedingSupplierUpdate.add(node);
   }
 
@@ -163,7 +167,11 @@ class Scm {
   Iterable<Task> get testNormalTasks => _testNormalTasks;
 
   ///  Runs alls tasks until they are done
-  void testFlushTasks() {
+  void testFlushTasks({bool tick = true}) {
+    if (tick) {
+      _tick();
+    }
+
     while (_testFastTasks.isNotEmpty || _testNormalTasks.isNotEmpty) {
       testRunNormalTasks();
       testRunFastTasks();

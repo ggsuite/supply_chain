@@ -1,1 +1,1 @@
-digraph unix { subgraph cluster_example_1 { label = "example"; node_0 [label="node"]; supplier_1 [label="supplier"]; producer_2 [label="producer"]; customer_3 [label="customer"]; }"supplier_1" -> "producer_2"; "producer_2" -> "customer_3"; }
+digraph unix { graph [nodesep = 0.5; ranksep=2]; subgraph cluster_example_1 { label = "example"; node_0 [label="node"]; supplier_1 [label="supplier"]; producer_2 [label="producer"]; customer_3 [label="customer"]; }"supplier_1" -> "producer_2"; "producer_2" -> "customer_3"; }

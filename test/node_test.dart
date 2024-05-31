@@ -261,7 +261,6 @@ void main() {
         expect(node.product, 1);
 
         // Let the chain run
-        chain.scm.tick();
         chain.scm.testFlushTasks();
 
         // Check if customer got the new component

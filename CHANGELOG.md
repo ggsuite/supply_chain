@@ -30,6 +30,7 @@
 - Allow to embed ScopeBluePrints directly in mocked content
 - Move initialization of suppliers to SCM
 - Improve error message
+- Let testFlushTasks also trigger a tick
 
 ### Removed
 

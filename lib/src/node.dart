@@ -285,7 +285,7 @@ class Node<T> {
   // ...........................................................................
   void _initScm() {
     scm.addNode(this);
-    scm.initSuppliers(this);
+    scm.needsInitSuppliers(this);
     _dispose.add(() {
       scm.removeNode(this);
 
