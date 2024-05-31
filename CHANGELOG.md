@@ -17,6 +17,7 @@
 - Add Scope deepParents, deepChildren
 - Add Node.graph and Node.saveGraphToFile
 - Add options to control if a node is highlighted or not
+- Add option show dependent nodes only
 
 ### Changed
 

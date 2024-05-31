@@ -371,6 +371,7 @@ class Scope {
     int parentScopeDepth = 0,
     int supplierDepth = -1,
     int customerDepth = 0,
+    bool showDependentNodesOnly = false,
   }) {
     return const Graph().fromScope(
       this,
@@ -378,6 +379,7 @@ class Scope {
       parentScopeDepth: parentScopeDepth,
       supplierDepth: -supplierDepth,
       customerDepth: customerDepth,
+      showDependentNodesOnly: showDependentNodesOnly,
     );
   }
 
@@ -395,6 +397,7 @@ class Scope {
     int supplierDepth = -1,
     int customerDepth = 0,
     bool highLightScope = false,
+    bool showDependentNodesOnly = false,
   }) async {
     await const Graph().writeScopeToFile(
       this,
@@ -404,6 +407,7 @@ class Scope {
       customerDepth: customerDepth,
       path,
       highLightScope: highLightScope,
+      showDependentNodesOnly: showDependentNodesOnly,
     );
   }
 

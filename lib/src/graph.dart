@@ -49,6 +49,7 @@ class Graph {
     int parentScopeDepth = 1,
     int supplierDepth = 1,
     int customerDepth = 1,
+    bool showDependentNodesOnly = true,
   }) {
     return _fromScope(
       scope,
@@ -58,6 +59,7 @@ class Graph {
       supplierDepth: supplierDepth,
       customerDepth: customerDepth,
       highlightedScope: scope,
+      showDependentNodesOnly: showDependentNodesOnly,
     );
   }
 
@@ -69,35 +71,41 @@ class Graph {
     int parentScopeDepth = 1,
     int supplierDepth = 1,
     int customerDepth = 1,
+    bool showDependentNodesOnly = true,
     Node<dynamic>? highlightedNode,
     Scope? highlightedScope,
   }) {
     // Collect all affected nodes
-    final nodes =
-        onlyNode != null ? [onlyNode] : <Node<dynamic>>[...scope.nodes];
+    final nodesToBeShown = showDependentNodesOnly
+        ? null
+        : onlyNode != null
+            ? [onlyNode]
+            : <Node<dynamic>>[...scope.nodes];
 
-    final nodesCopy = [...nodes];
-    for (final node in nodesCopy) {
-      nodes.addAll(node.deepCustomers(depth: customerDepth));
-      nodes.addAll(node.deepSuppliers(depth: supplierDepth));
+    if (nodesToBeShown != null) {
+      final nodesCopy = [...nodesToBeShown];
+      for (final node in nodesCopy) {
+        nodesToBeShown.addAll(node.deepCustomers(depth: customerDepth));
+        nodesToBeShown.addAll(node.deepSuppliers(depth: supplierDepth));
+      }
     }
 
     // Collect all affected scopes
-    final scopes = <Scope>[
+    final scopesToBeShown = <Scope>[
       scope,
       ...scope.deepParents(depth: parentScopeDepth),
       ...scope.deepChildren(depth: childScopeDepth),
     ];
 
     // Get the common root of all scopes
-    final commonParent = scopes.reduce((a, b) => a.commonParent(b));
+    final commonParent = scopesToBeShown.reduce((a, b) => a.commonParent(b));
 
     // Get the intermediate scopes
-    for (final node in nodes) {
+    for (final node in nodesToBeShown ?? <Node<dynamic>>[]) {
       Scope? scope = node.scope;
       do {
-        if (!scopes.contains(scope)) {
-          scopes.add(scope!);
+        if (!scopesToBeShown.contains(scope)) {
+          scopesToBeShown.add(scope!);
         }
         scope = scope?.parent;
       } while (scope != null && scope != commonParent);
@@ -111,12 +119,16 @@ class Graph {
     result += 'edge [fontname="Helvetica,Arial,sans-serif"]\n';
     result += _graphNodes(
       commonParent,
-      [...nodes],
-      [...scopes],
+      nodesToBeShown?.toList(),
+      scopesToBeShown.toList(),
       highlightedScope: highlightedScope,
       highlightedNode: highlightedNode,
     );
-    result += _graphEdges(commonParent, [...nodes], [...scopes]);
+    result += _graphEdges(
+      commonParent,
+      nodesToBeShown?.toList(),
+      scopesToBeShown.toList(),
+    );
     result += '}\n';
     return result;
   }
@@ -136,6 +148,7 @@ class Graph {
     int supplierDepth = 1,
     int customerDepth = 0,
     bool highLightScope = false,
+    bool showDependentNodesOnly = false,
   }) async {
     await _writeScopeToFile(
       scope,
@@ -146,6 +159,7 @@ class Graph {
       customerDepth: customerDepth,
       highLightNode: false,
       highLightScope: highLightScope,
+      showDependentNodesOnly: showDependentNodesOnly,
     );
   }
 
@@ -188,6 +202,7 @@ class Graph {
     int customerDepth = 0,
     bool highLightScope = false,
     bool highLightNode = false,
+    bool showDependentNodesOnly = false,
   }) async {
     final format = path.split('.').last;
 
@@ -200,6 +215,7 @@ class Graph {
       onlyNode: onlyNode,
       highlightedNode: highLightNode ? onlyNode : null,
       highlightedScope: highLightScope ? scope : null,
+      showDependentNodesOnly: showDependentNodesOnly,
     );
 
     final formattedContent = _indentDotGraph(content);
@@ -239,8 +255,8 @@ class Graph {
   // Graph
   String _graphNodes(
     Scope scope,
-    List<Node<dynamic>> nodes,
-    List<Scope> scopes, {
+    List<Node<dynamic>>? nodesToBeShown,
+    List<Scope>? scopesToBeShown, {
     Scope? highlightedScope,
     Node<dynamic>? highlightedNode,
   }) {
@@ -258,37 +274,45 @@ class Graph {
       }
 
       // Estimate the relevant child scopes
-      final relevantChildScopes = scope.children
-          .where(
-            (element) => scopes.contains(element),
-          )
-          .toList();
+      final relevantChildScopes = scopesToBeShown == null
+          ? scope.children // coverage:ignore-line
+          : scope.children
+              .where(
+                (element) => scopesToBeShown.contains(element),
+              )
+              .toList();
 
       // Remove the relevant child scopes from the list
-      for (final node in relevantChildScopes) {
-        scopes.remove(node);
+      if (scopesToBeShown != null) {
+        for (final node in relevantChildScopes) {
+          scopesToBeShown.remove(node);
+        }
       }
 
       for (final childScope in relevantChildScopes) {
         result += _graphNodes(
           childScope,
-          nodes,
-          scopes,
+          nodesToBeShown,
+          scopesToBeShown,
           highlightedScope: highlightedScope,
           highlightedNode: highlightedNode,
         );
       }
 
       // Estimate relevant nodes
-      final relevantNodes = scope.nodes
-          .where(
-            (element) => nodes.contains(element),
-          )
-          .toList();
+      final relevantNodes = nodesToBeShown == null
+          ? scope.nodes
+          : scope.nodes
+              .where(
+                (element) => nodesToBeShown.contains(element),
+              )
+              .toList();
 
       // Remove the relevant nodes from the list
-      for (final node in relevantNodes) {
-        nodes.remove(node);
+      if (nodesToBeShown != null) {
+        for (final node in relevantNodes) {
+          nodesToBeShown.remove(node);
+        }
       }
 
       // Write each node
@@ -313,8 +337,8 @@ class Graph {
 
   String _graphEdges(
     Scope scope,
-    List<Node<dynamic>> nodes,
-    List<Scope> scopes,
+    List<Node<dynamic>>? nodesToBeShown,
+    List<Scope>? scopesToBeShown,
   ) {
     {
       var result = '';
@@ -322,12 +346,12 @@ class Graph {
       // ..................
       // Write dependencies
       for (final node in scope.nodes) {
-        if (!nodes.contains(node)) {
+        if (nodesToBeShown != null && !nodesToBeShown.contains(node)) {
           continue;
         }
 
         for (final customer in node.customers) {
-          if (!nodes.contains(customer)) {
+          if (nodesToBeShown != null && !nodesToBeShown.contains(customer)) {
             continue;
           }
 
@@ -340,20 +364,24 @@ class Graph {
 
       // ..................................
       // Estimate the relevant child scopes
-      final relevantChildScopes = scope.children
-          .where(
-            (element) => scopes.contains(element),
-          )
-          .toList();
+      final relevantChildScopes = scopesToBeShown == null
+          ? scope.children // coverage:ignore-line
+          : scope.children
+              .where(
+                (element) => scopesToBeShown.contains(element),
+              )
+              .toList();
 
       // Remove the relevant child scopes from the list
-      for (final scope in relevantChildScopes) {
-        scopes.remove(scope);
+      if (scopesToBeShown != null) {
+        for (final scope in relevantChildScopes) {
+          scopesToBeShown.remove(scope);
+        }
       }
 
       // Write the child scopes
       for (final childScope in relevantChildScopes) {
-        result += _graphEdges(childScope, nodes, scopes);
+        result += _graphEdges(childScope, nodesToBeShown, scopesToBeShown);
       }
 
       return result;
