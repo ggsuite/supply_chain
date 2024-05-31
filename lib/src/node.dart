@@ -354,6 +354,49 @@ class Node<T> {
     return scope.commonParent(other.scope);
   }
 
+  // ...........................................................................
+  // Graph
+  /// Save the graph to a file
+  ///
+  /// The format can be
+  /// bmp canon cgimage cmap cmapx cmapx_np dot dot_json eps exr fig gd gd2 gif
+  /// gv icns ico imap imap_np ismap jp2 jpe jpeg jpg json json0 kitty kittyz
+  /// mp pct pdf pic pict plain plain-ext png pov ps ps2 psd sgi svg svgz tga
+  /// tif tiff tk vrml vt vt-24bit wbmp webp xdot xdot1.2 xdot1.4 xdot_json
+  Future<void> saveGraphToFile(
+    String path, {
+    int childScopeDepth = 0,
+    int parentScopeDepth = 0,
+    int supplierDepth = -1,
+    int customerDepth = 0,
+  }) async {
+    await const Graph().writeNodeToFile(
+      this,
+      childScopeDepth: childScopeDepth,
+      parentScopeDepth: parentScopeDepth,
+      supplierDepth: supplierDepth,
+      customerDepth: customerDepth,
+      path,
+    );
+  }
+
+  // ...........................................................................
+  /// Returns a graph that can be turned into svg using graphviz
+  String graph({
+    int childScopeDepth = 0,
+    int parentScopeDepth = 0,
+    int supplierDepth = -1,
+    int customerDepth = 0,
+  }) {
+    return const Graph().fromNode(
+      this,
+      childScopeDepth: childScopeDepth,
+      parentScopeDepth: parentScopeDepth,
+      supplierDepth: -supplierDepth,
+      customerDepth: customerDepth,
+    );
+  }
+
   // ######################
   // Private
   // ######################

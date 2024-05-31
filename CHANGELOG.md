@@ -15,6 +15,7 @@
 - Add Scope.root
 - Add Scope replaceChild(), addChild(), remove()
 - Add Scope deepParents, deepChildren
+- Add Node.graph and Node.saveGraphToFile
 
 ### Changed
 
