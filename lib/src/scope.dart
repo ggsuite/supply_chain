@@ -21,7 +21,6 @@ class Scope {
     _init();
   }
 
-  // ...........................................................................
   /// Create a root supply scope having no parent
   Scope.root({
     required this.key,
@@ -31,13 +30,17 @@ class Scope {
     _init();
   }
 
-  // ...........................................................................
   /// Disposes the scope
   void dispose() {
     for (final d in _dispose.reversed) {
       d();
     }
+
+    _dispose.clear();
   }
+
+  /// Returns true if the scope is disposed
+  bool get isDisposed => _dispose.isEmpty;
 
   // ...........................................................................
   /// Returns the node as string
@@ -116,30 +119,6 @@ class Scope {
   }
 
   // ...........................................................................
-  Scope? _findScope(List<String> path) {
-    if (path.isEmpty) {
-      return null;
-    }
-
-    if (path.length == 1 && path.first == key) {
-      return this;
-    }
-
-    if (path.first == key) {
-      return _findScope(path.sublist(1));
-    }
-
-    for (final child in _children.values) {
-      final result = child._findScope(path);
-      if (result != null) {
-        return result;
-      }
-    }
-
-    return null;
-  }
-
-  // ...........................................................................
   /// The parent supply scope
   Scope? parent;
 
@@ -186,6 +165,74 @@ class Scope {
   }
 
   // ...........................................................................
+  /// Adds a child scope
+  Scope addChild(ScopeBluePrint bluePrint) {
+    return bluePrint.instantiate(scope: this);
+  }
+
+  /// Removes the scope from it's parent scope
+  void remove() {
+    dispose();
+  }
+
+  /// Replaces a scope with a new scope
+  void replaceChild(
+    ScopeBluePrint replacement, {
+    String? path,
+  }) {
+    path ??= replacement.key;
+    final oldScope = findScope(path);
+
+    if (oldScope == null) {
+      throw ArgumentError('Scope with path "$path" not found.');
+    }
+
+    // ................................
+    // Existing scope has the same key?
+    // Update the nodes in the old scope
+    if (oldScope.key == replacement.key) {
+      _updateNodesInScope(oldScope, replacement);
+
+      // Remove all children not existing in replacement anymore
+      final removedChildren = oldScope.children
+          .where(
+            (element) => !replacement.children.any((c) => c.key == element.key),
+          )
+          .toList();
+
+      for (final child in removedChildren.toList()) {
+        child.dispose();
+      }
+
+      // Also replace child scopes
+      for (final newChildScope in replacement.children) {
+        // Get the associated oldChildScope
+        final oldChildScope = oldScope.child(newChildScope.key);
+
+        // If no old child scope exists, instantiate the new child scope
+        if (oldChildScope == null) {
+          newChildScope.instantiate(scope: oldScope);
+        }
+
+        // If the old scope exists, replace it
+        else {
+          oldChildScope.replaceChild(
+            newChildScope,
+          );
+        }
+      }
+    }
+
+    // ....................................................
+    // Replacement has a different key than the old scope?
+    // Delete the old scope.
+    else {
+      replacement.instantiate(scope: oldScope.parent!);
+      oldScope.dispose();
+    }
+  }
+
+  // ...........................................................................
   /// Returns true if this scope is an ancestor of the given scope
   bool isAncestorOf(Scope scope) {
     if (_children.containsKey(scope.key)) {
@@ -201,7 +248,6 @@ class Scope {
     return false;
   }
 
-  // ...........................................................................
   /// Returns true if this scope is a descendant of the given scope
   bool isDescendantOf(Scope scope) {
     if (scope._children.containsKey(key)) {
@@ -345,13 +391,10 @@ class Scope {
   /// });
   ///
   /// ```
-  void mockContent(Object content) {
-    assert(content is Map<String, dynamic>);
-    final map = content as Map<String, dynamic>;
-
+  void mockContent(Map<String, dynamic> content) {
     // Iterate all entries of the map
-    for (final key in map.keys) {
-      final value = map[key];
+    for (final key in content.keys) {
+      final value = content[key];
 
       // If the entry is a map, create a child scope
       if (value is Map<String, dynamic>) {
@@ -436,9 +479,9 @@ class Scope {
     _initParent();
     _initPath();
     _initNodes();
+    _initChildren();
   }
 
-  // ...........................................................................
   void _initParent() {
     if (parent == null) {
       return;
@@ -453,7 +496,6 @@ class Scope {
     });
   }
 
-  // ...........................................................................
   void _initNodes() {
     // On dispose, all nodes should be disposed
     _dispose.add(() {
@@ -463,7 +505,14 @@ class Scope {
     });
   }
 
-  // ...........................................................................
+  void _initChildren() {
+    _dispose.add(() {
+      for (final child in children.toList()) {
+        child.dispose();
+      }
+    });
+  }
+
   void _initPath() {
     _path = parent == null ? key : '${parent!.path}.$key';
   }
@@ -500,7 +549,6 @@ class Scope {
     }
   }
 
-  // ...........................................................................
   String get _graphEdges {
     {
       var result = '';
@@ -544,13 +592,11 @@ class Scope {
     return node;
   }
 
-  // ...........................................................................
   Node<T>? _findNodeNodeInParentScopes<T>(String key, List<String> scopePath) {
     return parent?._findNodeInOwnScope<T>(key, scopePath) ??
         parent?._findNodeNodeInParentScopes<T>(key, scopePath);
   }
 
-  // ...........................................................................
   Node<T>? _findNodeInDirectSiblingScopes<T>(
     String key,
     List<String> scopePath,
@@ -569,7 +615,6 @@ class Scope {
     return null;
   }
 
-  // ...........................................................................
   Node<T>? _findAnyUniqueNode<T>(String key, List<String> scopePath) {
     final scopePathString = scopePath.join('.');
     final nodes = scm.nodesWithKey<T>(key).where(
@@ -586,6 +631,68 @@ class Scope {
     }
 
     return null;
+  }
+
+  Scope? _findScope(List<String> path) {
+    if (path.isEmpty) {
+      return null;
+    }
+
+    if (path.length == 1 && path.first == key) {
+      return this;
+    }
+
+    if (path.first == key) {
+      return _findScope(path.sublist(1));
+    }
+
+    for (final child in _children.values) {
+      final result = child._findScope(path);
+      if (result != null) {
+        return result;
+      }
+    }
+
+    return null;
+  }
+
+  // ...........................................................................
+  void _updateNodesInScope(Scope previous, ScopeBluePrint current) {
+    // ....................
+    // Estimate added nodes
+    final addedNodes =
+        current.nodes.where((c) => !previous.nodes.any((p) => c.key == p.key));
+
+    // Estimate removed nodes
+    final removedNodes =
+        previous.nodes.where((p) => !current.nodes.any((c) => c.key == p.key));
+
+    // Estimate changed nodes
+    final changedNodes = current.nodes.where(
+      (c) => previous.nodes.any(
+        (p) => c.key == p.key && c != p.bluePrint,
+      ),
+    );
+
+    // .....................
+    // Dispose removed nodes
+    for (final removedNodeBluePrint in removedNodes.toList()) {
+      final removedNode = previous.node<dynamic>(key: removedNodeBluePrint.key);
+      assert(removedNode != null);
+      removedNode?.dispose();
+    }
+
+    // Instantiate added nodes
+    for (final addedNode in addedNodes) {
+      addedNode.instantiate(scope: previous);
+    }
+
+    // Update changed nodes
+    for (final changedNodeBluePrint in changedNodes) {
+      previous.replaceNode(
+        changedNodeBluePrint,
+      );
+    }
   }
 }
 

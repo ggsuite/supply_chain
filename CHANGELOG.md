@@ -13,6 +13,7 @@
 - Add Scope.mockContent
 - Add Scope.findScope
 - Add Scope.root
+- Add Scope replaceChild(), addChild(), remove()
 
 ### Changed
 

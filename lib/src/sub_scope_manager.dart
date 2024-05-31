@@ -46,19 +46,19 @@ class SubScopeManager extends Node<List<ScopeBluePrint>> {
     // Dispose removed scopes
     for (final removedScopeBluePrint in removedScopes) {
       final removedScope = scope.child(removedScopeBluePrint.key);
-      removedScope?.dispose();
+      removedScope?.remove();
     }
 
     // Add added scopes
     for (final addedScope in addedScopes) {
-      addedScope.instantiate(scope: scope);
+      scope.addChild(addedScope);
     }
 
     // Update changed scopes
     for (final changedScope in changedScopes) {
-      final previousScope =
-          previousScopes.firstWhere((s) => s.key == changedScope.key);
-      _updateNodesInScope(previousScope, changedScope);
+      scope.replaceChild(
+        changedScope,
+      );
     }
 
     if (announce) {
@@ -90,50 +90,6 @@ class SubScopeManager extends Node<List<ScopeBluePrint>> {
       bluePrint: SubScopeManagerBluePrint.example(),
       scope: scope,
     );
-  }
-
-  // ######################
-  // Private
-  // ######################
-
-  // ...........................................................................
-  void _updateNodesInScope(ScopeBluePrint previous, ScopeBluePrint current) {
-    // ...........................
-    // Get scopes from blue prints
-    final subScope = scope.child(previous.key)!;
-
-    // ....................
-    // Estimate added nodes
-    final addedNodes =
-        current.nodes.where((c) => !previous.nodes.any((p) => c.key == p.key));
-
-    // Estimate removed nodes
-    final removedNodes =
-        previous.nodes.where((p) => !current.nodes.any((c) => c.key == p.key));
-
-    // Estimate changed nodes
-    final changedNodes = current.nodes
-        .where((c) => previous.nodes.any((p) => c.key == p.key && c != p));
-
-    // .....................
-    // Dispose removed nodes
-    for (final removedNodeBluePrint in removedNodes) {
-      final removedNode = subScope.node<dynamic>(key: removedNodeBluePrint.key);
-      assert(removedNode != null);
-      removedNode?.dispose();
-    }
-
-    // Instantiate added nodes
-    for (final addedNode in addedNodes) {
-      addedNode.instantiate(scope: subScope);
-    }
-
-    // Update changed nodes
-    for (final changedNodeBluePrint in changedNodes) {
-      subScope.replaceNode(
-        changedNodeBluePrint,
-      );
-    }
   }
 }
 

@@ -20,8 +20,92 @@ class ScopeBluePrint {
   const ScopeBluePrint({
     required this.key,
     this.nodes = const [],
-    this.childScopes = const [],
+    this.children = const [],
   });
+
+  // ...........................................................................
+  /// Creates a blue print with children from JSON
+  ///
+  /// The JSON map must have exactly one key.
+  /// The value of the map must be a map.
+  /// The keys of the value map are the keys of the nodes.
+  /// The values of the value map are the initial products of the nodes.
+  /// If the value of the value map is a map, it is a child scope.
+  /// If the value of the value map is a node blue print, it is a node.
+  factory ScopeBluePrint.fromJson(Map<String, dynamic> json) {
+    // Iterate all entries of the map
+
+    assert(json.keys.length == 1, 'Only one key is allowed in the root map.');
+    assert(
+      json.values.first is Map<String, dynamic>,
+      'The value of the root map must be a map.',
+    );
+    final key = json.keys.first;
+    final value = json.values.first as Map<String, dynamic>;
+    final nodes = <NodeBluePrint<dynamic>>[];
+    final children = <ScopeBluePrint>[];
+    for (final subKey in value.keys) {
+      final subValue = value[subKey];
+
+      // Parse children
+      if (subValue is Map<String, dynamic>) {
+        final child = ScopeBluePrint.fromJson({subKey: subValue});
+        children.add(child);
+        continue;
+      }
+
+      if (subValue is ScopeBluePrint) {
+        assert(
+          subValue.key == subKey,
+          'The key of the node "${subValue.key}" must be "$subKey".',
+        );
+        children.add(subValue);
+        continue;
+      }
+
+      // Parse node blue prints
+      if (subValue is NodeBluePrint) {
+        assert(
+          subValue.key == subKey,
+          'The key of the node "${subValue.key}" must be "$subKey".',
+        );
+        nodes.add(subValue);
+        continue;
+      }
+
+      // Parse nodes
+      final nodeBluePrint = switch (subValue.runtimeType) {
+        const (int) => NodeBluePrint<int>(
+            key: subKey,
+            initialProduct: subValue as int,
+          ),
+        const (double) => NodeBluePrint<double>(
+            initialProduct: subValue as double,
+            key: subKey,
+          ),
+        const (String) => NodeBluePrint<String>(
+            initialProduct: subValue as String,
+            key: subKey,
+          ),
+        const (bool) => NodeBluePrint<bool>(
+            initialProduct: subValue as bool,
+            key: subKey,
+          ),
+        _ => throw ArgumentError(
+            'Type ${value.runtimeType} not supported. '
+            'Use NodeBluePrint<${value.runtimeType}> instead.',
+          )
+      };
+
+      nodes.add(nodeBluePrint);
+    }
+
+    return ScopeBluePrint(
+      key: key,
+      nodes: nodes,
+      children: children,
+    );
+  }
 
   // ...........................................................................
   /// Creates a copy of the scope with the given changes
@@ -37,7 +121,7 @@ class ScopeBluePrint {
     return ScopeBluePrint._private(
       key: key ?? this.key,
       nodes: nodes,
-      childScopes: subScopes ?? childScopes,
+      children: subScopes ?? children,
     );
   }
 
@@ -65,7 +149,7 @@ class ScopeBluePrint {
   final List<NodeBluePrint<dynamic>> nodes;
 
   /// The children of the scope
-  final List<ScopeBluePrint> childScopes;
+  final List<ScopeBluePrint> children;
 
   // ...........................................................................
   /// Returns the node for a given key
@@ -89,7 +173,7 @@ class ScopeBluePrint {
     innerScope.findOrCreateNodes(allNodes);
 
     // Init sub scopes
-    final allSubScopes = [...childScopes, ...additionalSubScopes];
+    final allSubScopes = [...children, ...additionalSubScopes];
     for (final subScope in allSubScopes) {
       subScope.instantiate(
         scope: innerScope,
@@ -138,7 +222,7 @@ class ScopeBluePrint {
       nodes: [
         dependency,
       ],
-      childScopes: [
+      children: [
         ScopeBluePrint(
           key: 'childScope',
           nodes: [
@@ -159,7 +243,7 @@ class ScopeBluePrint {
   ScopeBluePrint._private({
     required this.key,
     required this.nodes,
-    required this.childScopes,
+    required this.children,
   });
 
   // ...........................................................................
@@ -232,7 +316,7 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
               suppliers: [],
             ),
           ],
-          childScopes: [
+          children: [
             const ScopeBluePrint(
               key: 'childScopeConstructedByParent',
               nodes: [
