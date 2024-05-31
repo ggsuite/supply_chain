@@ -32,6 +32,10 @@
 - Improve error message
 - Let testFlushTasks also trigger a tick
 
+### Fixed
+
+- Fix need of calling testFlushTasks two times
+
 ### Removed
 
 - Removed plant

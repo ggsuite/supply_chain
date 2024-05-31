@@ -172,9 +172,15 @@ class Scm {
       _tick();
     }
 
-    while (_testFastTasks.isNotEmpty || _testNormalTasks.isNotEmpty) {
+    while (_testFastTasks.isNotEmpty ||
+        _testNormalTasks.isNotEmpty ||
+        _nodesNeedingSupplierUpdate.isNotEmpty) {
       testRunNormalTasks();
       testRunFastTasks();
+
+      if (tick && _preparedNodes.isNotEmpty) {
+        _tick();
+      }
     }
   }
 
