@@ -154,6 +154,85 @@ void main() {
       expect(customer1.suppliers, <Node<dynamic>>[]);
     });
 
+    group('deepSuppliers, deepCustomers', () {
+      final scope = Scope.example(scm: Scm.example())
+        ..mockContent({
+          's111': 's111',
+          's11': 's11',
+          's10': 's10',
+          's01': 's01',
+          's00': 's00',
+          's1': 's1',
+          's0': 's0',
+          'x': 'x',
+          'c0': 'c0',
+          'c1': '1',
+          'c00': 'c00',
+          'c01': 'c01',
+          'c10': 'c10',
+          'c11': 'c11',
+          'c111': 'c111',
+        });
+
+      final s111 = scope.findNode<String>('s111')!;
+      final s11 = scope.findNode<String>('s11')!;
+      final s10 = scope.findNode<String>('s10')!;
+      final s01 = scope.findNode<String>('s01')!;
+      final s00 = scope.findNode<String>('s00')!;
+      final s1 = scope.findNode<String>('s1')!;
+      final s0 = scope.findNode<String>('s0')!;
+      final x = scope.findNode<String>('x')!;
+      final c0 = scope.findNode<String>('c0')!;
+      final c1 = scope.findNode<String>('c1')!;
+      final c00 = scope.findNode<String>('c00')!;
+      final c01 = scope.findNode<String>('c01')!;
+      final c10 = scope.findNode<String>('c10')!;
+      final c11 = scope.findNode<String>('c11')!;
+      final c111 = scope.findNode<String>('c111')!;
+
+      s11.addSupplier(s111);
+      s1.addSupplier(s11);
+      s1.addSupplier(s10);
+      s0.addSupplier(s01);
+      s0.addSupplier(s00);
+      x.addSupplier(s1);
+      x.addSupplier(s0);
+      x.addCustomer(c0);
+      x.addCustomer(c1);
+      c0.addCustomer(c00);
+      c0.addCustomer(c01);
+      c1.addCustomer(c10);
+      c1.addCustomer(c11);
+      c11.addCustomer(c111);
+
+      group('should only return own suppliers and customers', () {
+        test('when depth == 0', () {
+          expect(x.deepSuppliers(depth: 0), [s1, s0]);
+          expect(x.deepCustomers(depth: 0), [c0, c1]);
+        });
+      });
+
+      group('should return suppliers of supplier and customers of customers',
+          () {
+        test('when depth == 1', () {
+          expect(x.deepSuppliers(depth: 1), [s1, s0, s11, s10, s01, s00]);
+          expect(x.deepCustomers(depth: 1), [c0, c1, c00, c01, c10, c11]);
+        });
+      });
+
+      group('should return all suppliers and customers', () {
+        test('when depth == 1000', () {
+          final expectedSuppliers = [s1, s0, s11, s10, s111, s01, s00];
+          final expectedCustomers = [c0, c1, c00, c01, c10, c11, c111];
+
+          expect(x.deepSuppliers(depth: 1000), expectedSuppliers);
+          expect(x.deepSuppliers(depth: -1), expectedSuppliers);
+          expect(x.deepCustomers(depth: 1000), expectedCustomers);
+          expect(x.deepCustomers(depth: -1), expectedCustomers);
+        });
+      });
+    });
+
     test('dispose() should work fine', () {
       // Create a supplier -> producer -> customer chain
       final supplier = Node.example(

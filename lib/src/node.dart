@@ -236,6 +236,39 @@ class Node<T> {
   void removeCustomer(Customer<dynamic> customer) => _removeCustomer(customer);
 
   // ...........................................................................
+  // Deep suppliers & customers
+
+  /// Get suppliers of the node of a given depth
+  Iterable<Node<dynamic>> deepSuppliers({int depth = 1}) {
+    if (depth < 0) depth = 100000;
+
+    final result = <Node<dynamic>>[...suppliers];
+
+    if (depth == 0) {
+      return result;
+    }
+
+    for (final supplier in suppliers) {
+      result.addAll(supplier.deepSuppliers(depth: depth - 1));
+    }
+    return result;
+  }
+
+  /// Get suppliers of the node of a given depth
+  Iterable<Node<dynamic>> deepCustomers({int depth = 1}) {
+    final result = <Node<dynamic>>[...customers];
+
+    if (depth == 0) {
+      return result;
+    }
+
+    for (final customer in customers) {
+      result.addAll(customer.deepCustomers(depth: depth - 1));
+    }
+    return result;
+  }
+
+  // ...........................................................................
   // Timeouts
 
   /// Is set to true if production times out

@@ -32,6 +32,7 @@
 - Move initialization of suppliers to SCM
 - Improve error message
 - Let testFlushTasks also trigger a tick
+- deepSuppliers and deepCustomers
 
 ### Fixed
 
