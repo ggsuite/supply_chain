@@ -104,7 +104,7 @@ class Graph2 {
   const Graph2();
 
   // ...........................................................................
-  /// Returns graph that can be converted to the dot format late
+  /// Returns graph that can be converted to the dot format later
   GraphScopeItem tree({
     Scope? scope,
     Node<dynamic>? node,
@@ -131,7 +131,7 @@ class Graph2 {
 
     scope ??= node!.scope;
 
-    return _singleNodeGraphWithSuppliers(
+    return _singleNodeGraph(
       scope: scope,
       node: node,
       childScopeDepth: childScopeDepth,
@@ -218,7 +218,7 @@ class Graph2 {
   // ######################
 
   // ...........................................................................
-  GraphScopeItem? _singleNodeGraphWithSuppliers({
+  GraphScopeItem? _singleNodeGraph({
     required Scope scope,
     required Node<dynamic>? node,
     required int childScopeDepth,
