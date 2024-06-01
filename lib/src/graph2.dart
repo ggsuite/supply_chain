@@ -104,55 +104,41 @@ class Graph2 {
   const Graph2();
 
   // ...........................................................................
-  /// Returns graph that can be converted to the dot format later
-  GraphScopeItem tree({
-    Scope? scope,
-    Node<dynamic>? node,
-    int childScopeDepth = 0,
-    int parentScopeDepth = 0,
+  /// Returns graph for a node that can be converted to the dot format later
+  GraphScopeItem treeForNode({
+    required Node<dynamic> node,
     int supplierDepth = 0,
     int customerDepth = 0,
     bool showDependentNodesOnly = false,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
   }) {
-    // Either scope or node must be shown
-    if (node != null && scope != null && node.scope != scope) {
-      throw ArgumentError(
-        'Either node or scope must be given, but not both.',
-      );
-    }
-
-    if (node == null && scope == null) {
-      throw ArgumentError(
-        'Either node or scope must be given.',
-      );
-    }
-
-    scope ??= node!.scope;
-
-    return _singleNodeGraph(
-      scope: scope,
+    return _treeForNode(
       node: node,
-      childScopeDepth: childScopeDepth,
-      parentScopeDepth: parentScopeDepth,
       supplierDepth: supplierDepth,
       customerDepth: customerDepth,
       highlightedNodes: highlightedNodes,
       highlightedScopes: highlightedScopes,
     )!;
+  }
 
-    // Handle the single node case
-    // _singleNodeGraph(
-    //       scope: scope,
-    //       node: node,
-    //       childScopeDepth: childScopeDepth,
-    //       parentScopeDepth: parentScopeDepth,
-    //       supplierDepth: supplierDepth,
-    //       customerDepth: customerDepth,
-    //       highlightedNodes: highlightedNodes,
-    //       highlightedScopes: highlightedScopes,
-    //     ) ??
+  // ...........................................................................
+  /// Returns a graph for a scope that can be converted to the dot format later
+  GraphScopeItem treeForScope({
+    required Scope scope,
+    int childScopeDepth = 0,
+    int parentScopeDepth = 0,
+    bool showDependentNodesOnly = false,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
+  }) {
+    return _treeForScope(
+      scope: scope,
+      childScopeDepth: childScopeDepth,
+      parentScopeDepth: parentScopeDepth,
+      highlightedNodes: highlightedNodes,
+      highlightedScopes: highlightedScopes,
+    )!;
   }
 
   // ...........................................................................
@@ -218,20 +204,47 @@ class Graph2 {
   // ######################
 
   // ...........................................................................
-  GraphScopeItem? _singleNodeGraph({
+  GraphScopeItem? _treeForScope({
     required Scope scope,
-    required Node<dynamic>? node,
     required int childScopeDepth,
     required int parentScopeDepth,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
+  }) {
+    // Get scopes to be shown
+    final parentScopes = scope.deepParents(depth: parentScopeDepth);
+    final childScopes = scope.deepChildren(depth: childScopeDepth);
+    final scopesToBeShown = [...parentScopes, scope, ...childScopes];
+
+    // Show all nodes that are in the specified scopes
+    final shownNodes = <Node<dynamic>>[];
+    for (final scope in scopesToBeShown) {
+      shownNodes.addAll(scope.nodes);
+    }
+
+    // Order the scopes by depth
+    final orderedScopes = scopesToBeShown.toList()
+      ..sort((a, b) => a.depth.compareTo(b.depth));
+
+    // Create the graph based on the scopes
+    final graph = _graphFromScopes(
+      shownScopes: orderedScopes,
+      shownNodes: shownNodes,
+      highlightedNodes: highlightedNodes,
+      highlightedScopes: highlightedScopes,
+    );
+
+    return graph;
+  }
+
+  // ...........................................................................
+  GraphScopeItem? _treeForNode({
+    required Node<dynamic> node,
     required int supplierDepth,
     required int customerDepth,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
   }) {
-    if (!(childScopeDepth == 0 && parentScopeDepth == 0 && node != null)) {
-      return null;
-    }
-
     // Get all supplier nodes
     final supplierNodes = node.deepSuppliers(depth: supplierDepth);
     final customerNodes = node.deepCustomers(depth: customerDepth);
@@ -267,6 +280,7 @@ class Graph2 {
 
     // Get common parent scope
     final commonParent = _commonParent(scopes);
+    scopes.add(commonParent);
 
     // Add all scope that are inbetween the common parent and the scopes
     for (final scope in scopes) {
@@ -346,11 +360,11 @@ class Graph2 {
   // ...........................................................................
   List<GraphNodeItem> _shownNodes(
     Iterable<Node<dynamic>> nodes,
-    Iterable<Node<dynamic>> allShownNodes,
+    Iterable<Node<dynamic>>? allShownNodes,
   ) {
     final result = <GraphNodeItem>[];
     for (final node in nodes) {
-      if (allShownNodes.contains(node)) {
+      if (allShownNodes == null || allShownNodes.contains(node)) {
         final graphItem = GraphNodeItem(
           node: node,
           isHighlighted: false,
@@ -400,6 +414,12 @@ class Graph2 {
       if (scopeItem.isHighlighted) {
         result += 'style = filled;\n';
         result += 'fillcolor = "#AAFFFF88";\n';
+      }
+
+      // Write an empty node, if nodeItems is empty
+      if (scopeItem.nodeItems.isEmpty) {
+        result +=
+            'invisible [label = "", shape = point, style=invis]; // ${scope.key}\n';
       }
 
       // Write each node

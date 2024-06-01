@@ -402,4 +402,13 @@ void main() {
       );
     });
   });
+
+  group('Examples', () {
+    test('ButterFlyExample', () {
+      expect(ButterFlyExample(), isNotNull);
+    });
+    test('TriangleExample', () {
+      expect(TriangleExample(), isNotNull);
+    });
+  });
 }

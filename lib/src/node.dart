@@ -580,7 +580,7 @@ class ButterFlyExample {
       level2 = scope.findScope('level2')!;
       level3 = scope.findScope('level3')!;
 
-      allScopes = [level0, level1, level2, level3];
+      allScopes = [level0, level1, level2, level3, scope];
     } else {
       allScopes = [];
     }
@@ -651,5 +651,65 @@ class ButterFlyExample {
   late final Scope level3;
 
   /// A list of all scopes
+  late final List<Scope> allScopes;
+}
+
+// #############################################################################
+/// Creates a house with walls
+class TriangleExample {
+  /// Constructor
+  TriangleExample() {
+    triangle = Scope.example(scm: Scm.example(), key: 'triangle');
+    triangle.mockContent({
+      'top': 0,
+      'left': {
+        'left': 0,
+      },
+      'right': {
+        'right': 0,
+      },
+    });
+
+    topNode = triangle.findNode<int>('top')!;
+    leftNode = triangle.findNode<int>('left')!;
+    rightNode = triangle.findNode<int>('right')!;
+
+    topScope = triangle;
+    leftScope = triangle.findScope('left')!;
+    rightScope = triangle.findScope('right')!;
+
+    topNode.addCustomer(leftNode);
+    topNode.addCustomer(rightNode);
+    leftNode.addCustomer(rightNode);
+
+    allNodes = [topNode, leftNode, rightNode];
+    allScopes = [topScope, leftScope, rightScope];
+  }
+
+  /// The house scope
+  late final Scope triangle;
+
+  /// The top node
+  late final Node<int> topNode;
+
+  /// The left node
+  late final Node<int> leftNode;
+
+  /// The right node
+  late final Node<int> rightNode;
+
+  /// The top scope
+  late final Scope topScope;
+
+  /// The left scope
+  late final Scope leftScope;
+
+  /// The right scope
+  late final Scope rightScope;
+
+  /// All nodes
+  late final List<Node<dynamic>> allNodes;
+
+  /// All scopes
   late final List<Scope> allScopes;
 }
