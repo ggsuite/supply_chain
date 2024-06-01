@@ -9,220 +9,170 @@ import 'dart:io';
 import 'package:gg_is_github/gg_is_github.dart';
 import 'package:supply_chain/supply_chain.dart';
 
+// .............................................................................
+/// An item representing a node in the graph
+class GraphNodeItem {
+  /// Constructor
+  GraphNodeItem({
+    required this.node,
+    required this.shownCustomers,
+    this.isHighlighted = false,
+  });
+
+  /// The customers to be printed
+  final List<GraphNodeItem> shownCustomers;
+
+  /// The node represented by the item
+  final Node<dynamic> node;
+
+  /// Is the node highlighted
+  final bool isHighlighted;
+
+  @override
+  String toString() => node.key;
+}
+
+// .............................................................................
+/// An item representing a scope in the graph
+class GraphScopeItem {
+  /// Constructor
+  GraphScopeItem({
+    required this.scope,
+    required this.nodeItems,
+    required this.children,
+    this.isHighlighted = false,
+  }) {
+    for (final node in nodeItems) {
+      if (node.node.scope != scope) {
+        throw ArgumentError('All nodes must be in the given scope.');
+      }
+    }
+  }
+
+  /// The scope represented by the node
+  final Scope scope;
+
+  /// The children to be printed
+  final List<GraphScopeItem> children;
+
+  /// The nodes to be shown in the scope
+  final List<GraphNodeItem> nodeItems;
+
+  /// Is the scope highlighted
+  final bool isHighlighted;
+
+  @override
+  String toString() => scope.key;
+
+  /// Find a node item in the graph
+  GraphNodeItem? findNodeItem(Node<dynamic> node) {
+    for (final nodeItem in nodeItems) {
+      if (nodeItem.node == node) {
+        return nodeItem;
+      }
+    }
+
+    for (final child in children) {
+      final result = child.findNodeItem(node);
+      if (result != null) {
+        return result;
+      }
+    }
+    return null;
+  }
+
+  /// Find a scope item in the graph
+  GraphScopeItem? findScopeItem(Scope scope) {
+    if (this.scope == scope) {
+      return this;
+    }
+
+    for (final child in children) {
+      final result = child.findScopeItem(scope);
+      if (result != null) {
+        return result;
+      }
+    }
+    return null;
+  }
+}
+
+// #############################################################################
 /// Creates a dot graph with certain configuration
 class Graph {
   /// Constructor
   const Graph();
 
-  /// Returns a graph in dot format for the given scope
-  ///
-  /// Prints all nodes of the scope.
-  /// Prints all suppliers of the nodes with [supplierDepth] levels.
-  /// Prints all customers of the nodes with [customerDepth] levels.
-  String fromNode(
-    Node<dynamic> node, {
-    int childScopeDepth = 1,
-    int parentScopeDepth = 1,
-    int supplierDepth = 1,
-    int customerDepth = 1,
+  // ...........................................................................
+  /// Returns graph for a node that can be converted to the dot format later
+  GraphScopeItem treeForNode({
+    required Node<dynamic> node,
+    int supplierDepth = 0,
+    int customerDepth = 0,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
   }) {
-    return _fromScope(
-      node.scope,
-      onlyNode: node,
-      childScopeDepth: childScopeDepth,
-      parentScopeDepth: parentScopeDepth,
+    return _treeForNode(
+      node: node,
       supplierDepth: supplierDepth,
       customerDepth: customerDepth,
-      highlightedNode: node,
-      highlightedScope: node.scope,
-    );
-  }
-
-  /// Returns a graph in dot format for the given scope
-  ///
-  /// Prints all nodes of the scope.
-  /// Prints all suppliers of the nodes with [supplierDepth] levels.
-  /// Prints all customers of the nodes with [customerDepth] levels.
-  String fromScope(
-    Scope scope, {
-    int childScopeDepth = 1,
-    int parentScopeDepth = 1,
-    int supplierDepth = 1,
-    int customerDepth = 1,
-    bool showDependentNodesOnly = true,
-  }) {
-    return _fromScope(
-      scope,
-      onlyNode: null,
-      childScopeDepth: childScopeDepth,
-      parentScopeDepth: parentScopeDepth,
-      supplierDepth: supplierDepth,
-      customerDepth: customerDepth,
-      highlightedScope: scope,
-      showDependentNodesOnly: showDependentNodesOnly,
-    );
+      highlightedNodes: highlightedNodes,
+      highlightedScopes: highlightedScopes,
+    )!;
   }
 
   // ...........................................................................
-  String _fromScope(
-    Scope scope, {
-    Node<dynamic>? onlyNode,
-    int childScopeDepth = 1,
-    int parentScopeDepth = 1,
-    int supplierDepth = 1,
-    int customerDepth = 1,
-    bool showDependentNodesOnly = true,
-    Node<dynamic>? highlightedNode,
-    Scope? highlightedScope,
+  /// Returns a graph for a scope that can be converted to the dot format later
+  GraphScopeItem treeForScope({
+    required Scope scope,
+    int childScopeDepth = 0,
+    int parentScopeDepth = 0,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
   }) {
-    // Collect all affected nodes
-    final nodesToBeShown = showDependentNodesOnly
-        ? null
-        : onlyNode != null
-            ? [onlyNode]
-            : <Node<dynamic>>[...scope.nodes];
+    return _treeForScope(
+      scope: scope,
+      childScopeDepth: childScopeDepth,
+      parentScopeDepth: parentScopeDepth,
+      highlightedNodes: highlightedNodes,
+      highlightedScopes: highlightedScopes,
+    )!;
+  }
 
-    if (nodesToBeShown != null) {
-      final nodesCopy = [...nodesToBeShown];
-      for (final node in nodesCopy) {
-        nodesToBeShown.addAll(node.deepCustomers(depth: customerDepth));
-        nodesToBeShown.addAll(node.deepSuppliers(depth: supplierDepth));
-      }
-    }
-
-    // Collect all affected scopes
-    final scopesToBeShown = <Scope>[
-      scope,
-      ...scope.deepParents(depth: parentScopeDepth),
-      ...scope.deepChildren(depth: childScopeDepth),
-    ];
-
-    // Get the common root of all scopes
-    final commonParent = scopesToBeShown.reduce((a, b) => a.commonParent(b));
-
-    // Get the intermediate scopes
-    for (final node in nodesToBeShown ?? <Node<dynamic>>[]) {
-      Scope? scope = node.scope;
-      do {
-        if (!scopesToBeShown.contains(scope)) {
-          scopesToBeShown.add(scope!);
-        }
-        scope = scope?.parent;
-      } while (scope != null && scope != commonParent);
-    }
-
+  // ...........................................................................
+  /// Turn a graph into dot format
+  String dot({
+    required GraphScopeItem tree,
+  }) {
     var result = '';
     result += 'digraph unix {\n';
     result += 'graph [nodesep = 0.25; ranksep=1];\n';
     result += 'fontname="Helvetica,Arial,sans-serif"\n';
     result += 'node [fontname="Helvetica,Arial,sans-serif"]\n';
     result += 'edge [fontname="Helvetica,Arial,sans-serif"]\n';
-    result += _graphNodes(
-      commonParent,
-      nodesToBeShown?.toList(),
-      scopesToBeShown.toList(),
-      highlightedScope: highlightedScope,
-      highlightedNode: highlightedNode,
-    );
-    result += _graphEdges(
-      commonParent,
-      nodesToBeShown?.toList(),
-      scopesToBeShown.toList(),
-    );
+    result += _dotNodes(tree);
+    result += _dotEdges(tree);
     result += '}\n';
-    return result;
-  }
-
-  /// Save the graph to a file
-  ///
-  /// The format can be
-  /// bmp canon cgimage cmap cmapx cmapx_np dot dot_json eps exr fig gd gd2 gif
-  /// gv icns ico imap imap_np ismap jp2 jpe jpeg jpg json json0 kitty kittyz
-  /// mp pct pdf pic pict plain plain-ext png pov ps ps2 psd sgi svg svgz tga
-  /// tif tiff tk vrml vt vt-24bit wbmp webp xdot xdot1.2 xdot1.4 xdot_json
-  Future<void> writeScopeToFile(
-    Scope scope,
-    String path, {
-    int childScopeDepth = 0,
-    int parentScopeDepth = 1,
-    int supplierDepth = 1,
-    int customerDepth = 0,
-    bool highLightScope = false,
-    bool showDependentNodesOnly = false,
-  }) async {
-    await _writeScopeToFile(
-      scope,
-      path,
-      childScopeDepth: childScopeDepth,
-      parentScopeDepth: parentScopeDepth,
-      supplierDepth: supplierDepth,
-      customerDepth: customerDepth,
-      highLightNode: false,
-      highLightScope: highLightScope,
-      showDependentNodesOnly: showDependentNodesOnly,
-    );
-  }
-
-  /// Save the graph to a file
-  ///
-  /// The format can be
-  /// bmp canon cgimage cmap cmapx cmapx_np dot dot_json eps exr fig gd gd2 gif
-  /// gv icns ico imap imap_np ismap jp2 jpe jpeg jpg json json0 kitty kittyz
-  /// mp pct pdf pic pict plain plain-ext png pov ps ps2 psd sgi svg svgz tga
-  /// tif tiff tk vrml vt vt-24bit wbmp webp xdot xdot1.2 xdot1.4 xdot_json
-  Future<void> writeNodeToFile(
-    Node<dynamic> node,
-    String path, {
-    int childScopeDepth = 0,
-    int parentScopeDepth = 1,
-    int supplierDepth = 1,
-    int customerDepth = 0,
-    bool highLightNode = false,
-  }) async {
-    await _writeScopeToFile(
-      node.scope,
-      path,
-      onlyNode: node,
-      childScopeDepth: childScopeDepth,
-      parentScopeDepth: parentScopeDepth,
-      supplierDepth: supplierDepth,
-      customerDepth: customerDepth,
-      highLightNode: highLightNode,
-    );
+    return _indentDotGraph(result);
   }
 
   // ...........................................................................
-  Future<void> _writeScopeToFile(
-    Scope scope,
-    String path, {
-    Node<dynamic>? onlyNode,
-    int childScopeDepth = 0,
-    int parentScopeDepth = 1,
-    int supplierDepth = 1,
-    int customerDepth = 0,
-    bool highLightScope = false,
-    bool highLightNode = false,
-    bool showDependentNodesOnly = false,
+  /// Save the graph to a file
+  ///
+  /// The format can be
+  /// bmp canon cgimage cmap cmapx cmapx_np dot dot_json eps exr fig gd gd2 gif
+  /// gv icns ico imap imap_np ismap jp2 jpe jpeg jpg json json0 kitty kittyz
+  /// mp pct pdf pic pict plain plain-ext png pov ps ps2 psd sgi svg svgz tga
+  /// tif tiff tk vrml vt vt-24bit wbmp webp xdot xdot1.2 xdot1.4 xdot_json
+  Future<void> writeImageFile({
+    required String dot,
+    required String path,
   }) async {
     final format = path.split('.').last;
 
-    final content = _fromScope(
-      scope,
-      childScopeDepth: childScopeDepth,
-      parentScopeDepth: parentScopeDepth,
-      supplierDepth: supplierDepth,
-      customerDepth: customerDepth,
-      onlyNode: onlyNode,
-      highlightedNode: highLightNode ? onlyNode : null,
-      highlightedScope: highLightScope ? scope : null,
-      showDependentNodesOnly: showDependentNodesOnly,
-    );
-
-    final formattedContent = _indentDotGraph(content);
-
     final file = File(path);
     if (format == 'dot') {
-      await file.writeAsString(formattedContent);
+      await file.writeAsString(dot);
       return;
     }
     // coverage:ignore-start
@@ -233,7 +183,7 @@ class Graph {
         final tempDir = await Directory.systemTemp.createTemp();
         final tempPath = '${tempDir.path}/$fileName.dot';
         final tempFile = File(tempPath);
-        tempFile.writeAsStringSync(content);
+        tempFile.writeAsStringSync(dot);
 
         // Convert dot file to target format
         final process = await Process.run(
@@ -252,81 +202,244 @@ class Graph {
   // ######################
 
   // ...........................................................................
-  // Graph
-  String _graphNodes(
-    Scope scope,
-    List<Node<dynamic>>? nodesToBeShown,
-    List<Scope>? scopesToBeShown, {
-    Scope? highlightedScope,
-    Node<dynamic>? highlightedNode,
+  GraphScopeItem? _treeForScope({
+    required Scope scope,
+    required int childScopeDepth,
+    required int parentScopeDepth,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
   }) {
+    // Get scopes to be shown
+    final parentScopes = scope.deepParents(depth: parentScopeDepth);
+    final childScopes = scope.deepChildren(depth: childScopeDepth);
+    final scopesToBeShown = [...parentScopes, scope, ...childScopes];
+
+    // Show all nodes that are in the specified scopes
+    final shownNodes = <Node<dynamic>>[];
+    for (final scope in scopesToBeShown) {
+      shownNodes.addAll(scope.nodes);
+    }
+
+    // Order the scopes by depth
+    final orderedScopes = scopesToBeShown.toList()
+      ..sort((a, b) => a.depth.compareTo(b.depth));
+
+    // Create the graph based on the scopes
+    final graph = _graphFromScopes(
+      shownScopes: orderedScopes,
+      shownNodes: shownNodes,
+      highlightedNodes: highlightedNodes,
+      highlightedScopes: highlightedScopes,
+    );
+
+    return graph;
+  }
+
+  // ...........................................................................
+  GraphScopeItem? _treeForNode({
+    required Node<dynamic> node,
+    required int supplierDepth,
+    required int customerDepth,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
+  }) {
+    // Get all supplier nodes
+    final supplierNodes = node.deepSuppliers(depth: supplierDepth);
+    final customerNodes = node.deepCustomers(depth: customerDepth);
+
+    // Get shown nodes
+    final shownNodes = [node, ...supplierNodes, ...customerNodes];
+
+    // Get a list of all scopes to be shown
+    final scopesToBeShown = _scopesCoveredByNodes(shownNodes);
+
+    // Order the scopes by depth
+    final orderedScopes = scopesToBeShown.toList()
+      ..sort((a, b) => a.depth.compareTo(b.depth));
+
+    // Create the graph based on the scopes
+    final graph = _graphFromScopes(
+      shownScopes: orderedScopes,
+      shownNodes: shownNodes,
+      highlightedNodes: highlightedNodes,
+      highlightedScopes: highlightedScopes,
+    );
+
+    return graph;
+  }
+
+  // ...........................................................................
+  Set<Scope> _scopesCoveredByNodes(Iterable<Node<dynamic>> nodes) {
+    // Get all scopes covered by the nodes
+    final scopes = <Scope>{};
+    for (final node in nodes) {
+      scopes.add(node.scope);
+    }
+
+    // Get common parent scope
+    final commonParent = _commonParent(scopes);
+    scopes.add(commonParent);
+
+    // Add all scope that are inbetween the common parent and the scopes
+    for (final scope in scopes) {
+      var current = scope;
+      while (current != commonParent) {
+        scopes.add(current);
+        current = current.parent!;
+      }
+    }
+
+    return scopes;
+  }
+
+  // ...........................................................................
+  Scope _commonParent(Iterable<Scope> scopes) =>
+      scopes.reduce((a, b) => a.commonParent(b));
+
+  // ...........................................................................
+  GraphScopeItem _graphFromScopes({
+    required List<Scope> shownScopes,
+    required List<Node<dynamic>> shownNodes,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
+  }) {
+    // Iterate over all scopes beginning at the end
+    // (the last scope is the most detailed one)
+
+    final scope = shownScopes.first;
+    final shownChildren = _shownChildren(
+      scope,
+      shownScopes,
+      shownNodes,
+      highlightedNodes,
+      highlightedScopes,
+    );
+
+    final graphScopeItem = GraphScopeItem(
+      scope: scope,
+      children: shownChildren,
+      isHighlighted: highlightedScopes?.contains(scope) ?? false,
+      nodeItems: _shownNodesInScope(scope, shownNodes, highlightedNodes),
+    );
+
+    return graphScopeItem;
+  }
+
+  // ...........................................................................
+  List<GraphScopeItem> _shownChildren(
+    Scope scope,
+    List<Scope> shownScopes,
+    List<Node<dynamic>> shownNodes,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
+  ) {
+    final result = <GraphScopeItem>[];
+    for (final child in scope.children) {
+      if (shownScopes.contains(child)) {
+        result.add(
+          GraphScopeItem(
+            scope: child,
+            children: _shownChildren(
+              child,
+              shownScopes,
+              shownNodes,
+              highlightedNodes,
+              highlightedScopes,
+            ),
+            isHighlighted: highlightedScopes?.contains(child) ?? false,
+            nodeItems: _shownNodesInScope(child, shownNodes, highlightedNodes),
+          ),
+        );
+      }
+    }
+    return result;
+  }
+
+  // ...........................................................................
+  List<GraphNodeItem> _shownNodes(
+    Iterable<Node<dynamic>> nodes,
+    Iterable<Node<dynamic>>? allShownNodes,
+  ) {
+    final result = <GraphNodeItem>[];
+    for (final node in nodes) {
+      if (allShownNodes == null || allShownNodes.contains(node)) {
+        final graphItem = GraphNodeItem(
+          node: node,
+          isHighlighted: false,
+          shownCustomers: [],
+        );
+        result.add(graphItem);
+      }
+    }
+    return result;
+  }
+
+  // ...........................................................................
+  List<GraphNodeItem> _shownNodesInScope(
+    Scope scope,
+    List<Node<dynamic>> allShownNodes,
+    List<Node<dynamic>>? highlightedNodes,
+  ) {
+    final nodes = allShownNodes.where((node) => node.scope == scope).toList();
+    final result = <GraphNodeItem>[];
+    for (final node in nodes) {
+      result.add(
+        GraphNodeItem(
+          node: node,
+          isHighlighted: highlightedNodes?.contains(node) ?? false,
+          shownCustomers: _shownNodes(node.customers, allShownNodes),
+        ),
+      );
+    }
+
+    return result;
+  }
+
+  // ...........................................................................
+  // Graph
+  String _dotNodes(
+    GraphScopeItem scopeItem,
+  ) {
     {
       var result = '';
+      final scope = scopeItem.scope;
 
       final scopeId = '${scope.key}_${scope.id}';
 
       // Create a cluster for this scope
       result += 'subgraph cluster_$scopeId {\n';
-      result += 'label = "${scope.key}";\n';
-      if (scope == highlightedScope) {
+      result += 'label = "${scope.key}"; // scope\n';
+      if (scopeItem.isHighlighted) {
         result += 'style = filled;\n';
         result += 'fillcolor = "#AAFFFF88";\n';
       }
 
-      // Estimate the relevant child scopes
-      final relevantChildScopes = scopesToBeShown == null
-          ? scope.children // coverage:ignore-line
-          : scope.children
-              .where(
-                (element) => scopesToBeShown.contains(element),
-              )
-              .toList();
-
-      // Remove the relevant child scopes from the list
-      if (scopesToBeShown != null) {
-        for (final node in relevantChildScopes) {
-          scopesToBeShown.remove(node);
-        }
-      }
-
-      for (final childScope in relevantChildScopes) {
-        result += _graphNodes(
-          childScope,
-          nodesToBeShown,
-          scopesToBeShown,
-          highlightedScope: highlightedScope,
-          highlightedNode: highlightedNode,
-        );
-      }
-
-      // Estimate relevant nodes
-      final relevantNodes = nodesToBeShown == null
-          ? scope.nodes
-          : scope.nodes
-              .where(
-                (element) => nodesToBeShown.contains(element),
-              )
-              .toList();
-
-      // Remove the relevant nodes from the list
-      if (nodesToBeShown != null) {
-        for (final node in relevantNodes) {
-          nodesToBeShown.remove(node);
-        }
+      // Write an empty node, if nodeItems is empty
+      if (scopeItem.nodeItems.isEmpty) {
+        result +=
+            'invisible [label = "", shape = point, style=invis]; // ${scope.key}\n';
       }
 
       // Write each node
-      for (final node in relevantNodes) {
+      for (final nodeItem in scopeItem.nodeItems) {
+        final node = nodeItem.node;
         final nodeId = _nodeId(node);
         result += '$nodeId [\n';
-        result += '  label="${node.key}"\n';
+        result += '  label = "${node.key}"; // node\n';
 
-        if (node == highlightedNode) {
+        if (nodeItem.isHighlighted) {
           result += '  style = filled;\n';
           result += '  fillcolor = "#FFFFAA";\n';
         }
 
         result += '];\n';
+      }
+
+      // Write the child scopes
+      for (final childScope in scopeItem.children) {
+        result += _dotNodes(
+          childScope,
+        );
       }
 
       result += '\n}\n'; // cluster
@@ -335,53 +448,27 @@ class Graph {
     }
   }
 
-  String _graphEdges(
-    Scope scope,
-    List<Node<dynamic>>? nodesToBeShown,
-    List<Scope>? scopesToBeShown,
+  // ...........................................................................
+  String _dotEdges(
+    GraphScopeItem scopeItem,
   ) {
     {
       var result = '';
 
-      // ..................
       // Write dependencies
-      for (final node in scope.nodes) {
-        if (nodesToBeShown != null && !nodesToBeShown.contains(node)) {
-          continue;
-        }
+      for (final nodeItem in scopeItem.nodeItems) {
+        final node = nodeItem.node;
 
-        for (final customer in node.customers) {
-          if (nodesToBeShown != null && !nodesToBeShown.contains(customer)) {
-            continue;
-          }
-
+        for (final customer in nodeItem.shownCustomers) {
           final from = _nodeId(node);
-          final to = _nodeId(customer);
-
+          final to = _nodeId(customer.node);
           result += '"$from" -> "$to";\n';
         }
       }
 
-      // ..................................
-      // Estimate the relevant child scopes
-      final relevantChildScopes = scopesToBeShown == null
-          ? scope.children // coverage:ignore-line
-          : scope.children
-              .where(
-                (element) => scopesToBeShown.contains(element),
-              )
-              .toList();
-
-      // Remove the relevant child scopes from the list
-      if (scopesToBeShown != null) {
-        for (final scope in relevantChildScopes) {
-          scopesToBeShown.remove(scope);
-        }
-      }
-
       // Write the child scopes
-      for (final childScope in relevantChildScopes) {
-        result += _graphEdges(childScope, nodesToBeShown, scopesToBeShown);
+      for (final childScopeItem in scopeItem.children) {
+        result += _dotEdges(childScopeItem);
       }
 
       return result;
@@ -398,19 +485,20 @@ class Graph {
     List<String> lines = content.split('\n');
     int indent = 0;
     List<String> indentedLines = [];
+    const int spaces = 2;
 
     for (var line in lines) {
       // Adjust indentation
       if (line.contains('}')) {
-        indent -= 4;
+        indent -= spaces;
       }
 
       // Apply current indentation and add line to results
-      String indentedLine = ' ' * indent + line.trim();
+      String indentedLine = ' ' * indent + line;
       indentedLines.add(indentedLine);
 
       if (line.contains('{')) {
-        indent += 4;
+        indent += spaces;
       }
     }
 

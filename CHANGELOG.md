@@ -41,6 +41,7 @@
 - Use a new flexible graph implementation
 - Good progress in visualizing supply chains
 - Rename identifiers
+- Give each dot file a unique name
 
 ### Fixed
 

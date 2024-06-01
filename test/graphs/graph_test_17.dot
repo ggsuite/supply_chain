@@ -1,0 +1,30 @@
+digraph unix {
+  graph [nodesep = 0.25; ranksep=1];
+  fontname="Helvetica,Arial,sans-serif"
+  node [fontname="Helvetica,Arial,sans-serif"]
+  edge [fontname="Helvetica,Arial,sans-serif"]
+  subgraph cluster_triangle_7 {
+    label = "triangle"; // scope
+    top_15 [
+      label = "top"; // node
+    ];
+    subgraph cluster_left_8 {
+      label = "left"; // scope
+      left_16 [
+        label = "left"; // node
+      ];
+      
+    }
+    subgraph cluster_right_9 {
+      label = "right"; // scope
+      right_17 [
+        label = "right"; // node
+      ];
+      
+    }
+    
+  }
+  "top_15" -> "left_16";
+  "top_15" -> "right_17";
+  "left_16" -> "right_17";
+}

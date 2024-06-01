@@ -719,14 +719,14 @@ void main() {
         final graphFile = '$cwd/test/graphs/$fileName';
 
         // Save dot file
-        await chain.saveGraphToFile(graphFile);
+        await chain.writeImageFile(graphFile);
 
         // Save svg file
         final svgFile = graphFile.replaceAll('.dot', '.svg');
-        await chain.saveGraphToFile(svgFile);
+        await chain.writeImageFile(svgFile);
 
         // Create graph directly
-        final graph = chain.graph();
+        final graph = chain.dot();
         expect(graph, isNotNull);
       }
 

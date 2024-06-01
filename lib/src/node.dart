@@ -363,40 +363,42 @@ class Node<T> {
   /// gv icns ico imap imap_np ismap jp2 jpe jpeg jpg json json0 kitty kittyz
   /// mp pct pdf pic pict plain plain-ext png pov ps ps2 psd sgi svg svgz tga
   /// tif tiff tk vrml vt vt-24bit wbmp webp xdot xdot1.2 xdot1.4 xdot_json
-  Future<void> saveGraphToFile(
+  Future<void> writeDotFile(
     String path, {
-    int childScopeDepth = 0,
-    int parentScopeDepth = 0,
-    int supplierDepth = -1,
+    int supplierDepth = 0,
     int customerDepth = 0,
-    bool highLightNode = false,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
   }) async {
-    await const Graph().writeNodeToFile(
-      this,
-      childScopeDepth: childScopeDepth,
-      parentScopeDepth: parentScopeDepth,
+    const graph = Graph();
+
+    final dot = this.dot(
       supplierDepth: supplierDepth,
       customerDepth: customerDepth,
-      path,
-      highLightNode: highLightNode,
+      highlightedNodes: highlightedNodes,
+      highlightedScopes: highlightedScopes,
     );
+    await graph.writeImageFile(path: path, dot: dot);
   }
 
   // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz
-  String graph({
-    int childScopeDepth = 0,
-    int parentScopeDepth = 0,
-    int supplierDepth = -1,
+  String dot({
+    int supplierDepth = 0,
     int customerDepth = 0,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
   }) {
-    return const Graph().fromNode(
-      this,
-      childScopeDepth: childScopeDepth,
-      parentScopeDepth: parentScopeDepth,
-      supplierDepth: -supplierDepth,
+    const graph = Graph();
+    final tree = graph.treeForNode(
+      node: this,
+      supplierDepth: supplierDepth,
       customerDepth: customerDepth,
+      highlightedNodes: highlightedNodes,
+      highlightedScopes: highlightedScopes,
     );
+    final dot = graph.dot(tree: tree);
+    return dot;
   }
 
   // ######################

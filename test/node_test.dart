@@ -386,7 +386,7 @@ void main() {
       test('should save the graph to a file', () async {
         final node = ButterFlyExample(withScopes: true).x;
         const path = 'test/graphs/graph_test/node_test_saveGraphToFile.dot';
-        await node.saveGraphToFile(path);
+        await node.writeDotFile(path);
       });
     });
 
@@ -396,7 +396,7 @@ void main() {
         'and customers',
         () {
           final node = ButterFlyExample(withScopes: true).x;
-          final graph = node.graph();
+          final graph = node.dot();
           expect(graph, isNotNull);
         },
       );

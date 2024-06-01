@@ -369,21 +369,22 @@ class Scope {
 
   // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz
-  String graph({
+  String dot({
     int childScopeDepth = 0,
     int parentScopeDepth = 0,
-    int supplierDepth = -1,
-    int customerDepth = 0,
-    bool showDependentNodesOnly = false,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
   }) {
-    return const Graph().fromScope(
-      this,
+    final tree = const Graph().treeForScope(
+      scope: this,
       childScopeDepth: childScopeDepth,
       parentScopeDepth: parentScopeDepth,
-      supplierDepth: -supplierDepth,
-      customerDepth: customerDepth,
-      showDependentNodesOnly: showDependentNodesOnly,
+      highlightedNodes: highlightedNodes,
+      highlightedScopes: highlightedScopes,
     );
+
+    final dot = const Graph().dot(tree: tree);
+    return dot;
   }
 
   /// Save the graph to a file
@@ -393,24 +394,23 @@ class Scope {
   /// gv icns ico imap imap_np ismap jp2 jpe jpeg jpg json json0 kitty kittyz
   /// mp pct pdf pic pict plain plain-ext png pov ps ps2 psd sgi svg svgz tga
   /// tif tiff tk vrml vt vt-24bit wbmp webp xdot xdot1.2 xdot1.4 xdot_json
-  Future<void> saveGraphToFile(
+  Future<void> writeImageFile(
     String path, {
     int childScopeDepth = 0,
     int parentScopeDepth = 0,
-    int supplierDepth = -1,
-    int customerDepth = 0,
-    bool highLightScope = false,
-    bool showDependentNodesOnly = false,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
   }) async {
-    await const Graph().writeScopeToFile(
-      this,
+    final dot = this.dot(
       childScopeDepth: childScopeDepth,
       parentScopeDepth: parentScopeDepth,
-      supplierDepth: supplierDepth,
-      customerDepth: customerDepth,
-      path,
-      highLightScope: highLightScope,
-      showDependentNodesOnly: showDependentNodesOnly,
+      highlightedNodes: highlightedNodes,
+      highlightedScopes: highlightedScopes,
+    );
+
+    await const Graph().writeImageFile(
+      dot: dot,
+      path: path,
     );
   }
 
