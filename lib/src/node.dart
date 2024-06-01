@@ -394,7 +394,7 @@ class Node<T> {
       node: this,
       supplierDepth: supplierDepth,
       customerDepth: customerDepth,
-      highlightedNodes: highlightedNodes,
+      highlightedNodes: highlightedNodes ?? [this],
       highlightedScopes: highlightedScopes,
     );
     final dot = graph.dot(tree: tree);

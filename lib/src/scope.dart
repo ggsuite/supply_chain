@@ -370,7 +370,7 @@ class Scope {
   // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz
   String dot({
-    int childScopeDepth = 0,
+    int childScopeDepth = -1,
     int parentScopeDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
@@ -396,7 +396,7 @@ class Scope {
   /// tif tiff tk vrml vt vt-24bit wbmp webp xdot xdot1.2 xdot1.4 xdot_json
   Future<void> writeImageFile(
     String path, {
-    int childScopeDepth = 0,
+    int childScopeDepth = -1,
     int parentScopeDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,

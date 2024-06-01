@@ -11,6 +11,20 @@ digraph unix {
     nodeBuiltByParent_1 [
       label = "nodeBuiltByParent"; // node
     ];
+    subgraph cluster_childScopeConstructedByParent_3 {
+      label = "childScopeConstructedByParent"; // scope
+      nodeConstructedByChildScope_2 [
+        label = "nodeConstructedByChildScope"; // node
+      ];
+      
+    }
+    subgraph cluster_childScopeBuiltByParent_4 {
+      label = "childScopeBuiltByParent"; // scope
+      nodeBuiltByChildScope_3 [
+        label = "nodeBuiltByChildScope"; // node
+      ];
+      
+    }
     
   }
 }

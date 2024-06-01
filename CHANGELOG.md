@@ -42,6 +42,7 @@
 - Good progress in visualizing supply chains
 - Rename identifiers
 - Give each dot file a unique name
+- Highlight selected node in Node.writeImageFile, childScopeDepth is -1 by default
 
 ### Fixed
 

@@ -6,6 +6,23 @@ digraph unix {
   subgraph cluster_outer_6 {
     label = "outer"; // scope
     invisible [label = "", shape = point, style=invis]; // outer
+    subgraph cluster_scope_7 {
+      label = "scope"; // scope
+      dependency_4 [
+        label = "dependency"; // node
+      ];
+      subgraph cluster_childScope_8 {
+        label = "childScope"; // scope
+        node_5 [
+          label = "node"; // node
+        ];
+        customer_6 [
+          label = "customer"; // node
+        ];
+        
+      }
+      
+    }
     
   }
 }
