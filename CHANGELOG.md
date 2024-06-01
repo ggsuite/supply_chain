@@ -38,6 +38,7 @@
 - Let testFlushTasks also trigger a tick
 - deepSuppliers and deepCustomers
 - Use a new flexible graph implementation
+- Good progress in visualizing supply chains
 
 ### Fixed
 

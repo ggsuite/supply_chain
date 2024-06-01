@@ -270,7 +270,7 @@ class Graph {
       result += 'label = "${scope.key}";\n';
       if (scope == highlightedScope) {
         result += 'style = filled;\n';
-        result += 'fillcolor = "#DDDDDD";\n';
+        result += 'fillcolor = "#AAFFFF88";\n';
       }
 
       // Estimate the relevant child scopes
@@ -323,7 +323,7 @@ class Graph {
 
         if (node == highlightedNode) {
           result += '  style = filled;\n';
-          result += '  fillcolor = "#EEEEEE";\n';
+          result += '  fillcolor = "#FFFFAA";\n';
         }
 
         result += '];\n';

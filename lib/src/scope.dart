@@ -57,6 +57,9 @@ class Scope {
   /// The path of the scope as array
   List<String> get pathArray => _pathArray;
 
+  /// The depth of the scope
+  int get depth => _pathArray.length;
+
   /// The uinquie id of the scope
   final int id = _idCounter++;
 

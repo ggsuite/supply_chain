@@ -541,6 +541,24 @@ class ButterFlyExample {
     c11 = scope.findNode<String>('c11')!;
     c111 = scope.findNode<String>('c111')!;
 
+    allNodes = [
+      s111,
+      s11,
+      s10,
+      s01,
+      s00,
+      s1,
+      s0,
+      x,
+      c0,
+      c1,
+      c00,
+      c01,
+      c10,
+      c11,
+      c111,
+    ];
+
     s11.addSupplier(s111);
     s1.addSupplier(s11);
     s1.addSupplier(s10);
@@ -555,7 +573,20 @@ class ButterFlyExample {
     c1.addCustomer(c10);
     c1.addCustomer(c11);
     c11.addCustomer(c111);
+
+    if (withScopes) {
+      level0 = scope.findScope('level0')!;
+      level1 = scope.findScope('level1')!;
+      level2 = scope.findScope('level2')!;
+      level3 = scope.findScope('level3')!;
+
+      allScopes = [level0, level1, level2, level3];
+    } else {
+      allScopes = [];
+    }
   }
+
+  // ...........................................................................
 
   /// s111
   late final Node<String> s111;
@@ -601,4 +632,24 @@ class ButterFlyExample {
 
   /// c111
   late final Node<String> c111;
+
+  /// All nodeså
+  late final List<Node<dynamic>> allNodes;
+
+  // ...........................................................................
+
+  /// level0
+  late final Scope level0;
+
+  /// level1
+  late final Scope level1;
+
+  /// level2
+  late final Scope level2;
+
+  /// level3
+  late final Scope level3;
+
+  /// A list of all scopes
+  late final List<Scope> allScopes;
 }

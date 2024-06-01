@@ -247,7 +247,7 @@ void main() {
       });
     });
 
-    group('path, pathArray', () {
+    group('path, pathArray, pathDepth', () {
       test('should return the path of the scope', () {
         final root = ExampleScopeRoot(scm: Scm.testInstance);
         final childScopeA = root.child('childScopeA')!;
@@ -260,6 +260,7 @@ void main() {
           grandChildScope.pathArray,
           ['exampleRoot', 'childScopeA', 'grandChildScope'],
         );
+        expect(grandChildScope.depth, 3);
       });
     });
 

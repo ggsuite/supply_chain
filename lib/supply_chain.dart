@@ -7,6 +7,7 @@
 library;
 
 export 'src/graph.dart';
+export 'src/graph2.dart';
 export 'src/keys.dart';
 export 'src/node_blue_print.dart';
 export 'src/node.dart';
