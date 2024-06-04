@@ -798,8 +798,15 @@ void main() {
               final root = Scope.example();
 
               // Create two child scopes
-              Scope(key: 'childScopeA', parent: root);
-              final b = Scope(key: 'childScopeB', parent: root);
+              Scope(
+                bluePrint: const ScopeBluePrint(key: 'childScopeA'),
+                parent: root,
+              );
+
+              final b = Scope(
+                bluePrint: const ScopeBluePrint(key: 'childScopeA'),
+                parent: root,
+              );
 
               // Add a NodeA to ChildScopeA
               final nodeA = root.child('childScopeA')!.findOrCreateNode<int>(

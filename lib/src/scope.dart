@@ -11,18 +11,19 @@ class Scope {
   // ...........................................................................
   /// Creates a scope with a key. Key must be lower camel case.
   Scope({
-    required this.key,
+    required this.bluePrint,
     required this.parent,
   })  : scm = parent!.scm,
-        assert(key.isCamelCase) {
+        assert(bluePrint.key.isCamelCase) {
     _init();
   }
 
   /// Create a root supply scope having no parent
   Scope.root({
-    required this.key,
+    required String key,
     required this.scm,
   })  : parent = null,
+        bluePrint = ScopeBluePrint(key: key),
         assert(key.isCamelCase) {
     _init();
   }
@@ -49,7 +50,10 @@ class Scope {
   final Scm scm;
 
   /// The key of the scope
-  final String key;
+  String get key => bluePrint.key;
+
+  /// The blue print of the scope
+  final ScopeBluePrint bluePrint;
 
   /// The path of the scope
   String get path => _path;
@@ -423,7 +427,7 @@ class Scope {
     String key = 'example',
   }) {
     scm ??= Scm.example();
-    return Scope.root(key: key, scm: scm);
+    return Scope.root(key: 'example', scm: scm);
   }
 
   // ...........................................................................
@@ -647,7 +651,7 @@ class Scope {
       return null;
     }
 
-    if (path.length == 1 && path.first == key) {
+    if (path.length == 1 && (path.first == key)) {
       return this;
     }
 
@@ -742,9 +746,9 @@ class ExampleScopeRoot extends Scope {
 class ExampleChildScope extends Scope {
   /// Constructor
   ExampleChildScope({
-    required super.key,
+    required String key,
     required super.parent,
-  }) {
+  }) : super(bluePrint: ScopeBluePrint(key: key)) {
     /// Create a node
     findOrCreateNode(
       NodeBluePrint(
@@ -776,9 +780,9 @@ class ExampleChildScope extends Scope {
 class ExampleGrandChildScope extends Scope {
   /// Constructor
   ExampleGrandChildScope({
-    required super.key,
+    required String key,
     required super.parent,
-  }) {
+  }) : super(bluePrint: ScopeBluePrint(key: key)) {
     findOrCreateNode(
       NodeBluePrint(
         initialProduct: 0,

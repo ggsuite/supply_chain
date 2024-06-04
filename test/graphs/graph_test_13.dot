@@ -3,9 +3,9 @@ digraph unix {
   fontname="Helvetica,Arial,sans-serif"
   node [fontname="Helvetica,Arial,sans-serif"]
   edge [fontname="Helvetica,Arial,sans-serif"]
-  subgraph cluster_empty_11 {
-    label = "empty"; // scope
-    invisible [label = "", shape = point, style=invis]; // empty
+  subgraph cluster_example_11 {
+    label = "example"; // scope
+    invisible [label = "", shape = point, style=invis]; // example
     
   }
 }

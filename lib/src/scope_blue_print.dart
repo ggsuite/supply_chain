@@ -21,6 +21,7 @@ class ScopeBluePrint {
     required this.key,
     this.nodes = const [],
     this.children = const [],
+    this.aliases = const [],
   });
 
   // ...........................................................................
@@ -114,12 +115,14 @@ class ScopeBluePrint {
     List<NodeBluePrint<dynamic>>? nodes,
     List<ScopeBluePrint>? subScopes,
     List<NodeBluePrint<dynamic>> overrides = const [],
+    List<String>? aliases,
   }) {
     nodes = nodes ?? this.nodes;
     nodes = _replaceNodes(nodes, overrides);
 
     return ScopeBluePrint._private(
       key: key ?? this.key,
+      aliases: aliases ?? this.aliases,
       nodes: nodes,
       children: subScopes ?? children,
     );
@@ -151,6 +154,9 @@ class ScopeBluePrint {
   /// The children of the scope
   final List<ScopeBluePrint> children;
 
+  /// The list of key aliases
+  final List<String> aliases;
+
   // ...........................................................................
   /// Returns the node for a given key
   NodeBluePrint<T>? findNode<T>(String key) => _findNodeByKey<T>(key, nodes);
@@ -161,7 +167,7 @@ class ScopeBluePrint {
     required Scope scope,
   }) {
     // Create an inner scope
-    final innerScope = Scope(parent: scope, key: key);
+    final innerScope = Scope(parent: scope, bluePrint: this);
 
     final (
       List<NodeBluePrint<dynamic>> additionalNodes,
@@ -242,6 +248,7 @@ class ScopeBluePrint {
   /// Private constructor
   ScopeBluePrint._private({
     required this.key,
+    required this.aliases,
     required this.nodes,
     required this.children,
   });

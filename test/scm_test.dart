@@ -550,9 +550,12 @@ void main() {
       test('should return all nodes with a given key and type', () {
         final root = Scope.root(key: 'example', scm: Scm.testInstance);
         final scm = root.scm;
-        final chain0 = Scope(key: 's0', parent: root);
-        final chain1 = Scope(key: 's1', parent: root);
-        final chain2 = Scope(key: 's2', parent: root);
+        final chain0 =
+            Scope(bluePrint: const ScopeBluePrint(key: 's0'), parent: root);
+        final chain1 =
+            Scope(bluePrint: const ScopeBluePrint(key: 's1'), parent: root);
+        final chain2 =
+            Scope(bluePrint: const ScopeBluePrint(key: 's2'), parent: root);
 
         // Create some nodes
         final intNodeA0 = Node<int>(
