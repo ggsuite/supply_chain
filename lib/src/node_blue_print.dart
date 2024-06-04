@@ -20,6 +20,20 @@ class NodeBluePrint<T> {
     Produce<T>? produce,
   }) : produce = produce ?? doNothing<T>;
 
+  /// Maps a supplier to a different key
+  factory NodeBluePrint.map({
+    required String supplier,
+    required String toKey,
+    required T initialProduct,
+  }) {
+    return NodeBluePrint(
+      key: toKey,
+      initialProduct: initialProduct,
+      suppliers: [supplier],
+      produce: (components, previous) => components.first as T,
+    );
+  }
+
   /// Checks if the configuration is valid
   void check() {
     assert(key.isNotEmpty, 'The key must not be empty');

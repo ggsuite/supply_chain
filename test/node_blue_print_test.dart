@@ -27,6 +27,23 @@ void main() {
       });
     });
 
+    group('map(key, supplier, initialProduct)', () {
+      test('returns a new instance', () {
+        final bluePrint = NodeBluePrint<int>.map(
+          supplier: 'supplier',
+          toKey: 'node',
+          initialProduct: 123,
+        );
+
+        expect(bluePrint.key, 'node');
+        expect(bluePrint.initialProduct, 123);
+        expect(bluePrint.suppliers, ['supplier']);
+
+        /// Should just forward the original supplier's value
+        expect(bluePrint.produce([456], 0), 456);
+      });
+    });
+
     group('check', () {
       test('asserts that key is not empty', () {
         expect(
