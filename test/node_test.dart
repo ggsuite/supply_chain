@@ -386,7 +386,7 @@ void main() {
       test('should save the graph to a file', () async {
         final node = ButterFlyExample(withScopes: true).x;
         const path = 'test/graphs/graph_test/node_test_saveGraphToFile.dot';
-        await node.writeDotFile(path);
+        await node.writeImageFile(path);
       });
     });
 

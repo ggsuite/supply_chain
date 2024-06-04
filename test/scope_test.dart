@@ -291,7 +291,7 @@ void main() {
     });
 
     group('matchesPath(path), matchesPathArry(pathArray)', () {
-      group('without aliases', () {
+      group('with aliases', () {
         test('should return true if path matches', () {
           final scope = Scope.example();
           scope.mockContent({
@@ -313,10 +313,6 @@ void main() {
           final b = scope.findScope('a.b')!;
           expect(b.matchesPath('c0'), isFalse);
         });
-      });
-
-      group('with aliases', () {
-        test('should return true if path matches', () {});
       });
     });
 

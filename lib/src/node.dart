@@ -363,7 +363,7 @@ class Node<T> {
   /// gv icns ico imap imap_np ismap jp2 jpe jpeg jpg json json0 kitty kittyz
   /// mp pct pdf pic pict plain plain-ext png pov ps ps2 psd sgi svg svgz tga
   /// tif tiff tk vrml vt vt-24bit wbmp webp xdot xdot1.2 xdot1.4 xdot_json
-  Future<void> writeDotFile(
+  Future<void> writeImageFile(
     String path, {
     int supplierDepth = 0,
     int customerDepth = 0,

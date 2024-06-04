@@ -281,7 +281,7 @@ class Graph {
     scopes.add(commonParent);
 
     // Add all scope that are inbetween the common parent and the scopes
-    for (final scope in scopes) {
+    for (final scope in [...scopes]) {
       var current = scope;
       while (current != commonParent) {
         scopes.add(current);
