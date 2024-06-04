@@ -16,6 +16,7 @@ class NodeBluePrint<T> {
   const NodeBluePrint({
     required this.key,
     required this.initialProduct,
+    this.documentation = '',
     this.suppliers = const <String>[],
     Produce<T>? produce,
   }) : produce = produce ?? doNothing<T>;
@@ -50,6 +51,9 @@ class NodeBluePrint<T> {
 
   /// The key of this node
   final String key;
+
+  /// The documentation of the node
+  final String documentation;
 
   /// A list of supplier keys
   final Iterable<String> suppliers;

@@ -22,6 +22,7 @@ class ScopeBluePrint {
     this.nodes = const [],
     this.children = const [],
     this.aliases = const [],
+    this.documentation = '',
   });
 
   // ...........................................................................
@@ -125,6 +126,7 @@ class ScopeBluePrint {
       aliases: aliases ?? this.aliases,
       nodes: nodes,
       children: subScopes ?? children,
+      documentation: documentation,
     );
   }
 
@@ -159,6 +161,10 @@ class ScopeBluePrint {
 
   /// The list of key aliases
   final List<String> aliases;
+
+  // ...........................................................................
+  /// Returns a documentation for the node
+  final String documentation;
 
   // ...........................................................................
   /// Returns the node for a given key
@@ -254,6 +260,7 @@ class ScopeBluePrint {
     required this.aliases,
     required this.nodes,
     required this.children,
+    required this.documentation,
   });
 
   // ...........................................................................

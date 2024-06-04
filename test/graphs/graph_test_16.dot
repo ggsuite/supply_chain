@@ -1,5 +1,6 @@
 digraph unix {
-  graph [nodesep = 0.25; ranksep=1];
+  graph [ dpi = 75 ]; 
+  graph [nodesep = 1.0; ranksep=1];
   fontname="Helvetica,Arial,sans-serif"
   node [fontname="Helvetica,Arial,sans-serif"]
   edge [fontname="Helvetica,Arial,sans-serif"]

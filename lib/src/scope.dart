@@ -505,6 +505,7 @@ class Scope {
 
       // If value is a NodeBluePrint, create a child node
       else if (value is NodeBluePrint) {
+        assert(value.key == key);
         value.instantiate(scope: this);
       }
 
@@ -812,8 +813,9 @@ class ExampleChildScope extends Scope {
   }) : super(bluePrint: ScopeBluePrint(key: key)) {
     /// Create a node
     findOrCreateNode(
-      NodeBluePrint(
+      NodeBluePrint<int>(
         initialProduct: 0,
+        documentation: '<code>result = previous + 1</code>',
         produce: (components, previous) => previous + 1,
         key: 'childNodeA',
         suppliers: ['rootA', 'rootB', 'childScopeA.childNodeB'],
@@ -823,6 +825,7 @@ class ExampleChildScope extends Scope {
     findOrCreateNode(
       NodeBluePrint(
         initialProduct: 0,
+        documentation: '<code>result = previous + 1</code>',
         produce: (components, previous) => previous + 1,
         key: 'childNodeB',
       ),

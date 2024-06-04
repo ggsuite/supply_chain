@@ -20,6 +20,7 @@
 - Add option show dependent nodes only
 - Add additional cases for printing graphs
 - Add NodeBluePrint.map
+- Add Doc class to create html documentations
 
 ### Changed
 
