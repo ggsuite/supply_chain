@@ -307,6 +307,14 @@ void main() {
           final scope = Scope.example();
           expect(scope.findScope('example'), scope);
         });
+
+        test('when the path has the name of an alias', () {
+          final scope = Scope.example(aliases: ['x', 'y', 'z']);
+          expect(scope.findScope('x'), scope);
+          expect(scope.findScope('y'), scope);
+          expect(scope.findScope('z'), scope);
+          expect(scope.findScope('u'), isNull);
+        });
         test('when the path has the name of a child node', () {
           final scope = Scope.example();
           scope.mockContent({

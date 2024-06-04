@@ -45,6 +45,7 @@
 - Give each dot file a unique name
 - Highlight selected node in Node.writeImageFile, childScopeDepth is -1 by default
 - Instantiation of a scope requires a blue print
+- Scopes can now have key aliases
 
 ### Fixed
 

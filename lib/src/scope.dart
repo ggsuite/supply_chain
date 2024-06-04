@@ -22,8 +22,9 @@ class Scope {
   Scope.root({
     required String key,
     required this.scm,
+    List<String> aliases = const [],
   })  : parent = null,
-        bluePrint = ScopeBluePrint(key: key),
+        bluePrint = ScopeBluePrint(key: key, aliases: aliases),
         assert(key.isCamelCase) {
     _init();
   }
@@ -425,9 +426,10 @@ class Scope {
   factory Scope.example({
     Scm? scm,
     String key = 'example',
+    List<String> aliases = const [],
   }) {
     scm ??= Scm.example();
-    return Scope.root(key: 'example', scm: scm);
+    return Scope.root(key: 'example', scm: scm, aliases: aliases);
   }
 
   // ...........................................................................
@@ -651,7 +653,8 @@ class Scope {
       return null;
     }
 
-    if (path.length == 1 && (path.first == key)) {
+    if (path.length == 1 &&
+        (path.first == key || bluePrint.aliases.contains(path.first))) {
       return this;
     }
 
