@@ -19,6 +19,7 @@
 - Add options to control if a node is highlighted or not
 - Add option show dependent nodes only
 - Add additional cases for printing graphs
+- Add NodeBluePrint.map
 
 ### Changed
 

@@ -83,6 +83,9 @@ class NodeBluePrint<T> {
     );
   }
 
+  /// Maps the key of the blue print to another key
+  NodeBluePrint<T> mapTo(String key) => copyWith(key: key);
+
   /// Provites an operator =
   @override
   bool operator ==(Object other) {

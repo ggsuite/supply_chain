@@ -246,6 +246,18 @@ void main() {
         expect(newBluePrint.produce([], 0), 1);
       });
     });
+
+    group('mapTo(key)', () {
+      test('should map the scope blue print to a different key', () {
+        final a = NodeBluePrint.example(key: 'a');
+        final b = a.mapTo('b');
+        expect(b.key, 'b');
+        expect(b.initialProduct, a.initialProduct);
+        expect(b.suppliers, a.suppliers);
+        expect(a.produce([], 0), 1);
+        expect(b.produce([], 0), 1);
+      });
+    });
   });
 
   group('doNothing', () {
