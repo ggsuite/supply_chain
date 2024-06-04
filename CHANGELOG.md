@@ -50,6 +50,7 @@
 ### Fixed
 
 - Fix need of calling testFlushTasks two times
+- Fix issues in relation with aliases
 
 ### Removed
 

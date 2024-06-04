@@ -46,8 +46,11 @@ class Scope {
   @override
   String toString() => key;
 
+  /// Returns true if the key matches the given key or an alias
+  bool matchesKey(String key) => bluePrint.matchesKey(key);
+
   // ...........................................................................
-  /// The supply scope manager
+  /// The supply chain manager
   final Scm scm;
 
   /// The key of the scope
@@ -61,6 +64,12 @@ class Scope {
 
   /// The path of the scope as array
   List<String> get pathArray => _pathArray;
+
+  /// Returns true if node matches the path
+  bool matchesPath(String path) => _matchesPathArray(path.split('.'));
+
+  /// Returns true if node matches the path
+  bool matchesPathArray(List<String> pathArray) => _matchesPathArray(pathArray);
 
   /// The depth of the scope
   int get depth => _pathArray.length;
@@ -109,6 +118,14 @@ class Scope {
     result.addAll(parents);
 
     return result;
+  }
+
+  /// Iterable to iterate over all nodes recursively
+  Iterable<Scope> get allScopes sync* {
+    yield this; // Yield the current node
+    for (var child in children) {
+      yield* child.allScopes; // Recursively yield all children
+    }
   }
 
   /// Returns the child scope with the given key
@@ -466,8 +483,21 @@ class Scope {
 
       // If the entry is a map, create a child scope
       if (value is Map<String, dynamic>) {
-        final bluePrint = ScopeBluePrint(key: key);
-        final child = bluePrint.instantiate(scope: this);
+        // Read aliases
+        final aliases = key.split('|').map(
+              (e) => e.trim(),
+            );
+        final k = aliases.first;
+        final a = aliases.skip(1).toList();
+
+        // Create the blue print
+        final bluePrint = ScopeBluePrint(
+          key: k,
+          aliases: a,
+        );
+        final child = bluePrint.instantiate(
+          scope: this,
+        );
 
         // Forward child content to child
         child.mockContent(value);
@@ -594,10 +624,11 @@ class Scope {
       return null;
     }
 
-    if (scopePath.isNotEmpty) {
-      if (!node.scope.path.endsWith(scopePath.join('.'))) {
-        return null;
-      }
+    // Check if the scope matches the path
+    final nodeMatchesPath = matchesPathArray(scopePath);
+
+    if (!nodeMatchesPath) {
+      return null;
     }
 
     if (node is! Node<T>) {
@@ -631,10 +662,20 @@ class Scope {
   }
 
   Node<T>? _findAnyUniqueNode<T>(String key, List<String> scopePath) {
-    final scopePathString = scopePath.join('.');
-    final nodes = scm.nodesWithKey<T>(key).where(
-          (element) => element.scope.path.endsWith(scopePathString),
-        );
+    // Find the scopes that matches the scope path
+    final matchingScopes = root.allScopes.where(
+      (element) => element.matchesPathArray(scopePath),
+    );
+
+    // Find the node within that scopes
+    final List<Node<T>> nodes = [];
+    for (final node in matchingScopes) {
+      final n = node._findNodeInOwnScope<T>(key, []);
+      if (n != null) {
+        nodes.add(n);
+      }
+    }
+
     if (nodes.length == 1) {
       return nodes.first;
     }
@@ -653,8 +694,7 @@ class Scope {
       return null;
     }
 
-    if (path.length == 1 &&
-        (path.first == key || bluePrint.aliases.contains(path.first))) {
+    if (path.length == 1 && bluePrint.matchesKey(path.first)) {
       return this;
     }
 
@@ -709,6 +749,24 @@ class Scope {
         changedNodeBluePrint,
       );
     }
+  }
+
+  // ...........................................................................
+  bool _matchesPathArray(List<String> path) {
+    Scope? parent = this;
+    var i = path.length - 1;
+
+    while (i >= 0 && parent != null) {
+      final segment = path[i];
+      if (!parent.matchesKey(segment)) {
+        return false;
+      }
+
+      parent = parent.parent;
+      i--;
+    }
+
+    return true;
   }
 }
 

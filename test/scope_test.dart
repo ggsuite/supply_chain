@@ -132,6 +132,32 @@ void main() {
           });
         });
       });
+
+      group('allScopes', () {
+        test('should provide an iterator iterating over all scopes recursively',
+            () {
+          final scope = Scope.example()
+            ..mockContent({
+              'a': {
+                'b': {
+                  'c': {
+                    'd': 0,
+                  },
+                },
+              },
+              'x': {
+                'y': {
+                  'z': {
+                    'w': 0,
+                  },
+                },
+              },
+            });
+
+          final allScopes = scope.allScopes.map((e) => e.key).toList();
+          expect(allScopes, ['example', 'a', 'b', 'c', 'x', 'y', 'z']);
+        });
+      });
     });
 
     test('string', () {
@@ -261,6 +287,36 @@ void main() {
           ['exampleRoot', 'childScopeA', 'grandChildScope'],
         );
         expect(grandChildScope.depth, 3);
+      });
+    });
+
+    group('matchesPath(path), matchesPathArry(pathArray)', () {
+      group('without aliases', () {
+        test('should return true if path matches', () {
+          final scope = Scope.example();
+          scope.mockContent({
+            'a': {
+              'b': {
+                'c0|c1|c2': {
+                  'd': 0,
+                },
+              },
+            },
+          });
+
+          final c = scope.findScope('a.b.c0')!;
+          expect(c.matchesPath('a.b.c0'), isTrue);
+          expect(c.matchesPath('a.b.c1'), isTrue);
+          expect(c.matchesPath('a.b.c2'), isTrue);
+          expect(c.matchesPath('a.b.c3'), isFalse);
+
+          final b = scope.findScope('a.b')!;
+          expect(b.matchesPath('c0'), isFalse);
+        });
+      });
+
+      group('with aliases', () {
+        test('should return true if path matches', () {});
       });
     });
 
@@ -792,6 +848,25 @@ void main() {
               final childNodeAFromChild =
                   childScopeA.findNode<int>('childNodeA');
               expect(childNodeAFromChild?.key, 'childNodeA');
+            });
+
+            test('when the path contains an alias', () {
+              final scope = Scope.example();
+              scope.mockContent({
+                'a': {
+                  'b': {
+                    'c0|c1|c2': {
+                      'd': 0,
+                    },
+                  },
+                },
+              });
+
+              // Find the node c
+              expect(scope.findNode<int>('a.b.c0.d')?.key, 'd');
+              expect(scope.findNode<int>('a.b.c1.d')?.key, 'd');
+              expect(scope.findNode<int>('a.b.c2.d')?.key, 'd');
+              expect(scope.findNode<int>('a.b.c3.d')?.key, isNull);
             });
 
             test('when the node is contained in parent chain', () {
