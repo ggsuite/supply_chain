@@ -1,12 +1,12 @@
 digraph unix {
   graph [ dpi = 75 ]; 
-  graph [nodesep = 1.0; ranksep=1];
+  graph [nodesep = 1.0; ranksep=2];
   fontname="Helvetica,Arial,sans-serif"
   node [fontname="Helvetica,Arial,sans-serif"]
   edge [fontname="Helvetica,Arial,sans-serif"]
-  subgraph cluster_example_13 {
-    label = "example"; // scope
-    invisible [label = "", shape = point, style=invis]; // example
+  subgraph cluster_a_13 {
+    label = "a"; // scope
+    invisible [label = "", shape = point, style=invis]; // a
     subgraph cluster_b_14 {
       label = "b"; // scope
       invisible [label = "", shape = point, style=invis]; // b

@@ -38,6 +38,17 @@ class Scope {
     _dispose.clear();
   }
 
+  /// Sets back all nodes to it's inital products
+  void reset() {
+    for (final node in _nodes.values) {
+      node.reset();
+    }
+
+    for (final child in _children.values) {
+      child.reset();
+    }
+  }
+
   /// Returns true if the scope is disposed
   bool get isDisposed => _dispose.isEmpty;
 
@@ -446,7 +457,7 @@ class Scope {
     List<String> aliases = const [],
   }) {
     scm ??= Scm.example();
-    return Scope.root(key: 'example', scm: scm, aliases: aliases);
+    return Scope.root(key: key, scm: scm, aliases: aliases);
   }
 
   // ...........................................................................

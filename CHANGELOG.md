@@ -21,6 +21,7 @@
 - Add additional cases for printing graphs
 - Add NodeBluePrint.map
 - Add Doc class to create html documentations
+- Add Scope.reset and Node.reset
 
 ### Changed
 

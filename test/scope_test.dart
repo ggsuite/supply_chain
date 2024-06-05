@@ -164,6 +164,43 @@ void main() {
       expect(scope.toString(), scope.key);
     });
 
+    group('reset', () {
+      test('should reset all nodes in this and child scopes', () {
+        final scope = Scope.example();
+        scope.mockContent({
+          'a': {
+            'b': {
+              'n0': 10,
+              'c': {
+                'n1': 11,
+              },
+            },
+          },
+        });
+
+        final n0 = scope.findNode<int>('a.b.n0')!;
+        final n1 = scope.findNode<int>('a.b.c.n1')!;
+
+        // Initally we have the following products
+        scope.scm.testFlushTasks();
+        expect(n0.product, 10);
+        expect(n1.product, 11);
+
+        // Let's change the products
+        n0.product = 20;
+        n1.product = 21;
+        scope.scm.testFlushTasks();
+
+        // Reset
+        scope.reset();
+        scope.scm.testFlushTasks();
+
+        // The products should be reset to their initial values
+        expect(n0.product, 10);
+        expect(n1.product, 11);
+      });
+    });
+
     group('root', () {
       test('should return the scope itself, if scope is the root', () {
         final root = Scope.example();
@@ -865,11 +902,43 @@ void main() {
               expect(scope.findNode<int>('a.b.c3.d')?.key, isNull);
             });
 
-            test('when the node is contained in parent chain', () {
-              // Should return nodes from parent chain
-              final childScopeA = rootScope.child('childScopeA')!;
-              final rootAFromChild = childScopeA.findNode<int>('rootA');
-              expect(rootAFromChild?.key, 'rootA');
+            group('when the node is contained in parent chain', () {
+              test('part 1', () {
+                // Should return nodes from parent chain
+                final childScopeA = rootScope.child('childScopeA')!;
+                final rootAFromChild = childScopeA.findNode<int>('rootA');
+                expect(rootAFromChild?.key, 'rootA');
+              });
+
+              test('part 2', () {
+                final corpus = Scope.example(key: 'corpus');
+                corpus.mockContent({
+                  'width': 600.0,
+                  'depth': 615.0,
+                  'panels': {
+                    'rightPanel': {
+                      'thickness': 19.0,
+                    },
+                    'leftPanel': {
+                      'thickness': 19.0,
+                    },
+                    'bottomPanel': ScopeBluePrint(
+                      key: 'bottomPanel',
+                      nodes: [
+                        NodeBluePrint<double>(
+                          key: 'thickness',
+                          initialProduct: 19.0,
+                          produce: (components, previousProduct) => 19.0,
+                        ),
+                      ],
+                    ),
+                  },
+                });
+
+                final panel = corpus.findScope('bottomPanel')!;
+                final corpusWidth = panel.findNode<double>('corpus.width');
+                expect(corpusWidth, isNotNull);
+              });
             });
 
             test('when the node is contained in sibling chain', () {

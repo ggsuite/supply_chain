@@ -59,6 +59,17 @@ class Node<T> {
   bool get isDisposed => _isDisposed;
 
   // ...........................................................................
+  /// Set back to initial state
+  void reset() {
+    if (_product == bluePrint.initialProduct) {
+      return;
+    }
+
+    _product = bluePrint.initialProduct;
+    scm.nominate(this);
+  }
+
+  // ...........................................................................
   /// Updates the node with a new bluePrint
   void update(NodeBluePrint<T> bluePrint) {
     final oldBluePrint = this.bluePrint;
@@ -89,6 +100,9 @@ class Node<T> {
 
   /// The key of the node
   String get path => '${scope.path}.$key';
+
+  /// Returns true, if this path matches the given path
+  bool matchesPath(String path) => _matchesPath(path);
 
   /// The unique id of the node
   final int id = _idCounter++;
@@ -473,6 +487,22 @@ class Node<T> {
   // ...........................................................................
   // Tick & Animation
   bool _isAnimated = false;
+
+  // ...........................................................................
+  bool _matchesPath(String path) {
+    if (this.path == path) {
+      return true;
+    }
+
+    final parts = path.split('.');
+    final key = parts.last;
+    if (key != this.key) {
+      return false;
+    }
+
+    parts.removeLast();
+    return scope.matchesPathArray(parts);
+  }
 }
 
 /// Provides a deeply configured node sructure

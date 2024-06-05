@@ -21,16 +21,19 @@ class Doc {
   Future<void> create() async {
     scope.scm.initSuppliers();
 
-    _writeHeader();
-    await _writeScopes();
-    _writeFooter();
-
+    // Create directory
     final dir = Directory(targetDirectory);
     if (await dir.exists()) {
       await dir.delete(recursive: true);
     }
     await dir.create(recursive: true);
 
+    // Write content
+    _writeHeader();
+    await _writeScopes();
+    _writeFooter();
+
+    // Write index.html
     await File('$targetDirectory/index.html').writeAsString(lines.join('\n'));
   }
 
@@ -114,27 +117,39 @@ class Doc {
       return;
     }
 
+    lines.add('<div>');
     lines.add('Ergibt sich aus: ');
     lines.add('<ul>');
     for (final supplier in node.suppliers) {
-      lines.add('<li><code>${supplier.key}</code></li>');
+      final supplerAddress =
+          node.bluePrint.suppliers.where((e) => supplier.matchesPath(e)).first;
+
+      lines.add('<li><code>$supplerAddress</code></li>');
     }
     lines.add('</ul>');
+    lines.add('</div>');
   }
 
   // ...........................................................................
   Future<void> _nodeGraph(Node<dynamic> node) async {
-    if (!isGitHub) {
+    if (isGitHub) {
       return;
     }
 
     // coverage:ignore-start
     final fileName = '${node.path}.png';
     final path = '$targetDirectory/$fileName';
-    await node.writeImageFile(path, supplierDepth: -1, customerDepth: -1);
+    await node.writeImageFile(
+      path,
+      supplierDepth: 1,
+      customerDepth: 1,
+      highlightedNodes: [],
+    );
+
     lines.add(
       '<img src="$fileName" alt="${node.key}"><br>',
     );
+
     // coverage:ignore-end
   }
 

@@ -51,6 +51,27 @@ void main() {
       });
     });
 
+    group('matchesPath', () {
+      test('should return true if the path matches', () {
+        final scope = Scope.example();
+        scope.mockContent({
+          'a': {
+            'b': {
+              'c0|c1|c2': {
+                'd': 0,
+              },
+            },
+          },
+        });
+
+        final d = scope.findNode<int>('a.b.c1.d')!;
+        expect(d.matchesPath('a.b.c0.d'), isTrue);
+        expect(d.matchesPath('a.b.c1.d'), isTrue);
+        expect(d.matchesPath('a.b.c2.d'), isTrue);
+        expect(d.matchesPath('a.b.c3.d'), isFalse);
+      });
+    });
+
     group('commonParent', () {
       test('should return the common parent of two nodes', () {
         final parent = Scope.example(key: 'root');
@@ -267,6 +288,27 @@ void main() {
 
       // Should remove the node from the scope
       expect(chain.findNode<int>('producer'), isNull);
+    });
+
+    test('reset', () {
+      final scope = Scope.example();
+      const bp = NodeBluePrint(key: 'test', initialProduct: 5);
+      final node = bp.instantiate(scope: scope);
+      final node2 = NodeBluePrint<int>.map(
+        supplier: 'test',
+        toKey: 'test2',
+        initialProduct: 6,
+      ).instantiate(scope: scope);
+
+      scope.scm.testFlushTasks();
+      expect(node2.product, 5);
+
+      node.product = 11;
+      scope.scm.testFlushTasks();
+      expect(node2.product, 11);
+      node.reset();
+      scope.scm.testFlushTasks();
+      expect(node2.product, 5);
     });
 
     group('isAnimated', () {
