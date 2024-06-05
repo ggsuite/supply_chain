@@ -50,6 +50,7 @@
 - Scopes can now have key aliases
 - Rename writeDotFile into writeImageFile
 - Detect duplicate keys
+- Renamed map to forward
 
 ### Fixed
 

@@ -264,15 +264,24 @@ void main() {
       });
     });
 
-    group('mapTo(key)', () {
-      test('should map the scope blue print to a different key', () {
-        final a = NodeBluePrint.example(key: 'a');
-        final b = a.mapTo('b');
+    group('forward(key)', () {
+      test('should forward the supplier to this node', () {
+        const a = NodeBluePrint<int>(key: 'a', initialProduct: 5);
+        final b = a.forward(toKey: 'b');
+        final scope = Scope.example();
+        final nodeA = a.instantiate(scope: scope);
+        final nodeB = b.instantiate(scope: scope);
+        scope.scm.testFlushTasks();
+
         expect(b.key, 'b');
         expect(b.initialProduct, a.initialProduct);
-        expect(b.suppliers, a.suppliers);
-        expect(a.produce([], 0), 1);
-        expect(b.produce([], 0), 1);
+        expect(b.suppliers, ['a']);
+        expect(nodeA.product, nodeB.product);
+
+        // A change of a should be forwarded to be
+        nodeA.product = 12;
+        scope.scm.testFlushTasks();
+        expect(nodeB.product, 12);
       });
     });
   });
