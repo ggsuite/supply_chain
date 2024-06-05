@@ -141,9 +141,8 @@ class Doc {
     final path = '$targetDirectory/$fileName';
     await node.writeImageFile(
       path,
-      supplierDepth: 1,
-      customerDepth: 1,
-      highlightedNodes: [],
+      supplierDepth: -1,
+      customerDepth: 0,
     );
 
     lines.add(

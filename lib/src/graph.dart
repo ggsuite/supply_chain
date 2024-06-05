@@ -147,7 +147,7 @@ class Graph {
     var result = '';
     result += 'digraph unix {\n';
     result += 'graph [ dpi = 75 ]; \n';
-    result += 'graph [nodesep = 1.0; ranksep=2];\n';
+    result += 'graph [nodesep = 0.25; ranksep=0.25];\n';
     result += 'fontname="Helvetica,Arial,sans-serif"\n';
     result += 'node [fontname="Helvetica,Arial,sans-serif"]\n';
     result += 'edge [fontname="Helvetica,Arial,sans-serif"]\n';
