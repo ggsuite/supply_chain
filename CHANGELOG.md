@@ -51,6 +51,7 @@
 - Rename writeDotFile into writeImageFile
 - Detect duplicate keys
 - Renamed map to forward
+- Rename forward to forwardTo
 
 ### Fixed
 

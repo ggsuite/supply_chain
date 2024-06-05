@@ -102,7 +102,7 @@ class NodeBluePrint<T> {
   }
 
   /// Maps the key of the blue print to another key
-  NodeBluePrint<T> forward({required String toKey}) => NodeBluePrint.map(
+  NodeBluePrint<T> forwardTo(String toKey) => NodeBluePrint.map(
         supplier: key,
         toKey: toKey,
         initialProduct: initialProduct,

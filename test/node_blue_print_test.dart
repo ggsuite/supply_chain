@@ -267,7 +267,7 @@ void main() {
     group('forward(key)', () {
       test('should forward the supplier to this node', () {
         const a = NodeBluePrint<int>(key: 'a', initialProduct: 5);
-        final b = a.forward(toKey: 'b');
+        final b = a.forwardTo('b');
         final scope = Scope.example();
         final nodeA = a.instantiate(scope: scope);
         final nodeB = b.instantiate(scope: scope);
