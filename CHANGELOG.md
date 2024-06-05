@@ -49,6 +49,7 @@
 - Instantiation of a scope requires a blue print
 - Scopes can now have key aliases
 - Rename writeDotFile into writeImageFile
+- Detect duplicate keys
 
 ### Fixed
 

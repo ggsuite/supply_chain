@@ -185,6 +185,11 @@ class ScopeBluePrint {
 
     // Add nodes to the inner scope
     final allNodes = <NodeBluePrint<dynamic>>[...nodes, ...additionalNodes];
+
+    // Make sure there no duplicate keys
+    _checkForDuplicateKeys(allNodes);
+
+    // Create node
     innerScope.findOrCreateNodes(allNodes);
 
     // Init sub scopes
@@ -301,6 +306,28 @@ class ScopeBluePrint {
       }
     }
     return result;
+  }
+
+  // ...........................................................................
+  void _checkForDuplicateKeys(List<NodeBluePrint<dynamic>> nodes) {
+    final keys = nodes.map(
+      (e) => e.key,
+    );
+    var occurrences = <dynamic, int>{};
+    for (var element in keys) {
+      occurrences.update(element, (value) => value + 1, ifAbsent: () => 1);
+    }
+
+    var duplicates = <dynamic>[];
+    occurrences.forEach((key, value) {
+      if (value > 1) {
+        duplicates.add(key);
+      }
+    });
+
+    if (duplicates.isNotEmpty) {
+      throw ArgumentError('Duplicate keys found: $duplicates');
+    }
   }
 }
 

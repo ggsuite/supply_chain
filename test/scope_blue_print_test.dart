@@ -176,6 +176,33 @@ void main() {
               .writeImageFile('test.graphs.example_scope_blue_print.dot');
         });
       });
+
+      group('should throw if blueprints contain nodes with the same key', () {
+        test('when the keys are the same', () {
+          const bluePrint = ScopeBluePrint(
+            key: 'root',
+            nodes: [
+              NodeBluePrint<int>(key: 'node', initialProduct: 5),
+              NodeBluePrint<int>(key: 'node', initialProduct: 6),
+              NodeBluePrint<int>(key: 'node1', initialProduct: 5),
+              NodeBluePrint<int>(key: 'node1', initialProduct: 6),
+              NodeBluePrint<int>(key: 'node2', initialProduct: 6),
+            ],
+          );
+
+          final rootScope = Scope.root(key: 'root', scm: Scm.example());
+          expect(
+            () => bluePrint.instantiate(scope: rootScope),
+            throwsA(
+              isA<ArgumentError>().having(
+                (e) => e.toString(),
+                'toString()',
+                contains('Duplicate keys found: [node, node1]'),
+              ),
+            ),
+          );
+        });
+      });
     });
 
     group('saveGraphToFile', () {
