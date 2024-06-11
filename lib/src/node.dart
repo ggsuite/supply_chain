@@ -321,6 +321,11 @@ class Node<T> {
       throw ArgumentError('Plugin with key $key is not added.');
     }
 
+    // Remove the plugin's plugins
+    for (final pluginPlugin in [...plugin.plugins]) {
+      plugin.removePlugin(pluginPlugin.key);
+    }
+
     // Remove the connect preceeding and following nodes
     final index = _plugins.indexOf(plugin);
     final preceedingNode = index == 0 ? this : _plugins[index - 1];
