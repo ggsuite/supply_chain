@@ -389,6 +389,85 @@ class Scope {
   }
 
   // ...........................................................................
+  (List<Node<dynamic>> hostNodes, List<NodeBluePrint<dynamic>> plugins)
+      _hostNodes(ScopePlugin plugin) {
+    // Make sure all plugins have uinique keys
+    final foundKeys = <String>{};
+    for (final nodePlugin in plugin.nodePlugins.values) {
+      if (foundKeys.contains(nodePlugin.key)) {
+        throw ArgumentError(
+          'Found multiple node plugins with key "${nodePlugin.key}".',
+        );
+      }
+      foundKeys.add(nodePlugin.key);
+    }
+
+    // Find host nodes
+    final hostAddresses = plugin.nodePlugins.keys;
+    final hostNodes = <Node<dynamic>>[];
+    final nodePlugins = plugin.nodePlugins.values.toList();
+    final invalidAddresses = <String>[];
+    for (final address in hostAddresses) {
+      final node = findNode<dynamic>(address);
+      if (node != null) {
+        hostNodes.add(node);
+      } else {
+        invalidAddresses.add(address);
+      }
+    }
+
+    // Throw if not all host nodes are found
+    if (invalidAddresses.isNotEmpty) {
+      throw ArgumentError(
+        'Host nodes not found: ${invalidAddresses.join(', ')}',
+      );
+    }
+
+    return (hostNodes, nodePlugins);
+  }
+
+  // ...........................................................................
+  /// Adds a scope plugin
+  void addPlugin(ScopePlugin plugin) {
+    if (_plugins.contains(plugin)) {
+      throw ArgumentError('Plugin already added.');
+    }
+
+    final (hostNodes, nodePlugins) = _hostNodes(plugin);
+
+    // Add the plugins to each node
+    for (var i = 0; i < hostNodes.length; i++) {
+      final node = hostNodes[i];
+      final nodePlugin = nodePlugins[i];
+      node.addPlugin(nodePlugin);
+    }
+
+    // Add the scope plugin to the list of scope plugins
+    _plugins.add(plugin);
+  }
+
+  /// Removes a scope plugin
+  void removePlugin(ScopePlugin plugin) {
+    if (!_plugins.contains(plugin)) {
+      throw ArgumentError('Plugin not found.');
+    }
+
+    final (hostNodes, nodePlugins) = _hostNodes(plugin);
+
+    // Remove the plugins from the node
+    for (var i = 0; i < hostNodes.length; i++) {
+      final node = hostNodes[i];
+      final nodePlugin = nodePlugins[i];
+      node.removePlugin(nodePlugin.key);
+    }
+
+    _plugins.remove(plugin);
+  }
+
+  /// Returns the scope plugins
+  List<ScopePlugin> get plugins => _plugins;
+
+  // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz
   String dot({
     int childScopeDepth = -1,
@@ -572,6 +651,9 @@ class Scope {
   final Map<String, Scope> _children = {};
   final Map<String, Node<dynamic>> _nodes = {};
   static int _idCounter = 0;
+
+  // ...........................................................................
+  final List<ScopePlugin> _plugins = [];
 
   // ...........................................................................
   void _init() {

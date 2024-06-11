@@ -23,6 +23,7 @@
 - Add Doc class to create html documentations
 - Add Scope.reset and Node.reset
 - Add Node.addPlugin and removePlugin
+- Added Scope.addPlugin and removePlugin
 
 ### Changed
 

@@ -10,11 +10,9 @@ import 'package:test/test.dart';
 
 void main() {
   group('ScopePlugin', () {
-    group('example', () {
-      test('should work', () {
-        const scopePlugin = ScopePlugin(nodePlugins: {});
-        expect(scopePlugin, isNotNull);
-      });
+    test('should work', () {
+      const scopePlugin = ScopePlugin(nodePlugins: {});
+      expect(scopePlugin, isNotNull);
     });
   });
 }

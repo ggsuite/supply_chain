@@ -6,7 +6,7 @@
 
 import 'package:supply_chain/supply_chain.dart';
 
-/// Maps a host node key to a node blueprint describing the plugin
+/// Maps a host node address to a node blueprint describing the plugin
 typedef PluginMap = Map<String, NodeBluePrint<dynamic>>;
 
 /// A scope plugin defines a list of node plugins that modify a scope.
