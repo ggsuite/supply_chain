@@ -49,6 +49,12 @@ void main() {
           scope: scope,
         );
 
+        // Create the directory. It should be deleted.
+        final dir = Directory(targetDir);
+        if (!await dir.exists()) {
+          await dir.create(recursive: true);
+        }
+
         // Create the documentation
         await doc.create();
 

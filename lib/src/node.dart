@@ -212,6 +212,7 @@ class Node<T> {
         bluePrint.produce(suppliers.map((s) => s.product).toList(), product);
 
     _product = newProduct;
+
     if (announce) {
       scm.hasNewProduct(this);
     }
@@ -237,21 +238,6 @@ class Node<T> {
   /// Remove a supplier from the node
   void removeSupplier(Supplier<dynamic> supplier) => _removeSupplier(supplier);
 
-  // ...........................................................................
-  // Customers
-
-  /// The customers of the node
-  Iterable<Node<dynamic>> get customers => _customers;
-
-  /// Add a customer to the node
-  void addCustomer(Customer<dynamic> customer) => _addCustomer(customer);
-
-  /// Remove a customer from the node
-  void removeCustomer(Customer<dynamic> customer) => _removeCustomer(customer);
-
-  // ...........................................................................
-  // Deep suppliers & customers
-
   /// Get suppliers of the node of a given depth
   Iterable<Node<dynamic>> deepSuppliers({int depth = 1}) {
     if (depth < 0) depth = 100000;
@@ -267,6 +253,18 @@ class Node<T> {
     }
     return result;
   }
+
+  // ...........................................................................
+  // Customers
+
+  /// The customers of the node
+  Iterable<Node<dynamic>> get customers => _customers;
+
+  /// Add a customer to the node
+  void addCustomer(Customer<dynamic> customer) => _addCustomer(customer);
+
+  /// Remove a customer from the node
+  void removeCustomer(Customer<dynamic> customer) => _removeCustomer(customer);
 
   /// Get suppliers of the node of a given depth
   Iterable<Node<dynamic>> deepCustomers({int depth = 1}) {
