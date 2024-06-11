@@ -335,8 +335,18 @@ class Node<T> {
     }
     preceedingNode.removeCustomer(plugin);
 
+    // Remove the plugin from scope
+    plugin.dispose();
+
     // Remove the plugin from the array
     _plugins.remove(plugin);
+  }
+
+  /// Clears all plugins
+  void clearPlugins() {
+    for (final plugin in [..._plugins]) {
+      removePlugin(plugin.key);
+    }
   }
 
   /// Returns the plugin with the key or null when not found

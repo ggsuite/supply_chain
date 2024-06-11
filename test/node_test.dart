@@ -512,6 +512,27 @@ void main() {
           // Also plugin0's plugins should be removed from the chain
           expect(host.customers, [customer0, customer1]);
         });
+
+        test('should remove the plugin from the scope', () {
+          final plugin = host.addPlugin(plugin0BluePrint);
+          expect(chain.findNode<int>('zero'), plugin);
+
+          host.removePlugin('zero');
+          expect(chain.findNode<int>('zero'), isNull);
+
+          expect(plugin.isDisposed, isTrue);
+        });
+      });
+
+      group('clearPlugins()', () {
+        test('should remove all plugins', () {
+          node.addPlugin(plugin0BluePrint);
+          node.addPlugin(plugin1BluePrint);
+          node.addPlugin(plugin2BluePrint);
+
+          node.clearPlugins();
+          expect(node.plugins, isEmpty);
+        });
       });
     });
 

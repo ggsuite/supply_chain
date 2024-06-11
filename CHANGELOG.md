@@ -57,6 +57,7 @@
 - Print only suppliers of nodes in doc graphs
 - Plugins can be added and removed now
 - Handle the case that a plugin has plugins
+- Removing a plugin from a node will dispose the plugin
 
 ### Fixed
 

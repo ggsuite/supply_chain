@@ -728,6 +728,23 @@ void main() {
         expect(scope.node<int>(key: 'node'), isNull);
       });
 
+      test('should also remove the plugins of the node', () {
+        final scope = Scope.example();
+        final node = scope.findOrCreateNode<int>(
+          NodeBluePrint(
+            initialProduct: 0,
+            produce: (components, previousProduct) => previousProduct,
+            key: 'node',
+          ),
+        );
+
+        final pluginNode = node.addPlugin(NodeBluePrint.example());
+        expect(pluginNode.isDisposed, isFalse);
+
+        scope.removeNode('node');
+        expect(pluginNode.isDisposed, isTrue);
+      });
+
       test('should do nothing if node does not exist', () {
         expect(
           () => scope.removeNode('Unknown'),

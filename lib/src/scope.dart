@@ -342,6 +342,11 @@ class Scope {
 
   /// Remove the node from the scope
   void removeNode(String key) {
+    final node = _nodes[key];
+
+    // Remove the node's plugins first
+    node?.clearPlugins();
+
     _nodes.remove(key);
   }
 
