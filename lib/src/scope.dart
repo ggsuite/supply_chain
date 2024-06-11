@@ -142,55 +142,12 @@ class Scope {
   /// Returns the child scope with the given key
   Scope? child(String key) => _children[key];
 
-  /// The nodes of this scope
-  Iterable<Node<dynamic>> get nodes => _nodes.values;
-
-  /// Returns the own node for a given key or null if not found
-  Node<T>? node<T>({required String key}) => _findNodeInOwnScope<T>(key, []);
-
-  // ...........................................................................
-  /// Returns the node with key. If not available in scope the node is created.
-  Node<T> findOrCreateNode<T>(NodeBluePrint<T> bluePrint) {
-    // Return existing node when already existing
-    final existingNode = _nodes[bluePrint.key];
-    if (existingNode != null) {
-      assert(
-        existingNode.bluePrint == bluePrint,
-        'Node with key "$key" already exists with different configuration',
-      );
-      return existingNode as Node<T>;
-    }
-
-    // Create a new node
-    final node = Node<T>(
-      bluePrint: bluePrint,
-      scope: this,
-    );
-
-    return node;
-  }
-
-  // ...........................................................................
-  /// Returns the node with key. If not available in scope the node is created.
-  List<Node<dynamic>> findOrCreateNodes(
-    List<NodeBluePrint<dynamic>> bluePrints,
-  ) {
-    final result = <Node<dynamic>>[];
-    for (final bluePrint in bluePrints) {
-      final newNode = bluePrint.instantiate(scope: this);
-      result.add(newNode);
-    }
-    return result;
-  }
-
-  // ...........................................................................
   /// Returns the first scope with the given path.
   /// Throws if multiple scopes with the same path exist.
   Scope? findScope(String path) {
     return _findScope(path.split('.'));
   }
 
-  // ...........................................................................
   /// The parent supply scope
   Scope? parent;
 
@@ -233,40 +190,6 @@ class Scope {
     return result;
   }
 
-  // ...........................................................................
-  /// Adds an existing node to the scope
-  void addNode<T>(Node<T> node) {
-    assert(node.runtimeType != Node<dynamic>);
-    // Throw if node with key already exists
-    if (_nodes.containsKey(node.key)) {
-      throw ArgumentError(
-        'Node with key ${node.key} already exists in scope "$key"',
-      );
-    }
-
-    _nodes[node.key] = node;
-  }
-
-  // ...........................................................................
-  /// Remove the node from the scope
-  void removeNode(String key) {
-    _nodes.remove(key);
-  }
-
-  // ...........................................................................
-  /// Replace an existing node with the same key
-  void replaceNode(NodeBluePrint<dynamic> bluePrint) {
-    final existingNode = _nodes[bluePrint.key];
-    if (existingNode == null) {
-      throw ArgumentError(
-        'Node with key "${bluePrint.key}" does not exist in scope "$key"',
-      );
-    }
-
-    existingNode.update(bluePrint);
-  }
-
-  // ...........................................................................
   /// Adds a child scope
   Scope addChild(ScopeBluePrint bluePrint) {
     return bluePrint.instantiate(scope: this);
@@ -334,7 +257,6 @@ class Scope {
     }
   }
 
-  // ...........................................................................
   /// Returns true if this scope is an ancestor of the given scope
   bool isAncestorOf(Scope scope) {
     if (_children.containsKey(scope.key)) {
@@ -366,6 +288,75 @@ class Scope {
   }
 
   // ...........................................................................
+  /// The nodes of this scope
+  Iterable<Node<dynamic>> get nodes => _nodes.values;
+
+  /// Returns the own node for a given key or null if not found
+  Node<T>? node<T>({required String key}) => _findNodeInOwnScope<T>(key, []);
+
+  /// Returns the node with key. If not available in scope the node is created.
+  Node<T> findOrCreateNode<T>(NodeBluePrint<T> bluePrint) {
+    // Return existing node when already existing
+    final existingNode = _nodes[bluePrint.key];
+    if (existingNode != null) {
+      assert(
+        existingNode.bluePrint == bluePrint,
+        'Node with key "$key" already exists with different configuration',
+      );
+      return existingNode as Node<T>;
+    }
+
+    // Create a new node
+    final node = Node<T>(
+      bluePrint: bluePrint,
+      scope: this,
+    );
+
+    return node;
+  }
+
+  /// Returns the node with key. If not available in scope the node is created.
+  List<Node<dynamic>> findOrCreateNodes(
+    List<NodeBluePrint<dynamic>> bluePrints,
+  ) {
+    final result = <Node<dynamic>>[];
+    for (final bluePrint in bluePrints) {
+      final newNode = bluePrint.instantiate(scope: this);
+      result.add(newNode);
+    }
+    return result;
+  }
+
+  /// Adds an existing node to the scope
+  void addNode<T>(Node<T> node) {
+    assert(node.runtimeType != Node<dynamic>);
+    // Throw if node with key already exists
+    if (_nodes.containsKey(node.key)) {
+      throw ArgumentError(
+        'Node with key ${node.key} already exists in scope "$key"',
+      );
+    }
+
+    _nodes[node.key] = node;
+  }
+
+  /// Remove the node from the scope
+  void removeNode(String key) {
+    _nodes.remove(key);
+  }
+
+  /// Replace an existing node with the same key
+  void replaceNode(NodeBluePrint<dynamic> bluePrint) {
+    final existingNode = _nodes[bluePrint.key];
+    if (existingNode == null) {
+      throw ArgumentError(
+        'Node with key "${bluePrint.key}" does not exist in scope "$key"',
+      );
+    }
+
+    existingNode.update(bluePrint);
+  }
+
   /// Returns true if a node with the given key exists in this or a
   /// parent supply scope
   bool hasNode(String key) {
@@ -376,7 +367,6 @@ class Scope {
     return parent?.hasNode(key) ?? false;
   }
 
-  // ...........................................................................
   /// Returns the node of key in this or any parent nodes
   Node<T>? findNode<T>(
     String key, {
@@ -397,8 +387,6 @@ class Scope {
 
     return node;
   }
-
-  // Print graph
 
   // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz

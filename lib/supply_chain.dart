@@ -16,6 +16,7 @@ export 'src/producer.dart';
 export 'src/scm.dart';
 export 'src/scope_blue_print.dart';
 export 'src/scope.dart';
+export 'src/scope_plugin.dart';
 export 'src/sub_scope_manager_blue_print.dart';
 export 'src/sub_scope_manager.dart';
 export 'src/tools.dart';
