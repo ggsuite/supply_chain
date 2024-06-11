@@ -54,6 +54,7 @@
 - Renamed map to forward
 - Rename forward to forwardTo
 - Print only suppliers of nodes in doc graphs
+- Plugins can be added and removed now
 
 ### Fixed
 

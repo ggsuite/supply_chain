@@ -282,16 +282,35 @@ class Node<T> {
 
   // ...........................................................................
   /// Add a plugin to the node. Throws if already added.
-  void addPlugin(NodeBluePrint<T> bluePrint) {
+  Node<T> addPlugin(NodeBluePrint<T> bluePrint) {
     // Already added? Throw.
     final existingPlugin = this.plugin(bluePrint.key);
     if (existingPlugin != null) {
       throw ArgumentError('Plugin with key ${bluePrint.key} is already added.');
     }
 
-    // Add plugin to the list of plugins
+    // Instantiate the plugin
     final plugin = bluePrint.instantiate(scope: this.scope);
+
+    // ............
+    // The plugin takes over all customers of it's preceeding node
+    final preceedingNode = _plugins.isEmpty ? this : _plugins.last;
+    for (final customer in [...preceedingNode.customers]) {
+      preceedingNode.removeCustomer(customer);
+      plugin.addCustomer(customer);
+    }
+
+    // The plugin adds itself as a customer to the preceeding node
+    preceedingNode.addCustomer(plugin);
+
+    // ............
     _plugins.add(plugin);
+
+    // ............
+    // Nominate plugin for production
+    scm.nominate(plugin);
+
+    return plugin;
   }
 
   /// Remove the plugin. Throws if not found.
@@ -302,6 +321,16 @@ class Node<T> {
       throw ArgumentError('Plugin with key $key is not added.');
     }
 
+    // Remove the connect preceeding and following nodes
+    final index = _plugins.indexOf(plugin);
+    final preceedingNode = index == 0 ? this : _plugins[index - 1];
+    for (final customer in [...plugin.customers]) {
+      plugin.removeCustomer(customer);
+      preceedingNode.addCustomer(customer);
+    }
+    preceedingNode.removeCustomer(plugin);
+
+    // Remove the plugin from the array
     _plugins.remove(plugin);
   }
 
