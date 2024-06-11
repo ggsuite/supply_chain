@@ -281,6 +281,44 @@ class Node<T> {
   }
 
   // ...........................................................................
+  /// Add a plugin to the node. Throws if already added.
+  void addPlugin(NodeBluePrint<T> bluePrint) {
+    // Already added? Throw.
+    final existingPlugin = this.plugin(bluePrint.key);
+    if (existingPlugin != null) {
+      throw ArgumentError('Plugin with key ${bluePrint.key} is already added.');
+    }
+
+    // Add plugin to the list of plugins
+    final plugin = bluePrint.instantiate(scope: this.scope);
+    _plugins.add(plugin);
+  }
+
+  /// Remove the plugin. Throws if not found.
+  void removePlugin(String key) {
+    final plugin = this.plugin(key);
+
+    if (plugin == null) {
+      throw ArgumentError('Plugin with key $key is not added.');
+    }
+
+    _plugins.remove(plugin);
+  }
+
+  /// Returns the plugin with the key or null when not found
+  Node<T>? plugin(String key) {
+    for (final plugin in _plugins) {
+      if (plugin.key == key) {
+        return plugin;
+      }
+    }
+    return null;
+  }
+
+  /// Returns the list of plugin nodes
+  Iterable<Node<T>> get plugins => _plugins;
+
+  // ...........................................................................
   // Timeouts
 
   /// Is set to true if production times out
@@ -421,6 +459,9 @@ class Node<T> {
   final List<void Function()> _dispose = [];
 
   bool _isDisposed = false;
+
+  // ...........................................................................
+  final List<Node<T>> _plugins = [];
 
   // ...........................................................................
   NodeBluePrint<T> _bluePrint;

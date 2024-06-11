@@ -253,6 +253,83 @@ void main() {
       }
     });
 
+    group('plugins', () {
+      final pluginOne = NodeBluePrint<int>(
+        key: 'one',
+        initialProduct: 0,
+        produce: (components, int previousProduct) => previousProduct + 1,
+      );
+
+      final pluginTwo = NodeBluePrint<int>(
+        key: 'two',
+        initialProduct: 0,
+        produce: (components, int previousProduct) => previousProduct + 1,
+      );
+
+      final pluginThree = NodeBluePrint<int>(
+        key: 'three',
+        initialProduct: 0,
+        produce: (components, int previousProduct) => previousProduct + 1,
+      );
+
+      setUp(() {
+        node.addPlugin(pluginOne);
+        node.addPlugin(pluginTwo);
+        node.addPlugin(pluginThree);
+      });
+
+      group('addPlugin', () {
+        group('should throw', () {
+          test('when plugin is already added', () {
+            expect(
+              () => node.addPlugin(pluginOne),
+              throwsA(
+                isA<ArgumentError>().having(
+                  (e) => e.message,
+                  'message',
+                  contains('Plugin with key one is already added.'),
+                ),
+              ),
+            );
+          });
+        });
+
+        test('should add the plugin to the list of plugins', () {
+          expect(node.plugins.map((p) => p.key), ['one', 'two', 'three']);
+        });
+      });
+
+      group('removePlugin', () {
+        group('should throw', () {
+          test('when plugin is not added', () {
+            final node = Node.example();
+
+            expect(
+              () => node.removePlugin('unknown'),
+              throwsA(
+                isA<ArgumentError>().having(
+                  (e) => e.message,
+                  'message',
+                  'Plugin with key unknown is not added.',
+                ),
+              ),
+            );
+          });
+        });
+
+        test('should remove the plugin from the list of plugins', () {
+          node.removePlugin('two');
+          expect(node.plugins.map((p) => p.key), ['one', 'three']);
+
+          node.removePlugin('one');
+          expect(node.plugins.map((p) => p.key), ['three']);
+
+          node.removePlugin('three');
+          expect(node.plugins, isEmpty);
+        });
+      });
+    });
+
     test('dispose() should work fine', () {
       // Create a supplier -> producer -> customer chain
       final supplier = Node.example(
