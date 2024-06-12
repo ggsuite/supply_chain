@@ -360,9 +360,43 @@ class Scm {
     // Nodes needs preparation? Prepare.
     node.prepare();
 
+    // Prepare all plugins
+    for (final plugin in node.plugins) {
+      _prepareNode(plugin);
+    }
+
+    // If node is a plugin
+    if (node is PluginNode) {
+      _preparePluginNode(node);
+    }
+
     // Prepare also all customers
     for (final customer in node.customers) {
       _prepareNode(customer);
+    }
+  }
+
+  // ...........................................................................
+  void _preparePluginNode(PluginNode<dynamic> node) {
+    // Last plugin? Prepare also host's customers
+    if (node.isLastPlugin) {
+      for (final customer in node.host.customers) {
+        _prepareNode(customer);
+      }
+    }
+
+    // Not last plugin? Prepare the following plugins
+    else {
+      bool isLaterPlugin = false;
+      for (final plugin in node.host.plugins) {
+        if (plugin == node) {
+          isLaterPlugin = true;
+          continue;
+        }
+        if (isLaterPlugin) {
+          _prepareNode(plugin);
+        }
+      }
     }
   }
 
@@ -394,6 +428,9 @@ class Scm {
           (n) => n.isReadyToProduce,
         )
         .toList();
+
+    // Make sure plugins are processed first
+    nodesReadyToProduce.sort((a, b) => a is PluginNode ? -1 : 1);
 
     // Start timeout timer
     if (nodesReadyToProduce.isNotEmpty && shouldTimeOut) {
@@ -453,14 +490,36 @@ class Scm {
     // Reset production state
     node.finalizeProduction();
 
+    // Plugins now need to produce
+    _preparedNodes.addAll(node.plugins);
+
     // Customers now need to produce
     _preparedNodes.addAll(node.customers);
+
+    // If node is a plugin
+    _finalizePluginNode(node);
+
+    // Schedule production
     _scheduleProduction();
 
     // Everything is done?
     if (_preparedNodes.isEmpty) {
       _resetMinimumProductionPriority();
       _stopTimeoutCheck();
+    }
+  }
+
+  // ...........................................................................
+  void _finalizePluginNode(Node<dynamic> node) {
+    if (node is PluginNode) {
+      // If node is the last plugin, host's customers need to produce
+      if (node.isLastPlugin) {
+        _preparedNodes.addAll(node.host.customers);
+      }
+      // Otherwise the output node needs to produce
+      else {
+        _preparedNodes.add(node.output);
+      }
     }
   }
 

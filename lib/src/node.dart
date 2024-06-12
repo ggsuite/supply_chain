@@ -4,6 +4,7 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'package:meta/meta.dart';
 import 'package:supply_chain/supply_chain.dart';
 
 /// A supplier delivers products to a node
@@ -39,7 +40,7 @@ class Node<T> {
     required NodeBluePrint<T> bluePrint,
     required this.scope,
   })  : scm = scope.scm,
-        _product = bluePrint.initialProduct,
+        _originalProduct = bluePrint.initialProduct,
         assert(bluePrint.key.isCamelCase),
         _bluePrint = bluePrint {
     _init();
@@ -61,11 +62,11 @@ class Node<T> {
   // ...........................................................................
   /// Set back to initial state
   void reset() {
-    if (_product == bluePrint.initialProduct) {
+    if (_originalProduct == bluePrint.initialProduct) {
       return;
     }
 
-    _product = bluePrint.initialProduct;
+    _originalProduct = bluePrint.initialProduct;
     scm.nominate(this);
   }
 
@@ -117,7 +118,10 @@ class Node<T> {
   // Product
 
   /// The product of the node
-  T get product => _product;
+  T get product => pluginResult ?? _originalProduct;
+
+  /// Returns the original product not processed by plugins
+  T get originalProduct => _originalProduct;
 
   /// The product of the node
   set product(T v) {
@@ -125,7 +129,7 @@ class Node<T> {
       bluePrint.produce == doNothing<T>,
       'Product can only be set if bluePrint.produce is doNothing',
     );
-    _product = v;
+    _originalProduct = v;
     scm.nominate(this);
   }
 
@@ -202,17 +206,29 @@ class Node<T> {
   // Production
 
   /// The product produced by this node
-  T _product;
+  T _originalProduct;
 
   /// Produces the product.
   void produce({bool announce = true}) {
     assert(!isDisposed);
 
-    final newProduct =
-        bluePrint.produce(suppliers.map((s) => s.product).toList(), product);
+    final newProduct = bluePrint.produce(
+      suppliers.map((s) => s.product).toList(),
+      previousProduct,
+    );
 
-    _product = newProduct;
+    _originalProduct = newProduct;
 
+    // If this node is the last plugin in the chain,
+    // write the product into the host's pluginResult
+    if (this.isPlugin) {
+      final pluginNode = this as PluginNode<T>;
+      if (pluginNode.isLastPlugin) {
+        pluginNode.host.pluginResult = newProduct;
+      }
+    }
+
+    // Announce
     if (announce) {
       scm.hasNewProduct(this);
     }
@@ -281,71 +297,31 @@ class Node<T> {
   }
 
   // ...........................................................................
-  /// Add a plugin to the node. Throws if already added.
-  Node<T> addPlugin(NodeBluePrint<T> bluePrint) {
-    // Already added? Throw.
-    final existingPlugin = this.plugin(bluePrint.key);
-    if (existingPlugin != null) {
-      throw ArgumentError('Plugin with key ${bluePrint.key} is already added.');
-    }
-
-    // Instantiate the plugin
-    final plugin = bluePrint.instantiate(scope: this.scope);
-
-    // ............
-    // The plugin takes over all customers of it's preceeding node
-    final preceedingNode = _plugins.isEmpty ? this : _plugins.last;
-    for (final customer in [...preceedingNode.customers]) {
-      preceedingNode.removeCustomer(customer);
-      plugin.addCustomer(customer);
-    }
-
-    // The plugin adds itself as a customer to the preceeding node
-    preceedingNode.addCustomer(plugin);
-
-    // ............
-    _plugins.add(plugin);
-
-    // ............
-    // Nominate plugin for production
-    scm.nominate(plugin);
-
-    return plugin;
+  /// PluginNode uses this method to add itself to the host node
+  @protected
+  void addPlugin(PluginNode<T> plugin, {int? index}) {
+    _plugins.insert(index ?? _plugins.length, plugin);
   }
 
-  /// Remove the plugin. Throws if not found.
-  void removePlugin(String key) {
-    final plugin = this.plugin(key);
-
-    if (plugin == null) {
-      throw ArgumentError('Plugin with key $key is not added.');
-    }
-
-    // Remove the plugin's plugins
-    for (final pluginPlugin in [...plugin.plugins]) {
-      plugin.removePlugin(pluginPlugin.key);
-    }
-
-    // Remove the connect preceeding and following nodes
-    final index = _plugins.indexOf(plugin);
-    final preceedingNode = index == 0 ? this : _plugins[index - 1];
-    for (final customer in [...plugin.customers]) {
-      plugin.removeCustomer(customer);
-      preceedingNode.addCustomer(customer);
-    }
-    preceedingNode.removeCustomer(plugin);
-
-    // Remove the plugin from scope
-    plugin.dispose();
-
-    // Remove the plugin from the array
+  /// PluginNode uses this method to remove itself from the host node
+  @protected
+  void removePlugin(PluginNode<T> plugin) {
     _plugins.remove(plugin);
   }
+
+  /// The value return by this method is forwarded to the produce method
+  @protected
+  T get previousProduct => originalProduct;
+
+  @protected
+
+  /// The last plugin will write it's result into this variable
+  T? pluginResult;
 
   /// Clears all plugins
   void clearPlugins() {
     for (final plugin in [..._plugins]) {
-      removePlugin(plugin.key);
+      plugin.dispose();
     }
   }
 
@@ -360,7 +336,10 @@ class Node<T> {
   }
 
   /// Returns the list of plugin nodes
-  Iterable<Node<T>> get plugins => _plugins;
+  Iterable<PluginNode<T>> get plugins => _plugins;
+
+  /// Returns if node is a plugin
+  bool get isPlugin => false;
 
   // ...........................................................................
   // Timeouts
@@ -376,9 +355,10 @@ class Node<T> {
   static Node<int> example({
     NodeBluePrint<int>? bluePrint,
     Scope? scope,
+    String? key,
   }) {
     scope ??= Scope.example(scm: Scm.testInstance);
-    bluePrint ??= NodeBluePrint.example();
+    bluePrint ??= NodeBluePrint.example(key: key);
 
     final result = Node<int>(
       bluePrint: bluePrint,
@@ -505,7 +485,7 @@ class Node<T> {
   bool _isDisposed = false;
 
   // ...........................................................................
-  final List<Node<T>> _plugins = [];
+  final List<PluginNode<T>> _plugins = [];
 
   // ...........................................................................
   NodeBluePrint<T> _bluePrint;

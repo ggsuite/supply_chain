@@ -214,7 +214,7 @@ void main() {
         expect(bluePrint.toString(), 'aaliyah');
       });
     });
-    group('findOrCreateNode(scope)', () {
+    group('instantiate(scope)', () {
       test('returns existing node', () {
         testSetNextKeyCounter(0);
         final bluePrint = NodeBluePrint.example();
@@ -236,6 +236,13 @@ void main() {
           NodeBluePrint.example(key: 'node2').instantiate(scope: scope),
           isNot(node),
         );
+      });
+    });
+
+    group('instantiateAsPlugin(host, index)', () {
+      test('returns a new instance', () {
+        final pluginNode = PluginNode.example();
+        expect(pluginNode, isNotNull);
       });
     });
 

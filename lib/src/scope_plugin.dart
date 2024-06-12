@@ -12,8 +12,14 @@ typedef PluginMap = Map<String, NodeBluePrint<dynamic>>;
 /// A scope plugin defines a list of node plugins that modify a scope.
 class ScopePlugin {
   /// Constructor
-  const ScopePlugin({required this.nodePlugins});
+  const ScopePlugin({
+    required this.key,
+    required this.nodePlugins,
+  });
 
   /// Returns the node plugins
   final PluginMap nodePlugins;
+
+  /// The key of the plugin
+  final String key;
 }

@@ -11,7 +11,7 @@ import 'package:test/test.dart';
 void main() {
   group('ScopePlugin', () {
     test('should work', () {
-      const scopePlugin = ScopePlugin(nodePlugins: {});
+      const scopePlugin = ScopePlugin(nodePlugins: {}, key: 'scopePlugin');
       expect(scopePlugin, isNotNull);
     });
   });

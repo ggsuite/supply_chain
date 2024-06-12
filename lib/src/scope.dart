@@ -442,9 +442,9 @@ class Scope {
 
     // Add the plugins to each node
     for (var i = 0; i < hostNodes.length; i++) {
-      final node = hostNodes[i];
-      final nodePlugin = nodePlugins[i];
-      node.addPlugin(nodePlugin);
+      final hostNode = hostNodes[i];
+      final pluginBluePrint = nodePlugins[i];
+      pluginBluePrint.instantiateAsPlugin(host: hostNode);
     }
 
     // Add the scope plugin to the list of scope plugins
@@ -454,16 +454,22 @@ class Scope {
   /// Removes a scope plugin
   void removePlugin(ScopePlugin plugin) {
     if (!_plugins.contains(plugin)) {
-      throw ArgumentError('Plugin not found.');
+      throw ArgumentError('Plugin "${plugin.key}" not found.');
     }
 
     final (hostNodes, nodePlugins) = _hostNodes(plugin);
 
     // Remove the plugins from the node
     for (var i = 0; i < hostNodes.length; i++) {
-      final node = hostNodes[i];
-      final nodePlugin = nodePlugins[i];
-      node.removePlugin(nodePlugin.key);
+      final host = hostNodes[i];
+      final pluginBluePrint = nodePlugins[i];
+      final plugin = host.plugin(pluginBluePrint.key);
+      if (plugin == null) {
+        throw ArgumentError(
+          'PluginNode with key "${pluginBluePrint.key}" not found.',
+        );
+      }
+      plugin.dispose();
     }
 
     _plugins.remove(plugin);

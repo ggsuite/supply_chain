@@ -254,309 +254,171 @@ void main() {
     });
 
     group('plugins', () {
-      late Node<int> host;
-      final plugin0BluePrint = NodeBluePrint<int>(
-        key: 'zero',
-        initialProduct: 0,
-        produce: (components, int previousProduct) => previousProduct + 1,
-      );
+      test('should work as expected', () {
+        // Create pluginNode2
+        final host = Node.example(key: 'host');
+        final scm = host.scope.scm;
 
-      final plugin1BluePrint = NodeBluePrint<int>(
-        key: 'one',
-        initialProduct: 0,
-        produce: (components, int previousProduct) => previousProduct + 1,
-      );
+        // Check the initial product
+        scm.testFlushTasks();
+        expect(host.product, 1);
 
-      final plugin2BluePrint = NodeBluePrint<int>(
-        key: 'two',
-        initialProduct: 0,
-        produce: (components, int previousProduct) => previousProduct + 1,
-      );
-
-      late Node<int> customer0;
-      late Node<int> customer1;
-
-      setUp(() {
-        host = node;
-
-        // Add two existing customers
-        customer0 = NodeBluePrint.example(key: 'customer0').instantiate(
-          scope: chain,
+        // Insert a first plugin 2, adding 2 to the original product
+        final plugin2 = PluginNode.example(
+          key: 'plugin2',
+          produce: (components, previousProduct) => previousProduct + 2,
+          host: host,
         );
-        host.addCustomer(customer0);
 
-        customer1 = NodeBluePrint.example(key: 'customer1').instantiate(
-          scope: chain,
+        scm.testFlushTasks();
+        expect(host.plugins, [plugin2]);
+        expect(plugin2.input, host);
+        expect(plugin2.output, host);
+        expect(plugin2, isNotNull);
+        expect(host.originalProduct, 1);
+        expect(host.product, 1 + 2);
+
+        // Insert pluginNode0 before pluginNode2, multiplying by 3
+        final plugin0 = PluginNode.example(
+          key: 'plugin0',
+          produce: (components, previousProduct) => previousProduct * 3,
+          host: host,
+          index: 0,
         );
-        host.addCustomer(customer1);
-      });
+        scm.testFlushTasks();
 
-      group('addPlugin', () {
-        group('should throw', () {
-          test('when plugin is already added', () {
-            node.addPlugin(plugin0BluePrint);
+        expect(host.plugins, [plugin0, plugin2]);
+        expect(plugin0.input, host);
+        expect(plugin0.output, plugin2);
+        expect(host.originalProduct, 1);
+        expect(host.product, 1 * 3 + 2);
 
-            expect(
-              () => node.addPlugin(plugin0BluePrint),
-              throwsA(
-                isA<ArgumentError>().having(
-                  (e) => e.message,
-                  'message',
-                  contains('Plugin with key zero is already added.'),
-                ),
-              ),
-            );
-          });
-        });
+        // Insert pluginNode1 between pluginNode0 and pluginNode2
+        // The plugin multiplies the previous result by 4
+        final plugin1 = PluginNode.example(
+          key: 'plugin1',
+          produce: (components, previousProduct) => previousProduct * 4,
+          host: host,
+          index: 1,
+        );
+        scm.testFlushTasks();
+        expect(host.plugins, [plugin0, plugin1, plugin2]);
+        expect(plugin0.input, host);
+        expect(plugin0.output, plugin1);
+        expect(plugin1.input, plugin0);
+        expect(plugin1.output, plugin2);
+        expect(plugin2.input, plugin1);
+        expect(plugin2.output, host);
+        expect(host.originalProduct, 1);
+        expect(host.product, (1 * 3 * 4) + 2);
 
-        test('should add the plugin to the list of plugins', () {
-          node.addPlugin(plugin0BluePrint);
-          expect(node.plugins.map((p) => p.key), ['zero']);
+        // Insert pluginNode3 after pluginNode2 adding ten
+        final plugin3 = PluginNode.example(
+          key: 'plugin3',
+          produce: (components, previousProduct) => previousProduct + 10,
+          host: host,
+          index: 3,
+        );
+        scm.testFlushTasks();
+        expect(host.plugins, [plugin0, plugin1, plugin2, plugin3]);
+        expect(plugin0.input, host);
+        expect(plugin0.output, plugin1);
+        expect(plugin1.input, plugin0);
+        expect(plugin1.output, plugin2);
+        expect(plugin2.input, plugin1);
+        expect(plugin2.output, plugin3);
+        expect(plugin3.input, plugin2);
+        expect(plugin3.output, host);
+        expect(host.originalProduct, 1);
+        expect(host.product, (1 * 3 * 4) + 2 + 10);
 
-          node.addPlugin(plugin1BluePrint);
-          expect(node.plugins.map((p) => p.key), ['zero', 'one']);
+        // Remove plugin node in the middle
+        plugin1.dispose();
+        scm.testFlushTasks();
+        expect(host.plugins, [plugin0, plugin2, plugin3]);
+        expect(plugin0.input, host);
+        expect(plugin0.output, plugin2);
+        expect(plugin2.input, plugin0);
+        expect(plugin2.output, plugin3);
+        expect(plugin3.input, plugin2);
+        expect(plugin3.output, host);
+        expect(host.originalProduct, 1);
+        expect(host.product, (1 * 3) + 2 + 10);
 
-          node.addPlugin(plugin2BluePrint);
-          expect(node.plugins.map((p) => p.key), ['zero', 'one', 'two']);
-        });
+        // Remove first plugin node
+        plugin0.dispose();
+        scm.testFlushTasks();
+        expect(host.plugins, [plugin2, plugin3]);
+        expect(plugin2.input, host);
+        expect(plugin2.output, plugin3);
+        expect(plugin3.input, plugin2);
+        expect(plugin3.output, host);
+        expect(host.originalProduct, 1);
+        expect(host.product, 1 + 2 + 10);
 
-        test('should insert itself between the host node and it\'s customers',
-            () {
-          // Initially the host has two customers
-          expect(node.customers, [customer0, customer1]);
+        // Remove last plugin node
+        plugin3.dispose();
+        scm.testFlushTasks();
+        expect(host.plugins, [plugin2]);
+        expect(plugin2.input, host);
+        expect(plugin2.output, host);
+        expect(host.originalProduct, 1);
+        expect(host.product, 1 + 2);
 
-          // The host is supplier for each customer
-          expect(customer0.suppliers, [host]);
-          expect(customer1.suppliers, [host]);
-
-          // ............
-          // Add a plugin
-          final plugin0 = host.addPlugin(plugin0BluePrint);
-
-          // The node has now one customer
-          expect(host.customers, hasLength(1));
-          expect(host.customers.elementAt(0).key, plugin0BluePrint.key);
-
-          // The host is supplier for the plugin
-          expect(plugin0.suppliers, [host]);
-
-          // The previous customers are now customers of the plugin
-          expect(plugin0.customers, [customer0, customer1]);
-          expect(customer0.suppliers, [plugin0]);
-          expect(customer1.suppliers, [plugin0]);
-
-          // ...................
-          // Add a second plugin
-          final plugin1 = node.addPlugin(plugin1BluePrint);
-
-          // The host is still connected to the first plugin
-          expect(host.customers, hasLength(1));
-          expect(host.customers.elementAt(0).key, plugin0BluePrint.key);
-
-          // The plugin0 has still  host as supplier
-          expect(plugin0.suppliers, [host]);
-
-          // Plugin1 is now customer of plugin0
-          expect(plugin0.customers, [plugin1]);
-          expect(plugin1.suppliers, [plugin0]);
-
-          // Plugin2 has taken over the customers of the previous plugin
-          expect(plugin1.customers, [customer0, customer1]);
-
-          // ..................
-          // Add a third plugin
-          final plugin2 = node.addPlugin(plugin2BluePrint);
-
-          // The plugin2 is inserted between plugin1 and plugin1's customers
-          expect(plugin1.customers, [plugin2]);
-          expect(plugin2.suppliers, [plugin1]);
-          expect(customer0.suppliers, [plugin2]);
-          expect(customer1.suppliers, [plugin2]);
-          expect(plugin2.customers, [customer0, customer1]);
-        });
-
-        test('should handle the case that a plugin has plugins', () {
-          // Initially the host has two customers
-          expect(host.customers, [customer0, customer1]);
-
-          // The host is supplier for each customer
-          expect(customer0.suppliers, [host]);
-          expect(customer1.suppliers, [host]);
-
-          // ............
-          // Add a plugin to the host
-          final plugin0 = host.addPlugin(plugin0BluePrint);
-
-          // The node has now one customer
-          expect(host.customers, hasLength(1));
-          expect(host.customers.elementAt(0).key, plugin0BluePrint.key);
-
-          // Add a plugin to the plugin
-          final plugin1 = plugin0.addPlugin(plugin1BluePrint);
-
-          // The plugin0 is still connected to the host
-          expect(host.customers, hasLength(1));
-          expect(host.customers.elementAt(0).key, plugin0BluePrint.key);
-
-          // The plugin0 is supplier for the plugin1
-          expect(plugin1.suppliers, [plugin0]);
-
-          // The plugin1 is customer of the plugin0
-          expect(plugin0.customers, [plugin1]);
-
-          // The plugin1 is supplier for the host's customers
-          expect(customer0.suppliers, [plugin1]);
-          expect(customer1.suppliers, [plugin1]);
-
-          // The plugin1 has the host's customers as customers
-          expect(plugin1.customers, [customer0, customer1]);
-        });
-
-        test('should apply the plugins produce method automatically', () {
-          final host = const NodeBluePrint<int>(
-            key: 'host',
-            initialProduct: 10,
-          ).instantiate(scope: chain);
-
-          // Check initial product of host
-          expect(host.product, 10);
-
-          // Insert a plugin multiplying the value by 2
-          final plugin0 = host.addPlugin(
-            NodeBluePrint<int>(
-              key: 'plugin0',
-              initialProduct: 0,
-              produce: (components, previousProduct) =>
-                  (components.first as int) * 2,
-            ),
-          );
-
-          // The plugin should deliver the right product
-          host.scm.testFlushTasks();
-          expect(plugin0.product, 20);
-          // expect(host.product, 20); Todo: Needs to be fixed
-        });
-      });
-
-      group('removePlugin', () {
-        group('should throw', () {
-          test('when plugin is not added', () {
-            final node = Node.example();
-
-            expect(
-              () => node.removePlugin('unknown'),
-              throwsA(
-                isA<ArgumentError>().having(
-                  (e) => e.message,
-                  'message',
-                  'Plugin with key unknown is not added.',
-                ),
-              ),
-            );
-          });
-        });
-
-        test('should remove the plugin from the list of plugins', () {
-          node.addPlugin(plugin0BluePrint);
-          node.addPlugin(plugin1BluePrint);
-          node.addPlugin(plugin2BluePrint);
-
-          node.removePlugin('one');
-          expect(node.plugins.map((p) => p.key), ['zero', 'two']);
-
-          node.removePlugin('zero');
-          expect(node.plugins.map((p) => p.key), ['two']);
-
-          node.removePlugin('two');
-          expect(node.plugins, isEmpty);
-        });
-
-        test('should connect the removed plugin\'s suppliers and customers',
-            () {
-          final host = node;
-
-          final plugin0 = host.addPlugin(plugin0BluePrint);
-          final plugin1 = host.addPlugin(plugin1BluePrint);
-          final plugin2 = host.addPlugin(plugin2BluePrint);
-
-          // Before we have the chain
-          // host -> plugin0 -> plugin1 -> plugin2 -> customer0
-          //                                       -> customer1
-          expect(host.customers, [plugin0]);
-          expect(plugin0.customers, [plugin1]);
-          expect(plugin1.customers, [plugin2]);
-          expect(plugin2.customers, [customer0, customer1]);
-
-          // Remove the plugin in the middle, i.e. plugin1
-          host.removePlugin(plugin1.key);
-
-          // The chain should now be
-          // host -> plugin0 -> plugin2 -> customer0
-          //                            -> customer1
-          expect(host.customers, [plugin0]);
-          expect(plugin0.customers, [plugin2]);
-          expect(plugin2.customers, [customer0, customer1]);
-
-          // Remove the first plugin
-          host.removePlugin(plugin0.key);
-
-          // The chain should now be
-          // host -> plugin2 -> customer0
-          //                 -> customer1
-          expect(host.customers, [plugin2]);
-          expect(plugin2.customers, [customer0, customer1]);
-
-          // Remove the last plugin
-          host.removePlugin(plugin2.key);
-
-          // The chain should now be
-          // host -> customer0
-          //      -> customer1
-          expect(host.customers, [customer0, customer1]);
-        });
-
-        test('should handle the case that the removed plugin has plugins', () {
-          // Initially the host has two customers
-          expect(host.customers, [customer0, customer1]);
-
-          // Add a plugin to the host
-          final plugin0 = host.addPlugin(plugin0BluePrint);
-
-          // Add a plugin to the plugin
-          final plugin1 = plugin0.addPlugin(plugin1BluePrint);
-
-          // Initially we have the
-          // chain host -> plugin0 -> plugin1 -> customer0|1
-          expect(host.customers, [plugin0]);
-          expect(plugin0.customers, [plugin1]);
-          expect(plugin1.customers, [customer0, customer1]);
-
-          // Remove the plugin0 from the host
-          host.removePlugin(plugin0.key);
-
-          // Also plugin0's plugins should be removed from the chain
-          expect(host.customers, [customer0, customer1]);
-        });
-
-        test('should remove the plugin from the scope', () {
-          final plugin = host.addPlugin(plugin0BluePrint);
-          expect(chain.findNode<int>('zero'), plugin);
-
-          host.removePlugin('zero');
-          expect(chain.findNode<int>('zero'), isNull);
-
-          expect(plugin.isDisposed, isTrue);
-        });
+        // Remove last remaining plugin node
+        plugin2.dispose();
+        scm.testFlushTasks();
+        expect(host.plugins, <PluginNode<dynamic>>[]);
+        expect(host.originalProduct, 1);
+        expect(host.product, 1);
       });
 
       group('clearPlugins()', () {
-        test('should remove all plugins', () {
-          node.addPlugin(plugin0BluePrint);
-          node.addPlugin(plugin1BluePrint);
-          node.addPlugin(plugin2BluePrint);
+        test('should remove all plugins from node', () {
+          final host = Node.example(key: 'host');
+          final scm = host.scope.scm;
 
-          node.clearPlugins();
-          expect(node.plugins, isEmpty);
+          // Insert pluginNode0 before pluginNode2, multiplying by 3
+          final plugin0 = PluginNode.example(
+            key: 'plugin0',
+            produce: (components, previousProduct) => previousProduct * 3,
+            host: host,
+          );
+
+          // Insert a first plugin 2, adding 2 to the original product
+          final plugin1 = PluginNode.example(
+            key: 'plugin1',
+            produce: (components, previousProduct) => previousProduct + 2,
+            host: host,
+          );
+
+          scm.testFlushTasks();
+          expect(host.plugins, [plugin0, plugin1]);
+
+          host.clearPlugins();
+          scm.testFlushTasks();
+          expect(host.plugins, <PluginNode<dynamic>>[]);
+
+          expect(plugin0.isDisposed, true);
+          expect(plugin1.isDisposed, true);
+        });
+      });
+
+      group('plugin(String key)', () {
+        test('should return null if plugin with key does not exist', () {
+          final host = Node.example(key: 'host');
+          expect(host.plugin('plugin'), isNull);
+        });
+
+        test('should return the plugin with the key', () {
+          final host = Node.example(key: 'host');
+          final plugin = PluginNode.example(
+            key: 'plugin',
+            produce: (components, previousProduct) => previousProduct + 2,
+            host: host,
+          );
+
+          expect(host.plugin('plugin'), plugin);
         });
       });
     });

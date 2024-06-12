@@ -62,11 +62,16 @@ class NodeBluePrint<T> {
   final Produce<T> produce;
 
   /// An example instance for test purposes
-  static NodeBluePrint<int> example({String? key}) => NodeBluePrint<int>(
+  static NodeBluePrint<int> example({
+    String? key,
+    Produce<int>? produce,
+  }) =>
+      NodeBluePrint<int>(
         key: key ?? nextKey,
         initialProduct: 0,
         suppliers: [],
-        produce: (components, previousProduct) => previousProduct + 1,
+        produce:
+            produce ?? (components, previousProduct) => previousProduct + 1,
       );
 
   /// Instantiates the blue print in the given scope
@@ -83,6 +88,18 @@ class NodeBluePrint<T> {
     return Node<T>(
       bluePrint: this,
       scope: scope,
+    );
+  }
+
+  /// Instantiates the blue print as plugin in the given scope
+  PluginNode<T> instantiateAsPlugin({
+    required Node<T> host,
+    int? index,
+  }) {
+    return PluginNode<T>(
+      bluePrint: this,
+      host: host,
+      index: index,
     );
   }
 

@@ -603,6 +603,201 @@ void main() {
         );
       });
     });
+
+    group('should handle plugins correctly', () {
+      test('general workflow', () {
+        // Create pluginNode2
+        final host = Node.example(key: 'host');
+        final scope = host.scope;
+        final scm = host.scope.scm;
+
+        final customer0 =
+            host.bluePrint.forwardTo('customer0').instantiate(scope: scope);
+
+        final customer1 =
+            host.bluePrint.forwardTo('customer1').instantiate(scope: scope);
+
+        // Check the initial product
+        scm.testFlushTasks();
+        expect(host.product, 1);
+        expect(customer0.product, 1);
+        expect(customer1.product, 1);
+
+        // Insert a first plugin 2, adding 2 to the original product
+        final plugin2 = PluginNode.example(
+          key: 'plugin2',
+          produce: (components, previousProduct) => previousProduct + 2,
+          host: host,
+        );
+
+        scm.testFlushTasks();
+        expect(host.plugins, [plugin2]);
+        expect(plugin2.input, host);
+        expect(plugin2.output, host);
+        expect(plugin2, isNotNull);
+        expect(host.originalProduct, 1);
+        expect(host.product, 1 + 2);
+        expect(customer0.product, 1 + 2);
+        expect(customer1.product, 1 + 2);
+
+        // Insert pluginNode0 before pluginNode2, multiplying by 3
+        final plugin0 = PluginNode.example(
+          key: 'plugin0',
+          produce: (components, previousProduct) => previousProduct * 3,
+          host: host,
+          index: 0,
+        );
+        scm.testFlushTasks();
+
+        expect(host.plugins, [plugin0, plugin2]);
+        expect(plugin0.input, host);
+        expect(plugin0.output, plugin2);
+        expect(host.originalProduct, 1);
+        expect(host.product, 1 * 3 + 2);
+        expect(customer0.product, 1 * 3 + 2);
+        expect(customer1.product, 1 * 3 + 2);
+
+        // Insert pluginNode1 between pluginNode0 and pluginNode2
+        // The plugin multiplies the previous result by 4
+        final plugin1 = PluginNode.example(
+          key: 'plugin1',
+          produce: (components, previousProduct) => previousProduct * 4,
+          host: host,
+          index: 1,
+        );
+        scm.testFlushTasks();
+        expect(host.plugins, [plugin0, plugin1, plugin2]);
+        expect(plugin0.input, host);
+        expect(plugin0.output, plugin1);
+        expect(plugin1.input, plugin0);
+        expect(plugin1.output, plugin2);
+        expect(plugin2.input, plugin1);
+        expect(plugin2.output, host);
+        expect(host.originalProduct, 1);
+        expect(host.product, (1 * 3 * 4) + 2);
+        expect(customer0.product, (1 * 3 * 4) + 2);
+        expect(customer1.product, (1 * 3 * 4) + 2);
+
+        // Insert pluginNode3 after pluginNode2 adding ten
+        final plugin3 = PluginNode.example(
+          key: 'plugin3',
+          produce: (components, previousProduct) => previousProduct + 10,
+          host: host,
+          index: 3,
+        );
+        scm.testFlushTasks();
+        expect(host.plugins, [plugin0, plugin1, plugin2, plugin3]);
+        expect(plugin0.input, host);
+        expect(plugin0.output, plugin1);
+        expect(plugin1.input, plugin0);
+        expect(plugin1.output, plugin2);
+        expect(plugin2.input, plugin1);
+        expect(plugin2.output, plugin3);
+        expect(plugin3.input, plugin2);
+        expect(plugin3.output, host);
+        expect(host.originalProduct, 1);
+        expect(host.product, (1 * 3 * 4) + 2 + 10);
+        expect(customer0.product, (1 * 3 * 4) + 2 + 10);
+        expect(customer1.product, (1 * 3 * 4) + 2 + 10);
+
+        // Remove plugin node in the middle
+        plugin1.dispose();
+        scm.testFlushTasks();
+        expect(host.plugins, [plugin0, plugin2, plugin3]);
+        expect(plugin0.input, host);
+        expect(plugin0.output, plugin2);
+        expect(plugin2.input, plugin0);
+        expect(plugin2.output, plugin3);
+        expect(plugin3.input, plugin2);
+        expect(plugin3.output, host);
+        expect(host.originalProduct, 1);
+        expect(host.product, (1 * 3) + 2 + 10);
+        expect(customer0.product, (1 * 3) + 2 + 10);
+        expect(customer1.product, (1 * 3) + 2 + 10);
+
+        // Remove first plugin node
+        plugin0.dispose();
+        scm.testFlushTasks();
+        expect(host.plugins, [plugin2, plugin3]);
+        expect(plugin2.input, host);
+        expect(plugin2.output, plugin3);
+        expect(plugin3.input, plugin2);
+        expect(plugin3.output, host);
+        expect(host.originalProduct, 1);
+        expect(host.product, 1 + 2 + 10);
+        expect(customer0.product, 1 + 2 + 10);
+        expect(customer1.product, 1 + 2 + 10);
+
+        // Remove last plugin node
+        plugin3.dispose();
+        scm.testFlushTasks();
+        expect(host.plugins, [plugin2]);
+        expect(plugin2.input, host);
+        expect(plugin2.output, host);
+        expect(host.originalProduct, 1);
+        expect(host.product, 1 + 2);
+        expect(customer0.product, 1 + 2);
+        expect(customer1.product, 1 + 2);
+
+        // Remove last remaining plugin node
+        plugin2.dispose();
+        scm.testFlushTasks();
+        expect(host.plugins, <PluginNode<dynamic>>[]);
+        expect(host.originalProduct, 1);
+        expect(host.product, 1);
+        expect(customer0.product, 1);
+        expect(customer1.product, 1);
+      });
+
+      test('when a node is scheduled also the plugins should work', () {
+        int hostCalls = 0;
+        final host = Node.example(
+          bluePrint: NodeBluePrint<int>(
+            key: 'host',
+            initialProduct: 0,
+            produce: (components, previousProduct) => ++hostCalls,
+          ),
+        );
+
+        final scope = host.scope;
+        final scm = host.scope.scm;
+
+        final customer0 =
+            host.bluePrint.forwardTo('customer0').instantiate(scope: scope);
+
+        var p0Calls = 0;
+        final plugin0 = NodeBluePrint.example(
+          produce: (components, previousProduct) => ++p0Calls,
+        ).instantiateAsPlugin(host: host);
+
+        var p1Calls = 0;
+        final plugin1 = NodeBluePrint.example(
+          produce: (components, previousProduct) => ++p1Calls,
+        ).instantiateAsPlugin(host: host);
+
+        // Check state before
+        scm.testFlushTasks();
+        expect(hostCalls, 1);
+        expect(p0Calls, 1);
+        expect(p1Calls, 1);
+
+        // Nominate the host node for production
+        scm.nominate(host);
+
+        // Product
+        scm.testFlushTasks();
+
+        // The host as well the plugins should have been produced
+        expect(host.product, 2);
+        expect(p0Calls, 2);
+        expect(p1Calls, 2);
+
+        // Dispose
+        customer0.dispose();
+        plugin0.dispose();
+        plugin1.dispose();
+      });
+    });
   });
 
   group('test helpers', () {
