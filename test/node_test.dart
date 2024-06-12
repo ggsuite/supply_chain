@@ -374,43 +374,68 @@ void main() {
           expect(customer1.suppliers, [plugin2]);
           expect(plugin2.customers, [customer0, customer1]);
         });
-      });
 
-      test('should handle the case that a plugin has plugins', () {
-        // Initially the host has two customers
-        expect(host.customers, [customer0, customer1]);
+        test('should handle the case that a plugin has plugins', () {
+          // Initially the host has two customers
+          expect(host.customers, [customer0, customer1]);
 
-        // The host is supplier for each customer
-        expect(customer0.suppliers, [host]);
-        expect(customer1.suppliers, [host]);
+          // The host is supplier for each customer
+          expect(customer0.suppliers, [host]);
+          expect(customer1.suppliers, [host]);
 
-        // ............
-        // Add a plugin to the host
-        final plugin0 = host.addPlugin(plugin0BluePrint);
+          // ............
+          // Add a plugin to the host
+          final plugin0 = host.addPlugin(plugin0BluePrint);
 
-        // The node has now one customer
-        expect(host.customers, hasLength(1));
-        expect(host.customers.elementAt(0).key, plugin0BluePrint.key);
+          // The node has now one customer
+          expect(host.customers, hasLength(1));
+          expect(host.customers.elementAt(0).key, plugin0BluePrint.key);
 
-        // Add a plugin to the plugin
-        final plugin1 = plugin0.addPlugin(plugin1BluePrint);
+          // Add a plugin to the plugin
+          final plugin1 = plugin0.addPlugin(plugin1BluePrint);
 
-        // The plugin0 is still connected to the host
-        expect(host.customers, hasLength(1));
-        expect(host.customers.elementAt(0).key, plugin0BluePrint.key);
+          // The plugin0 is still connected to the host
+          expect(host.customers, hasLength(1));
+          expect(host.customers.elementAt(0).key, plugin0BluePrint.key);
 
-        // The plugin0 is supplier for the plugin1
-        expect(plugin1.suppliers, [plugin0]);
+          // The plugin0 is supplier for the plugin1
+          expect(plugin1.suppliers, [plugin0]);
 
-        // The plugin1 is customer of the plugin0
-        expect(plugin0.customers, [plugin1]);
+          // The plugin1 is customer of the plugin0
+          expect(plugin0.customers, [plugin1]);
 
-        // The plugin1 is supplier for the host's customers
-        expect(customer0.suppliers, [plugin1]);
-        expect(customer1.suppliers, [plugin1]);
+          // The plugin1 is supplier for the host's customers
+          expect(customer0.suppliers, [plugin1]);
+          expect(customer1.suppliers, [plugin1]);
 
-        // The plugin1 has the host's customers as customers
-        expect(plugin1.customers, [customer0, customer1]);
+          // The plugin1 has the host's customers as customers
+          expect(plugin1.customers, [customer0, customer1]);
+        });
+
+        test('should apply the plugins produce method automatically', () {
+          final host = const NodeBluePrint<int>(
+            key: 'host',
+            initialProduct: 10,
+          ).instantiate(scope: chain);
+
+          // Check initial product of host
+          expect(host.product, 10);
+
+          // Insert a plugin multiplying the value by 2
+          final plugin0 = host.addPlugin(
+            NodeBluePrint<int>(
+              key: 'plugin0',
+              initialProduct: 0,
+              produce: (components, previousProduct) =>
+                  (components.first as int) * 2,
+            ),
+          );
+
+          // The plugin should deliver the right product
+          host.scm.testFlushTasks();
+          expect(plugin0.product, 20);
+          // expect(host.product, 20); Todo: Needs to be fixed
+        });
       });
 
       group('removePlugin', () {
