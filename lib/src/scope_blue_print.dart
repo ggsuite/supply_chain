@@ -4,14 +4,19 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-import 'package:meta/meta.dart';
 import 'package:supply_chain/supply_chain.dart';
 
-NodeBluePrint<dynamic> _dontModifyMode(NodeBluePrint<dynamic> node) => node;
+NodeBluePrint<dynamic> _dontModifyMode(
+  Scope scope,
+  NodeBluePrint<dynamic> node,
+) =>
+    node;
+
 ScopeBluePrint _dontModifyScope(ScopeBluePrint scope) => scope;
 
 /// A function that allows to modify a node
 typedef ModifyNode = NodeBluePrint<dynamic> Function(
+  Scope scope,
   NodeBluePrint<dynamic> node,
 );
 
@@ -133,8 +138,8 @@ class ScopeBluePrint {
     List<NodeBluePrint<dynamic>>? nodeOverrides,
     List<ScopeBluePrint>? scopeOverrides,
     List<String>? aliases,
-    NodeBluePrint<dynamic> Function(NodeBluePrint<dynamic> node)? modifyNode,
-    ScopeBluePrint Function(ScopeBluePrint scope)? modifyScope,
+    ModifyNode? modifyNode,
+    ModifyScope? modifyScope,
   }) {
     // Merge the node overrides
     final mergedNodeOverrides = _mergeNodes(
@@ -176,12 +181,13 @@ class ScopeBluePrint {
   }
 
   /// Override this method in sub classes to replace single nodes by others
-  @mustCallSuper
-  NodeBluePrint<dynamic> modifyNode(NodeBluePrint<dynamic> node) =>
-      _modifyNode(node);
+  NodeBluePrint<dynamic> modifyNode(
+    Scope scope,
+    NodeBluePrint<dynamic> node,
+  ) =>
+      _modifyNode(scope, node);
 
   /// Override this method in sub classes to replace single scopes by others
-  @mustCallSuper
   ScopeBluePrint modifyScope(ScopeBluePrint scope) => _modifyScope(scope);
 
   // ...........................................................................
@@ -218,7 +224,7 @@ class ScopeBluePrint {
     final innerScope = Scope(parent: scope, bluePrint: this);
 
     final nodes = _mergeNodes(buildNodes(), nodeOverrides).map((n) {
-      final modifiedNode = modifyNode(n);
+      final modifiedNode = modifyNode(scope, n);
       assert(
         modifiedNode.key == n.key,
         'The key of the node must not be changed.',
@@ -314,8 +320,8 @@ class ScopeBluePrint {
     required this.nodeOverrides,
     required this.scopeOverrides,
     required this.documentation,
-    required NodeBluePrint<dynamic> Function(NodeBluePrint<dynamic>) modifyNode,
-    required ScopeBluePrint Function(ScopeBluePrint) modifyScope,
+    required ModifyNode modifyNode,
+    required ModifyScope modifyScope,
   })  : _modifyScope = modifyScope,
         _modifyNode = modifyNode;
 
@@ -486,7 +492,7 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
           ],
 
           // Modify the node with the key 'nodeToBeReplaced'
-          modifyNode: (NodeBluePrint<dynamic> node) {
+          modifyNode: (Scope scope, NodeBluePrint<dynamic> node) {
             return switch (node.key) {
               'nodeToBeReplaced' => node.copyWith(initialProduct: 807),
               _ => node,

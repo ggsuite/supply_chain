@@ -67,6 +67,7 @@
 - Define overrides in constructor
 - Refactor ScopePlugin
 - instantiate scope plugins within their own scope
+- Hand over scope in method modifyNode
 
 ### Fixed
 
