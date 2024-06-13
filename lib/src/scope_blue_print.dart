@@ -137,13 +137,15 @@ class ScopeBluePrint {
   }
 
   // ...........................................................................
-  /// Override this method in sub classes to define the nodes and the children
-  /// of the scope.
-  (
-    List<NodeBluePrint<dynamic>> nodes,
-    List<ScopeBluePrint> subScopes,
-  ) build() {
-    return ([], []);
+  /// Override this method in sub classes to define the nodes of the scope
+  List<NodeBluePrint<dynamic>> buildNodes() {
+    return [];
+  }
+
+  // ...........................................................................
+  /// Override this method in sub classes to define the child scopes
+  List<ScopeBluePrint> buildScopes() {
+    return [];
   }
 
   // ...........................................................................
@@ -178,10 +180,8 @@ class ScopeBluePrint {
     // Create an inner scope
     final innerScope = Scope(parent: scope, bluePrint: this);
 
-    final (
-      List<NodeBluePrint<dynamic>> additionalNodes,
-      List<ScopeBluePrint> additionalSubScopes
-    ) = build();
+    final additionalNodes = buildNodes();
+    final additionalSubScopes = buildScopes();
 
     // Add nodes to the inner scope
     final allNodes = <NodeBluePrint<dynamic>>[...nodes, ...additionalNodes];
@@ -375,27 +375,29 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
         );
 
   @override
-  (List<NodeBluePrint<dynamic>>, List<ScopeBluePrint>) build() {
-    return (
-      [
-        const NodeBluePrint<int>(
-          key: 'nodeBuiltByParent',
-          initialProduct: 0,
-          suppliers: [],
-        ),
-      ],
-      [
-        const ScopeBluePrint(
-          key: 'childScopeBuiltByParent',
-          nodes: [
-            NodeBluePrint<int>(
-              key: 'nodeBuiltByChildScope',
-              initialProduct: 0,
-              suppliers: [],
-            ),
-          ],
-        ),
-      ]
-    );
+  List<NodeBluePrint<dynamic>> buildNodes() {
+    return [
+      const NodeBluePrint<int>(
+        key: 'nodeBuiltByParent',
+        initialProduct: 0,
+        suppliers: [],
+      ),
+    ];
+  }
+
+  @override
+  List<ScopeBluePrint> buildScopes() {
+    return [
+      const ScopeBluePrint(
+        key: 'childScopeBuiltByParent',
+        nodes: [
+          NodeBluePrint<int>(
+            key: 'nodeBuiltByChildScope',
+            initialProduct: 0,
+            suppliers: [],
+          ),
+        ],
+      ),
+    ];
   }
 }
