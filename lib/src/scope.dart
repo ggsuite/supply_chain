@@ -400,84 +400,13 @@ class Scope {
   }
 
   // ...........................................................................
-  (List<Node<dynamic>> hostNodes, List<NodeBluePrint<dynamic>> plugins)
-      _hostNodes(ScopePlugin plugin) {
-    // Make sure all plugins have uinique keys
-    final foundKeys = <String>{};
-    for (final nodePlugin in plugin.nodePlugins.values) {
-      if (foundKeys.contains(nodePlugin.key)) {
-        throw ArgumentError(
-          'Found multiple node plugins with key "${nodePlugin.key}".',
-        );
-      }
-      foundKeys.add(nodePlugin.key);
-    }
-
-    // Find host nodes
-    final hostAddresses = plugin.nodePlugins.keys;
-    final hostNodes = <Node<dynamic>>[];
-    final nodePlugins = plugin.nodePlugins.values.toList();
-    final invalidAddresses = <String>[];
-    for (final address in hostAddresses) {
-      final node = findNode<dynamic>(address);
-      if (node != null) {
-        hostNodes.add(node);
-      } else {
-        invalidAddresses.add(address);
-      }
-    }
-
-    // Throw if not all host nodes are found
-    if (invalidAddresses.isNotEmpty) {
-      throw ArgumentError(
-        'Host nodes not found: ${invalidAddresses.join(', ')}',
-      );
-    }
-
-    return (hostNodes, nodePlugins);
-  }
-
-  // ...........................................................................
-  /// Adds a scope plugin
-  void addPlugin(ScopePlugin plugin) {
-    if (_plugins.contains(plugin)) {
-      throw ArgumentError('Plugin already added.');
-    }
-
-    final (hostNodes, nodePlugins) = _hostNodes(plugin);
-
-    // Add the plugins to each node
-    for (var i = 0; i < hostNodes.length; i++) {
-      final hostNode = hostNodes[i];
-      final pluginBluePrint = nodePlugins[i];
-      pluginBluePrint.instantiateAsPlugin(host: hostNode);
-    }
-
-    // Add the scope plugin to the list of scope plugins
+  /// This method is called by scopePlugin to add the plugin
+  void scopePluginAdd(ScopePlugin plugin) {
     _plugins.add(plugin);
   }
 
   /// Removes a scope plugin
-  void removePlugin(ScopePlugin plugin) {
-    if (!_plugins.contains(plugin)) {
-      throw ArgumentError('Plugin "${plugin.key}" not found.');
-    }
-
-    final (hostNodes, nodePlugins) = _hostNodes(plugin);
-
-    // Remove the plugins from the node
-    for (var i = 0; i < hostNodes.length; i++) {
-      final host = hostNodes[i];
-      final pluginBluePrint = nodePlugins[i];
-      final plugin = host.plugin(pluginBluePrint.key);
-      if (plugin == null) {
-        throw ArgumentError(
-          'PluginNode with key "${pluginBluePrint.key}" not found.',
-        );
-      }
-      plugin.dispose();
-    }
-
+  void scopePluginRemove(ScopePlugin plugin) {
     _plugins.remove(plugin);
   }
 

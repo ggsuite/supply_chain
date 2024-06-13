@@ -1135,226 +1135,6 @@ void main() {
       });
     });
 
-    group('plugins', () {
-      group('addPlugin(plugin)', () {
-        group('should throw', () {
-          test('if the plugin is already added', () {
-            const plugin = ScopePlugin(nodePlugins: {}, key: 'plugin');
-            scope.addPlugin(plugin);
-            expect(
-              () => scope.addPlugin(plugin),
-              throwsA(
-                predicate<ArgumentError>(
-                  (e) => e.toString().contains(
-                        'Plugin already added.',
-                      ),
-                ),
-              ),
-            );
-          });
-
-          test('when there are multiple node plugins with the same key', () {
-            final plugin0 = ScopePlugin(
-              key: 'plugin0',
-              nodePlugins: {
-                'node0': NodeBluePrint.example(key: 'key'),
-                'node1': NodeBluePrint.example(key: 'key'),
-              },
-            );
-
-            expect(
-              () => scope.addPlugin(plugin0),
-              throwsA(
-                predicate<ArgumentError>(
-                  (e) => e.toString().contains(
-                        'Found multiple node plugins with key "key"',
-                      ),
-                ),
-              ),
-            );
-          });
-          test('when host nodes cannot be found', () {
-            final plugin = ScopePlugin(
-              key: 'plugin0',
-              nodePlugins: {
-                'unknown0': NodeBluePrint.example(key: 'unknown'),
-                'unknown1': NodeBluePrint.example(key: 'unknown1'),
-              },
-            );
-            expect(
-              () => scope.addPlugin(plugin),
-              throwsA(
-                predicate<ArgumentError>(
-                  (e) => e.toString().contains(
-                        'Host nodes not found: unknown0, unknown1',
-                      ),
-                ),
-              ),
-            );
-          });
-
-          test('when types of host nodes and plugin nodes do not match', () {
-            final scope = Scope.example();
-            scope.mockContent({
-              'node0': 'string',
-            });
-
-            const plugin = ScopePlugin(
-              key: 'plugin0',
-              nodePlugins: {
-                'node0': NodeBluePrint<int>(key: 'plugin0', initialProduct: 0),
-              },
-            );
-
-            expect(
-              () => scope.addPlugin(plugin),
-              throwsA(
-                predicate<Error>(
-                  (e) => e.toString().contains(
-                        '\'Node<String>\' is not a subtype of type '
-                        '\'Node<int>\' of \'host\'',
-                      ),
-                ),
-              ),
-            );
-          });
-        });
-
-        test('should add the plugin to the list of plugins', () {
-          const plugin = ScopePlugin(
-            nodePlugins: {},
-            key: 'plugin0',
-          );
-          scope.addPlugin(plugin);
-          expect(scope.plugins, [plugin]);
-        });
-
-        test('should add the node plugins to their corresponding hosts', () {
-          // Define an existing node and scope hierarchy
-          final scope = Scope.example();
-          scope.mockContent({
-            'a': {
-              'b': {
-                'n0': 0,
-              },
-              'c': {
-                'n1': 0,
-              },
-            },
-          });
-
-          // Get the two nodes we want to add plugins to
-          final node0 = scope.findNode<int>('a.b.n0')!;
-          final node1 = scope.findNode<int>('a.c.n1')!;
-
-          // Define a node plugin that modifies the two nodes
-          final scopePlugin = ScopePlugin(
-            key: 'plugin0',
-            nodePlugins: {
-              'b.n0': NodeBluePrint<int>(
-                key: 'byTwo',
-                initialProduct: 0,
-                produce: (components, previousProduct) =>
-                    (components.first as int) * 2,
-              ),
-              'a.c.n1': NodeBluePrint<int>(
-                key: 'byThree',
-                initialProduct: 0,
-                produce: (components, previousProduct) =>
-                    (components.first as int) * 3,
-              ),
-            },
-          );
-
-          // Add the plugin to the scope
-          scope.addPlugin(scopePlugin);
-
-          // The plugins should have been added to the nodes
-          expect(node0.plugins, hasLength(1));
-          expect(node0.plugins.first.key, 'byTwo');
-          expect(node1.plugins, hasLength(1));
-          expect(node1.plugins.first.key, 'byThree');
-
-          // Remove the plugin from the scope
-          scope.removePlugin(scopePlugin);
-
-          // The plugins should have been removed from the nodes
-          expect(node0.plugins, isEmpty);
-          expect(node1.plugins, isEmpty);
-        });
-      });
-
-      group('removePlugin(plugin)', () {
-        group('should throw', () {
-          test('if the plugin is not added', () {
-            const plugin = ScopePlugin(
-              key: 'plugin0',
-              nodePlugins: {},
-            );
-            expect(
-              () => scope.removePlugin(plugin),
-              throwsA(
-                predicate<ArgumentError>(
-                  (e) => e.toString().contains(
-                        'Plugin "plugin0" not found.',
-                      ),
-                ),
-              ),
-            );
-          });
-
-          test('if one of the plugin nodes in the plugin is not found', () {
-            final scope = Scope.example();
-            scope.mockContent({
-              'node0': 0,
-            });
-
-            // Create a plugin with a node that does not exist
-            const plugin = ScopePlugin(
-              key: 'plugin0',
-              nodePlugins: {
-                'node0':
-                    NodeBluePrint<int>(key: 'pluginNode0', initialProduct: 0),
-              },
-            );
-
-            // Add the plugin
-            scope.addPlugin(plugin);
-
-            // Remove the node that the plugin is supposed to modify
-            final pluginNode = scope.findNode<int>('pluginNode0')!;
-            pluginNode.dispose();
-
-            // Try to remove the plugin
-            expect(
-              () => scope.removePlugin(plugin),
-              throwsA(
-                predicate<ArgumentError>(
-                  (e) => e.toString().contains(
-                        'PluginNode with key "pluginNode0" not found.',
-                      ),
-                ),
-              ),
-            );
-          });
-        });
-
-        test('should remove the plugin from the list of plugins', () {
-          const plugin = ScopePlugin(
-            key: 'plugin0',
-            nodePlugins: {},
-          );
-          scope.addPlugin(plugin);
-          scope.removePlugin(plugin);
-          expect(scope.plugins, isEmpty);
-        });
-
-        test('should remove the node plugins from it\'s hosts', () {
-          // Is tested in addPlugin()
-        });
-      });
-    });
-
     group('mockContent', () {
       test('should create a mock content', () {
         final scope = Scope.example();
@@ -1429,6 +1209,26 @@ void main() {
             ),
           );
         });
+      });
+    });
+
+    group('scopePluginAdd, scopePluginRemove', () {
+      test('should add and remove a scope plugin', () {
+        final scope = Scope.example();
+        scope.mockContent({
+          'a': {
+            'b': {
+              'node0': 0,
+            },
+          },
+        });
+        final plugin = ScopePlugin.example();
+        expect(scope.plugins, isEmpty);
+
+        plugin.instantiate(scope: scope);
+        expect(scope.plugins, contains(plugin));
+
+        plugin.dispose(scope: scope);
       });
     });
   });
