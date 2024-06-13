@@ -74,6 +74,7 @@
 
 - Removed plant
 - Remove dependencies from ScopeBluePrint
+- Remove key named parameter from node
 
 ## [1.0.13] - 2024-05-17
 

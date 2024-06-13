@@ -369,16 +369,16 @@ void main() {
 
     group('node(key)', () {
       test('should return the node with the given key', () {
-        expect(scope.node<int>(key: 'node'), node);
+        expect(scope.node<int>('node'), node);
       });
 
       test('should return null if the node does not exist', () {
-        expect(scope.node<int>(key: 'unknown'), isNull);
+        expect(scope.node<int>('unknown'), isNull);
       });
 
       test('should throw if the type does not match', () {
         expect(
-          () => scope.node<String>(key: 'node'),
+          () => scope.node<String>('node'),
           throwsA(
             predicate<ArgumentError>(
               (e) => e.toString().contains(
@@ -699,7 +699,7 @@ void main() {
         );
 
         scope.replaceNode(newNode);
-        expect(scope.node<int>(key: 'node')?.bluePrint, newNode);
+        expect(scope.node<int>('node')?.bluePrint, newNode);
       });
 
       test('should throw if the node does not exist', () {
@@ -723,9 +723,9 @@ void main() {
     });
     group('removeNode()', () {
       test('should remove the node with the given key', () {
-        expect(scope.node<int>(key: 'node'), isNotNull);
+        expect(scope.node<int>('node'), isNotNull);
         scope.removeNode('node');
-        expect(scope.node<int>(key: 'node'), isNull);
+        expect(scope.node<int>('node'), isNull);
       });
 
       test('should also remove the plugins of the node', () {

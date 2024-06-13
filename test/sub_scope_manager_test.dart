@@ -42,9 +42,9 @@ void main() {
         final row2 = scope.child('row2')!;
 
         // Each row scope should have the right height
-        expect(row0.node<int>(key: 'rowHeight')?.product, 10);
-        expect(row1.node<int>(key: 'rowHeight')?.product, 20);
-        expect(row2.node<int>(key: 'rowHeight')?.product, 30);
+        expect(row0.node<int>('rowHeight')?.product, 10);
+        expect(row1.node<int>('rowHeight')?.product, 20);
+        expect(row2.node<int>('rowHeight')?.product, 30);
 
         // Update the row heights
         rowHeightsNode.product = [40, 50, 60, 70];
@@ -54,17 +54,17 @@ void main() {
 
         // The row scopes should have the new heights
         final row3 = scope.child('row3')!;
-        expect(row0.node<int>(key: 'rowHeight')?.product, 40);
-        expect(row1.node<int>(key: 'rowHeight')?.product, 50);
-        expect(row2.node<int>(key: 'rowHeight')?.product, 60);
-        expect(row3.node<int>(key: 'rowHeight')?.product, 70);
+        expect(row0.node<int>('rowHeight')?.product, 40);
+        expect(row1.node<int>('rowHeight')?.product, 50);
+        expect(row2.node<int>('rowHeight')?.product, 60);
+        expect(row3.node<int>('rowHeight')?.product, 70);
 
         // Remove row heights
         rowHeightsNode.product = [10];
         scm.testFlushTasks();
         expect(scm.nodes, expectNodeCount());
         expect(scope.children.length, 1);
-        expect(row0.node<int>(key: 'rowHeight')?.product, 10);
+        expect(row0.node<int>('rowHeight')?.product, 10);
       });
     });
 

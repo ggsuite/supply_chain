@@ -353,7 +353,7 @@ class ScopeBluePrint {
   ) {
     // If there are no other overrides, return the current ones
     if (overrides == null || overrides.isEmpty) {
-      return nodeOverrides;
+      return original;
     }
 
     // If current overrides are empty, return the new ones
@@ -388,7 +388,7 @@ class ScopeBluePrint {
   ) {
     // If there are no other overrides, return the current ones
     if (overrides == null || overrides.isEmpty) {
-      return scopeOverrides;
+      return original;
     }
 
     // If current overrides are empty, return the new ones

@@ -14,7 +14,12 @@ class Scope {
     required this.bluePrint,
     required this.parent,
   })  : scm = parent!.scm,
-        assert(bluePrint.key.isCamelCase) {
+        assert(
+          bluePrint.key.isCamelCase,
+          // coverage:ignore-start
+          'Key "${bluePrint.key}" must be lower camel case',
+          // coverage:ignore-end
+        ) {
     _init();
   }
 
@@ -293,7 +298,7 @@ class Scope {
   Iterable<Node<dynamic>> get nodes => _nodes.values;
 
   /// Returns the own node for a given key or null if not found
-  Node<T>? node<T>({required String key}) => _findNodeInOwnScope<T>(key, []);
+  Node<T>? node<T>(String key) => _findNodeInOwnScope<T>(key, []);
 
   /// Returns the node with key. If not available in scope the node is created.
   Node<T> findOrCreateNode<T>(NodeBluePrint<T> bluePrint) {
@@ -827,7 +832,7 @@ class Scope {
     // .....................
     // Dispose removed nodes
     for (final removedNodeBluePrint in removedNodes.toList()) {
-      final removedNode = previous.node<dynamic>(key: removedNodeBluePrint.key);
+      final removedNode = previous.node<dynamic>(removedNodeBluePrint.key);
       assert(removedNode != null);
       removedNode?.dispose();
     }
