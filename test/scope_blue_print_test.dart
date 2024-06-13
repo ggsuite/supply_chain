@@ -333,5 +333,35 @@ void main() {
         });
       });
     });
+
+    group('special cases', () {
+      test('modifyNodes of child scopes', () {
+        // Instantiate the ExampleScopeBluePrint with modifyNode set
+        const modifiedNode = NodeBluePrint<int>(
+          key: 'nodeBuiltByChildScope',
+          initialProduct: 312,
+        );
+
+        final scope = ExampleScopeBluePrint(
+          modifyNode: (scope, node) {
+            print(scope.path);
+            print(node.key);
+            if (scope.path.endsWith(
+                  'childScopeBuiltByParent',
+                ) &&
+                node.key == 'nodeBuiltByChildScope') {
+              return modifiedNode;
+            } else {
+              return node;
+            }
+          },
+        ).instantiate(
+          scope: Scope.example(),
+        );
+
+        final modifiedNodeOut = scope.findNode<int>('nodeBuiltByChildScope')!;
+        expect(modifiedNodeOut.bluePrint, modifiedNode);
+      });
+    });
   });
 }

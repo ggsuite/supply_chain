@@ -224,7 +224,11 @@ class ScopeBluePrint {
     final innerScope = Scope(parent: scope, bluePrint: this);
 
     final nodes = _mergeNodes(buildNodes(), nodeOverrides).map((n) {
-      final modifiedNode = modifyNode(scope, n);
+      final modifiedNode = _recursiveModifyNode(
+        scopeOfNode: innerScope,
+        currentScope: innerScope,
+        node: n,
+      );
       assert(
         modifiedNode.key == n.key,
         'The key of the node must not be changed.',
@@ -443,6 +447,27 @@ class ScopeBluePrint {
 
     return mergedOverrides;
   }
+
+  // ...........................................................................
+  // Todo: Move this code down
+  NodeBluePrint<dynamic> _recursiveModifyNode({
+    required Scope scopeOfNode,
+    required Scope currentScope,
+    required NodeBluePrint<dynamic> node,
+  }) {
+    final modifiedNode = modifyNode(scopeOfNode, node);
+
+    final newModifyingParentScope = currentScope.parent;
+
+    final nodeModifiedByParentScope =
+        newModifyingParentScope?.bluePrint._recursiveModifyNode(
+      scopeOfNode: scopeOfNode,
+      currentScope: newModifyingParentScope,
+      node: modifiedNode,
+    );
+
+    return nodeModifiedByParentScope ?? modifiedNode;
+  }
 }
 
 // #############################################################################
@@ -468,6 +493,9 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
     super.key = 'parentScope',
     List<NodeBluePrint<dynamic>> nodeOverrides = const [],
     List<ScopeBluePrint> scopeOverrides = const [],
+    super.documentation,
+    ModifyNode? modifyNode,
+    ModifyScope? modifyScope,
   }) : super(
           nodeOverrides: [
             const NodeBluePrint<int>(
@@ -492,20 +520,23 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
           ],
 
           // Modify the node with the key 'nodeToBeReplaced'
-          modifyNode: (Scope scope, NodeBluePrint<dynamic> node) {
-            return switch (node.key) {
-              'nodeToBeReplaced' => node.copyWith(initialProduct: 807),
-              _ => node,
-            };
-          },
+          modifyNode: modifyNode ??
+              (Scope scope, NodeBluePrint<dynamic> node) {
+                return switch (node.key) {
+                  'nodeToBeReplaced' => node.copyWith(initialProduct: 807),
+                  _ => node,
+                };
+              },
 
           // Modify the scope with the key 'scopeToBeReplaced'
-          modifyScope: (ScopeBluePrint scope) {
-            return switch (scope.key) {
-              'scopeToBeReplaced' => scope.copyWith(aliases: ['replacedScope']),
-              _ => scope,
-            };
-          },
+          modifyScope: modifyScope ??
+              (ScopeBluePrint scope) {
+                return switch (scope.key) {
+                  'scopeToBeReplaced' =>
+                    scope.copyWith(aliases: ['replacedScope']),
+                  _ => scope,
+                };
+              },
         );
 
   @override

@@ -432,6 +432,34 @@ void main() {
           expect(scope.findScope('a.b.c')?.key, 'c');
           expect(scope.findScope('a.b.c.d'), isNull);
         });
+
+        test('when the scope name is repated down the hiearchy', () {
+          final scope = Scope.example();
+          scope.mockContent({
+            'corpus': {
+              'panels': {
+                'left': {
+                  'faces': {
+                    'right': {
+                      'x': 0,
+                    },
+                  },
+                },
+                'right': {
+                  'faces': {
+                    'right': {
+                      'x': 0,
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          final corpus = scope.findScope('corpus')!;
+          final right = corpus.findScope('corpus.panels.right')!;
+          expect(right.path, 'example.corpus.panels.right');
+        });
       });
       group('should return null', () {
         test('if the scope does not exist', () {
@@ -987,6 +1015,36 @@ void main() {
               expect(foundNodeA, nodeA);
             });
 
+            test('when the node is contained within a child of the parent', () {
+              final scope = Scope.example();
+              scope.mockContent({
+                'root': {
+                  'corpus': {
+                    'bounds': {
+                      'xLeft': 0,
+                    },
+                    'corners': {
+                      'frontBottomLeft': {
+                        'x': 0,
+                      },
+                    },
+                    'panels': {
+                      'left': {
+                        'bounds': {
+                          'xLeft': 0,
+                        },
+                      },
+                    },
+                  },
+                },
+              });
+
+              final frontBottomLeft =
+                  scope.findScope('corners.frontBottomLeft')!;
+              final xLeft = frontBottomLeft.findNode<dynamic>('bounds.xLeft')!;
+              expect(xLeft.path, endsWith('corpus.bounds.xLeft'));
+            });
+
             test('when the node is contained somewhere else', () {
               final root = ExampleScopeRoot(scm: Scm.testInstance);
 
@@ -1111,7 +1169,7 @@ void main() {
               predicate<ArgumentError>(
                 (e) => e.toString().contains(
                       'More than one node with key "grandChildNodeA" and '
-                      'Type<int> found.',
+                      'Type<int> found:',
                     ),
               ),
             ),

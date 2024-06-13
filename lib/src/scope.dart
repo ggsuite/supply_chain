@@ -647,6 +647,20 @@ class Scope {
 
   // ...........................................................................
   Node<T>? _findNodeInOwnScope<T>(String nodeKey, List<String> scopePath) {
+    // If the scope path is not empty, find the child scope
+    if (scopePath.isNotEmpty) {
+      final childScope = _children[scopePath.first];
+      if (childScope == null) {
+        return null;
+      } else {
+        return childScope._findNodeInOwnScope<T>(
+          nodeKey,
+          scopePath.sublist(1),
+        );
+      }
+    }
+
+    // Find the node in the current scope
     final node = _nodes[nodeKey];
     if (node == null) {
       return null;
@@ -710,14 +724,15 @@ class Scope {
 
     if (nodes.length > 1) {
       throw ArgumentError(
-        'More than one node with key "$key" and Type<$T> found.',
+        'More than one node with key "$key" and Type<$T> found:\n - '
+        '${nodes.map((e) => e.path).join('\n - ')}',
       );
     }
 
     return null;
   }
 
-  Scope? _findScope(List<String> path) {
+  Scope? _findScope(List<String> path, {bool didFindFirstScope = false}) {
     if (path.isEmpty) {
       return null;
     }
@@ -727,7 +742,19 @@ class Scope {
     }
 
     if (path.first == key) {
-      return _findScope(path.sublist(1));
+      return _findScope(path.sublist(1), didFindFirstScope: true);
+    }
+
+    if (didFindFirstScope) {
+      final directChild = _children[path.first];
+      if (directChild == null) {
+        return null;
+      } else {
+        final restPath = path.sublist(1);
+        return restPath.isEmpty
+            ? directChild
+            : directChild._findScope(restPath, didFindFirstScope: true);
+      }
     }
 
     for (final child in _children.values) {
