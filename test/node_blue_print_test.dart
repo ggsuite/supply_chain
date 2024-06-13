@@ -271,7 +271,7 @@ void main() {
       });
     });
 
-    group('forward(key)', () {
+    group('forwardTo(key)', () {
       test('should forward the supplier to this node', () {
         const a = NodeBluePrint<int>(key: 'a', initialProduct: 5);
         final b = a.forwardTo('b');
@@ -289,6 +289,39 @@ void main() {
         nodeA.product = 12;
         scope.scm.testFlushTasks();
         expect(nodeB.product, 12);
+      });
+    });
+
+    group('forwardFrom(supplier)', () {
+      test('should forward the suppliers value to this node', () {
+        final scope = Scope.example();
+        final scm = scope.scm;
+        scope.mockContent({
+          'a': {
+            'b': {
+              'n0': const NodeBluePrint<int>(key: 'n0', initialProduct: 618),
+            },
+            'c': {
+              // Here we are forwarding the value from b.n0 to c.n1
+              'n1': const NodeBluePrint<int>(key: 'n1', initialProduct: 374)
+                  .forwardFrom('b.n0'),
+            },
+          },
+        });
+
+        final n0 = scope.findNode<int>('n0')!;
+        final n1 = scope.findNode<int>('n1')!;
+
+        scm.testFlushTasks();
+
+        // The value of n0 should be forwarded to n1
+        expect(n0.product, 618);
+        expect(n1.product, 618);
+
+        // Change value of n0
+        n0.product = 123;
+        scm.testFlushTasks();
+        expect(n1.product, 123);
       });
     });
   });

@@ -125,6 +125,13 @@ class NodeBluePrint<T> {
         initialProduct: initialProduct,
       );
 
+  /// Maps the key of the blue print to another key
+  NodeBluePrint<T> forwardFrom(String supplier) => NodeBluePrint.map(
+        supplier: supplier,
+        toKey: key,
+        initialProduct: initialProduct,
+      );
+
   /// Provites an operator =
   @override
   bool operator ==(Object other) {
