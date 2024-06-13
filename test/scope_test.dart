@@ -652,8 +652,8 @@ void main() {
 
     group('findOrCreateNodes', () {
       test('should return a list of nodes', () {
-        final bluePrint = ScopeBluePrint.example().children.first;
-        final nodes = scope.findOrCreateNodes(bluePrint.nodes);
+        final bluePrint = ScopeBluePrint.example().scopeOverrides.first;
+        final nodes = scope.findOrCreateNodes(bluePrint.nodeOverrides);
         expect(nodes, hasLength(2));
         expect(nodes[0].key, 'node');
         expect(nodes[1].key, 'customer');
@@ -941,7 +941,7 @@ void main() {
                     },
                     'bottomPanel': ScopeBluePrint(
                       key: 'bottomPanel',
-                      nodes: [
+                      nodeOverrides: [
                         NodeBluePrint<double>(
                           key: 'thickness',
                           initialProduct: 19.0,

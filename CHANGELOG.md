@@ -60,6 +60,7 @@
 - Removing a plugin from a node will dispose the plugin
 - Implement better way to handle plugins
 - Split build into buildNodes and buildScopes
+- Allow to override nodes and scopes while instantiating a scope blue print
 
 ### Fixed
 

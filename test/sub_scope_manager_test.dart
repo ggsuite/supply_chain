@@ -99,7 +99,7 @@ void main() {
       producedScopeBluePrints = [
         ScopeBluePrint(
           key: 'row0',
-          nodes: [
+          nodeOverrides: [
             NodeBluePrint<int>(
               key: 'rowHeight',
               initialProduct: 10,
@@ -117,7 +117,7 @@ void main() {
       producedScopeBluePrints = [
         ScopeBluePrint(
           key: 'row0',
-          nodes: [
+          nodeOverrides: [
             NodeBluePrint<int>(
               key: 'rowHeight',
               initialProduct: 10,
@@ -141,7 +141,7 @@ void main() {
       producedScopeBluePrints = [
         ScopeBluePrint(
           key: 'row0',
-          nodes: [
+          nodeOverrides: [
             NodeBluePrint<int>(
               key: 'rowHeight',
               initialProduct: 10,

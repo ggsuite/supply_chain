@@ -10,17 +10,17 @@ import 'package:supply_chain/supply_chain.dart';
 /// that can form or build a scope.
 ///
 /// - [key]: The key of the blue print
-/// - [nodes]: The nodes of the blue print.
-///   Can also be specified in build()
-/// - [children]: The children of the blue print.
-///   Can also be specified in build().
+/// - [nodeOverrides]: Allows to override or extend the nodes built
+///   by buildNodes().
+/// - [scopeOverrides]: Allows to override or extend nodes built
+///   by buildScopes().
 class ScopeBluePrint {
   // ...........................................................................
   /// Constructor of the scope
   const ScopeBluePrint({
     required this.key,
-    this.nodes = const [],
-    this.children = const [],
+    this.nodeOverrides = const [],
+    this.scopeOverrides = const [],
     this.aliases = const [],
     this.documentation = '',
   });
@@ -104,8 +104,8 @@ class ScopeBluePrint {
 
     return ScopeBluePrint(
       key: key,
-      nodes: nodes,
-      children: children,
+      nodeOverrides: nodes,
+      scopeOverrides: children,
     );
   }
 
@@ -113,19 +113,26 @@ class ScopeBluePrint {
   /// Creates a copy of the scope with the given changes
   ScopeBluePrint copyWith({
     String? key,
-    List<NodeBluePrint<dynamic>>? nodes,
-    List<ScopeBluePrint>? subScopes,
-    List<NodeBluePrint<dynamic>> overrides = const [],
+    List<NodeBluePrint<dynamic>>? nodeOverrides,
+    List<ScopeBluePrint>? scopeOverrides,
     List<String>? aliases,
   }) {
-    nodes = nodes ?? this.nodes;
-    nodes = _replaceNodes(nodes, overrides);
+    // Merge the node overrides
+    final mergedNodeOverrides = _mergeNodes(
+      this.nodeOverrides,
+      nodeOverrides,
+    );
+
+    final mergedScopeOverrides = _mergeScopes(
+      this.scopeOverrides,
+      scopeOverrides,
+    );
 
     return ScopeBluePrint._private(
       key: key ?? this.key,
       aliases: aliases ?? this.aliases,
-      nodes: nodes,
-      children: subScopes ?? children,
+      nodeOverrides: mergedNodeOverrides,
+      scopeOverrides: mergedScopeOverrides,
       documentation: documentation,
     );
   }
@@ -156,10 +163,10 @@ class ScopeBluePrint {
   bool matchesKey(String key) => key == this.key || aliases.contains(key);
 
   /// The nodes of the scope
-  final List<NodeBluePrint<dynamic>> nodes;
+  final List<NodeBluePrint<dynamic>> nodeOverrides;
 
   /// The children of the scope
-  final List<ScopeBluePrint> children;
+  final List<ScopeBluePrint> scopeOverrides;
 
   /// The list of key aliases
   final List<String> aliases;
@@ -170,7 +177,8 @@ class ScopeBluePrint {
 
   // ...........................................................................
   /// Returns the node for a given key
-  NodeBluePrint<T>? findNode<T>(String key) => _findNodeByKey<T>(key, nodes);
+  NodeBluePrint<T>? findNode<T>(String key) =>
+      _findNodeByKey<T>(key, nodeOverrides);
 
   // ...........................................................................
   /// Turns the blue print into a scope and adds it to the parent scope.
@@ -180,21 +188,17 @@ class ScopeBluePrint {
     // Create an inner scope
     final innerScope = Scope(parent: scope, bluePrint: this);
 
-    final additionalNodes = buildNodes();
-    final additionalSubScopes = buildScopes();
+    final nodes = _mergeNodes(buildNodes(), nodeOverrides);
+    final scopes = _mergeScopes(buildScopes(), scopeOverrides);
 
-    // Add nodes to the inner scope
-    final allNodes = <NodeBluePrint<dynamic>>[...nodes, ...additionalNodes];
-
-    // Make sure there no duplicate keys
-    _checkForDuplicateKeys(allNodes);
+    // Make sure there are no duplicate keys
+    _checkForDuplicateKeys(nodes);
 
     // Create node
-    innerScope.findOrCreateNodes(allNodes);
+    innerScope.findOrCreateNodes(nodes);
 
     // Init sub scopes
-    final allSubScopes = [...children, ...additionalSubScopes];
-    for (final subScope in allSubScopes) {
+    for (final subScope in scopes) {
       subScope.instantiate(
         scope: innerScope,
       );
@@ -239,13 +243,13 @@ class ScopeBluePrint {
     /// return the result
     return ScopeBluePrint(
       key: 'scope',
-      nodes: [
+      nodeOverrides: [
         dependency,
       ],
-      children: [
+      scopeOverrides: [
         ScopeBluePrint(
           key: 'childScope',
-          nodes: [
+          nodeOverrides: [
             node,
             customer,
           ],
@@ -263,8 +267,8 @@ class ScopeBluePrint {
   ScopeBluePrint._private({
     required this.key,
     required this.aliases,
-    required this.nodes,
-    required this.children,
+    required this.nodeOverrides,
+    required this.scopeOverrides,
     required this.documentation,
   });
 
@@ -288,27 +292,6 @@ class ScopeBluePrint {
   }
 
   // ...........................................................................
-  /// Replaces nodes in a list of nodes with the given overrides
-  static List<NodeBluePrint<dynamic>> _replaceNodes(
-    List<NodeBluePrint<dynamic>> nodes,
-    List<NodeBluePrint<dynamic>> overrides,
-  ) {
-    if (overrides.isEmpty) return nodes;
-    if (nodes.isEmpty) return overrides;
-
-    final result = <NodeBluePrint<dynamic>>[];
-    for (final node in nodes) {
-      final override = _findNodeByKey<dynamic>(node.key, overrides);
-      if (override != null) {
-        result.add(override);
-      } else {
-        result.add(node);
-      }
-    }
-    return result;
-  }
-
-  // ...........................................................................
   void _checkForDuplicateKeys(List<NodeBluePrint<dynamic>> nodes) {
     final keys = nodes.map(
       (e) => e.key,
@@ -328,6 +311,76 @@ class ScopeBluePrint {
     if (duplicates.isNotEmpty) {
       throw ArgumentError('Duplicate keys found: $duplicates');
     }
+  }
+
+  // ...........................................................................
+  List<NodeBluePrint<dynamic>> _mergeNodes(
+    List<NodeBluePrint<dynamic>> original,
+    List<NodeBluePrint<dynamic>>? overrides,
+  ) {
+    // If there are no other overrides, return the current ones
+    if (overrides == null || overrides.isEmpty) {
+      return nodeOverrides;
+    }
+
+    // If current overrides are empty, return the new ones
+    if (original.isEmpty) {
+      return overrides;
+    }
+
+    // Iterate all new overrides and merge them with the current ones
+    final mergedOverrides = [...original];
+    for (final newOverride in overrides) {
+      final index = mergedOverrides
+          .indexWhere((element) => element.key == newOverride.key);
+
+      // Original element with same key existing? Replace it.
+      if (index != -1) {
+        mergedOverrides[index] = newOverride;
+      }
+
+      // No original element with same key existing? Add it.
+      else {
+        mergedOverrides.add(newOverride);
+      }
+    }
+
+    return mergedOverrides;
+  }
+
+  // ...........................................................................
+  List<ScopeBluePrint> _mergeScopes(
+    List<ScopeBluePrint> original,
+    List<ScopeBluePrint>? overrides,
+  ) {
+    // If there are no other overrides, return the current ones
+    if (overrides == null || overrides.isEmpty) {
+      return scopeOverrides;
+    }
+
+    // If current overrides are empty, return the new ones
+    if (original.isEmpty) {
+      return overrides;
+    }
+
+    // Iterate all new overrides and merge them with the current ones
+    final mergedOverrides = [...original];
+    for (final newOverride in overrides) {
+      final index = mergedOverrides
+          .indexWhere((element) => element.key == newOverride.key);
+
+      // Original element with same key existing? Replace it.
+      if (index != -1) {
+        mergedOverrides[index] = newOverride;
+      }
+
+      // No original element with same key existing? Add it.
+      else {
+        mergedOverrides.add(newOverride);
+      }
+    }
+
+    return mergedOverrides;
   }
 }
 
@@ -352,18 +405,21 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
   /// Constructor
   ExampleScopeBluePrint({
     super.key = 'parentScope',
+    List<NodeBluePrint<dynamic>> nodeOverrides = const [],
+    List<ScopeBluePrint> scopeOverrides = const [],
   }) : super(
-          nodes: [
+          nodeOverrides: [
             const NodeBluePrint<int>(
               key: 'nodeConstructedByParent',
               initialProduct: 0,
               suppliers: [],
             ),
+            ...nodeOverrides,
           ],
-          children: [
+          scopeOverrides: [
             const ScopeBluePrint(
               key: 'childScopeConstructedByParent',
-              nodes: [
+              nodeOverrides: [
                 NodeBluePrint<int>(
                   key: 'nodeConstructedByChildScope',
                   initialProduct: 0,
@@ -371,6 +427,7 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
                 ),
               ],
             ),
+            ...scopeOverrides,
           ],
         );
 
@@ -390,7 +447,7 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
     return [
       const ScopeBluePrint(
         key: 'childScopeBuiltByParent',
-        nodes: [
+        nodeOverrides: [
           NodeBluePrint<int>(
             key: 'nodeBuiltByChildScope',
             initialProduct: 0,
