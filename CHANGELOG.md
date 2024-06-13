@@ -62,6 +62,7 @@
 - Implement better way to handle plugins
 - Split build into buildNodes and buildScopes
 - Allow to override nodes and scopes while instantiating a scope blue print
+- Define overrides in constructor
 
 ### Fixed
 

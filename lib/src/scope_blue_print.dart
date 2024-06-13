@@ -6,6 +6,9 @@
 
 import 'package:supply_chain/supply_chain.dart';
 
+NodeBluePrint<dynamic> _dontModifyMode(NodeBluePrint<dynamic> node) => node;
+ScopeBluePrint _dontModifyScope(ScopeBluePrint scope) => scope;
+
 /// A scope blue print is a collection of related node blue prints.
 /// that can form or build a scope.
 ///
@@ -23,6 +26,8 @@ class ScopeBluePrint {
     this.scopeOverrides = const [],
     this.aliases = const [],
     this.documentation = '',
+    this.modifyNode = _dontModifyMode,
+    this.modifyScope = _dontModifyScope,
   });
 
   // ...........................................................................
@@ -116,6 +121,8 @@ class ScopeBluePrint {
     List<NodeBluePrint<dynamic>>? nodeOverrides,
     List<ScopeBluePrint>? scopeOverrides,
     List<String>? aliases,
+    NodeBluePrint<dynamic> Function(NodeBluePrint<dynamic> node)? modifyNode,
+    ScopeBluePrint Function(ScopeBluePrint scope)? modifyScope,
   }) {
     // Merge the node overrides
     final mergedNodeOverrides = _mergeNodes(
@@ -134,6 +141,8 @@ class ScopeBluePrint {
       nodeOverrides: mergedNodeOverrides,
       scopeOverrides: mergedScopeOverrides,
       documentation: documentation,
+      modifyNode: modifyNode ?? this.modifyNode,
+      modifyScope: modifyScope ?? this.modifyScope,
     );
   }
 
@@ -149,21 +158,18 @@ class ScopeBluePrint {
     return [];
   }
 
-  // ...........................................................................
   /// Override this method in sub classes to define the child scopes
   List<ScopeBluePrint> buildScopes() {
     return [];
   }
 
   // ...........................................................................
-  /// Override this method in sub classes to replace node blue prints by
-  /// other ones.
-  NodeBluePrint<dynamic> modifyNode(NodeBluePrint<dynamic> node) => node;
+  /// Set this method to override single nodes of a scope
+  final NodeBluePrint<dynamic> Function(NodeBluePrint<dynamic> node) modifyNode;
 
-  // ...........................................................................
   /// Override this method in sub classes to replace scope blue prints by
   /// other ones.
-  ScopeBluePrint modifyScope(ScopeBluePrint scope) => scope;
+  final ScopeBluePrint Function(ScopeBluePrint scope) modifyScope;
 
   // ...........................................................................
   /// The key of the scope
@@ -295,6 +301,8 @@ class ScopeBluePrint {
     required this.nodeOverrides,
     required this.scopeOverrides,
     required this.documentation,
+    required this.modifyNode,
+    required this.modifyScope,
   });
 
   // ...........................................................................
@@ -454,6 +462,22 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
             ),
             ...scopeOverrides,
           ],
+
+          // Modify the node with the key 'nodeToBeReplaced'
+          modifyNode: (NodeBluePrint<dynamic> node) {
+            return switch (node.key) {
+              'nodeToBeReplaced' => node.copyWith(initialProduct: 807),
+              _ => node,
+            };
+          },
+
+          // Modify the scope with the key 'scopeToBeReplaced'
+          modifyScope: (ScopeBluePrint scope) {
+            return switch (scope.key) {
+              'scopeToBeReplaced' => scope.copyWith(aliases: ['replacedScope']),
+              _ => scope,
+            };
+          },
         );
 
   @override
@@ -473,14 +497,6 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
   }
 
   @override
-  NodeBluePrint<dynamic> modifyNode(NodeBluePrint<dynamic> node) {
-    return switch (node.key) {
-      'nodeToBeReplaced' => node.copyWith(initialProduct: 807),
-      _ => node,
-    };
-  }
-
-  @override
   List<ScopeBluePrint> buildScopes() {
     return [
       const ScopeBluePrint(
@@ -495,13 +511,5 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
       ),
       ScopeBluePrint.example(key: 'scopeToBeReplaced'),
     ];
-  }
-
-  @override
-  ScopeBluePrint modifyScope(ScopeBluePrint scope) {
-    return switch (scope.key) {
-      'scopeToBeReplaced' => scope.copyWith(aliases: ['replacedScope']),
-      _ => scope,
-    };
   }
 }
