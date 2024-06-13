@@ -26,6 +26,7 @@
 - Added Scope.addPlugin and removePlugin
 - Add modifyScope, modifyNode
 - Add forwardFrom
+- Add overridable modifyScope and modifyNode
 
 ### Changed
 

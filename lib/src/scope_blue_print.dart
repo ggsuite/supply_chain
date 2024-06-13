@@ -4,10 +4,21 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'package:meta/meta.dart';
 import 'package:supply_chain/supply_chain.dart';
 
 NodeBluePrint<dynamic> _dontModifyMode(NodeBluePrint<dynamic> node) => node;
 ScopeBluePrint _dontModifyScope(ScopeBluePrint scope) => scope;
+
+/// A function that allows to modify a node
+typedef ModifyNode = NodeBluePrint<dynamic> Function(
+  NodeBluePrint<dynamic> node,
+);
+
+/// A function that allows to modify a node
+typedef ModifyScope = ScopeBluePrint Function(
+  ScopeBluePrint node,
+);
 
 /// A scope blue print is a collection of related node blue prints.
 /// that can form or build a scope.
@@ -26,9 +37,10 @@ class ScopeBluePrint {
     this.scopeOverrides = const [],
     this.aliases = const [],
     this.documentation = '',
-    this.modifyNode = _dontModifyMode,
-    this.modifyScope = _dontModifyScope,
-  });
+    ModifyNode modifyNode = _dontModifyMode,
+    ModifyScope modifyScope = _dontModifyScope,
+  })  : _modifyScope = modifyScope,
+        _modifyNode = modifyNode;
 
   // ...........................................................................
   /// Creates a blue print with children from JSON
@@ -141,8 +153,8 @@ class ScopeBluePrint {
       nodeOverrides: mergedNodeOverrides,
       scopeOverrides: mergedScopeOverrides,
       documentation: documentation,
-      modifyNode: modifyNode ?? this.modifyNode,
-      modifyScope: modifyScope ?? this.modifyScope,
+      modifyNode: modifyNode ?? _modifyNode,
+      modifyScope: modifyScope ?? _modifyScope,
     );
   }
 
@@ -163,13 +175,14 @@ class ScopeBluePrint {
     return [];
   }
 
-  // ...........................................................................
-  /// Set this method to override single nodes of a scope
-  final NodeBluePrint<dynamic> Function(NodeBluePrint<dynamic> node) modifyNode;
+  /// Override this method in sub classes to replace single nodes by others
+  @mustCallSuper
+  NodeBluePrint<dynamic> modifyNode(NodeBluePrint<dynamic> node) =>
+      _modifyNode(node);
 
-  /// Override this method in sub classes to replace scope blue prints by
-  /// other ones.
-  final ScopeBluePrint Function(ScopeBluePrint scope) modifyScope;
+  /// Override this method in sub classes to replace single scopes by others
+  @mustCallSuper
+  ScopeBluePrint modifyScope(ScopeBluePrint scope) => _modifyScope(scope);
 
   // ...........................................................................
   /// The key of the scope
@@ -301,9 +314,18 @@ class ScopeBluePrint {
     required this.nodeOverrides,
     required this.scopeOverrides,
     required this.documentation,
-    required this.modifyNode,
-    required this.modifyScope,
-  });
+    required NodeBluePrint<dynamic> Function(NodeBluePrint<dynamic>) modifyNode,
+    required ScopeBluePrint Function(ScopeBluePrint) modifyScope,
+  })  : _modifyScope = modifyScope,
+        _modifyNode = modifyNode;
+
+  // ...........................................................................
+  /// Set this method to override single nodes of a scope
+  final ModifyNode _modifyNode;
+
+  /// Override this method in sub classes to replace scope blue prints by
+  /// other ones.
+  final ModifyScope _modifyScope;
 
   // ...........................................................................
   /// Finds a node with a given key in a given list of nodes.
