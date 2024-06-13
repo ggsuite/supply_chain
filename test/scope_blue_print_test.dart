@@ -196,6 +196,18 @@ void main() {
             isNotNull,
           );
 
+          // Check if modifyNode and modifyScope did work
+          expect(
+            scope.findNode<int>('nodeToBeReplaced')!.bluePrint.initialProduct,
+            807,
+          );
+
+          expect(
+            scope.findScope('scopeToBeReplaced')!.bluePrint.aliases,
+            ['replacedScope'],
+          );
+
+          // Write image
           await scope
               .writeImageFile('test.graphs.example_scope_blue_print.dot');
         });

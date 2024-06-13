@@ -156,6 +156,16 @@ class ScopeBluePrint {
   }
 
   // ...........................................................................
+  /// Override this method in sub classes to replace node blue prints by
+  /// other ones.
+  NodeBluePrint<dynamic> modifyNode(NodeBluePrint<dynamic> node) => node;
+
+  // ...........................................................................
+  /// Override this method in sub classes to replace scope blue prints by
+  /// other ones.
+  ScopeBluePrint modifyScope(ScopeBluePrint scope) => scope;
+
+  // ...........................................................................
   /// The key of the scope
   final String key;
 
@@ -188,8 +198,23 @@ class ScopeBluePrint {
     // Create an inner scope
     final innerScope = Scope(parent: scope, bluePrint: this);
 
-    final nodes = _mergeNodes(buildNodes(), nodeOverrides);
-    final scopes = _mergeScopes(buildScopes(), scopeOverrides);
+    final nodes = _mergeNodes(buildNodes(), nodeOverrides).map((n) {
+      final modifiedNode = modifyNode(n);
+      assert(
+        modifiedNode.key == n.key,
+        'The key of the node must not be changed.',
+      );
+      return modifiedNode;
+    }).toList();
+
+    final scopes = _mergeScopes(buildScopes(), scopeOverrides).map((s) {
+      final modifiedScope = modifyScope(s);
+      assert(
+        modifiedScope.key == s.key,
+        'The key of the scope must not be changed.',
+      );
+      return modifiedScope;
+    }).toList();
 
     // Make sure there are no duplicate keys
     _checkForDuplicateKeys(nodes);
@@ -210,7 +235,7 @@ class ScopeBluePrint {
 
   // ...........................................................................
   /// Creates an example instance for test purposes
-  factory ScopeBluePrint.example() {
+  factory ScopeBluePrint.example({String key = 'scope'}) {
     /// Fake an external dependency
     const dependency = NodeBluePrint<int>(
       key: 'dependency',
@@ -242,7 +267,7 @@ class ScopeBluePrint {
 
     /// return the result
     return ScopeBluePrint(
-      key: 'scope',
+      key: key,
       nodeOverrides: [
         dependency,
       ],
@@ -439,7 +464,20 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
         initialProduct: 0,
         suppliers: [],
       ),
+      const NodeBluePrint<int>(
+        key: 'nodeToBeReplaced',
+        initialProduct: 0,
+        suppliers: [],
+      ),
     ];
+  }
+
+  @override
+  NodeBluePrint<dynamic> modifyNode(NodeBluePrint<dynamic> node) {
+    return switch (node.key) {
+      'nodeToBeReplaced' => node.copyWith(initialProduct: 807),
+      _ => node,
+    };
   }
 
   @override
@@ -455,6 +493,15 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
           ),
         ],
       ),
+      ScopeBluePrint.example(key: 'scopeToBeReplaced'),
     ];
+  }
+
+  @override
+  ScopeBluePrint modifyScope(ScopeBluePrint scope) {
+    return switch (scope.key) {
+      'scopeToBeReplaced' => scope.copyWith(aliases: ['replacedScope']),
+      _ => scope,
+    };
   }
 }

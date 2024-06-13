@@ -24,6 +24,7 @@
 - Add Scope.reset and Node.reset
 - Add Node.addPlugin and removePlugin
 - Added Scope.addPlugin and removePlugin
+- Add modifyScope, modifyNode
 
 ### Changed
 

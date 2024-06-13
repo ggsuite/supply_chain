@@ -9,19 +9,39 @@ digraph unix {
     nodeBuiltByParent_0 [
       label = "nodeBuiltByParent"; // node
     ];
-    nodeConstructedByParent_1 [
+    nodeToBeReplaced_1 [
+      label = "nodeToBeReplaced"; // node
+    ];
+    nodeConstructedByParent_2 [
       label = "nodeConstructedByParent"; // node
     ];
     subgraph cluster_childScopeBuiltByParent_3 {
       label = "childScopeBuiltByParent"; // scope
-      nodeBuiltByChildScope_2 [
+      nodeBuiltByChildScope_3 [
         label = "nodeBuiltByChildScope"; // node
       ];
       
     }
-    subgraph cluster_childScopeConstructedByParent_4 {
+    subgraph cluster_scopeToBeReplaced_4 {
+      label = "scopeToBeReplaced"; // scope
+      dependency_4 [
+        label = "dependency"; // node
+      ];
+      subgraph cluster_childScope_5 {
+        label = "childScope"; // scope
+        node_5 [
+          label = "node"; // node
+        ];
+        customer_6 [
+          label = "customer"; // node
+        ];
+        
+      }
+      
+    }
+    subgraph cluster_childScopeConstructedByParent_6 {
       label = "childScopeConstructedByParent"; // scope
-      nodeConstructedByChildScope_3 [
+      nodeConstructedByChildScope_7 [
         label = "nodeConstructedByChildScope"; // node
       ];
       
