@@ -13,8 +13,9 @@ class PluginNode<T> extends Node<T> {
   PluginNode({
     required super.bluePrint,
     required this.host,
+    Scope? scope,
     int? index,
-  }) : super(scope: host.scope) {
+  }) : super(scope: scope ?? host.scope) {
     _insertPlugin(index);
     _prepareRemoval();
   }
@@ -69,6 +70,7 @@ class PluginNode<T> extends Node<T> {
     );
     final pluginNode = bluePrint.instantiateAsPlugin(
       host: host,
+      scope: host.scope,
       index: index,
     );
     return pluginNode;

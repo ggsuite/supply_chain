@@ -65,6 +65,7 @@
 - Allow to override nodes and scopes while instantiating a scope blue print
 - Define overrides in constructor
 - Refactor ScopePlugin
+- instantiate scope plugins within their own scope
 
 ### Fixed
 

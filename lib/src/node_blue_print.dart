@@ -94,12 +94,14 @@ class NodeBluePrint<T> {
   /// Instantiates the blue print as plugin in the given scope
   PluginNode<T> instantiateAsPlugin({
     required Node<T> host,
+    Scope? scope,
     int? index,
   }) {
     return PluginNode<T>(
       bluePrint: this,
       host: host,
       index: index,
+      scope: scope,
     );
   }
 

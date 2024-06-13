@@ -185,41 +185,6 @@ void main() {
               ),
             );
           });
-
-          test('if one of the plugin nodes in the plugin is not found', () {
-            final scope = Scope.example();
-            scope.mockContent({
-              'node0': 0,
-            });
-
-            // Create a plugin with a node that does not exist
-            const plugin = ScopePlugin(
-              key: 'plugin0',
-              overrides: {
-                'node0':
-                    NodeBluePrint<int>(key: 'pluginNode0', initialProduct: 0),
-              },
-            );
-
-            // Add the plugin
-            plugin.instantiate(scope: scope);
-
-            // Remove the node that the plugin is supposed to modify
-            final pluginNode = scope.findNode<int>('pluginNode0')!;
-            pluginNode.dispose();
-
-            // Try to remove the plugin
-            expect(
-              () => plugin.dispose(scope: scope),
-              throwsA(
-                predicate<ArgumentError>(
-                  (e) => e.toString().contains(
-                        'PluginNode with key "pluginNode0" not found.',
-                      ),
-                ),
-              ),
-            );
-          });
         });
 
         test('should remove the plugin from the list of plugins', () {
