@@ -68,6 +68,7 @@
 - Refactor ScopePlugin
 - instantiate scope plugins within their own scope
 - Hand over scope in method modifyNode
+- Improved error message
 
 ### Fixed
 

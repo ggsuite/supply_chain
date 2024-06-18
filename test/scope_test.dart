@@ -1168,7 +1168,8 @@ void main() {
             throwsA(
               predicate<ArgumentError>(
                 (e) => e.toString().contains(
-                      'More than one node with key "grandChildNodeA" and '
+                      'Scope "exampleRoot": More than one node '
+                      'with key "grandChildNodeA" and '
                       'Type<int> found:',
                     ),
               ),

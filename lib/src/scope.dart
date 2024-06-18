@@ -724,7 +724,8 @@ class Scope {
 
     if (nodes.length > 1) {
       throw ArgumentError(
-        'More than one node with key "$key" and Type<$T> found:\n - '
+        'Scope "$path": More than one node '
+        'with key "$key" and Type<$T> found:\n - '
         '${nodes.map((e) => e.path).join('\n - ')}',
       );
     }
