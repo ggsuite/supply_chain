@@ -132,6 +132,10 @@ class ScopeBluePrint {
   }
 
   // ...........................................................................
+  /// Override this method to perform actions or checks before instantiation
+  void willInstantiate() {}
+
+  // ...........................................................................
   /// Creates a copy of the scope with the given changes
   ScopeBluePrint copyWith({
     String? key,
@@ -220,6 +224,8 @@ class ScopeBluePrint {
   Scope instantiate({
     required Scope scope,
   }) {
+    willInstantiate();
+
     // Create an inner scope
     final innerScope = Scope(parent: scope, bluePrint: this);
 

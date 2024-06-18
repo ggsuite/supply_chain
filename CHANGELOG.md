@@ -27,6 +27,7 @@
 - Add modifyScope, modifyNode
 - Add forwardFrom
 - Add overridable modifyScope and modifyNode
+- Add willInstantiate
 
 ### Changed
 
