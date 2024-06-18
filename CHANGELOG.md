@@ -73,6 +73,7 @@
 - Allow a to specify a list of allowed products for a node
 - Rename additionalNodes into additionalScopes
 - Rename forwardFrom -
+- Rename forwardFrom -&gt; switchSupplier
 
 ### Fixed
 
