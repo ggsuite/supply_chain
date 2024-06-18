@@ -520,7 +520,8 @@ void main() {
     });
 
     group('set and get product', () {
-      test('should possible if no suppliers and produce function is given', () {
+      test('should be possible if no suppliers and produce function is given',
+          () {
         // Create a node -> customer chain
         final chain = Scope.example(scm: scm);
 
@@ -555,6 +556,37 @@ void main() {
 
         // Check if customer got the new component
         expect(customer.product, 10);
+      });
+
+      test('should throw if a produce method is given', () {
+        // Create a node -> customer chain
+        final chain = Scope.example(scm: scm);
+
+        final node = Node<int>(
+          scope: chain,
+          bluePrint: NodeBluePrint<int>(
+            key: 'node',
+            initialProduct: 0,
+            produce: (components, previousProduct) => 1,
+          ),
+        );
+
+        // Check initial values
+        expect(node.product, 0);
+
+        // Set a product from the outside
+        expect(
+          () => node.product = 1,
+          throwsA(
+            isA<AssertionError>().having(
+              (e) => e.message,
+              'message',
+              contains(
+                'Product can only be set if bluePrint.produce is doNothing',
+              ),
+            ),
+          ),
+        );
       });
     });
 

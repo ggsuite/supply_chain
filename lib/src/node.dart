@@ -127,7 +127,7 @@ class Node<T> {
   set product(T v) {
     assert(
       bluePrint.produce == doNothing<T>,
-      'Product can only be set if bluePrint.produce is doNothing',
+      '$path:  Product can only be set if bluePrint.produce is doNothing',
     );
     _throwIfNotAllowed(v);
     _originalProduct = v;

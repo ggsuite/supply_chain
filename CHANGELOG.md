@@ -75,6 +75,7 @@
 - Rename forwardFrom -
 - Rename forwardFrom -> switchSupplier
 - Rename modifyNode into modifyChildNode
+- Improve assertion
 
 ### Fixed
 
