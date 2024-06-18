@@ -196,7 +196,7 @@ void main() {
             isNotNull,
           );
 
-          // Check if modifyNode and modifyScope did work
+          // Check if modifyChildNode and modifyScope did work
           expect(
             scope.findNode<int>('nodeToBeReplaced')!.bluePrint.initialProduct,
             807,
@@ -335,15 +335,15 @@ void main() {
     });
 
     group('special cases', () {
-      test('modifyNodes of child scopes', () {
-        // Instantiate the ExampleScopeBluePrint with modifyNode set
+      test('modifyChildNodes of child scopes', () {
+        // Instantiate the ExampleScopeBluePrint with modifyChildNode set
         const modifiedNode = NodeBluePrint<int>(
           key: 'nodeBuiltByChildScope',
           initialProduct: 312,
         );
 
         final scope = ExampleScopeBluePrint(
-          modifyNode: (scope, node) {
+          modifyChildNode: (scope, node) {
             print(scope.path);
             print(node.key);
             if (scope.path.endsWith(

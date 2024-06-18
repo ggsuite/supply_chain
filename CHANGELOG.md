@@ -24,9 +24,9 @@
 - Add Scope.reset and Node.reset
 - Add Node.addPlugin and removePlugin
 - Added Scope.addPlugin and removePlugin
-- Add modifyScope, modifyNode
+- Add modifyScope, modifyChildNode
 - Add switchSupplier
-- Add overridable modifyScope and modifyNode
+- Add overridable modifyScope and modifyChildNode
 - Add willInstantiate
 
 ### Changed
@@ -68,12 +68,13 @@
 - Define overrides in constructor
 - Refactor ScopePlugin
 - instantiate scope plugins within their own scope
-- Hand over scope in method modifyNode
+- Hand over scope in method modifyChildNode
 - Improved error message
 - Allow a to specify a list of allowed products for a node
 - Rename additionalNodes into additionalScopes
 - Rename forwardFrom -
-- Rename forwardFrom -&gt; switchSupplier
+- Rename forwardFrom -> switchSupplier
+- Rename modifyNode into modifyChildNode
 
 ### Fixed
 

@@ -42,10 +42,10 @@ class ScopeBluePrint {
     this.scopeOverrides = const [],
     this.aliases = const [],
     this.documentation = '',
-    ModifyNode modifyNode = _dontModifyMode,
+    ModifyNode modifyChildNode = _dontModifyMode,
     ModifyScope modifyScope = _dontModifyScope,
   })  : _modifyScope = modifyScope,
-        _modifyNode = modifyNode;
+        _modifyChildNode = modifyChildNode;
 
   // ...........................................................................
   /// Creates a blue print with children from JSON
@@ -142,7 +142,7 @@ class ScopeBluePrint {
     List<NodeBluePrint<dynamic>>? modifiedNodes,
     List<ScopeBluePrint>? modifiedScopes,
     List<String>? aliases,
-    ModifyNode? modifyNode,
+    ModifyNode? modifyChildNode,
     ModifyScope? modifyScope,
   }) {
     // Merge the node overrides
@@ -162,7 +162,7 @@ class ScopeBluePrint {
       nodeOverrides: mergedNodeOverrides,
       scopeOverrides: mergedScopeOverrides,
       documentation: documentation,
-      modifyNode: modifyNode ?? _modifyNode,
+      modifyChildNode: modifyChildNode ?? _modifyChildNode,
       modifyScope: modifyScope ?? _modifyScope,
     );
   }
@@ -185,11 +185,11 @@ class ScopeBluePrint {
   }
 
   /// Override this method in sub classes to replace single nodes by others
-  NodeBluePrint<dynamic> modifyNode(
+  NodeBluePrint<dynamic> modifyChildNode(
     Scope scope,
     NodeBluePrint<dynamic> node,
   ) =>
-      _modifyNode(scope, node);
+      _modifyChildNode(scope, node);
 
   /// Override this method in sub classes to replace single scopes by others
   ScopeBluePrint modifyScope(ScopeBluePrint scope) => _modifyScope(scope);
@@ -330,14 +330,14 @@ class ScopeBluePrint {
     required this.nodeOverrides,
     required this.scopeOverrides,
     required this.documentation,
-    required ModifyNode modifyNode,
+    required ModifyNode modifyChildNode,
     required ModifyScope modifyScope,
   })  : _modifyScope = modifyScope,
-        _modifyNode = modifyNode;
+        _modifyChildNode = modifyChildNode;
 
   // ...........................................................................
   /// Set this method to override single nodes of a scope
-  final ModifyNode _modifyNode;
+  final ModifyNode _modifyChildNode;
 
   /// Override this method in sub classes to replace scope blue prints by
   /// other ones.
@@ -461,7 +461,7 @@ class ScopeBluePrint {
     required Scope currentScope,
     required NodeBluePrint<dynamic> node,
   }) {
-    final modifiedNode = modifyNode(scopeOfNode, node);
+    final modifiedNode = modifyChildNode(scopeOfNode, node);
 
     final newModifyingParentScope = currentScope.parent;
 
@@ -500,7 +500,7 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
     List<NodeBluePrint<dynamic>> nodeOverrides = const [],
     List<ScopeBluePrint> scopeOverrides = const [],
     super.documentation,
-    ModifyNode? modifyNode,
+    ModifyNode? modifyChildNode,
     ModifyScope? modifyScope,
   }) : super(
           nodeOverrides: [
@@ -526,7 +526,7 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
           ],
 
           // Modify the node with the key 'nodeToBeReplaced'
-          modifyNode: modifyNode ??
+          modifyChildNode: modifyChildNode ??
               (Scope scope, NodeBluePrint<dynamic> node) {
                 return switch (node.key) {
                   'nodeToBeReplaced' => node.copyWith(initialProduct: 807),
