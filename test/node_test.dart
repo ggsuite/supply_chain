@@ -613,6 +613,63 @@ void main() {
         },
       );
     });
+
+    group('special cases', () {
+      group('should throw', () {
+        group('when the new product is not in the list of allowed values', () {
+          test('with a fixed value assigned', () {
+            final node = Node<int>(
+              scope: Scope.example(),
+              bluePrint: const NodeBluePrint<int>(
+                key: 'node',
+                initialProduct: 0,
+                allowedProducts: [0, 1, 2],
+              ),
+            );
+
+            expect(
+              () => node.product = 3,
+              throwsA(
+                isA<ArgumentError>().having(
+                  (e) => e.message,
+                  'message',
+                  contains(
+                    'The product 3 is not in the list of allowed '
+                    'products [0, 1, 2].',
+                  ),
+                ),
+              ),
+            );
+          });
+
+          test('with value produced', () {
+            final node = Node<int>(
+              scope: Scope.example(),
+              bluePrint: NodeBluePrint<int>(
+                key: 'node',
+                initialProduct: 0,
+                allowedProducts: [0, 1, 2],
+                produce: (List<dynamic> components, previousProduct) => 3,
+              ),
+            );
+
+            expect(
+              () => node.produce(),
+              throwsA(
+                isA<ArgumentError>().having(
+                  (e) => e.message,
+                  'message',
+                  contains(
+                    'The product 3 is not in the list of allowed '
+                    'products [0, 1, 2].',
+                  ),
+                ),
+              ),
+            );
+          });
+        });
+      });
+    });
   });
 
   group('Examples', () {

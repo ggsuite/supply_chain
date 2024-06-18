@@ -70,6 +70,7 @@
 - instantiate scope plugins within their own scope
 - Hand over scope in method modifyNode
 - Improved error message
+- Allow a to specify a list of allowed products for a node
 
 ### Fixed
 

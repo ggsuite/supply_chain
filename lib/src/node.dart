@@ -129,6 +129,7 @@ class Node<T> {
       bluePrint.produce == doNothing<T>,
       'Product can only be set if bluePrint.produce is doNothing',
     );
+    _throwIfNotAllowed(v);
     _originalProduct = v;
     scm.nominate(this);
   }
@@ -216,6 +217,8 @@ class Node<T> {
       suppliers.map((s) => s.product).toList(),
       previousProduct,
     );
+
+    _throwIfNotAllowed(newProduct);
 
     _originalProduct = newProduct;
 
@@ -565,6 +568,18 @@ class Node<T> {
 
     parts.removeLast();
     return scope.matchesPathArray(parts);
+  }
+
+  // ...........................................................................
+  void _throwIfNotAllowed(T product) {
+    // Check, if the new product is allowed
+    if (bluePrint.allowedProducts.isNotEmpty) {
+      if (!bluePrint.allowedProducts.contains(product)) {
+        throw ArgumentError('The product $product '
+            'is not in the list of allowed products '
+            '[${bluePrint.allowedProducts.join(', ')}].');
+      }
+    }
   }
 }
 

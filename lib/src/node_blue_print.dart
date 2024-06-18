@@ -18,6 +18,7 @@ class NodeBluePrint<T> {
     required this.initialProduct,
     this.documentation = '',
     this.suppliers = const <String>[],
+    this.allowedProducts = const [],
     Produce<T>? produce,
   }) : produce = produce ?? doNothing<T>;
 
@@ -57,6 +58,9 @@ class NodeBluePrint<T> {
 
   /// A list of supplier keys
   final Iterable<String> suppliers;
+
+  /// A list of allowed values
+  final List<T> allowedProducts;
 
   /// The produce function
   final Produce<T> produce;
