@@ -118,10 +118,10 @@ class Node<T> {
   // Product
 
   /// The product of the node
-  T get product => pluginResult ?? _originalProduct;
+  T get product => mockedProduct ?? pluginResult ?? _originalProduct;
 
   /// Returns the original product not processed by plugins
-  T get originalProduct => _originalProduct;
+  T get originalProduct => mockedProduct ?? _originalProduct;
 
   /// The product of the node
   set product(T v) {
@@ -133,6 +133,9 @@ class Node<T> {
     _originalProduct = v;
     scm.nominate(this);
   }
+
+  /// If mocked product is set, this product is returned
+  T? mockedProduct;
 
   // ...........................................................................
   // Animation

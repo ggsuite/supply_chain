@@ -28,6 +28,7 @@
 - Add switchSupplier
 - Add overridable modifyScope and modifyChildNode
 - Add willInstantiate
+- Add possibility to set a mocked product
 
 ### Changed
 
