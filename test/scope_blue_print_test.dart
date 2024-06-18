@@ -311,14 +311,14 @@ void main() {
 
         test('with the given nodes', () {
           final bluePrint = ScopeBluePrint.example();
-          final copy = bluePrint.copyWith(nodeOverrides: []);
+          final copy = bluePrint.copyWith(additionalNodes: []);
           expect(copy.nodeOverrides, bluePrint.nodeOverrides);
         });
 
         test('with the given subScopes', () {
           final bluePrint = ScopeBluePrint.example();
           final otherSubScopes = <ScopeBluePrint>[];
-          final copy = bluePrint.copyWith(scopeOverrides: otherSubScopes);
+          final copy = bluePrint.copyWith(additionalScopes: otherSubScopes);
           expect(copy.scopeOverrides, same(bluePrint.scopeOverrides));
         });
 
@@ -328,7 +328,7 @@ void main() {
             key: 'node',
             initialProduct: 5,
           );
-          final copy = bluePrint.copyWith(nodeOverrides: [overriddenNode]);
+          final copy = bluePrint.copyWith(additionalNodes: [overriddenNode]);
           expect(copy.findNode<int>('node'), overriddenNode);
         });
       });

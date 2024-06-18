@@ -71,6 +71,7 @@
 - Hand over scope in method modifyNode
 - Improved error message
 - Allow a to specify a list of allowed products for a node
+- Rename additionalNodes into additionalScopes
 
 ### Fixed
 

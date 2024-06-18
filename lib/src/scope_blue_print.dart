@@ -139,21 +139,21 @@ class ScopeBluePrint {
   /// Creates a copy of the scope with the given changes
   ScopeBluePrint copyWith({
     String? key,
-    List<NodeBluePrint<dynamic>>? nodeOverrides,
-    List<ScopeBluePrint>? scopeOverrides,
+    List<NodeBluePrint<dynamic>>? additionalNodes,
+    List<ScopeBluePrint>? additionalScopes,
     List<String>? aliases,
     ModifyNode? modifyNode,
     ModifyScope? modifyScope,
   }) {
     // Merge the node overrides
     final mergedNodeOverrides = _mergeNodes(
-      this.nodeOverrides,
       nodeOverrides,
+      additionalNodes,
     );
 
     final mergedScopeOverrides = _mergeScopes(
-      this.scopeOverrides,
       scopeOverrides,
+      additionalScopes,
     );
 
     return ScopeBluePrint._private(
