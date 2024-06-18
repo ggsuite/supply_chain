@@ -75,6 +75,7 @@
 - Fix need of calling testFlushTasks two times
 - Fix issues in relation with aliases
 - Fix various search issues
+- Fix an search error with scope aliases
 
 ### Removed
 

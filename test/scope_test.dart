@@ -1102,18 +1102,76 @@ void main() {
               expect(grandChildNodeReal, grandChildNodeAExpected);
             });
 
-            test('when the node is contained in parent scope', () {
-              final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
-              final childScopeA = rootScope.child('childScopeA')!;
-              final grandChildScope = childScopeA.child('grandChildScope')!;
-              final childNodeAExpected = childScopeA.findNode<int>(
-                'childNodeA',
-              );
+            group('when the node is contained in parent scope', () {
+              test('and no aliases are used', () {
+                final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
+                final childScopeA = rootScope.child('childScopeA')!;
+                final grandChildScope = childScopeA.child('grandChildScope')!;
+                final childNodeAExpected = childScopeA.findNode<int>(
+                  'childNodeA',
+                );
 
-              final childNodeAReal = grandChildScope.findNode<int>(
-                'childScopeA.childNodeA',
-              );
-              expect(childNodeAReal, childNodeAExpected);
+                final childNodeAReal = grandChildScope.findNode<int>(
+                  'childScopeA.childNodeA',
+                );
+                expect(childNodeAReal, childNodeAExpected);
+              });
+              test('and the scope key is an alias', () {
+                final scope = Scope.example();
+                scope.mockContent(
+                  {
+                    'a': {
+                      // .........................................
+                      // Create a first scope scA with the alias X
+                      'scA': const ScopeBluePrint(
+                        key: 'scA',
+                        aliases: ['x'],
+
+                        // The scope has a child scope
+                        scopeOverrides: [
+                          ScopeBluePrint(key: 'scAChild0'),
+                        ],
+
+                        // And a node
+                        nodeOverrides: [
+                          NodeBluePrint<int>(
+                            key: 'scANode',
+                            initialProduct: 0,
+                          ),
+                        ],
+                      ),
+
+                      // .........................................
+                      // Create a second scope scB, also with the alias X
+                      'scB': const ScopeBluePrint(
+                        key: 'scB',
+                        aliases: ['x'],
+
+                        // The scope has also a child scope
+                        scopeOverrides: [
+                          ScopeBluePrint(key: 'scAChild1'),
+                        ],
+
+                        // And it as also a node
+                        nodeOverrides: [
+                          NodeBluePrint<int>(
+                            key: 'scANode',
+                            initialProduct: 0,
+                          ),
+                        ],
+                      ),
+                    },
+                  },
+                );
+
+                // Get one of the child scopes
+                final scAChild0 = scope.findScope('scAChild0')!;
+
+                // Search for a node in the parent scope using the alias
+                final scANode = scAChild0.findNode<int>('x.scANode');
+
+                expect(scANode, isNotNull);
+              });
             });
 
             test('when the node is contained in sibling scope', () {

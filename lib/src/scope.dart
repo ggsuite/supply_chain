@@ -647,8 +647,11 @@ class Scope {
 
   // ...........................................................................
   Node<T>? _findNodeInOwnScope<T>(String nodeKey, List<String> scopePath) {
+    bool pathMatchesOwnScope =
+        scopePath.isNotEmpty && matchesPathArray(scopePath);
+
     // If the scope path is not empty, find the child scope
-    if (scopePath.isNotEmpty) {
+    if (scopePath.isNotEmpty && !pathMatchesOwnScope) {
       final childScope = _children[scopePath.first];
       if (childScope == null) {
         return null;
