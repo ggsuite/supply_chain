@@ -25,7 +25,7 @@
 - Add Node.addPlugin and removePlugin
 - Added Scope.addPlugin and removePlugin
 - Add modifyScope, modifyNode
-- Add forwardFrom
+- Add switchSupplier
 - Add overridable modifyScope and modifyNode
 - Add willInstantiate
 
@@ -72,6 +72,7 @@
 - Improved error message
 - Allow a to specify a list of allowed products for a node
 - Rename additionalNodes into additionalScopes
+- Rename forwardFrom -
 
 ### Fixed
 

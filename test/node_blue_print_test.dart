@@ -292,7 +292,7 @@ void main() {
       });
     });
 
-    group('forwardFrom(supplier)', () {
+    group('switchSupplier(supplier)', () {
       test('should forward the suppliers value to this node', () {
         final scope = Scope.example();
         final scm = scope.scm;
@@ -304,7 +304,7 @@ void main() {
             'c': {
               // Here we are forwarding the value from b.n0 to c.n1
               'n1': const NodeBluePrint<int>(key: 'n1', initialProduct: 374)
-                  .forwardFrom('b.n0'),
+                  .switchSupplier('b.n0'),
             },
           },
         });
