@@ -147,6 +147,8 @@ void main() {
       group('should instantiate scopes and nodes returned in build()', () {
         test('when build() returns a list of scope and node overrides',
             () async {
+          // Create a scope blue print
+          // which overrides the with key nodeConstructedByChildScope
           const overridenScope = ScopeBluePrint(
             key: 'childScopeConstructedByParent',
             nodeOverrides: [
@@ -157,11 +159,15 @@ void main() {
             ],
           );
 
+          // Instantiate ExampleScopeBluePrint
+          // and override the childScopeConstructedByParent
           final bluePrint = ExampleScopeBluePrint(
             scopeOverrides: [
               overridenScope,
             ],
           );
+
+          // Instantiate the scope blue print
           final rootScope = Scope.root(key: 'root', scm: Scm.example());
           final scope = bluePrint.instantiate(scope: rootScope);
 
@@ -181,6 +187,7 @@ void main() {
             isNotNull,
           );
 
+          // Find nodeBuiltByChildScope
           expect(
             scope.findNode<int>(
               'parentScope.childScopeBuiltByParent.nodeBuiltByChildScope',
@@ -188,6 +195,7 @@ void main() {
             isNotNull,
           );
 
+          // Find childScopeConstructedByParent
           expect(
             scope.findNode<int>(
               'parentScope.childScopeConstructedByParent.'
@@ -196,7 +204,7 @@ void main() {
             isNotNull,
           );
 
-          // Check if modifyChildNode and modifyScope did work
+          // Check if modifyChildNode and modifyChildScope did work
           expect(
             scope.findNode<int>('nodeToBeReplaced')!.bluePrint.initialProduct,
             807,
@@ -344,8 +352,6 @@ void main() {
 
         final scope = ExampleScopeBluePrint(
           modifyChildNode: (scope, node) {
-            print(scope.path);
-            print(node.key);
             if (scope.path.endsWith(
                   'childScopeBuiltByParent',
                 ) &&

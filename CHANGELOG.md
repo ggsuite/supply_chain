@@ -24,9 +24,9 @@
 - Add Scope.reset and Node.reset
 - Add Node.addPlugin and removePlugin
 - Added Scope.addPlugin and removePlugin
-- Add modifyScope, modifyChildNode
+- Add modifyChildScope, modifyChildNode
 - Add switchSupplier
-- Add overridable modifyScope and modifyChildNode
+- Add overridable modifyChildScope and modifyChildNode
 - Add willInstantiate
 - Add possibility to set a mocked product
 
@@ -77,6 +77,7 @@
 - Rename forwardFrom -> switchSupplier
 - Rename modifyNode into modifyChildNode
 - Improve assertion
+- Rework modifyChildScopes
 
 ### Fixed
 
