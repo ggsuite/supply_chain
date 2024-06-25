@@ -87,7 +87,7 @@ class ScopePlugin {
     for (final nodePlugin in plugins.values) {
       if (foundKeys.contains(nodePlugin.key)) {
         throw ArgumentError(
-          'Found multiple node plugins with key "${nodePlugin.key}".',
+          'Found multiple node plugins with key "${nodePlugin.key}":\n',
         );
       }
       foundKeys.add(nodePlugin.key);

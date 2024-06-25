@@ -108,6 +108,30 @@ void main() {
       expect(node.product, productBefore + 1);
     });
 
+    group('mockedProduct', () {
+      test('should override the produced product by a given value', () {
+        final node = Node<int>(
+          scope: Scope.example(),
+          bluePrint: const NodeBluePrint<int>(
+            key: 'test',
+            initialProduct: 5,
+          ),
+        );
+
+        // Set  a product. Which should be returned.
+        node.product = 2;
+        expect(node.product, 2);
+
+        // Mock a product. Which should be returned.
+        node.mockedProduct = 5;
+        expect(node.product, 5);
+
+        // Remove the mocked product. The original product should be returned.
+        node.mockedProduct = null;
+        expect(node.product, 2);
+      });
+    });
+
     test('suppliers, addSupplier(), removeSupplier()', () {
       final supplier0 = Node.example(scope: chain);
       final supplier1 = Node.example(scope: chain);

@@ -135,7 +135,13 @@ class Node<T> {
   }
 
   /// If mocked product is set, this product is returned
-  T? mockedProduct;
+  set mockedProduct(T? t) {
+    _mockedProduct = t;
+    scm.nominate(this);
+  }
+
+  /// Returns the mocked product or null
+  T? get mockedProduct => _mockedProduct;
 
   // ...........................................................................
   // Animation
@@ -489,6 +495,8 @@ class Node<T> {
   final List<void Function()> _dispose = [];
 
   bool _isDisposed = false;
+
+  T? _mockedProduct;
 
   // ...........................................................................
   final List<PluginNode<T>> _plugins = [];
