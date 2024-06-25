@@ -95,13 +95,13 @@ class NodeBluePrint<T> {
     );
   }
 
-  /// Instantiates the blue print as plugin in the given scope
-  PluginNode<T> instantiateAsPlugin({
+  /// Instantiates the blue print as insert in the given scope
+  Insert<T> instantiateAsInsert({
     required Node<T> host,
     Scope? scope,
     int? index,
   }) {
-    return PluginNode<T>(
+    return Insert<T>(
       bluePrint: this,
       host: host,
       index: index,

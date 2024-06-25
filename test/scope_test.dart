@@ -756,7 +756,7 @@ void main() {
         expect(scope.node<int>('node'), isNull);
       });
 
-      test('should also remove the plugins of the node', () {
+      test('should also remove the inserts of the node', () {
         final scope = Scope.example();
         final host = scope.findOrCreateNode<int>(
           NodeBluePrint(
@@ -766,11 +766,11 @@ void main() {
           ),
         );
 
-        final pluginNode = PluginNode.example(host: host);
-        expect(pluginNode.isDisposed, isFalse);
+        final insert = Insert.example(host: host);
+        expect(insert.isDisposed, isFalse);
 
         scope.removeNode('node');
-        expect(pluginNode.isDisposed, isTrue);
+        expect(insert.isDisposed, isTrue);
       });
 
       test('should do nothing if node does not exist', () {
@@ -1329,8 +1329,8 @@ void main() {
       });
     });
 
-    group('scopePluginAdd, scopePluginRemove', () {
-      test('should add and remove a scope plugin', () {
+    group('scopeInsertAdd, scopeInsertRemove', () {
+      test('should add and remove a scope insert', () {
         final scope = Scope.example();
         scope.mockContent({
           'a': {
@@ -1339,13 +1339,13 @@ void main() {
             },
           },
         });
-        final plugin = ScopePlugin.example();
-        expect(scope.plugins, isEmpty);
+        final insert = ScopeInserts.example();
+        expect(scope.inserts, isEmpty);
 
-        plugin.instantiate(scope: scope);
-        expect(scope.plugins, contains(plugin));
+        insert.instantiate(scope: scope);
+        expect(scope.inserts, contains(insert));
 
-        plugin.dispose(scope: scope);
+        insert.dispose(scope: scope);
       });
     });
   });

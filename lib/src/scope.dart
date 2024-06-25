@@ -350,8 +350,8 @@ class Scope {
   void removeNode(String key) {
     final node = _nodes[key];
 
-    // Remove the node's plugins first
-    node?.clearPlugins();
+    // Remove the node's inserts first
+    node?.clearInserts();
 
     _nodes.remove(key);
   }
@@ -400,18 +400,18 @@ class Scope {
   }
 
   // ...........................................................................
-  /// This method is called by scopePlugin to add the plugin
-  void scopePluginAdd(ScopePlugin plugin) {
-    _plugins.add(plugin);
+  /// This method is called by scopeInsert to add the insert
+  void scopeInsertAdd(ScopeInserts insert) {
+    _inserts.add(insert);
   }
 
-  /// Removes a scope plugin
-  void scopePluginRemove(ScopePlugin plugin) {
-    _plugins.remove(plugin);
+  /// Removes a scope insert
+  void scopeInsertRemove(ScopeInserts insert) {
+    _inserts.remove(insert);
   }
 
-  /// Returns the scope plugins
-  List<ScopePlugin> get plugins => _plugins;
+  /// Returns the scope inserts
+  List<ScopeInserts> get inserts => _inserts;
 
   // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz
@@ -599,7 +599,7 @@ class Scope {
   static int _idCounter = 0;
 
   // ...........................................................................
-  final List<ScopePlugin> _plugins = [];
+  final List<ScopeInserts> _inserts = [];
 
   // ...........................................................................
   void _init() {

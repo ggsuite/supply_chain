@@ -239,10 +239,10 @@ void main() {
       });
     });
 
-    group('instantiateAsPlugin(host, index)', () {
+    group('instantiateAsInsert(host, index)', () {
       test('returns a new instance', () {
-        final pluginNode = PluginNode.example();
-        expect(pluginNode, isNotNull);
+        final insert = Insert.example();
+        expect(insert, isNotNull);
       });
     });
 

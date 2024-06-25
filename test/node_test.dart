@@ -277,9 +277,9 @@ void main() {
       }
     });
 
-    group('plugins', () {
+    group('inserts', () {
       test('should work as expected', () {
-        // Create pluginNode2
+        // Create insert2
         final host = Node.example(key: 'host');
         final scm = host.scope.scm;
 
@@ -287,162 +287,162 @@ void main() {
         scm.testFlushTasks();
         expect(host.product, 1);
 
-        // Insert a first plugin 2, adding 2 to the original product
-        final plugin2 = PluginNode.example(
-          key: 'plugin2',
+        // Insert a first insert 2, adding 2 to the original product
+        final insert2 = Insert.example(
+          key: 'insert2',
           produce: (components, previousProduct) => previousProduct + 2,
           host: host,
         );
 
         scm.testFlushTasks();
-        expect(host.plugins, [plugin2]);
-        expect(plugin2.input, host);
-        expect(plugin2.output, host);
-        expect(plugin2, isNotNull);
+        expect(host.inserts, [insert2]);
+        expect(insert2.input, host);
+        expect(insert2.output, host);
+        expect(insert2, isNotNull);
         expect(host.originalProduct, 1);
         expect(host.product, 1 + 2);
 
-        // Insert pluginNode0 before pluginNode2, multiplying by 3
-        final plugin0 = PluginNode.example(
-          key: 'plugin0',
+        // Add insert0 before insert2, multiplying by 3
+        final insert0 = Insert.example(
+          key: 'insert0',
           produce: (components, previousProduct) => previousProduct * 3,
           host: host,
           index: 0,
         );
         scm.testFlushTasks();
 
-        expect(host.plugins, [plugin0, plugin2]);
-        expect(plugin0.input, host);
-        expect(plugin0.output, plugin2);
+        expect(host.inserts, [insert0, insert2]);
+        expect(insert0.input, host);
+        expect(insert0.output, insert2);
         expect(host.originalProduct, 1);
         expect(host.product, 1 * 3 + 2);
 
-        // Insert pluginNode1 between pluginNode0 and pluginNode2
-        // The plugin multiplies the previous result by 4
-        final plugin1 = PluginNode.example(
-          key: 'plugin1',
+        // Add insert1 between insert0 and insert2
+        // The insert multiplies the previous result by 4
+        final insert1 = Insert.example(
+          key: 'insert1',
           produce: (components, previousProduct) => previousProduct * 4,
           host: host,
           index: 1,
         );
         scm.testFlushTasks();
-        expect(host.plugins, [plugin0, plugin1, plugin2]);
-        expect(plugin0.input, host);
-        expect(plugin0.output, plugin1);
-        expect(plugin1.input, plugin0);
-        expect(plugin1.output, plugin2);
-        expect(plugin2.input, plugin1);
-        expect(plugin2.output, host);
+        expect(host.inserts, [insert0, insert1, insert2]);
+        expect(insert0.input, host);
+        expect(insert0.output, insert1);
+        expect(insert1.input, insert0);
+        expect(insert1.output, insert2);
+        expect(insert2.input, insert1);
+        expect(insert2.output, host);
         expect(host.originalProduct, 1);
         expect(host.product, (1 * 3 * 4) + 2);
 
-        // Insert pluginNode3 after pluginNode2 adding ten
-        final plugin3 = PluginNode.example(
-          key: 'plugin3',
+        // Add insert3 after insert2 adding ten
+        final insert3 = Insert.example(
+          key: 'insert3',
           produce: (components, previousProduct) => previousProduct + 10,
           host: host,
           index: 3,
         );
         scm.testFlushTasks();
-        expect(host.plugins, [plugin0, plugin1, plugin2, plugin3]);
-        expect(plugin0.input, host);
-        expect(plugin0.output, plugin1);
-        expect(plugin1.input, plugin0);
-        expect(plugin1.output, plugin2);
-        expect(plugin2.input, plugin1);
-        expect(plugin2.output, plugin3);
-        expect(plugin3.input, plugin2);
-        expect(plugin3.output, host);
+        expect(host.inserts, [insert0, insert1, insert2, insert3]);
+        expect(insert0.input, host);
+        expect(insert0.output, insert1);
+        expect(insert1.input, insert0);
+        expect(insert1.output, insert2);
+        expect(insert2.input, insert1);
+        expect(insert2.output, insert3);
+        expect(insert3.input, insert2);
+        expect(insert3.output, host);
         expect(host.originalProduct, 1);
         expect(host.product, (1 * 3 * 4) + 2 + 10);
 
-        // Remove plugin node in the middle
-        plugin1.dispose();
+        // Remove insert node in the middle
+        insert1.dispose();
         scm.testFlushTasks();
-        expect(host.plugins, [plugin0, plugin2, plugin3]);
-        expect(plugin0.input, host);
-        expect(plugin0.output, plugin2);
-        expect(plugin2.input, plugin0);
-        expect(plugin2.output, plugin3);
-        expect(plugin3.input, plugin2);
-        expect(plugin3.output, host);
+        expect(host.inserts, [insert0, insert2, insert3]);
+        expect(insert0.input, host);
+        expect(insert0.output, insert2);
+        expect(insert2.input, insert0);
+        expect(insert2.output, insert3);
+        expect(insert3.input, insert2);
+        expect(insert3.output, host);
         expect(host.originalProduct, 1);
         expect(host.product, (1 * 3) + 2 + 10);
 
-        // Remove first plugin node
-        plugin0.dispose();
+        // Remove first insert node
+        insert0.dispose();
         scm.testFlushTasks();
-        expect(host.plugins, [plugin2, plugin3]);
-        expect(plugin2.input, host);
-        expect(plugin2.output, plugin3);
-        expect(plugin3.input, plugin2);
-        expect(plugin3.output, host);
+        expect(host.inserts, [insert2, insert3]);
+        expect(insert2.input, host);
+        expect(insert2.output, insert3);
+        expect(insert3.input, insert2);
+        expect(insert3.output, host);
         expect(host.originalProduct, 1);
         expect(host.product, 1 + 2 + 10);
 
-        // Remove last plugin node
-        plugin3.dispose();
+        // Remove last insert node
+        insert3.dispose();
         scm.testFlushTasks();
-        expect(host.plugins, [plugin2]);
-        expect(plugin2.input, host);
-        expect(plugin2.output, host);
+        expect(host.inserts, [insert2]);
+        expect(insert2.input, host);
+        expect(insert2.output, host);
         expect(host.originalProduct, 1);
         expect(host.product, 1 + 2);
 
-        // Remove last remaining plugin node
-        plugin2.dispose();
+        // Remove last remaining insert node
+        insert2.dispose();
         scm.testFlushTasks();
-        expect(host.plugins, <PluginNode<dynamic>>[]);
+        expect(host.inserts, <Insert<dynamic>>[]);
         expect(host.originalProduct, 1);
         expect(host.product, 1);
       });
 
-      group('clearPlugins()', () {
-        test('should remove all plugins from node', () {
+      group('clearInserts()', () {
+        test('should remove all inserts from node', () {
           final host = Node.example(key: 'host');
           final scm = host.scope.scm;
 
-          // Insert pluginNode0 before pluginNode2, multiplying by 3
-          final plugin0 = PluginNode.example(
-            key: 'plugin0',
+          // Add insert0 before insert2, multiplying by 3
+          final insert0 = Insert.example(
+            key: 'insert0',
             produce: (components, previousProduct) => previousProduct * 3,
             host: host,
           );
 
-          // Insert a first plugin 2, adding 2 to the original product
-          final plugin1 = PluginNode.example(
-            key: 'plugin1',
+          // Insert a first insert 2, adding 2 to the original product
+          final insert1 = Insert.example(
+            key: 'insert1',
             produce: (components, previousProduct) => previousProduct + 2,
             host: host,
           );
 
           scm.testFlushTasks();
-          expect(host.plugins, [plugin0, plugin1]);
+          expect(host.inserts, [insert0, insert1]);
 
-          host.clearPlugins();
+          host.clearInserts();
           scm.testFlushTasks();
-          expect(host.plugins, <PluginNode<dynamic>>[]);
+          expect(host.inserts, <Insert<dynamic>>[]);
 
-          expect(plugin0.isDisposed, true);
-          expect(plugin1.isDisposed, true);
+          expect(insert0.isDisposed, true);
+          expect(insert1.isDisposed, true);
         });
       });
 
-      group('plugin(String key)', () {
-        test('should return null if plugin with key does not exist', () {
+      group('insert(String key)', () {
+        test('should return null if insert with key does not exist', () {
           final host = Node.example(key: 'host');
-          expect(host.plugin('plugin'), isNull);
+          expect(host.insert('insert'), isNull);
         });
 
-        test('should return the plugin with the key', () {
+        test('should return the insert with the key', () {
           final host = Node.example(key: 'host');
-          final plugin = PluginNode.example(
-            key: 'plugin',
+          final insert = Insert.example(
+            key: 'insert',
             produce: (components, previousProduct) => previousProduct + 2,
             host: host,
           );
 
-          expect(host.plugin('plugin'), plugin);
+          expect(host.insert('insert'), insert);
         });
       });
     });

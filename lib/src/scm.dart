@@ -360,14 +360,14 @@ class Scm {
     // Nodes needs preparation? Prepare.
     node.prepare();
 
-    // Prepare all plugins
-    for (final plugin in node.plugins) {
-      _prepareNode(plugin);
+    // Prepare all inserts
+    for (final insert in node.inserts) {
+      _prepareNode(insert);
     }
 
-    // If node is a plugin
-    if (node is PluginNode) {
-      _preparePluginNode(node);
+    // If node is a insert
+    if (node is Insert) {
+      _prepareInsert(node);
     }
 
     // Prepare also all customers
@@ -377,24 +377,24 @@ class Scm {
   }
 
   // ...........................................................................
-  void _preparePluginNode(PluginNode<dynamic> node) {
-    // Last plugin? Prepare also host's customers
-    if (node.isLastPlugin) {
+  void _prepareInsert(Insert<dynamic> node) {
+    // Last insert? Prepare also host's customers
+    if (node.isLastInsert) {
       for (final customer in node.host.customers) {
         _prepareNode(customer);
       }
     }
 
-    // Not last plugin? Prepare the following plugins
+    // Not last insert? Prepare the following inserts
     else {
-      bool isLaterPlugin = false;
-      for (final plugin in node.host.plugins) {
-        if (plugin == node) {
-          isLaterPlugin = true;
+      bool isLaterInsert = false;
+      for (final insert in node.host.inserts) {
+        if (insert == node) {
+          isLaterInsert = true;
           continue;
         }
-        if (isLaterPlugin) {
-          _prepareNode(plugin);
+        if (isLaterInsert) {
+          _prepareNode(insert);
         }
       }
     }
@@ -429,8 +429,8 @@ class Scm {
         )
         .toList();
 
-    // Make sure plugins are processed first
-    nodesReadyToProduce.sort((a, b) => a is PluginNode ? -1 : 1);
+    // Make sure inserts are processed first
+    nodesReadyToProduce.sort((a, b) => a is Insert ? -1 : 1);
 
     // Start timeout timer
     if (nodesReadyToProduce.isNotEmpty && shouldTimeOut) {
@@ -490,14 +490,14 @@ class Scm {
     // Reset production state
     node.finalizeProduction();
 
-    // Plugins now need to produce
-    _preparedNodes.addAll(node.plugins);
+    // Inserts now need to produce
+    _preparedNodes.addAll(node.inserts);
 
     // Customers now need to produce
     _preparedNodes.addAll(node.customers);
 
-    // If node is a plugin
-    _finalizePluginNode(node);
+    // If node is a insert
+    _finalizeInsert(node);
 
     // Schedule production
     _scheduleProduction();
@@ -510,10 +510,10 @@ class Scm {
   }
 
   // ...........................................................................
-  void _finalizePluginNode(Node<dynamic> node) {
-    if (node is PluginNode) {
-      // If node is the last plugin, host's customers need to produce
-      if (node.isLastPlugin) {
+  void _finalizeInsert(Node<dynamic> node) {
+    if (node is Insert) {
+      // If node is the last insert, host's customers need to produce
+      if (node.isLastInsert) {
         _preparedNodes.addAll(node.host.customers);
       }
       // Otherwise the output node needs to produce

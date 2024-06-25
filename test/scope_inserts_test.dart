@@ -14,31 +14,31 @@ void main() {
     scope = Scope.example();
   });
 
-  group('ScopePlugin', () {
+  group('ScopeInsert', () {
     test('example', () {
-      expect(ScopePlugin.example(), isNotNull);
+      expect(ScopeInserts.example(), isNotNull);
     });
-    group('plugins', () {
-      group('addPlugin(plugin)', () {
+    group('inserts', () {
+      group('addInsert(insert)', () {
         group('should throw', () {
-          test('if the plugin is already added', () {
-            const plugin = ScopePlugin(overrides: {}, key: 'plugin');
-            plugin.instantiate(scope: scope);
+          test('if the insert is already added', () {
+            const insert = ScopeInserts(overrides: {}, key: 'insert');
+            insert.instantiate(scope: scope);
             expect(
-              () => plugin.instantiate(scope: scope),
+              () => insert.instantiate(scope: scope),
               throwsA(
                 predicate<ArgumentError>(
                   (e) => e.toString().contains(
-                        'Plugin already added.',
+                        'Insert already added.',
                       ),
                 ),
               ),
             );
           });
 
-          test('when there are multiple node plugins with the same key', () {
-            final plugin0 = ScopePlugin(
-              key: 'plugin0',
+          test('when there are multiple node inserts with the same key', () {
+            final insert0 = ScopeInserts(
+              key: 'insert0',
               overrides: {
                 'node0': NodeBluePrint.example(key: 'key'),
                 'node1': NodeBluePrint.example(key: 'key'),
@@ -46,26 +46,26 @@ void main() {
             );
 
             expect(
-              () => plugin0.instantiate(scope: scope),
+              () => insert0.instantiate(scope: scope),
               throwsA(
                 predicate<ArgumentError>(
                   (e) => e.toString().contains(
-                        'Found multiple node plugins with key "key"',
+                        'Found multiple node inserts with key "key"',
                       ),
                 ),
               ),
             );
           });
           test('when host nodes cannot be found', () {
-            final plugin = ScopePlugin(
-              key: 'plugin0',
+            final insert = ScopeInserts(
+              key: 'insert0',
               overrides: {
                 'unknown0': NodeBluePrint.example(key: 'unknown'),
                 'unknown1': NodeBluePrint.example(key: 'unknown1'),
               },
             );
             expect(
-              () => plugin.instantiate(scope: scope),
+              () => insert.instantiate(scope: scope),
               throwsA(
                 predicate<ArgumentError>(
                   (e) => e.toString().contains(
@@ -76,21 +76,21 @@ void main() {
             );
           });
 
-          test('when types of host nodes and plugin nodes do not match', () {
+          test('when types of host nodes and insert nodes do not match', () {
             final scope = Scope.example();
             scope.mockContent({
               'node0': 'string',
             });
 
-            const plugin = ScopePlugin(
-              key: 'plugin0',
+            const insert = ScopeInserts(
+              key: 'insert0',
               overrides: {
-                'node0': NodeBluePrint<int>(key: 'plugin0', initialProduct: 0),
+                'node0': NodeBluePrint<int>(key: 'insert0', initialProduct: 0),
               },
             );
 
             expect(
-              () => plugin.instantiate(scope: scope),
+              () => insert.instantiate(scope: scope),
               throwsA(
                 predicate<Error>(
                   (e) => e.toString().contains(
@@ -103,16 +103,16 @@ void main() {
           });
         });
 
-        test('should add the plugin to the list of plugins', () {
-          const plugin = ScopePlugin(
+        test('should add the insert to the list of inserts', () {
+          const insert = ScopeInserts(
             overrides: {},
-            key: 'plugin0',
+            key: 'insert0',
           );
-          plugin.instantiate(scope: scope);
-          expect(scope.plugins, [plugin]);
+          insert.instantiate(scope: scope);
+          expect(scope.inserts, [insert]);
         });
 
-        test('should add the node plugins to their corresponding hosts', () {
+        test('should add the node inserts to their corresponding hosts', () {
           // Define an existing node and scope hierarchy
           final scope = Scope.example();
           scope.mockContent({
@@ -126,13 +126,13 @@ void main() {
             },
           });
 
-          // Get the two nodes we want to add plugins to
+          // Get the two nodes we want to add inserts to
           final node0 = scope.findNode<int>('a.b.n0')!;
           final node1 = scope.findNode<int>('a.c.n1')!;
 
-          // Define a node plugin that modifies the two nodes
-          final scopePlugin = ScopePlugin(
-            key: 'plugin0',
+          // Define a node insert that modifies the two nodes
+          final scopeInsert = ScopeInserts(
+            key: 'insert0',
             overrides: {
               'b.n0': NodeBluePrint<int>(
                 key: 'byTwo',
@@ -149,37 +149,37 @@ void main() {
             },
           );
 
-          // Add the plugin to the scope
-          scopePlugin.instantiate(scope: scope);
+          // Add the insert to the scope
+          scopeInsert.instantiate(scope: scope);
 
-          // The plugins should have been added to the nodes
-          expect(node0.plugins, hasLength(1));
-          expect(node0.plugins.first.key, 'byTwo');
-          expect(node1.plugins, hasLength(1));
-          expect(node1.plugins.first.key, 'byThree');
+          // The inserts should have been added to the nodes
+          expect(node0.inserts, hasLength(1));
+          expect(node0.inserts.first.key, 'byTwo');
+          expect(node1.inserts, hasLength(1));
+          expect(node1.inserts.first.key, 'byThree');
 
-          // Remove the plugin from the scope
-          scopePlugin.dispose(scope: scope);
+          // Remove the insert from the scope
+          scopeInsert.dispose(scope: scope);
 
-          // The plugins should have been removed from the nodes
-          expect(node0.plugins, isEmpty);
-          expect(node1.plugins, isEmpty);
+          // The inserts should have been removed from the nodes
+          expect(node0.inserts, isEmpty);
+          expect(node1.inserts, isEmpty);
         });
       });
 
-      group('removePlugin(plugin)', () {
+      group('removeInsert(insert)', () {
         group('should throw', () {
-          test('if the plugin is not added', () {
-            const plugin = ScopePlugin(
-              key: 'plugin0',
+          test('if the insert is not added', () {
+            const insert = ScopeInserts(
+              key: 'insert0',
               overrides: {},
             );
             expect(
-              () => plugin.dispose(scope: scope),
+              () => insert.dispose(scope: scope),
               throwsA(
                 predicate<ArgumentError>(
                   (e) => e.toString().contains(
-                        'Plugin "plugin0" not found.',
+                        'Insert "insert0" not found.',
                       ),
                 ),
               ),
@@ -187,18 +187,18 @@ void main() {
           });
         });
 
-        test('should remove the plugin from the list of plugins', () {
-          const plugin = ScopePlugin(
-            key: 'plugin0',
+        test('should remove the insert from the list of inserts', () {
+          const insert = ScopeInserts(
+            key: 'insert0',
             overrides: {},
           );
-          plugin.instantiate(scope: scope);
-          plugin.dispose(scope: scope);
-          expect(scope.plugins, isEmpty);
+          insert.instantiate(scope: scope);
+          insert.dispose(scope: scope);
+          expect(scope.inserts, isEmpty);
         });
 
-        test('should remove the node plugins from it\'s hosts', () {
-          // Is tested in addPlugin()
+        test('should remove the node inserts from it\'s hosts', () {
+          // Is tested in addInsert()
         });
       });
 
@@ -213,13 +213,13 @@ void main() {
             },
           });
 
-          ExampleScopePlugin(
+          ExampleScopeInsert(
             overrides: {
-              'node0': NodeBluePrint.example(key: 'plugin0Override'),
+              'node0': NodeBluePrint.example(key: 'insert0Override'),
             },
           ).instantiate(scope: scope);
 
-          expect(scope.plugins, hasLength(1));
+          expect(scope.inserts, hasLength(1));
         });
 
         test('should add additional nodes with overrides', () {
@@ -238,18 +238,18 @@ void main() {
           final node0 = scope.findNode<int>('a.b.node0')!;
           final node1 = scope.findNode<int>('a.c.node1')!;
 
-          ExampleScopePlugin(
+          ExampleScopeInsert(
             // Replace node1 by node1Override
             overrides: {
-              'node1': NodeBluePrint.example(key: 'plugin1Override'),
+              'node1': NodeBluePrint.example(key: 'insert1Override'),
             },
           ).instantiate(scope: scope);
 
-          expect(node0.plugins, hasLength(1));
-          expect(node0.plugins.first.key, 'plugin0');
+          expect(node0.inserts, hasLength(1));
+          expect(node0.inserts.first.key, 'insert0');
 
-          expect(node1.plugins, hasLength(1));
-          expect(node1.plugins.first.key, 'plugin1Override');
+          expect(node1.inserts, hasLength(1));
+          expect(node1.inserts.first.key, 'insert1Override');
         });
       });
     });

@@ -118,9 +118,9 @@ class Node<T> {
   // Product
 
   /// The product of the node
-  T get product => mockedProduct ?? pluginResult ?? _originalProduct;
+  T get product => mockedProduct ?? insertResult ?? _originalProduct;
 
-  /// Returns the original product not processed by plugins
+  /// Returns the original product not processed by inserts
   T get originalProduct => mockedProduct ?? _originalProduct;
 
   /// The product of the node
@@ -231,12 +231,12 @@ class Node<T> {
 
     _originalProduct = newProduct;
 
-    // If this node is the last plugin in the chain,
-    // write the product into the host's pluginResult
-    if (this.isPlugin) {
-      final pluginNode = this as PluginNode<T>;
-      if (pluginNode.isLastPlugin) {
-        pluginNode.host.pluginResult = newProduct;
+    // If this node is the last insert in the chain,
+    // write the product into the host's insertResult
+    if (this.isInsert) {
+      final insert = this as Insert<T>;
+      if (insert.isLastInsert) {
+        insert.host.insertResult = newProduct;
       }
     }
 
@@ -309,16 +309,16 @@ class Node<T> {
   }
 
   // ...........................................................................
-  /// PluginNode uses this method to add itself to the host node
+  /// Insert uses this method to add itself to the host node
   @protected
-  void addPlugin(PluginNode<T> plugin, {int? index}) {
-    _plugins.insert(index ?? _plugins.length, plugin);
+  void addInsert(Insert<T> insert, {int? index}) {
+    _inserts.insert(index ?? _inserts.length, insert);
   }
 
-  /// PluginNode uses this method to remove itself from the host node
+  /// Insert uses this method to remove itself from the host node
   @protected
-  void removePlugin(PluginNode<T> plugin) {
-    _plugins.remove(plugin);
+  void removeInsert(Insert<T> insert) {
+    _inserts.remove(insert);
   }
 
   /// The value return by this method is forwarded to the produce method
@@ -327,31 +327,31 @@ class Node<T> {
 
   @protected
 
-  /// The last plugin will write it's result into this variable
-  T? pluginResult;
+  /// The last insert will write it's result into this variable
+  T? insertResult;
 
-  /// Clears all plugins
-  void clearPlugins() {
-    for (final plugin in [..._plugins]) {
-      plugin.dispose();
+  /// Clears all inserts
+  void clearInserts() {
+    for (final insert in [..._inserts]) {
+      insert.dispose();
     }
   }
 
-  /// Returns the plugin with the key or null when not found
-  Node<T>? plugin(String key) {
-    for (final plugin in _plugins) {
-      if (plugin.key == key) {
-        return plugin;
+  /// Returns the insert with the key or null when not found
+  Node<T>? insert(String key) {
+    for (final insert in _inserts) {
+      if (insert.key == key) {
+        return insert;
       }
     }
     return null;
   }
 
-  /// Returns the list of plugin nodes
-  Iterable<PluginNode<T>> get plugins => _plugins;
+  /// Returns the list of insert nodes
+  Iterable<Insert<T>> get inserts => _inserts;
 
-  /// Returns if node is a plugin
-  bool get isPlugin => false;
+  /// Returns if node is a insert
+  bool get isInsert => false;
 
   // ...........................................................................
   // Timeouts
@@ -499,7 +499,7 @@ class Node<T> {
   T? _mockedProduct;
 
   // ...........................................................................
-  final List<PluginNode<T>> _plugins = [];
+  final List<Insert<T>> _inserts = [];
 
   // ...........................................................................
   NodeBluePrint<T> _bluePrint;

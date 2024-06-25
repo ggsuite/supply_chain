@@ -22,8 +22,8 @@
 - Add NodeBluePrint.map
 - Add Doc class to create html documentations
 - Add Scope.reset and Node.reset
-- Add Node.addPlugin and removePlugin
-- Added Scope.addPlugin and removePlugin
+- Add Node.addInsert and removeInsert
+- Added Scope.addInsert and removeInsert
 - Add modifyChildScope, modifyChildNode
 - Add switchSupplier
 - Add overridable modifyChildScope and modifyChildNode
@@ -61,15 +61,15 @@
 - Renamed map to forward
 - Rename forward to forwardTo
 - Print only suppliers of nodes in doc graphs
-- Plugins can be added and removed now
-- Handle the case that a plugin has plugins
-- Removing a plugin from a node will dispose the plugin
-- Implement better way to handle plugins
+- Inserts can be added and removed now
+- Handle the case that a insert has inserts
+- Removing a insert from a node will dispose the insert
+- Implement better way to handle inserts
 - Split build into buildNodes and buildScopes
 - Allow to override nodes and scopes while instantiating a scope blue print
 - Define overrides in constructor
-- Refactor ScopePlugin
-- instantiate scope plugins within their own scope
+- Refactor ScopeInsert
+- instantiate scope inserts within their own scope
 - Hand over scope in method modifyChildNode
 - Improved error message
 - Allow a to specify a list of allowed products for a node
@@ -79,6 +79,7 @@
 - Rename modifyNode into modifyChildNode
 - Improve assertion
 - Rework modifyChildScopes
+- Rename ScopePlugin into ScopeInserts
 
 ### Fixed
 
@@ -217,7 +218,8 @@
 - 'publish\_to: none for private repositories'
 - Rework changelog
 - 'Github Actions Pipeline'
-- 'Github Actions Pipeline: Add SDK file containing flutter into .github/workflows to make github installing flutter and not dart SDK'
+- 'Github Actions Pipeline: Add SDK file containing flutter into
+.github/workflows to make github installing flutter and not dart SDK'
 
 [Unreleased]: https://github.com/inlavigo/supply_chain/compare/1.0.13...HEAD
 [1.0.13]: https://github.com/inlavigo/supply_chain/compare/1.0.12...1.0.13

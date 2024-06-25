@@ -8,22 +8,22 @@ import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('PluginNode', () {
+  group('Insert', () {
     group('example', () {
       test('should work', () {
-        final pluginNode = PluginNode.example(key: 'plugin');
+        final insert = Insert.example(key: 'insert');
 
-        final host = pluginNode.host;
+        final host = insert.host;
 
-        expect(host.plugins, [pluginNode]);
-        expect(pluginNode.input, host);
-        expect(pluginNode.output, host);
-        expect(pluginNode, isNotNull);
+        expect(host.inserts, [insert]);
+        expect(insert.input, host);
+        expect(insert.output, host);
+        expect(insert, isNotNull);
       });
     });
 
-    test('should insert and remove plugins correctly', () {
-      // Create pluginNode2
+    test('should add and remove inserts correctly', () {
+      // Create insert2
       final host = Node.example(key: 'host');
       final scope = host.scope;
       final scm = host.scope.scm;
@@ -40,201 +40,201 @@ void main() {
       expect(customer0.product, 1);
       expect(customer1.product, 1);
 
-      // Insert a first plugin 2, adding 2 to the original product
-      final plugin2 = PluginNode.example(
-        key: 'plugin2',
+      // Insert a first insert 2, adding 2 to the original product
+      final insert2 = Insert.example(
+        key: 'insert2',
         produce: (components, previousProduct) => previousProduct + 2,
         host: host,
       );
 
       scm.testFlushTasks();
-      expect(host.plugins, [plugin2]);
-      expect(plugin2.input, host);
-      expect(plugin2.output, host);
-      expect(plugin2, isNotNull);
+      expect(host.inserts, [insert2]);
+      expect(insert2.input, host);
+      expect(insert2.output, host);
+      expect(insert2, isNotNull);
       expect(host.originalProduct, 1);
       expect(host.product, 1 + 2);
       expect(customer0.product, 1 + 2);
       expect(customer1.product, 1 + 2);
 
-      // Insert pluginNode0 before pluginNode2, multiplying by 3
-      final plugin0 = PluginNode.example(
-        key: 'plugin0',
+      // Add insert0 before insert2, multiplying by 3
+      final insert0 = Insert.example(
+        key: 'insert0',
         produce: (components, previousProduct) => previousProduct * 3,
         host: host,
         index: 0,
       );
       scm.testFlushTasks();
 
-      expect(host.plugins, [plugin0, plugin2]);
-      expect(plugin0.input, host);
-      expect(plugin0.output, plugin2);
+      expect(host.inserts, [insert0, insert2]);
+      expect(insert0.input, host);
+      expect(insert0.output, insert2);
       expect(host.originalProduct, 1);
       expect(host.product, 1 * 3 + 2);
       expect(customer0.product, 1 * 3 + 2);
       expect(customer1.product, 1 * 3 + 2);
 
-      // Insert pluginNode1 between pluginNode0 and pluginNode2
-      // The plugin multiplies the previous result by 4
-      final plugin1 = PluginNode.example(
-        key: 'plugin1',
+      // Add insert1 between insert0 and insert2
+      // The insert multiplies the previous result by 4
+      final insert1 = Insert.example(
+        key: 'insert1',
         produce: (components, previousProduct) => previousProduct * 4,
         host: host,
         index: 1,
       );
       scm.testFlushTasks();
-      expect(host.plugins, [plugin0, plugin1, plugin2]);
-      expect(plugin0.input, host);
-      expect(plugin0.output, plugin1);
-      expect(plugin1.input, plugin0);
-      expect(plugin1.output, plugin2);
-      expect(plugin2.input, plugin1);
-      expect(plugin2.output, host);
+      expect(host.inserts, [insert0, insert1, insert2]);
+      expect(insert0.input, host);
+      expect(insert0.output, insert1);
+      expect(insert1.input, insert0);
+      expect(insert1.output, insert2);
+      expect(insert2.input, insert1);
+      expect(insert2.output, host);
       expect(host.originalProduct, 1);
       expect(host.product, (1 * 3 * 4) + 2);
       expect(customer0.product, (1 * 3 * 4) + 2);
       expect(customer1.product, (1 * 3 * 4) + 2);
 
-      // Insert pluginNode3 after pluginNode2 adding ten
-      final plugin3 = PluginNode.example(
-        key: 'plugin3',
+      // Add insert3 after insert2 adding ten
+      final insert3 = Insert.example(
+        key: 'insert3',
         produce: (components, previousProduct) => previousProduct + 10,
         host: host,
         index: 3,
       );
       scm.testFlushTasks();
-      expect(host.plugins, [plugin0, plugin1, plugin2, plugin3]);
-      expect(plugin0.input, host);
-      expect(plugin0.output, plugin1);
-      expect(plugin1.input, plugin0);
-      expect(plugin1.output, plugin2);
-      expect(plugin2.input, plugin1);
-      expect(plugin2.output, plugin3);
-      expect(plugin3.input, plugin2);
-      expect(plugin3.output, host);
+      expect(host.inserts, [insert0, insert1, insert2, insert3]);
+      expect(insert0.input, host);
+      expect(insert0.output, insert1);
+      expect(insert1.input, insert0);
+      expect(insert1.output, insert2);
+      expect(insert2.input, insert1);
+      expect(insert2.output, insert3);
+      expect(insert3.input, insert2);
+      expect(insert3.output, host);
       expect(host.originalProduct, 1);
       expect(host.product, (1 * 3 * 4) + 2 + 10);
       expect(customer0.product, (1 * 3 * 4) + 2 + 10);
       expect(customer1.product, (1 * 3 * 4) + 2 + 10);
 
-      // Remove plugin node in the middle
-      plugin1.dispose();
+      // Remove insert node in the middle
+      insert1.dispose();
       scm.testFlushTasks();
-      expect(host.plugins, [plugin0, plugin2, plugin3]);
-      expect(plugin0.input, host);
-      expect(plugin0.output, plugin2);
-      expect(plugin2.input, plugin0);
-      expect(plugin2.output, plugin3);
-      expect(plugin3.input, plugin2);
-      expect(plugin3.output, host);
+      expect(host.inserts, [insert0, insert2, insert3]);
+      expect(insert0.input, host);
+      expect(insert0.output, insert2);
+      expect(insert2.input, insert0);
+      expect(insert2.output, insert3);
+      expect(insert3.input, insert2);
+      expect(insert3.output, host);
       expect(host.originalProduct, 1);
       expect(host.product, (1 * 3) + 2 + 10);
       expect(customer0.product, (1 * 3) + 2 + 10);
       expect(customer1.product, (1 * 3) + 2 + 10);
 
-      // Remove first plugin node
-      plugin0.dispose();
+      // Remove first insert node
+      insert0.dispose();
       scm.testFlushTasks();
-      expect(host.plugins, [plugin2, plugin3]);
-      expect(plugin2.input, host);
-      expect(plugin2.output, plugin3);
-      expect(plugin3.input, plugin2);
-      expect(plugin3.output, host);
+      expect(host.inserts, [insert2, insert3]);
+      expect(insert2.input, host);
+      expect(insert2.output, insert3);
+      expect(insert3.input, insert2);
+      expect(insert3.output, host);
       expect(host.originalProduct, 1);
       expect(host.product, 1 + 2 + 10);
       expect(customer0.product, 1 + 2 + 10);
       expect(customer1.product, 1 + 2 + 10);
 
-      // Remove last plugin node
-      plugin3.dispose();
+      // Remove last insert node
+      insert3.dispose();
       scm.testFlushTasks();
-      expect(host.plugins, [plugin2]);
-      expect(plugin2.input, host);
-      expect(plugin2.output, host);
+      expect(host.inserts, [insert2]);
+      expect(insert2.input, host);
+      expect(insert2.output, host);
       expect(host.originalProduct, 1);
       expect(host.product, 1 + 2);
       expect(customer0.product, 1 + 2);
       expect(customer1.product, 1 + 2);
 
-      // Remove last remaining plugin node
-      plugin2.dispose();
+      // Remove last remaining insert node
+      insert2.dispose();
       scm.testFlushTasks();
-      expect(host.plugins, <PluginNode<dynamic>>[]);
+      expect(host.inserts, <Insert<dynamic>>[]);
       expect(host.originalProduct, 1);
       expect(host.product, 1);
       expect(customer0.product, 1);
       expect(customer1.product, 1);
     });
 
-    group('should apply plugins correctly', () {
-      test('with one plugin', () {
+    group('should apply inserts correctly', () {
+      test('with one insert', () {
         final scope = Scope.example();
         final scm = scope.scm;
 
         final host = const NodeBluePrint(key: 'host', initialProduct: 1)
             .instantiate(scope: scope);
 
-        final plugin = NodeBluePrint(
-          key: 'plugin0',
+        final insert = NodeBluePrint(
+          key: 'insert0',
           initialProduct: 0,
           produce: (components, previousProduct) {
             return previousProduct * 10;
           },
-        ).instantiateAsPlugin(host: host);
+        ).instantiateAsInsert(host: host);
 
         // The product of the host should be multiplied by 10
         scm.testFlushTasks();
-        expect(plugin.product, 10);
+        expect(insert.product, 10);
         expect(host.originalProduct, 1);
         expect(host.product, 10);
 
         // Change the host product
         host.product = 2;
         scm.testFlushTasks();
-        expect(plugin.product, 20);
+        expect(insert.product, 20);
         expect(host.originalProduct, 2);
         expect(host.product, 20);
       });
 
-      test('with two plugins', () {
+      test('with two inserts', () {
         final scope = Scope.example();
         final scm = scope.scm;
         final host = const NodeBluePrint(key: 'host', initialProduct: 1)
             .instantiate(scope: scope);
 
-        final plugin0 = NodeBluePrint(
-          key: 'plugin0',
+        final insert0 = NodeBluePrint(
+          key: 'insert0',
           initialProduct: 0,
           produce: (components, previousProduct) {
             return previousProduct * 10;
           },
-        ).instantiateAsPlugin(host: host);
+        ).instantiateAsInsert(host: host);
 
-        final plugin1 = NodeBluePrint(
-          key: 'plugin1',
+        final insert1 = NodeBluePrint(
+          key: 'insert1',
           initialProduct: 0,
           produce: (components, previousProduct) {
             return previousProduct * 10;
           },
-        ).instantiateAsPlugin(host: host);
+        ).instantiateAsInsert(host: host);
 
         // The product of the host should be multiplied by 10
         scm.testFlushTasks();
-        expect(plugin0.product, 10);
-        expect(plugin1.product, 100);
+        expect(insert0.product, 10);
+        expect(insert1.product, 100);
         expect(host.originalProduct, 1);
         expect(host.product, 100);
 
         // Change the host product
         host.product = 2;
         scm.testFlushTasks();
-        expect(plugin0.product, 20);
-        expect(plugin1.product, 200);
+        expect(insert0.product, 20);
+        expect(insert1.product, 200);
         expect(host.originalProduct, 2);
         expect(host.product, 200);
       });
 
-      test('with a plugin that has suppliers', () {
+      test('with a insert that has suppliers', () {
         final scope = Scope.example();
         final scm = scope.scm;
 
@@ -250,22 +250,22 @@ void main() {
         final factor = const NodeBluePrint(key: 'factor', initialProduct: 10)
             .instantiate(scope: scope);
 
-        // Create a plugin that multiplies the product with the factor
-        final plugin0 = NodeBluePrint(
-          key: 'plugin0',
+        // Create a insert that multiplies the product with the factor
+        final insert0 = NodeBluePrint(
+          key: 'insert0',
           initialProduct: 0,
           suppliers: ['factor'],
           produce: (components, previousProduct) {
             final factor = components.first as int;
             return previousProduct * factor;
           },
-        ).instantiateAsPlugin(host: host);
+        ).instantiateAsInsert(host: host);
 
         // Initially the product of the host should be multiplied by 10
         // because the factor is 10
         scm.testFlushTasks();
         expect(host.customers, [customer]);
-        expect(plugin0.product, 10);
+        expect(insert0.product, 10);
         expect(host.originalProduct, 1);
         expect(host.product, 10);
         expect(customer.product, 10);
@@ -273,15 +273,15 @@ void main() {
         // Change the host's original product
         host.product = 2;
         scm.testFlushTasks();
-        expect(plugin0.product, 20);
+        expect(insert0.product, 20);
         expect(host.originalProduct, 2);
         expect(host.product, 20);
         expect(customer.product, 20);
 
-        // Change the factor which will modify the way, the plugin calculates
+        // Change the factor which will modify the way, the insert calculates
         factor.product = 100;
         scm.testFlushTasks();
-        expect(plugin0.product, 200);
+        expect(insert0.product, 200);
         expect(host.originalProduct, 2);
         expect(host.product, 200);
         expect(customer.product, 200);
@@ -291,12 +291,12 @@ void main() {
     group('should throw', () {
       test('when index is too big', () {
         final host = Node.example();
-        NodeBluePrint.example(key: 'plugin0').instantiateAsPlugin(
+        NodeBluePrint.example(key: 'insert0').instantiateAsInsert(
           host: host,
         );
 
         expect(
-          () => NodeBluePrint.example(key: 'plugin1').instantiateAsPlugin(
+          () => NodeBluePrint.example(key: 'insert1').instantiateAsInsert(
             host: host,
             index: 2,
           ),
@@ -306,7 +306,7 @@ void main() {
                 return p0.message;
               },
               'message',
-              'Plugin index 2 is out of range.',
+              'Insert index 2 is out of range.',
             ),
           ),
         );
@@ -315,7 +315,7 @@ void main() {
         final host = Node.example();
 
         expect(
-          () => NodeBluePrint.example(key: 'plugin0').instantiateAsPlugin(
+          () => NodeBluePrint.example(key: 'insert0').instantiateAsInsert(
             host: host,
             index: -1,
           ),
@@ -325,7 +325,7 @@ void main() {
                 return p0.message;
               },
               'message',
-              'Plugin index -1 is out of range.',
+              'Insert index -1 is out of range.',
             ),
           ),
         );
