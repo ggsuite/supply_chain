@@ -30,6 +30,7 @@
 - Add willInstantiate
 - Add possibility to set a mocked product
 - Add set get mockedProduct
+- Add InsertBluePrint
 
 ### Changed
 

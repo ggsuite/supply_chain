@@ -25,7 +25,6 @@ typedef Produce<T> = T Function(
 /// A node in a scope
 class Node<T> {
   // ...........................................................................
-
   /// - [initialProduct]: The product delivered before [produce] is called the
   ///   first time
   /// - [produce]: A function producing the product and saving it in product.
@@ -35,7 +34,6 @@ class Node<T> {
   /// - [scope]: The scope the node belongs to
   /// - [key]: The key of the node
   /// - [cacheSize]: The number of items in the cache
-
   Node({
     required NodeBluePrint<T> bluePrint,
     required this.scope,
@@ -233,7 +231,7 @@ class Node<T> {
 
     // If this node is the last insert in the chain,
     // write the product into the host's insertResult
-    if (this.isInsert) {
+    if (this.bluePrint.isInsert) {
       final insert = this as Insert<T>;
       if (insert.isLastInsert) {
         insert.host.insertResult = newProduct;
@@ -349,9 +347,6 @@ class Node<T> {
 
   /// Returns the list of insert nodes
   Iterable<Insert<T>> get inserts => _inserts;
-
-  /// Returns if node is a insert
-  bool get isInsert => false;
 
   // ...........................................................................
   // Timeouts

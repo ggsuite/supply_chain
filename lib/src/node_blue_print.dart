@@ -95,20 +95,6 @@ class NodeBluePrint<T> {
     );
   }
 
-  /// Instantiates the blue print as insert in the given scope
-  Insert<T> instantiateAsInsert({
-    required Node<T> host,
-    Scope? scope,
-    int? index,
-  }) {
-    return Insert<T>(
-      bluePrint: this,
-      host: host,
-      index: index,
-      scope: scope,
-    );
-  }
-
   /// Create a modified copy of the blue print
   NodeBluePrint<T> copyWith({
     T? initialProduct,
@@ -137,6 +123,9 @@ class NodeBluePrint<T> {
         toKey: key,
         initialProduct: initialProduct,
       );
+
+  /// Returns if node is an insert
+  bool get isInsert => false;
 
   /// Provites an operator =
   @override

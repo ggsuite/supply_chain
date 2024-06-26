@@ -7,7 +7,7 @@
 import 'package:supply_chain/supply_chain.dart';
 
 /// Maps a host node address to a node blueprint describing the insert
-typedef InsertMap = Map<String, NodeBluePrint<dynamic>>;
+typedef InsertMap = Map<String, InsertBluePrint<dynamic>>;
 
 /// A scope insert defines a list of node inserts that modify a scope.
 class ScopeInserts {
@@ -71,7 +71,7 @@ class ScopeInserts {
   }
 
   // ...........................................................................
-  (List<Node<dynamic>> hostNodes, List<NodeBluePrint<dynamic>> inserts)
+  (List<Node<dynamic>> hostNodes, List<InsertBluePrint<dynamic>> inserts)
       _hostNodes(
     Scope scope,
   ) {
@@ -125,7 +125,7 @@ class ScopeInserts {
       ScopeInserts(
         key: key,
         overrides: {
-          'node0': const NodeBluePrint<int>(
+          'node0': const InsertBluePrint<int>(
             key: 'insert0',
             initialProduct: 238,
           ),
@@ -145,7 +145,7 @@ class ExampleScopeInsert extends ScopeInserts {
   @override
   InsertMap build() {
     return {
-      'node0': const NodeBluePrint<int>(key: 'insert0', initialProduct: 822),
+      'node0': const InsertBluePrint<int>(key: 'insert0', initialProduct: 822),
     };
   }
 }

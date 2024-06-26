@@ -40,8 +40,8 @@ void main() {
             final insert0 = ScopeInserts(
               key: 'insert0',
               overrides: {
-                'node0': NodeBluePrint.example(key: 'key'),
-                'node1': NodeBluePrint.example(key: 'key'),
+                'node0': InsertBluePrint.example(key: 'key'),
+                'node1': InsertBluePrint.example(key: 'key'),
               },
             );
 
@@ -60,8 +60,8 @@ void main() {
             final insert = ScopeInserts(
               key: 'insert0',
               overrides: {
-                'unknown0': NodeBluePrint.example(key: 'unknown'),
-                'unknown1': NodeBluePrint.example(key: 'unknown1'),
+                'unknown0': InsertBluePrint.example(key: 'unknown'),
+                'unknown1': InsertBluePrint.example(key: 'unknown1'),
               },
             );
             expect(
@@ -85,7 +85,8 @@ void main() {
             const insert = ScopeInserts(
               key: 'insert0',
               overrides: {
-                'node0': NodeBluePrint<int>(key: 'insert0', initialProduct: 0),
+                'node0':
+                    InsertBluePrint<int>(key: 'insert0', initialProduct: 0),
               },
             );
 
@@ -134,13 +135,13 @@ void main() {
           final scopeInsert = ScopeInserts(
             key: 'insert0',
             overrides: {
-              'b.n0': NodeBluePrint<int>(
+              'b.n0': InsertBluePrint<int>(
                 key: 'byTwo',
                 initialProduct: 0,
                 produce: (components, previousProduct) =>
                     (components.first as int) * 2,
               ),
-              'a.c.n1': NodeBluePrint<int>(
+              'a.c.n1': InsertBluePrint<int>(
                 key: 'byThree',
                 initialProduct: 0,
                 produce: (components, previousProduct) =>
@@ -215,7 +216,7 @@ void main() {
 
           ExampleScopeInsert(
             overrides: {
-              'node0': NodeBluePrint.example(key: 'insert0Override'),
+              'node0': InsertBluePrint.example(key: 'insert0Override'),
             },
           ).instantiate(scope: scope);
 
@@ -241,7 +242,7 @@ void main() {
           ExampleScopeInsert(
             // Replace node1 by node1Override
             overrides: {
-              'node1': NodeBluePrint.example(key: 'insert1Override'),
+              'node1': InsertBluePrint.example(key: 'insert1Override'),
             },
           ).instantiate(scope: scope);
 
