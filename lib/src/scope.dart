@@ -4,6 +4,7 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'package:collection/collection.dart';
 import 'package:supply_chain/supply_chain.dart';
 
 /// A supply scope is a container for connected nodes
@@ -414,6 +415,25 @@ class Scope {
   List<ScopeInserts> get inserts => _inserts;
 
   // ...........................................................................
+  /// This method is called by scopeInsert to add the insert
+  void addPlugin(Plugin plugin) {
+    _plugins.add(plugin);
+  }
+
+  /// Removes a scope insert
+  void removePlugin(Plugin plugin) {
+    _plugins.remove(plugin);
+  }
+
+  /// Retruns the plugin with given key or null if not found
+  Plugin? plugin(String key) => _plugins.firstWhereOrNull(
+        (element) => element.bluePrint.key == key,
+      );
+
+  /// Returns the scope inserts
+  List<Plugin> get plugins => _plugins;
+
+  // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz
   String dot({
     int childScopeDepth = -1,
@@ -600,6 +620,7 @@ class Scope {
 
   // ...........................................................................
   final List<ScopeInserts> _inserts = [];
+  final List<Plugin> _plugins = [];
 
   // ...........................................................................
   void _init() {

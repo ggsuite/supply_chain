@@ -31,6 +31,7 @@
 - Add possibility to set a mocked product
 - Add set get mockedProduct
 - Add InsertBluePrint
+- Add base of Plugin
 
 ### Changed
 

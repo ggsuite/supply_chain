@@ -13,6 +13,8 @@ export 'src/insert_blue_print.dart';
 export 'src/keys.dart';
 export 'src/node_blue_print.dart';
 export 'src/node.dart';
+export 'src/plugin.dart';
+export 'src/plugin_blue_print.dart';
 export 'src/priority.dart';
 export 'src/producer.dart';
 export 'src/scm.dart';

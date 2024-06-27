@@ -1348,5 +1348,31 @@ void main() {
         insert.dispose(scope: scope);
       });
     });
+
+    group('addPlugin, removePlugin, plugin', () {
+      test('should add and remove a plugin', () {
+        final scope = Scope.example();
+        scope.mockContent({
+          'a': {
+            'b': {
+              'node0': 0,
+            },
+          },
+        });
+        final bluePrint = PluginBluePrint.example();
+        expect(scope.plugins, isEmpty);
+
+        // Instantiating the plugin should call addPlugin
+        final plugin = bluePrint.instantiate(scope: scope);
+        expect(scope.plugins, contains(plugin));
+
+        // Now we can get the plugin by key
+        expect(scope.plugin(bluePrint.key), plugin);
+
+        // Disposing the plugin should call removePlugin
+        plugin.dispose();
+        expect(scope.plugins, isNot(contains(bluePrint)));
+      });
+    });
   });
 }
