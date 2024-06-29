@@ -87,10 +87,10 @@ class PluginBluePrint {
   // ...........................................................................
   // Child plugins
 
-  /// Override this method to add child plugins to this plugin
+  /// A plugin can define plugins for child scopes
   ///
   /// - Returns: A list of child plugins
-  List<PluginBluePrint> get children {
+  List<PluginBluePrint> plugins({required Scope hostScope}) {
     return [];
   }
 
@@ -145,11 +145,11 @@ class ExamplePluginBluePrint extends PluginBluePrint {
   }
 
   // ...........................................................................
-  /// Child plugins
+  /// All scopes with key 'b' will get a child plugin
   @override
-  List<PluginBluePrint> get children {
+  List<PluginBluePrint> plugins({required Scope hostScope}) {
     return [
-      const ExampleChildPluginBluePrint(),
+      if (hostScope.key == 'b') const ExampleChildPluginBluePrint(),
     ];
   }
 

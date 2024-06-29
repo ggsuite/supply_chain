@@ -25,8 +25,10 @@ void main() {
 
         // All nodes having a key starting with "host" should have two inserts
         // added by ExamplePluginBluePrint
-        // and one inset added by the ExampleChildPluginBluePrint
-        expect(hostA.inserts, hasLength(2 + 1));
+
+        // Scope should have 1 additional insert,
+        // because
+        expect(hostA.inserts, hasLength(2));
         expect(hostB.inserts, hasLength(2 + 1));
         expect(hostC.inserts, hasLength(2 + 1));
 
@@ -36,7 +38,7 @@ void main() {
         // The values should be calculated correctly
         final initialA = hostA.bluePrint.initialProduct;
         final productA = hostA.product;
-        expect(productA, (initialA + 111) * 10 * 2);
+        expect(productA, (initialA + 111) * 10);
 
         final initialB = hostB.bluePrint.initialProduct;
         final productB = hostB.product;

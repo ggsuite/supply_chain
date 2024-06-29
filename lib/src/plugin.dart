@@ -48,7 +48,7 @@ class Plugin {
   void _init() {
     _initScope();
     _initInserts();
-    _initChildren();
+    _initChildren(scope);
   }
 
   void _initScope() {
@@ -68,8 +68,9 @@ class Plugin {
     _dispose.add(inserts.dispose);
   }
 
-  void _initChildren() {
-    for (final child in bluePrint.children) {
+  void _initChildren(Scope scope) {
+    // Init own children
+    for (final child in bluePrint.plugins(hostScope: scope)) {
       _children.add(child.instantiate(scope: scope));
     }
 
@@ -80,5 +81,9 @@ class Plugin {
         }
       },
     );
+
+    for (final childScope in scope.children) {
+      _initChildren(childScope);
+    }
   }
 }

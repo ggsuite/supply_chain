@@ -84,6 +84,7 @@
 - Rework modifyChildScopes
 - Rename ScopePlugin into ScopeInserts
 - Work on plugin and inserts
+- Plugins can define plugins for certain child scopes
 
 ### Fixed
 
