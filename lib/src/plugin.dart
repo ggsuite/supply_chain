@@ -18,8 +18,9 @@ class Plugin {
 
   /// Disposes the plugin
   void dispose() {
-    scope.removePlugin(this);
-    inserts.dispose();
+    for (var dispose in _dispose.reversed) {
+      dispose();
+    }
   }
 
   /// The blue print of the plugin
@@ -40,9 +41,14 @@ class Plugin {
   // Private
   // ######################
 
+  final List<Plugin> _children = [];
+
+  final List<void Function()> _dispose = [];
+
   void _init() {
     _initScope();
     _initInserts();
+    _initChildren();
   }
 
   void _initScope() {
@@ -51,9 +57,28 @@ class Plugin {
     }
 
     scope.addPlugin(this);
+
+    _dispose.add(
+      () => scope.removePlugin(this),
+    );
   }
 
   void _initInserts() {
     inserts = Inserts(plugin: this);
+    _dispose.add(inserts.dispose);
+  }
+
+  void _initChildren() {
+    for (final child in bluePrint.children) {
+      _children.add(child.instantiate(scope: scope));
+    }
+
+    _dispose.add(
+      () {
+        for (var child in _children) {
+          child.dispose();
+        }
+      },
+    );
   }
 }

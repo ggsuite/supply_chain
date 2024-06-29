@@ -23,10 +23,12 @@ void main() {
         final hostC = scope.findNode<int>('hostC')!;
         final other = scope.findNode<int>('other')!;
 
-        // All nodes having a key starting with "host" should have inserts
-        expect(hostA.inserts, hasLength(2));
-        expect(hostB.inserts, hasLength(2));
-        expect(hostC.inserts, hasLength(2));
+        // All nodes having a key starting with "host" should have two inserts
+        // added by ExamplePluginBluePrint
+        // and one inset added by the ExampleChildPluginBluePrint
+        expect(hostA.inserts, hasLength(2 + 1));
+        expect(hostB.inserts, hasLength(2 + 1));
+        expect(hostC.inserts, hasLength(2 + 1));
 
         // Nodes not starting with 'host' should not have inserts
         expect(other.inserts, hasLength(0));
@@ -34,15 +36,15 @@ void main() {
         // The values should be calculated correctly
         final initialA = hostA.bluePrint.initialProduct;
         final productA = hostA.product;
-        expect(productA, (initialA + 111) * 10);
+        expect(productA, (initialA + 111) * 10 * 2);
 
         final initialB = hostB.bluePrint.initialProduct;
         final productB = hostB.product;
-        expect(productB, (initialB + 111) * 10);
+        expect(productB, (initialB + 111) * 10 * 2);
 
         final initialC = hostC.bluePrint.initialProduct;
         final productC = hostC.product;
-        expect(productC, (initialC + 111) * 10);
+        expect(productC, (initialC + 111) * 10 * 2);
 
         // Finally let's dispose the plugin
         plugin.dispose();

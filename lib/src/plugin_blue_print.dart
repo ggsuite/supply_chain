@@ -13,7 +13,7 @@ class PluginBluePrint {
     required this.key,
   });
 
-  /// Instantiates this plugin within the given hostScope
+  /// Instantiates this plugin and it's children within the given hostScope
   ///
   /// - [hostScope]: The scope this plugin will be instantiated in
   /// - The callbacks below will be applied to the hostScope and all its
@@ -73,7 +73,7 @@ class PluginBluePrint {
   }
 
   // ...........................................................................
-  // Modify inserts
+  // Inserts
 
   /// Override this method to add inserts into a given node
   ///
@@ -81,6 +81,16 @@ class PluginBluePrint {
   List<InsertBluePrint<dynamic>> inserts({
     required Node<dynamic> hostNode,
   }) {
+    return [];
+  }
+
+  // ...........................................................................
+  // Child plugins
+
+  /// Override this method to add child plugins to this plugin
+  ///
+  /// - Returns: A list of child plugins
+  List<PluginBluePrint> get children {
     return [];
   }
 
@@ -135,6 +145,15 @@ class ExamplePluginBluePrint extends PluginBluePrint {
   }
 
   // ...........................................................................
+  /// Child plugins
+  @override
+  List<PluginBluePrint> get children {
+    return [
+      const ExampleChildPluginBluePrint(),
+    ];
+  }
+
+  // ...........................................................................
   /// Returns an example instance of the ExamplePlugin
   static Plugin get example {
     // The example applies inserts to all nodes with a key
@@ -158,5 +177,34 @@ class ExamplePluginBluePrint extends PluginBluePrint {
     final plugin = const ExamplePluginBluePrint().instantiate(scope: scope);
     plugin.scope.scm.testFlushTasks();
     return plugin;
+  }
+}
+
+// #############################################################################
+/// An example plugin
+class ExampleChildPluginBluePrint extends PluginBluePrint {
+  /// The constructor
+  const ExampleChildPluginBluePrint({super.key = 'exampleChildPlugin'});
+
+  // ...........................................................................
+  /// Inserts
+
+  /// Will an insert "diveByTwo" to all nodes starting with host
+  @override
+  List<InsertBluePrint<dynamic>> inserts({required Node<dynamic> hostNode}) {
+    // Add an insert to all nodes which keys start with "host"
+    if (hostNode.key.startsWith('host') && hostNode is Node<int>) {
+      return [
+        InsertBluePrint<int>(
+          key: 'multiplyByTwo',
+          initialProduct: 0,
+          produce: (components, previousProduct) {
+            return previousProduct * 2;
+          },
+        ),
+      ];
+    }
+
+    return super.inserts(hostNode: hostNode);
   }
 }

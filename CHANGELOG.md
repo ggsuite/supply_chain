@@ -32,6 +32,7 @@
 - Add set get mockedProduct
 - Add InsertBluePrint
 - Add base of Plugin
+- Add the concept of child plugins
 
 ### Changed
 
