@@ -67,9 +67,9 @@ class PluginBluePrint {
   /// - Returns: The replaced version of [nodeToBeReplaced]
   NodeBluePrint<dynamic> replaceNode({
     required Scope hostScope,
-    required NodeBluePrint<dynamic> nodeToBeReplaced,
+    required Node<dynamic> nodeToBeReplaced,
   }) {
-    return nodeToBeReplaced;
+    return nodeToBeReplaced.bluePrint;
   }
 
   // ...........................................................................

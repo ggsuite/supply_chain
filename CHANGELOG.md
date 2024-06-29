@@ -87,6 +87,7 @@
 - Plugins can define plugins for certain child scopes
 - findNode will skip inserts by default
 - Rename Inserts into PluginInserts
+- Plugins can replace nodes now
 
 ### Fixed
 

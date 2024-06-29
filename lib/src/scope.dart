@@ -376,7 +376,7 @@ class Scope {
       );
     }
 
-    existingNode.update(bluePrint);
+    existingNode.addBluePrint(bluePrint);
   }
 
   /// Returns true if a node with the given key exists in this or a

@@ -46,13 +46,14 @@ void main() {
       });
 
       test('replaceNode', () {
-        final nodeToBeReplaced = NodeBluePrint.example();
+        final node = Node.example();
+
         final replacedNode = pluginBluePrint.replaceNode(
           hostScope: hostScope,
-          nodeToBeReplaced: nodeToBeReplaced,
+          nodeToBeReplaced: node,
         );
 
-        expect(replacedNode, nodeToBeReplaced);
+        expect(replacedNode, node.bluePrint);
       });
 
       test('inserts(hostNode)', () {

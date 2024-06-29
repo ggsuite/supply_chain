@@ -37,6 +37,9 @@ class Plugin {
   /// The inserts of the plugin
   late final PluginInserts inserts;
 
+  /// The node replacer of the plugin
+  late final PluginNodeReplacer nodeReplacer;
+
   // ######################
   // Private
   // ######################
@@ -48,6 +51,7 @@ class Plugin {
   void _init() {
     _initScope();
     _initInserts();
+    _initNodeReplacer();
     _initChildren(scope);
   }
 
@@ -66,6 +70,11 @@ class Plugin {
   void _initInserts() {
     inserts = PluginInserts(plugin: this);
     _dispose.add(inserts.dispose);
+  }
+
+  void _initNodeReplacer() {
+    nodeReplacer = PluginNodeReplacer(plugin: this);
+    _dispose.add(nodeReplacer.dispose);
   }
 
   void _initChildren(Scope scope) {

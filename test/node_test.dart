@@ -614,22 +614,35 @@ void main() {
       });
     });
 
-    group('update(bluePrint)', () {
-      test('should do nothing, when bluePrint is the same as before', () {
-        node.update(node.bluePrint);
-      });
-
-      group('should throw an assertion error', () {
-        test('when key is different', () {
-          const otherBluePrint = NodeBluePrint<int>(
-            key: 'otherKey',
-            initialProduct: 6,
-          );
-
+    group('addBluePrint(bluePrint)', () {
+      group('should throw', () {
+        test('when bluePrint is already added', () {
           expect(
-            () => node.update(otherBluePrint),
-            throwsA(isA<AssertionError>()),
+            () => node.addBluePrint(node.bluePrint),
+            throwsA(
+              isA<ArgumentError>().having(
+                (e) => e.message,
+                'message',
+                contains(
+                  'The blue print "${node.key}" is already added',
+                ),
+              ),
+            ),
           );
+        });
+
+        group('an assertion error', () {
+          test('when key is different', () {
+            const otherBluePrint = NodeBluePrint<int>(
+              key: 'otherKey',
+              initialProduct: 6,
+            );
+
+            expect(
+              () => node.addBluePrint(otherBluePrint),
+              throwsA(isA<AssertionError>()),
+            );
+          });
         });
       });
 
@@ -639,11 +652,78 @@ void main() {
           produce: (components, previousProduct) => 7,
         );
 
-        node.update(otherBluePrint);
+        node.addBluePrint(otherBluePrint);
 
         expect(
           node.bluePrint,
           otherBluePrint,
+        );
+
+        expect(scm.nominatedNodes, [node]);
+      });
+    });
+
+    group('removeBluePrint(bluePrint)', () {
+      group('should throw.', () {
+        test('when bluePrint is not added', () {
+          const otherBluePrint = NodeBluePrint<int>(
+            key: 'otherKey',
+            initialProduct: 6,
+          );
+
+          expect(
+            () => node.removeBluePrint(otherBluePrint),
+            throwsA(
+              isA<ArgumentError>().having(
+                (e) => e.message,
+                'message',
+                contains(
+                  'The blue print "${otherBluePrint.key}" does not exist.',
+                ),
+              ),
+            ),
+          );
+        });
+
+        test('when bluePrint is the last blue print', () {
+          expect(
+            () => node.removeBluePrint(node.bluePrint),
+            throwsA(
+              isA<ArgumentError>().having(
+                (e) => e.message,
+                'message',
+                contains(
+                  'Cannot remove last bluePrint.',
+                ),
+              ),
+            ),
+          );
+        });
+      });
+
+      test('should remove the blue print and the previous one becomes active',
+          () {
+        final previousBluePrint = node.bluePrint;
+
+        final otherBluePrint = node.bluePrint.copyWith(
+          initialProduct: 6,
+          produce: (components, previousProduct) => 7,
+        );
+
+        node.addBluePrint(otherBluePrint);
+
+        expect(
+          node.bluePrint,
+          otherBluePrint,
+        );
+
+        scm.testFlushTasks();
+
+        node.removeBluePrint(otherBluePrint);
+
+        expect(
+          node.bluePrint,
+          previousBluePrint,
         );
 
         expect(scm.nominatedNodes, [node]);

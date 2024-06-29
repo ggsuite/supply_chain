@@ -40,8 +40,8 @@ class Node<T> {
     this.isInsert = false,
   })  : scm = scope.scm,
         _originalProduct = bluePrint.initialProduct,
-        assert(bluePrint.key.isCamelCase),
-        _bluePrint = bluePrint {
+        assert(bluePrint.key.isCamelCase) {
+    _bluePrints.add(bluePrint);
     _init();
   }
 
@@ -70,8 +70,14 @@ class Node<T> {
   }
 
   // ...........................................................................
-  /// Updates the node with a new bluePrint
-  void update(NodeBluePrint<T> bluePrint) {
+  /// Plugins use this method to replace the present blue print
+  void addBluePrint(NodeBluePrint<T> bluePrint) {
+    if (_bluePrints.contains(bluePrint)) {
+      throw ArgumentError(
+        'The blue print "${bluePrint.key}" is already added.',
+      );
+    }
+
     final oldBluePrint = this.bluePrint;
 
     if (bluePrint == oldBluePrint) {
@@ -81,12 +87,27 @@ class Node<T> {
     assert(bluePrint.key == this.bluePrint.key);
 
     // Update the bluePrint
-    this._bluePrint = bluePrint;
+    this._bluePrints.add(bluePrint);
 
     // If the produce function has changed, we need to produce again
     if (bluePrint.produce != oldBluePrint.produce) {
       scm.nominate(this);
     }
+  }
+
+  /// Plugins use this method to remove a formerly added blue print
+  void removeBluePrint(NodeBluePrint<T> bp) {
+    if (!_bluePrints.contains(bp)) {
+      throw ArgumentError('The blue print "${bp.key}" does not exist.');
+    }
+
+    if (_bluePrints.first == bp) {
+      throw ArgumentError('Cannot remove last bluePrint.');
+    }
+
+    _bluePrints.remove(bp);
+    reset();
+    scm.nominate(this);
   }
 
   // ...........................................................................
@@ -501,7 +522,9 @@ class Node<T> {
   final List<Insert<T>> _inserts = [];
 
   // ...........................................................................
-  NodeBluePrint<T> _bluePrint;
+  NodeBluePrint<T> get _bluePrint => _bluePrints.last;
+
+  final List<NodeBluePrint<T>> _bluePrints = [];
 
   // ...........................................................................
   Priority _ownPriority = Priority.frame;
