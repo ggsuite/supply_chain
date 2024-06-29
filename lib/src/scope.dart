@@ -393,7 +393,7 @@ class Scope {
   Node<T>? findNode<T>(
     String key, {
     bool throwIfNotFound = false,
-    bool skipInserts = true,
+    bool skipInserts = false,
   }) {
     final keyParts = key.split('.');
     final nodeKey = keyParts.last;
@@ -401,8 +401,9 @@ class Scope {
 
     final node = _findNodeInOwnScope<T>(nodeKey, scopePath, skipInserts) ??
         _findNodeNodeInParentScopes(nodeKey, scopePath, skipInserts) ??
+        _findOneNodeInChildScopes(nodeKey, scopePath, skipInserts) ??
         _findNodeInDirectSiblingScopes(nodeKey, scopePath, skipInserts) ??
-        _findAnyUniqueNode<T>(nodeKey, scopePath, skipInserts);
+        _findNodeInParentsChildScopes<T>(nodeKey, scopePath, skipInserts);
 
     if (node == null && throwIfNotFound) {
       throw ArgumentError('Node with key "$key" not found.');
@@ -737,38 +738,75 @@ class Scope {
     return null;
   }
 
-  Node<T>? _findAnyUniqueNode<T>(
+  Node<T>? _findOneNodeInChildScopes<T>(
     String key,
     List<String> scopePath,
     bool skipInserts,
   ) {
-    // Find the scopes that matches the scope path
-    final matchingScopes = root.allScopes.where(
-      (element) => element.matchesPathArray(scopePath),
+    List<Node<T>> result = _findMultipleNodesInChildScopes(
+      key,
+      scopePath,
+      skipInserts,
     );
 
-    // Find the node within that scopes
-    final List<Node<T>> nodes = [];
-    for (final scope in matchingScopes) {
-      final n = scope._findNodeInOwnScope<T>(key, [], skipInserts);
-      if (n != null) {
-        nodes.add(n);
-      }
-    }
-
-    if (nodes.length == 1) {
-      return nodes.first;
-    }
-
-    if (nodes.length > 1) {
+    if (result.isEmpty) {
+      return null;
+    } else if (result.length == 1) {
+      return result.first;
+    } else {
       throw ArgumentError(
         'Scope "$path": More than one node '
         'with key "$key" and Type<$T> found:\n - '
-        '${nodes.map((e) => e.path).join('\n - ')}',
+        '${result.map((e) => e.path).join('\n - ')}',
       );
     }
+  }
 
-    return null;
+  List<Node<T>> _findMultipleNodesInChildScopes<T>(
+    String key,
+    List<String> scopePath,
+    bool skipInserts,
+  ) {
+    final result = <Node<T>>[];
+
+    for (final child in _children.values) {
+      final node = child._findNodeInOwnScope<T>(key, scopePath, skipInserts);
+      if (node != null) {
+        result.add(node);
+      }
+    }
+
+    if (result.isNotEmpty) {
+      return result;
+    }
+
+    for (final child in _children.values) {
+      final nodes =
+          child._findMultipleNodesInChildScopes<T>(key, scopePath, skipInserts);
+      result.addAll(nodes);
+    }
+
+    return result;
+  }
+
+  Node<T>? _findNodeInParentsChildScopes<T>(
+    String key,
+    List<String> scopePath,
+    bool skipInserts,
+  ) {
+    if (parent == null) {
+      return null;
+    }
+
+    final result =
+        parent!._findOneNodeInChildScopes<T>(key, scopePath, skipInserts);
+
+    if (result != null) {
+      return result;
+    } else {
+      return parent!
+          ._findNodeInParentsChildScopes<T>(key, scopePath, skipInserts);
+    }
   }
 
   Scope? _findScope(List<String> path, {bool didFindFirstScope = false}) {

@@ -86,6 +86,7 @@
 - Work on plugin and inserts
 - Plugins can define plugins for certain child scopes
 - findNode will skip inserts by default
+- Rename Inserts into PluginInserts
 
 ### Fixed
 

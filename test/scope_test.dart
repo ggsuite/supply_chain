@@ -996,33 +996,88 @@ void main() {
               });
             });
 
-            test('when the node is contained in sibling chain', () {
-              // Create a new chain
-              final root = Scope.example();
+            group('when the node is contained in sibling chain', () {
+              test('and only there', () {
+                // Create a new chain
+                final root = Scope.example();
 
-              // Create two child scopes
-              Scope(
-                bluePrint: const ScopeBluePrint(key: 'childScopeA'),
-                parent: root,
-              );
+                // Create two child scopes
+                Scope(
+                  bluePrint: const ScopeBluePrint(key: 'childScopeA'),
+                  parent: root,
+                );
 
-              final b = Scope(
-                bluePrint: const ScopeBluePrint(key: 'childScopeA'),
-                parent: root,
-              );
+                final b = Scope(
+                  bluePrint: const ScopeBluePrint(key: 'childScopeA'),
+                  parent: root,
+                );
 
-              // Add a NodeA to ChildScopeA
-              final nodeA = root.child('childScopeA')!.findOrCreateNode<int>(
-                    NodeBluePrint(
-                      key: 'nodeA',
-                      initialProduct: 0,
-                      produce: (components, previous) => previous,
-                    ),
-                  );
+                // Add a NodeA to ChildScopeA
+                final nodeA = root.child('childScopeA')!.findOrCreateNode<int>(
+                      NodeBluePrint(
+                        key: 'nodeA',
+                        initialProduct: 0,
+                        produce: (components, previous) => previous,
+                      ),
+                    );
 
-              // ChildScopeB should find the node in ChildScopeA
-              final Node<int>? foundNodeA = b.findNode<int>('nodeA');
-              expect(foundNodeA, nodeA);
+                // ChildScopeB should find the node in ChildScopeA
+                final Node<int>? foundNodeA = b.findNode<int>('nodeA');
+                expect(foundNodeA, nodeA);
+              });
+
+              test('and also in a parent sibling chain', () {
+                final scope = Scope.example();
+                scope.mockContent({
+                  'corpus': {
+                    'panels': {
+                      'left': {
+                        'corners': {
+                          'backTopRight': {
+                            'leftPanelMiterCut': {
+                              'yInserts': {
+                                'somethingElse': 0,
+                              },
+                            },
+                          },
+                          'frontTopRight': {
+                            'leftPanelMiterCut': {
+                              'yInserts': {
+                                'frontTopRightMiterCut': 0,
+                              },
+                            },
+                          },
+                        },
+                      },
+                      'bottom': {
+                        'corners': {
+                          'frontTopRight': {
+                            'bottomPanelMiterCut': {
+                              'xInserts': {
+                                'frontTopRightMiterCut': 0,
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                });
+
+                final startScope = scope.findScope('backTopRight')!;
+                expect(
+                  startScope.findNode<int>('frontTopRightMiterCut')!.path,
+                  endsWith('yInserts.frontTopRightMiterCut'),
+                );
+
+                final startScope1 =
+                    scope.findScope('backTopRight.leftPanelMiterCut.yInserts')!;
+
+                expect(
+                  startScope1.findNode<int>('frontTopRightMiterCut')!.path,
+                  endsWith('yInserts.frontTopRightMiterCut'),
+                );
+              });
             });
 
             test('when the node is contained within a child of the parent', () {

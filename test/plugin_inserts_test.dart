@@ -8,12 +8,12 @@ import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('Inserts', () {
+  group('PluginInserts', () {
     group('should recursively iterate all nodes of the host scope', () {
       test('and add the inserts as defined in the plugin', () {
         // Look into [ExamplePluginBluePrint] to see the node hierarchy
         // used for this example
-        final inserts = Inserts.example();
+        final inserts = PluginInserts.example();
         final plugin = inserts.plugin;
         final scope = plugin.scope;
 

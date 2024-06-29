@@ -11,9 +11,9 @@ import 'package:supply_chain/supply_chain.dart';
 /// - Deeply iterates all nodes of the plugin's scope
 /// - Creates scopes for the inserts
 /// - Creates the insert nodes for each child
-class Inserts {
+class PluginInserts {
   /// The constructor
-  Inserts({
+  PluginInserts({
     required this.plugin,
   }) {
     _init(plugin.scope);
@@ -32,7 +32,7 @@ class Inserts {
 
   // ...........................................................................
   /// Returns an example instance
-  factory Inserts.example() {
+  factory PluginInserts.example() {
     final plugin = Plugin.example();
     final inserts = plugin.inserts;
     return inserts;

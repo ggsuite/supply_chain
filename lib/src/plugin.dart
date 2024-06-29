@@ -35,7 +35,7 @@ class Plugin {
   }
 
   /// The inserts of the plugin
-  late final Inserts inserts;
+  late final PluginInserts inserts;
 
   // ######################
   // Private
@@ -64,7 +64,7 @@ class Plugin {
   }
 
   void _initInserts() {
-    inserts = Inserts(plugin: this);
+    inserts = PluginInserts(plugin: this);
     _dispose.add(inserts.dispose);
   }
 
