@@ -1201,6 +1201,27 @@ void main() {
         });
       });
 
+      group('with skipInserts', () {
+        test('should return inserts when skipInserts is false ', () {
+          final plugin = Plugin.example();
+          final scope = plugin.scope;
+          final hostB = scope.findNode<int>('hostB')!;
+          expect(hostB.inserts.first.key, 'add111');
+
+          // skipInserts is false. The insert node will be found.
+          expect(
+            scope.findNode<int>('hostBInserts.add111', skipInserts: false),
+            isNotNull,
+          );
+
+          // skipInserts is true. The insert node will not be found.
+          expect(
+            scope.findNode<int>('hostBInserts.add111', skipInserts: true),
+            isNull,
+          );
+        });
+      });
+
       group('throws', () {
         test('if the type does not match', () {
           final rootScope = ExampleScopeRoot(scm: Scm.testInstance);

@@ -85,6 +85,7 @@
 - Rename ScopePlugin into ScopeInserts
 - Work on plugin and inserts
 - Plugins can define plugins for certain child scopes
+- findNode will skip inserts by default
 
 ### Fixed
 

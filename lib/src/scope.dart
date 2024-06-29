@@ -309,7 +309,7 @@ class Scope {
   Iterable<Node<dynamic>> get nodes => _nodes.values;
 
   /// Returns the own node for a given key or null if not found
-  Node<T>? node<T>(String key) => _findNodeInOwnScope<T>(key, []);
+  Node<T>? node<T>(String key) => _findNodeInOwnScope<T>(key, [], true);
 
   /// Returns the node with key. If not available in scope the node is created.
   Node<T> findOrCreateNode<T>(NodeBluePrint<T> bluePrint) {
@@ -393,15 +393,16 @@ class Scope {
   Node<T>? findNode<T>(
     String key, {
     bool throwIfNotFound = false,
+    bool skipInserts = true,
   }) {
     final keyParts = key.split('.');
     final nodeKey = keyParts.last;
     final scopePath = keyParts.sublist(0, keyParts.length - 1);
 
-    final node = _findNodeInOwnScope<T>(nodeKey, scopePath) ??
-        _findNodeNodeInParentScopes(nodeKey, scopePath) ??
-        _findNodeInDirectSiblingScopes(nodeKey, scopePath) ??
-        _findAnyUniqueNode<T>(nodeKey, scopePath);
+    final node = _findNodeInOwnScope<T>(nodeKey, scopePath, skipInserts) ??
+        _findNodeNodeInParentScopes(nodeKey, scopePath, skipInserts) ??
+        _findNodeInDirectSiblingScopes(nodeKey, scopePath, skipInserts) ??
+        _findAnyUniqueNode<T>(nodeKey, scopePath, skipInserts);
 
     if (node == null && throwIfNotFound) {
       throw ArgumentError('Node with key "$key" not found.');
@@ -662,7 +663,11 @@ class Scope {
   }
 
   // ...........................................................................
-  Node<T>? _findNodeInOwnScope<T>(String nodeKey, List<String> scopePath) {
+  Node<T>? _findNodeInOwnScope<T>(
+    String nodeKey,
+    List<String> scopePath,
+    bool skipInserts,
+  ) {
     bool pathMatchesOwnScope =
         scopePath.isNotEmpty && matchesPathArray(scopePath);
 
@@ -675,6 +680,7 @@ class Scope {
         return childScope._findNodeInOwnScope<T>(
           nodeKey,
           scopePath.sublist(1),
+          skipInserts,
         );
       }
     }
@@ -682,6 +688,10 @@ class Scope {
     // Find the node in the current scope
     final node = _nodes[nodeKey];
     if (node == null) {
+      return null;
+    }
+
+    if (skipInserts && node.isInsert) {
       return null;
     }
 
@@ -699,21 +709,26 @@ class Scope {
     return node;
   }
 
-  Node<T>? _findNodeNodeInParentScopes<T>(String key, List<String> scopePath) {
-    return parent?._findNodeInOwnScope<T>(key, scopePath) ??
-        parent?._findNodeNodeInParentScopes<T>(key, scopePath);
+  Node<T>? _findNodeNodeInParentScopes<T>(
+    String key,
+    List<String> scopePath,
+    bool skipInserts,
+  ) {
+    return parent?._findNodeInOwnScope<T>(key, scopePath, skipInserts) ??
+        parent?._findNodeNodeInParentScopes<T>(key, scopePath, skipInserts);
   }
 
   Node<T>? _findNodeInDirectSiblingScopes<T>(
     String key,
     List<String> scopePath,
+    bool skipInserts,
   ) {
     if (parent == null) {
       return null;
     }
 
     for (final sibling in parent!._children.values) {
-      final node = sibling._findNodeInOwnScope<T>(key, scopePath);
+      final node = sibling._findNodeInOwnScope<T>(key, scopePath, skipInserts);
       if (node != null) {
         return node;
       }
@@ -722,7 +737,11 @@ class Scope {
     return null;
   }
 
-  Node<T>? _findAnyUniqueNode<T>(String key, List<String> scopePath) {
+  Node<T>? _findAnyUniqueNode<T>(
+    String key,
+    List<String> scopePath,
+    bool skipInserts,
+  ) {
     // Find the scopes that matches the scope path
     final matchingScopes = root.allScopes.where(
       (element) => element.matchesPathArray(scopePath),
@@ -730,8 +749,8 @@ class Scope {
 
     // Find the node within that scopes
     final List<Node<T>> nodes = [];
-    for (final node in matchingScopes) {
-      final n = node._findNodeInOwnScope<T>(key, []);
+    for (final scope in matchingScopes) {
+      final n = scope._findNodeInOwnScope<T>(key, [], skipInserts);
       if (n != null) {
         nodes.add(n);
       }
