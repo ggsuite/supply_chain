@@ -367,6 +367,16 @@ void main() {
       });
     });
 
+    group('findOrCreateChild(key)', () {
+      test('should create a child scope with key or return an existing one',
+          () {
+        final scope = Scope.example();
+        final childScopeA = scope.findOrCreateChild('child');
+        final childScopeB = scope.findOrCreateChild('child');
+        expect(childScopeA, same(childScopeB));
+      });
+    });
+
     group('node(key)', () {
       test('should return the node with the given key', () {
         expect(scope.node<int>('node'), node);
@@ -1359,7 +1369,7 @@ void main() {
             },
           },
         });
-        final bluePrint = PluginBluePrint.example();
+        final bluePrint = PluginBluePrint.example.bluePrint;
         expect(scope.plugins, isEmpty);
 
         // Instantiating the plugin should call addPlugin

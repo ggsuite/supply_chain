@@ -8,7 +8,7 @@ import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final pluginBluePrint = PluginBluePrint.example();
+  final pluginBluePrint = PluginBluePrint.example.bluePrint;
   final hostScope = Scope.example();
   final scopeToBeReplaced = ScopeBluePrint.example();
 
@@ -16,7 +16,9 @@ void main() {
     group('instantiate', () {
       test('should create  a plugin and add it to scope', () {
         final scope = Scope.example();
-        final plugin = PluginBluePrint.example().instantiate(scope: scope);
+        final plugin = PluginBluePrint.example.bluePrint.instantiate(
+          scope: scope,
+        );
         expect(scope.plugins, contains(plugin));
       });
     });
@@ -53,8 +55,9 @@ void main() {
         expect(replacedNode, nodeToBeReplaced);
       });
 
-      test('inserts', () {
-        expect(pluginBluePrint.inserts(), isEmpty);
+      test('inserts(hostNode)', () {
+        final hostNode = Node.example();
+        expect(pluginBluePrint.inserts(hostNode: hostNode), isEmpty);
       });
     });
 

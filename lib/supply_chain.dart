@@ -10,6 +10,7 @@ export 'src/doc.dart';
 export 'src/graph.dart';
 export 'src/insert.dart';
 export 'src/insert_blue_print.dart';
+export 'src/inserts.dart';
 export 'src/keys.dart';
 export 'src/node_blue_print.dart';
 export 'src/node.dart';

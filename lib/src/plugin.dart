@@ -19,6 +19,7 @@ class Plugin {
   /// Disposes the plugin
   void dispose() {
     scope.removePlugin(this);
+    inserts.dispose();
   }
 
   /// The blue print of the plugin
@@ -28,17 +29,12 @@ class Plugin {
   final Scope scope;
 
   /// Returns an example instance of the plugin
-  factory Plugin.example({
-    String? key,
-  }) {
-    final scope = Scope.example();
-    final bluePrint = PluginBluePrint.example(key: key);
-    final plugin = Plugin(
-      bluePrint: bluePrint,
-      scope: scope,
-    );
-    return plugin;
+  factory Plugin.example() {
+    return PluginBluePrint.example;
   }
+
+  /// The inserts of the plugin
+  late final Inserts inserts;
 
   // ######################
   // Private
@@ -46,6 +42,7 @@ class Plugin {
 
   void _init() {
     _initScope();
+    _initInserts();
   }
 
   void _initScope() {
@@ -54,5 +51,9 @@ class Plugin {
     }
 
     scope.addPlugin(this);
+  }
+
+  void _initInserts() {
+    inserts = Inserts(plugin: this);
   }
 }

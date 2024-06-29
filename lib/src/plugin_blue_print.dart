@@ -9,7 +9,7 @@ import 'package:supply_chain/supply_chain.dart';
 /// A plugin changes various aspects of a scope and its children
 class PluginBluePrint {
   ///  Constructor
-  PluginBluePrint({
+  const PluginBluePrint({
     required this.key,
   });
 
@@ -78,16 +78,16 @@ class PluginBluePrint {
   /// Override this method to add inserts into a given node
   ///
   /// - [hostNode]: The host node the returned inserts will be added to
-  List<ScopeInserts> inserts() {
+  List<InsertBluePrint<dynamic>> inserts({
+    required Node<dynamic> hostNode,
+  }) {
     return [];
   }
 
   // ...........................................................................
   /// Returns an example instance of the plugin
-  factory PluginBluePrint.example({
-    String? key,
-  }) {
-    return PluginBluePrint(key: key ?? 'example');
+  static Plugin get example {
+    return ExamplePluginBluePrint.example;
   }
 
   // ######################
@@ -96,4 +96,67 @@ class PluginBluePrint {
 
   /// The key of the plugin
   final String key;
+}
+
+// #############################################################################
+/// An example plugin
+class ExamplePluginBluePrint extends PluginBluePrint {
+  /// The constructor
+  const ExamplePluginBluePrint({super.key = 'examplePlugin'});
+
+  // ...........................................................................
+  /// Inserts
+
+  /// Will add two inserts "add111" and "multiplyByTen" to all nodes
+  /// starting with host
+  @override
+  List<InsertBluePrint<dynamic>> inserts({required Node<dynamic> hostNode}) {
+    // Add an insert to all nodes which keys start with "host"
+    if (hostNode.key.startsWith('host') && hostNode is Node<int>) {
+      return [
+        InsertBluePrint<int>(
+          key: 'add111',
+          initialProduct: 0,
+          produce: (components, previousProduct) {
+            return previousProduct + 111;
+          },
+        ),
+        InsertBluePrint<int>(
+          key: 'multiplyBeTen',
+          initialProduct: 0,
+          produce: (components, previousProduct) {
+            return previousProduct * 10;
+          },
+        ),
+      ];
+    }
+
+    return super.inserts(hostNode: hostNode);
+  }
+
+  // ...........................................................................
+  /// Returns an example instance of the ExamplePlugin
+  static Plugin get example {
+    // The example applies inserts to all nodes with a key
+    // starting with 'host'.
+
+    // Let's create a node hiearchy with nodes starting with keys
+    // starting with hosts
+    final scope = Scope.example();
+    scope.mockContent({
+      'a': {
+        'hostA': 0xA,
+        'other': 1,
+        'b': {
+          'hostB': 0xB,
+          'hostC': 0xC,
+        },
+      },
+    });
+
+    // Apply the plugin to the scope
+    final plugin = const ExamplePluginBluePrint().instantiate(scope: scope);
+    plugin.scope.scm.testFlushTasks();
+    return plugin;
+  }
 }

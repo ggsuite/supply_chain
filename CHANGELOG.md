@@ -82,6 +82,7 @@
 - Improve assertion
 - Rework modifyChildScopes
 - Rename ScopePlugin into ScopeInserts
+- Work on plugin and inserts
 
 ### Fixed
 

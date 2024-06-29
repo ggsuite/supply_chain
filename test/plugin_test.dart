@@ -32,8 +32,8 @@ void main() {
         // Create a scope
         final scope = Scope.example();
         // Create two blue prints with the same key
-        final bluePrint0 = PluginBluePrint.example(key: 'key');
-        final bluePrint1 = PluginBluePrint.example(key: 'key');
+        final bluePrint0 = PluginBluePrint.example.bluePrint;
+        final bluePrint1 = PluginBluePrint.example.bluePrint;
 
         // Instantiate the first plugin
         bluePrint0.instantiate(scope: scope);
@@ -45,7 +45,7 @@ void main() {
             isA<ArgumentError>().having(
               (e) => e.message,
               'message',
-              contains('Another plugin with key key is added.'),
+              contains('Another plugin with key examplePlugin is added.'),
             ),
           ),
         );

@@ -201,6 +201,16 @@ class Scope {
     return bluePrint.instantiate(scope: this);
   }
 
+  /// Find or create a child scope with key
+  Scope findOrCreateChild(String key) {
+    final existingChild = child(key);
+    if (existingChild != null) {
+      return existingChild;
+    }
+
+    return ScopeBluePrint(key: key).instantiate(scope: this);
+  }
+
   /// Removes the scope from it's parent scope
   void remove() {
     dispose();
