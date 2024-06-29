@@ -412,20 +412,6 @@ class Scope {
 
   // ...........................................................................
   /// This method is called by scopeInsert to add the insert
-  void scopeInsertAdd(ScopeInserts insert) {
-    _inserts.add(insert);
-  }
-
-  /// Removes a scope insert
-  void scopeInsertRemove(ScopeInserts insert) {
-    _inserts.remove(insert);
-  }
-
-  /// Returns the scope inserts
-  List<ScopeInserts> get inserts => _inserts;
-
-  // ...........................................................................
-  /// This method is called by scopeInsert to add the insert
   void addPlugin(Plugin plugin) {
     _plugins.add(plugin);
   }
@@ -629,7 +615,6 @@ class Scope {
   static int _idCounter = 0;
 
   // ...........................................................................
-  final List<ScopeInserts> _inserts = [];
   final List<Plugin> _plugins = [];
 
   // ...........................................................................

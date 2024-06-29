@@ -1339,26 +1339,6 @@ void main() {
       });
     });
 
-    group('scopeInsertAdd, scopeInsertRemove', () {
-      test('should add and remove a scope insert', () {
-        final scope = Scope.example();
-        scope.mockContent({
-          'a': {
-            'b': {
-              'node0': 0,
-            },
-          },
-        });
-        final insert = ScopeInserts.example();
-        expect(scope.inserts, isEmpty);
-
-        insert.instantiate(scope: scope);
-        expect(scope.inserts, contains(insert));
-
-        insert.dispose(scope: scope);
-      });
-    });
-
     group('addPlugin, removePlugin, plugin', () {
       test('should add and remove a plugin', () {
         final scope = Scope.example();
