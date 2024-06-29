@@ -11,13 +11,13 @@ class Insert<T> extends Node<T> {
   /// Creates a new insert node based on [bluePrint] within [host]
   /// and inserts it into the insert chain at [index]
   Insert({
-    required InsertBluePrint<T> bluePrint,
+    required super.bluePrint,
     required this.host,
     Scope? scope,
     int? index,
   }) : super(
           scope: scope ?? host.scope,
-          bluePrint: bluePrint,
+          isInsert: true,
         ) {
     _insertInsert(index);
     _prepareRemoval();
@@ -63,7 +63,7 @@ class Insert<T> extends Node<T> {
     int? index,
   }) {
     host ??= Node.example();
-    final bluePrint = InsertBluePrint.example(
+    final bluePrint = NodeBluePrint.example(
       key: key,
       produce: produce,
     );

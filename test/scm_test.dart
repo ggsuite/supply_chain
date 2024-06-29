@@ -766,13 +766,13 @@ void main() {
             host.bluePrint.forwardTo('customer0').instantiate(scope: scope);
 
         var p0Calls = 0;
-        final insert0 = InsertBluePrint.example(
+        final insert0 = NodeBluePrint.example(
           key: 'insert0',
           produce: (components, previousProduct) => ++p0Calls,
         ).instantiateAsInsert(host: host);
 
         var p1Calls = 0;
-        final insert1 = InsertBluePrint.example(
+        final insert1 = NodeBluePrint.example(
           key: 'insert1',
           produce: (components, previousProduct) => ++p1Calls,
         ).instantiateAsInsert(host: host);

@@ -30,7 +30,7 @@
 - Add willInstantiate
 - Add possibility to set a mocked product
 - Add set get mockedProduct
-- Add InsertBluePrint
+- Add NodeBluePrint
 - Add base of Plugin
 - Add the concept of child plugins
 
@@ -98,6 +98,7 @@
 - Remove dependencies from ScopeBluePrint
 - Remove key named parameter from node
 - Remove ScopeInsert
+- Remove concept of InsertBluePrint. NodeBluePrint is enough.
 
 ## [1.0.13] - 2024-05-17
 

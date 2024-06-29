@@ -78,7 +78,7 @@ class PluginBluePrint {
   /// Override this method to add inserts into a given node
   ///
   /// - [hostNode]: The host node the returned inserts will be added to
-  List<InsertBluePrint<dynamic>> inserts({
+  List<NodeBluePrint<dynamic>> inserts({
     required Node<dynamic> hostNode,
   }) {
     return [];
@@ -120,18 +120,18 @@ class ExamplePluginBluePrint extends PluginBluePrint {
   /// Will add two inserts "add111" and "multiplyByTen" to all nodes
   /// starting with host
   @override
-  List<InsertBluePrint<dynamic>> inserts({required Node<dynamic> hostNode}) {
+  List<NodeBluePrint<dynamic>> inserts({required Node<dynamic> hostNode}) {
     // Add an insert to all nodes which keys start with "host"
     if (hostNode.key.startsWith('host') && hostNode is Node<int>) {
       return [
-        InsertBluePrint<int>(
+        NodeBluePrint<int>(
           key: 'add111',
           initialProduct: 0,
           produce: (components, previousProduct) {
             return previousProduct + 111;
           },
         ),
-        InsertBluePrint<int>(
+        NodeBluePrint<int>(
           key: 'multiplyBeTen',
           initialProduct: 0,
           produce: (components, previousProduct) {
@@ -191,11 +191,11 @@ class ExampleChildPluginBluePrint extends PluginBluePrint {
 
   /// Will an insert "diveByTwo" to all nodes starting with host
   @override
-  List<InsertBluePrint<dynamic>> inserts({required Node<dynamic> hostNode}) {
+  List<NodeBluePrint<dynamic>> inserts({required Node<dynamic> hostNode}) {
     // Add an insert to all nodes which keys start with "host"
     if (hostNode.key.startsWith('host') && hostNode is Node<int>) {
       return [
-        InsertBluePrint<int>(
+        NodeBluePrint<int>(
           key: 'multiplyByTwo',
           initialProduct: 0,
           produce: (components, previousProduct) {

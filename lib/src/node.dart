@@ -37,6 +37,7 @@ class Node<T> {
   Node({
     required NodeBluePrint<T> bluePrint,
     required this.scope,
+    this.isInsert = false,
   })  : scm = scope.scm,
         _originalProduct = bluePrint.initialProduct,
         assert(bluePrint.key.isCamelCase),
@@ -231,7 +232,7 @@ class Node<T> {
 
     // If this node is the last insert in the chain,
     // write the product into the host's insertResult
-    if (this.bluePrint.isInsert) {
+    if (this.isInsert) {
       final insert = this as Insert<T>;
       if (insert.isLastInsert) {
         insert.host.insertResult = newProduct;
@@ -318,6 +319,9 @@ class Node<T> {
   void removeInsert(Insert<T> insert) {
     _inserts.remove(insert);
   }
+
+  /// Returns if node is an insert
+  final bool isInsert;
 
   /// The value return by this method is forwarded to the produce method
   @protected

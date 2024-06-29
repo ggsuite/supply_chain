@@ -78,7 +78,6 @@ void main() {
       when(() => bluePrint.key).thenReturn('subScopeManager');
       when(() => bluePrint.suppliers).thenReturn(['rowHeights']);
       when(() => bluePrint.allowedProducts).thenReturn([]);
-      when(() => bluePrint.isInsert).thenReturn(false);
       when(() => bluePrint.produce).thenReturn(
         (List<dynamic> components, List<ScopeBluePrint> previous) =>
             producedScopeBluePrints,

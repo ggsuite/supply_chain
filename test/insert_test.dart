@@ -174,7 +174,7 @@ void main() {
         final host = const NodeBluePrint(key: 'host', initialProduct: 1)
             .instantiate(scope: scope);
 
-        final insert = InsertBluePrint(
+        final insert = NodeBluePrint(
           key: 'insert0',
           initialProduct: 0,
           produce: (components, previousProduct) {
@@ -202,7 +202,7 @@ void main() {
         final host = const NodeBluePrint(key: 'host', initialProduct: 1)
             .instantiate(scope: scope);
 
-        final insert0 = InsertBluePrint(
+        final insert0 = NodeBluePrint(
           key: 'insert0',
           initialProduct: 0,
           produce: (components, previousProduct) {
@@ -210,7 +210,7 @@ void main() {
           },
         ).instantiateAsInsert(host: host);
 
-        final insert1 = InsertBluePrint(
+        final insert1 = NodeBluePrint(
           key: 'insert1',
           initialProduct: 0,
           produce: (components, previousProduct) {
@@ -251,7 +251,7 @@ void main() {
             .instantiate(scope: scope);
 
         // Create a insert that multiplies the product with the factor
-        final insert0 = InsertBluePrint(
+        final insert0 = NodeBluePrint(
           key: 'insert0',
           initialProduct: 0,
           suppliers: ['factor'],
@@ -291,12 +291,12 @@ void main() {
     group('should throw', () {
       test('when index is too big', () {
         final host = Node.example();
-        InsertBluePrint.example(key: 'insert0').instantiateAsInsert(
+        NodeBluePrint.example(key: 'insert0').instantiateAsInsert(
           host: host,
         );
 
         expect(
-          () => InsertBluePrint.example(key: 'insert1').instantiateAsInsert(
+          () => NodeBluePrint.example(key: 'insert1').instantiateAsInsert(
             host: host,
             index: 2,
           ),
@@ -315,7 +315,7 @@ void main() {
         final host = Node.example();
 
         expect(
-          () => InsertBluePrint.example(key: 'insert0').instantiateAsInsert(
+          () => NodeBluePrint.example(key: 'insert0').instantiateAsInsert(
             host: host,
             index: -1,
           ),
