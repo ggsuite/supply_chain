@@ -759,11 +759,22 @@ void main() {
         );
       });
     });
-    group('removeNode()', () {
+    group('removeNode(), removeNodes()', () {
       test('should remove the node with the given key', () {
-        expect(scope.node<int>('node'), isNotNull);
-        scope.removeNode('node');
+        expect(
+          scope.findOrCreateNode(
+            NodeBluePrint.example(
+              key: 'node1',
+            ),
+          ),
+          isNotNull,
+        );
+
+        final bp0 = scope.node<int>('node')!.bluePrint;
+        final bp1 = scope.node<int>('node1')!.bluePrint;
+        scope.removeNodes([bp0, bp1]);
         expect(scope.node<int>('node'), isNull);
+        expect(scope.node<int>('node1'), isNull);
       });
 
       test('should also remove the inserts of the node', () {

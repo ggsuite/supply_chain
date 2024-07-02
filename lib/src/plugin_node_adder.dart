@@ -7,9 +7,9 @@
 import 'package:supply_chain/supply_chain.dart';
 
 /// Manages the nodes added by a plugin
-class PluginNodeReplacer {
+class PluginNodeAdder {
   /// The constructor
-  PluginNodeReplacer({
+  PluginNodeAdder({
     required this.plugin,
   }) {
     _init(plugin.scope);
@@ -27,7 +27,7 @@ class PluginNodeReplacer {
   final Plugin plugin;
 
   /// Returns an example instance for test purposes
-  static PluginNodeReplacer get example {
+  static PluginNodeAdder get example {
     final scope = Scope.example();
 
     scope.mockContent({
@@ -40,8 +40,8 @@ class PluginNodeReplacer {
       },
     });
 
-    final plugin = ExamplePluginReplacingIntNodes().instantiate(scope: scope);
-    return plugin.nodeReplacer;
+    final plugin = ExamplePluginAddingNodes().instantiate(scope: scope);
+    return plugin.nodeAdder;
   }
 
   // ######################
@@ -60,26 +60,28 @@ class PluginNodeReplacer {
 
   // ...........................................................................
   void _initScope(Scope scope) {
-    for (final node in scope.nodes) {
-      // Get the replacement for the node from the plugin
-      final newBluePrint = plugin.bluePrint.replaceNode(
-        hostScope: scope,
-        nodeToBeReplaced: node,
-      );
+    final bluePrints = plugin.bluePrint.addNodes(
+      hostScope: scope,
+    );
 
-      // No change? Continue
-      if (newBluePrint == node.bluePrint) {
-        continue;
+    // Make sure the node does not already exist.
+    for (final bluePrint in bluePrints) {
+      final node = scope.node<dynamic>(bluePrint.key);
+      if (node != null) {
+        throw Exception(
+          'Node with key "${bluePrint.key}" already exists. '
+          'Please use "PluginBluePrint:replaceNode" instead.',
+        );
       }
-
-      // Replace the blue print
-      node.addBluePrint(newBluePrint);
-
-      // On dispose we will revert the replacement
-      _dispose.add(() {
-        node.removeBluePrint(newBluePrint);
-      });
     }
+
+    // Replace the blue print
+    scope.findOrCreateNodes(bluePrints);
+
+    // On dispose, we will remove the added nodes again
+    _dispose.add(() {
+      scope.removeNodes(bluePrints);
+    });
   }
 
   // ######################
@@ -90,25 +92,42 @@ class PluginNodeReplacer {
 }
 
 // #############################################################################
-/// An example plugin replacing a node
-class ExamplePluginReplacingIntNodes extends PluginBluePrint {
+/// An example node adder for test purposes
+class ExamplePluginAddingNodes extends PluginBluePrint {
   /// The constructor
-  ExamplePluginReplacingIntNodes() : super(key: 'example');
+  ExamplePluginAddingNodes() : super(key: 'example');
 
   @override
-  NodeBluePrint<dynamic> replaceNode({
+  List<NodeBluePrint<dynamic>> addNodes({
     required Scope hostScope,
-    required Node<dynamic> nodeToBeReplaced,
   }) {
-    if (nodeToBeReplaced is Node<int>) {
-      return nodeToBeReplaced.bluePrint.copyWith(
-        produce: (components, previous) => 42,
-      );
+    // Add k,j to example scope
+    if (hostScope.key == 'example') {
+      return const [
+        NodeBluePrint<int>(
+          key: 'k',
+          initialProduct: 12,
+        ),
+        NodeBluePrint<int>(
+          key: 'j',
+          initialProduct: 367,
+        ),
+      ];
     }
-
-    return super.replaceNode(
-      hostScope: hostScope,
-      nodeToBeReplaced: nodeToBeReplaced,
-    );
+    // Add x,y to c scope
+    if (hostScope.key == 'c') {
+      return const [
+        NodeBluePrint<int>(
+          key: 'x',
+          initialProduct: 966,
+        ),
+        NodeBluePrint<int>(
+          key: 'y',
+          initialProduct: 767,
+        ),
+      ];
+    } else {
+      return []; // coverage:ignore-line
+    }
   }
 }

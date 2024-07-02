@@ -33,6 +33,7 @@
 - Add NodeBluePrint
 - Add base of Plugin
 - Add the concept of child plugins
+- Add plugin node adder
 
 ### Changed
 

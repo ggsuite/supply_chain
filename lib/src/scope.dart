@@ -367,6 +367,13 @@ class Scope {
     _nodes.remove(key);
   }
 
+  /// Remove the nodes from the scope
+  void removeNodes(List<NodeBluePrint<dynamic>> bluePrints) {
+    for (final bluePrint in bluePrints) {
+      removeNode(bluePrint.key);
+    }
+  }
+
   /// Replace an existing node with the same key
   void replaceNode(NodeBluePrint<dynamic> bluePrint) {
     final existingNode = _nodes[bluePrint.key];
