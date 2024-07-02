@@ -17,7 +17,7 @@ class _AddExistingNodePlugin extends PluginBluePrint {
   List<NodeBluePrint<dynamic>> addNodes({
     required Scope hostScope,
   }) {
-    // Try to add the already existing node "a" to the host scope
+    // Try to add the already existing node "existing" to the host scope
     // Will throw.
     return const [
       NodeBluePrint<int>(
@@ -65,6 +65,12 @@ void main() {
         expect(scope.node<int>('j'), isNull);
         expect(scopeC.node<int>('x'), isNull);
         expect(scopeC.node<int>('y'), isNull);
+
+        // Added nodes should also be disposed
+        expect(k.isDisposed, isTrue);
+        expect(j.isDisposed, isTrue);
+        expect(x.isDisposed, isTrue);
+        expect(y.isDisposed, isTrue);
       });
 
       group('should throw', () {

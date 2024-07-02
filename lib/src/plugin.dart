@@ -43,6 +43,9 @@ class Plugin {
   /// The node adder of the plugin
   late final PluginNodeAdder nodeAdder;
 
+  /// The scope adder of the plugin
+  late final PluginScopeAdder scopeAdder;
+
   // ######################
   // Private
   // ######################
@@ -56,6 +59,7 @@ class Plugin {
     _initInserts();
     _initNodeReplacer();
     _initNodeAdder();
+    _initScopeAdder();
     _initChildren(scope);
   }
 
@@ -84,6 +88,11 @@ class Plugin {
   void _initNodeAdder() {
     nodeAdder = PluginNodeAdder(plugin: this);
     _dispose.add(nodeAdder.dispose);
+  }
+
+  void _initScopeAdder() {
+    scopeAdder = PluginScopeAdder(plugin: this);
+    _dispose.add(scopeAdder.dispose);
   }
 
   void _initChildren(Scope scope) {

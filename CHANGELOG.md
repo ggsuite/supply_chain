@@ -34,6 +34,7 @@
 - Add base of Plugin
 - Add the concept of child plugins
 - Add plugin node adder
+- Add PluginScopeAdder
 
 ### Changed
 

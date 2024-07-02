@@ -17,6 +17,7 @@ export 'src/plugin.dart';
 export 'src/plugin_blue_print.dart';
 export 'src/plugin_node_replacer.dart';
 export 'src/plugin_node_adder.dart';
+export 'src/plugin_scope_adder.dart';
 export 'src/priority.dart';
 export 'src/producer.dart';
 export 'src/scm.dart';

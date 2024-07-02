@@ -353,16 +353,20 @@ void main() {
       });
     });
 
-    group('addChild(child), remove()', () {
+    group('addChild(child), addChildren(children) remove()', () {
       test('should instantiate and add the child to the scope', () {
         final scope = Scope.example();
-        const childBluePrint = ScopeBluePrint(key: 'child');
-        final child = scope.addChild(childBluePrint);
-        expect(scope.children, hasLength(1));
-        expect(scope.children.first, child);
+        const c0 = ScopeBluePrint(key: 'child0');
+        const c1 = ScopeBluePrint(key: 'child1');
+        final children = scope.addChildren([c0, c1]);
+        expect(scope.children, hasLength(2));
+        expect(scope.children.first, children.first);
+        expect(scope.children.last, children.last);
 
-        child.remove();
-        expect(child.isDisposed, isTrue);
+        children.first.remove();
+        children.last.remove();
+        expect(children.first.isDisposed, isTrue);
+        expect(children.last.isDisposed, isTrue);
         expect(scope.children, isEmpty);
       });
     });

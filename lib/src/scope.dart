@@ -201,6 +201,16 @@ class Scope {
     return bluePrint.instantiate(scope: this);
   }
 
+  /// Adds a number of children
+  List<Scope> addChildren(List<ScopeBluePrint> bluePrints) {
+    final result = <Scope>[];
+    for (final bluePrint in bluePrints) {
+      result.add(addChild(bluePrint));
+    }
+
+    return result;
+  }
+
   /// Find or create a child scope with key
   Scope findOrCreateChild(String key) {
     final existingChild = child(key);
