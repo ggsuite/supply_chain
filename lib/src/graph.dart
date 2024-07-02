@@ -9,6 +9,12 @@ import 'dart:io';
 import 'package:gg_is_github/gg_is_github.dart';
 import 'package:supply_chain/supply_chain.dart';
 
+/// The separation between nodes
+const nodeSeparation = 0.25;
+
+/// The separation between ranks
+const rankSeparation = 0.25;
+
 // .............................................................................
 /// An item representing a node in the graph
 class GraphNodeItem {
@@ -147,7 +153,7 @@ class Graph {
     var result = '';
     result += 'digraph unix {\n';
     result += 'graph [ dpi = 75 ]; \n';
-    result += 'graph [nodesep = 0.25; ranksep=0.25];\n';
+    result += 'graph [nodesep = $nodeSeparation; ranksep=$rankSeparation];\n';
     result += 'fontname="Helvetica,Arial,sans-serif"\n';
     result += 'node [fontname="Helvetica,Arial,sans-serif"]\n';
     result += 'edge [fontname="Helvetica,Arial,sans-serif"]\n';

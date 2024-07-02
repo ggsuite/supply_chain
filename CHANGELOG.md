@@ -88,6 +88,7 @@
 - findNode will skip inserts by default
 - Rename Inserts into PluginInserts
 - Plugins can replace nodes now
+- Split node and rank separation
 
 ### Fixed
 
