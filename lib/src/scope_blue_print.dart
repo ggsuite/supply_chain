@@ -154,21 +154,21 @@ class ScopeBluePrint {
     ModifyScope? modifyChildScope,
   }) {
     // Merge the node overrides
-    final mergedNodeOverrides = _mergeNodes(
-      nodesFromConstructor,
+    final mergedNodes = _mergeNodes(
+      _nodesFromConstructor,
       modifiedNodes,
     );
 
-    final mergedScopeOverrides = _mergeScopes(
-      childrenFromConstructor,
+    final mergedScopes = _mergeScopes(
+      _childrenFromConstructor,
       modifiedScopes,
     );
 
     return ScopeBluePrint._private(
       key: key ?? this.key,
       aliases: aliases ?? this.aliases,
-      nodes: mergedNodeOverrides,
-      children: mergedScopeOverrides,
+      nodes: mergedNodes,
+      children: mergedScopes,
       documentation: documentation,
       modifyChildNode: modifyChildNode ?? _modifyChildNode,
       modifyChildScope: modifyChildScope ?? _modifyChildScope,
@@ -216,11 +216,12 @@ class ScopeBluePrint {
   bool matchesKey(String key) => key == this.key || aliases.contains(key);
 
   /// The nodes of the scope
-  List<NodeBluePrint<dynamic>> get nodesFromConstructor =>
-      _nodesFromConstructor;
+  List<NodeBluePrint<dynamic>> get nodes =>
+      _mergeNodes(buildNodes(), _nodesFromConstructor);
 
   /// The children of the scope
-  List<ScopeBluePrint> get childrenFromConstructor => _childrenFromConstructor;
+  List<ScopeBluePrint> get children =>
+      _mergeScopes(buildScopes(), _childrenFromConstructor);
 
   /// The list of key aliases
   final List<String> aliases;
@@ -231,8 +232,7 @@ class ScopeBluePrint {
 
   // ...........................................................................
   /// Returns the node for a given key
-  NodeBluePrint<T>? findNode<T>(String key) =>
-      _findNodeByKey<T>(key, nodesFromConstructor);
+  NodeBluePrint<T>? findNode<T>(String key) => _findNodeByKey<T>(key, nodes);
 
   // ...........................................................................
   /// Turns the blue print into a scope and adds it to the parent scope.
@@ -252,7 +252,7 @@ class ScopeBluePrint {
     final innerScope = Scope(parent: scope, bluePrint: modifiedScope);
 
     // Instantiate the nodes of the scope
-    final nodes = _mergeNodes(buildNodes(), nodesFromConstructor).map((n) {
+    final modifiedNodes = nodes.map((n) {
       // Allow parents to modify this child node before instantiation
       final modifiedNode = _modifyNodeByParents(
         scopeOfNode: innerScope,
@@ -266,17 +266,15 @@ class ScopeBluePrint {
       return modifiedNode;
     }).toList();
 
-    final scopes = _mergeScopes(buildScopes(), childrenFromConstructor);
-
     // Make sure there are no duplicate keys
-    _checkForDuplicateKeys(nodes);
+    _checkForDuplicateKeys(modifiedNodes);
 
     // Create node
-    innerScope.findOrCreateNodes(nodes);
+    innerScope.findOrCreateNodes(modifiedNodes);
 
     // Init sub scopes
-    for (final subScope in scopes) {
-      subScope.instantiate(
+    for (final child in children) {
+      child.instantiate(
         scope: innerScope,
       );
     }

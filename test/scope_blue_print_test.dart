@@ -12,11 +12,10 @@ void main() {
     group('example', () {
       test('should provide a blue print with to nodes and one dependency', () {
         final scopeBluePrint = ScopeBluePrint.example();
-        final dependency = scopeBluePrint.nodesFromConstructor.first;
-        final subScope = scopeBluePrint.childrenFromConstructor.first;
-        final node = subScope.nodesFromConstructor.first as NodeBluePrint<int>;
-        final customer =
-            subScope.nodesFromConstructor.last as NodeBluePrint<int>;
+        final dependency = scopeBluePrint.nodes.first;
+        final subScope = scopeBluePrint.children.first;
+        final node = subScope.nodes.first as NodeBluePrint<int>;
+        final customer = subScope.nodes.last as NodeBluePrint<int>;
         expect(scopeBluePrint.toString(), scopeBluePrint.key);
         expect(dependency.key, 'dependency');
         expect(node.key, 'node');
@@ -51,8 +50,8 @@ void main() {
         expect(scopeBluePrint.key, 'a');
 
         void expectNode(int i, String key, dynamic value) {
-          expect(scopeBluePrint.nodesFromConstructor[i].key, key);
-          expect(scopeBluePrint.nodesFromConstructor[i].initialProduct, value);
+          expect(scopeBluePrint.nodes[i].key, key);
+          expect(scopeBluePrint.nodes[i].initialProduct, value);
         }
 
         expectNode(0, 'int', 5);
@@ -61,29 +60,26 @@ void main() {
         expectNode(3, 'bool', true);
         expectNode(4, 'bluePrint', 8);
 
-        expect(scopeBluePrint.childrenFromConstructor.length, 2);
-        expect(scopeBluePrint.childrenFromConstructor.first.key, 'b');
+        expect(scopeBluePrint.children.length, 2);
+        expect(scopeBluePrint.children.first.key, 'b');
         expect(
-          scopeBluePrint
-              .childrenFromConstructor.first.childrenFromConstructor.length,
+          scopeBluePrint.children.first.children.length,
           1,
         );
         expect(
-          scopeBluePrint
-              .childrenFromConstructor.first.childrenFromConstructor.first.key,
+          scopeBluePrint.children.first.children.first.key,
           'c',
         );
-        expect(scopeBluePrint.childrenFromConstructor.last.key, 'c');
+        expect(scopeBluePrint.children.last.key, 'c');
 
         expect(
-          scopeBluePrint.childrenFromConstructor.first.childrenFromConstructor
-              .first.nodesFromConstructor.first.key,
+          scopeBluePrint.children.first.children.first.nodes.first.key,
           'x',
         );
 
         expect(
-          scopeBluePrint.childrenFromConstructor.first.childrenFromConstructor
-              .first.nodesFromConstructor.first.initialProduct,
+          scopeBluePrint
+              .children.first.children.first.nodes.first.initialProduct,
           123,
         );
       });
@@ -294,15 +290,13 @@ void main() {
       });
 
       test('should return the node with the given key', () {
-        final bluePrint =
-            ScopeBluePrint.example().childrenFromConstructor.first;
+        final bluePrint = ScopeBluePrint.example().children.first;
         final node = bluePrint.findNode<int>('node');
         expect(node, isNotNull);
       });
 
       test('should throw if the type does not match', () {
-        final bluePrint =
-            ScopeBluePrint.example().childrenFromConstructor.first;
+        final bluePrint = ScopeBluePrint.example().children.first;
 
         expect(
           () => bluePrint.findNode<String>('node'),
@@ -328,7 +322,7 @@ void main() {
         test('with the given nodes', () {
           final bluePrint = ScopeBluePrint.example();
           final copy = bluePrint.copyWith(modifiedNodes: []);
-          expect(copy.nodesFromConstructor, bluePrint.nodesFromConstructor);
+          expect(copy.nodes, bluePrint.nodes);
         });
 
         test('with the given subScopes', () {
@@ -336,14 +330,13 @@ void main() {
           final otherSubScopes = <ScopeBluePrint>[];
           final copy = bluePrint.copyWith(modifiedScopes: otherSubScopes);
           expect(
-            copy.childrenFromConstructor,
-            same(bluePrint.childrenFromConstructor),
+            copy.children,
+            same(bluePrint.children),
           );
         });
 
         test('with the given overrides', () {
-          final bluePrint =
-              ScopeBluePrint.example().childrenFromConstructor.first;
+          final bluePrint = ScopeBluePrint.example().children.first;
           const overriddenNode = NodeBluePrint<int>(
             key: 'node',
             initialProduct: 5,

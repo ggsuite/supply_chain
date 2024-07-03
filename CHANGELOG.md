@@ -92,6 +92,7 @@
 - Plugins can replace nodes now
 - Split node and rank separation
 - Rename nodeOverrides and scopeOverrides
+- Improve merging of built and constructor nodes and scopes
 
 ### Fixed
 
