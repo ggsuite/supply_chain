@@ -35,23 +35,25 @@ typedef ModifyScope = ScopeBluePrint Function(
 /// that can form or build a scope.
 ///
 /// - [key]: The key of the blue print
-/// - [nodeOverrides]: Allows to override or extend the nodes built
+/// - [nodesFromConstructor]: Allows to override or extend the nodes built
 ///   by buildNodes().
-/// - [scopeOverrides]: Allows to override or extend nodes built
+/// - [childrenFromConstructor]: Allows to override or extend nodes built
 ///   by buildScopes().
 class ScopeBluePrint {
   // ...........................................................................
   /// Constructor of the scope
   const ScopeBluePrint({
     required this.key,
-    this.nodeOverrides = const [],
-    this.scopeOverrides = const [],
+    List<NodeBluePrint<dynamic>> nodes = const [],
+    List<ScopeBluePrint> children = const [],
     this.aliases = const [],
     this.documentation = '',
     ModifyNode modifyChildNode = _dontModifyMode,
     ModifyScope modifyChildScope = _dontModifyScope,
   })  : _modifyChildScope = modifyChildScope,
-        _modifyChildNode = modifyChildNode;
+        _modifyChildNode = modifyChildNode,
+        _nodesFromConstructor = nodes,
+        _childrenFromConstructor = children;
 
   // ...........................................................................
   /// Creates a blue print with children from JSON
@@ -132,8 +134,8 @@ class ScopeBluePrint {
 
     return ScopeBluePrint(
       key: key,
-      nodeOverrides: nodes,
-      scopeOverrides: children,
+      nodes: nodes,
+      children: children,
     );
   }
 
@@ -153,20 +155,20 @@ class ScopeBluePrint {
   }) {
     // Merge the node overrides
     final mergedNodeOverrides = _mergeNodes(
-      nodeOverrides,
+      nodesFromConstructor,
       modifiedNodes,
     );
 
     final mergedScopeOverrides = _mergeScopes(
-      scopeOverrides,
+      childrenFromConstructor,
       modifiedScopes,
     );
 
     return ScopeBluePrint._private(
       key: key ?? this.key,
       aliases: aliases ?? this.aliases,
-      nodeOverrides: mergedNodeOverrides,
-      scopeOverrides: mergedScopeOverrides,
+      nodes: mergedNodeOverrides,
+      children: mergedScopeOverrides,
       documentation: documentation,
       modifyChildNode: modifyChildNode ?? _modifyChildNode,
       modifyChildScope: modifyChildScope ?? _modifyChildScope,
@@ -214,10 +216,11 @@ class ScopeBluePrint {
   bool matchesKey(String key) => key == this.key || aliases.contains(key);
 
   /// The nodes of the scope
-  final List<NodeBluePrint<dynamic>> nodeOverrides;
+  List<NodeBluePrint<dynamic>> get nodesFromConstructor =>
+      _nodesFromConstructor;
 
   /// The children of the scope
-  final List<ScopeBluePrint> scopeOverrides;
+  List<ScopeBluePrint> get childrenFromConstructor => _childrenFromConstructor;
 
   /// The list of key aliases
   final List<String> aliases;
@@ -229,7 +232,7 @@ class ScopeBluePrint {
   // ...........................................................................
   /// Returns the node for a given key
   NodeBluePrint<T>? findNode<T>(String key) =>
-      _findNodeByKey<T>(key, nodeOverrides);
+      _findNodeByKey<T>(key, nodesFromConstructor);
 
   // ...........................................................................
   /// Turns the blue print into a scope and adds it to the parent scope.
@@ -249,7 +252,7 @@ class ScopeBluePrint {
     final innerScope = Scope(parent: scope, bluePrint: modifiedScope);
 
     // Instantiate the nodes of the scope
-    final nodes = _mergeNodes(buildNodes(), nodeOverrides).map((n) {
+    final nodes = _mergeNodes(buildNodes(), nodesFromConstructor).map((n) {
       // Allow parents to modify this child node before instantiation
       final modifiedNode = _modifyNodeByParents(
         scopeOfNode: innerScope,
@@ -263,7 +266,7 @@ class ScopeBluePrint {
       return modifiedNode;
     }).toList();
 
-    final scopes = _mergeScopes(buildScopes(), scopeOverrides);
+    final scopes = _mergeScopes(buildScopes(), childrenFromConstructor);
 
     // Make sure there are no duplicate keys
     _checkForDuplicateKeys(nodes);
@@ -317,13 +320,13 @@ class ScopeBluePrint {
     /// return the result
     return ScopeBluePrint(
       key: key,
-      nodeOverrides: [
+      nodes: [
         dependency,
       ],
-      scopeOverrides: [
+      children: [
         ScopeBluePrint(
           key: 'childScope',
-          nodeOverrides: [
+          nodes: [
             node,
             customer,
           ],
@@ -341,13 +344,19 @@ class ScopeBluePrint {
   ScopeBluePrint._private({
     required this.key,
     required this.aliases,
-    required this.nodeOverrides,
-    required this.scopeOverrides,
+    required List<NodeBluePrint<dynamic>> nodes,
+    required List<ScopeBluePrint> children,
     required this.documentation,
     required ModifyNode modifyChildNode,
     required ModifyScope modifyChildScope,
   })  : _modifyChildScope = modifyChildScope,
-        _modifyChildNode = modifyChildNode;
+        _modifyChildNode = modifyChildNode,
+        _nodesFromConstructor = nodes,
+        _childrenFromConstructor = children;
+
+  // ...........................................................................
+  final List<NodeBluePrint<dynamic>> _nodesFromConstructor;
+  final List<ScopeBluePrint> _childrenFromConstructor;
 
   // ...........................................................................
   /// Set this method to override single nodes of a scope
@@ -533,24 +542,24 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
   /// Constructor
   ExampleScopeBluePrint({
     super.key = 'parentScope',
-    List<NodeBluePrint<dynamic>> nodeOverrides = const [],
-    List<ScopeBluePrint> scopeOverrides = const [],
+    List<NodeBluePrint<dynamic>> nodes = const [],
+    List<ScopeBluePrint> childrenFromConstructor = const [],
     super.documentation,
     ModifyNode? modifyChildNode,
     ModifyScope? modifyChildScope,
   }) : super(
-          nodeOverrides: [
+          nodes: [
             const NodeBluePrint<int>(
               key: 'nodeConstructedByParent',
               initialProduct: 0,
               suppliers: [],
             ),
-            ...nodeOverrides,
+            ...nodes,
           ],
-          scopeOverrides: [
+          children: [
             const ScopeBluePrint(
               key: 'childScopeConstructedByParent',
-              nodeOverrides: [
+              nodes: [
                 NodeBluePrint<int>(
                   key: 'nodeConstructedByChildScope',
                   initialProduct: 0,
@@ -558,7 +567,7 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
                 ),
               ],
             ),
-            ...scopeOverrides,
+            ...childrenFromConstructor,
           ],
 
           // Modify the node with the key 'nodeToBeReplaced'
@@ -602,7 +611,7 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
     return [
       const ScopeBluePrint(
         key: 'childScopeBuiltByParent',
-        nodeOverrides: [
+        nodes: [
           NodeBluePrint<int>(
             key: 'nodeBuiltByChildScope',
             initialProduct: 0,

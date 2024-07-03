@@ -52,7 +52,7 @@ class SubScopeManagerBluePrint extends NodeBluePrint<List<ScopeBluePrint>> {
           // Create the scope for the row
           final scope = ScopeBluePrint(
             key: 'row$iCopy',
-            nodeOverrides: [rowHeightNode],
+            nodes: [rowHeightNode],
           );
 
           // Add the row scope to the result

@@ -247,8 +247,8 @@ class Scope {
       // Remove all children not existing in replacement anymore
       final removedChildren = oldScope.children
           .where(
-            (element) =>
-                !replacement.scopeOverrides.any((c) => c.key == element.key),
+            (element) => !replacement.childrenFromConstructor
+                .any((c) => c.key == element.key),
           )
           .toList();
 
@@ -257,7 +257,7 @@ class Scope {
       }
 
       // Also replace child scopes
-      for (final newChildScope in replacement.scopeOverrides) {
+      for (final newChildScope in replacement.childrenFromConstructor) {
         // Get the associated oldChildScope
         final oldChildScope = oldScope.child(newChildScope.key);
 
@@ -865,15 +865,15 @@ class Scope {
   void _updateNodesInScope(Scope previous, ScopeBluePrint current) {
     // ....................
     // Estimate added nodes
-    final addedNodes = current.nodeOverrides
+    final addedNodes = current.nodesFromConstructor
         .where((c) => !previous.nodes.any((p) => c.key == p.key));
 
     // Estimate removed nodes
     final removedNodes = previous.nodes
-        .where((p) => !current.nodeOverrides.any((c) => c.key == p.key));
+        .where((p) => !current.nodesFromConstructor.any((c) => c.key == p.key));
 
     // Estimate changed nodes
-    final changedNodes = current.nodeOverrides.where(
+    final changedNodes = current.nodesFromConstructor.where(
       (c) => previous.nodes.any(
         (p) => c.key == p.key && c != p.bluePrint,
       ),

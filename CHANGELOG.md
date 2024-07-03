@@ -91,6 +91,7 @@
 - Rename Inserts into PluginInserts
 - Plugins can replace nodes now
 - Split node and rank separation
+- Rename nodeOverrides and scopeOverrides
 
 ### Fixed
 

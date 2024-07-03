@@ -694,8 +694,9 @@ void main() {
 
     group('findOrCreateNodes', () {
       test('should return a list of nodes', () {
-        final bluePrint = ScopeBluePrint.example().scopeOverrides.first;
-        final nodes = scope.findOrCreateNodes(bluePrint.nodeOverrides);
+        final bluePrint =
+            ScopeBluePrint.example().childrenFromConstructor.first;
+        final nodes = scope.findOrCreateNodes(bluePrint.nodesFromConstructor);
         expect(nodes, hasLength(2));
         expect(nodes[0].key, 'node');
         expect(nodes[1].key, 'customer');
@@ -994,7 +995,7 @@ void main() {
                     },
                     'bottomPanel': ScopeBluePrint(
                       key: 'bottomPanel',
-                      nodeOverrides: [
+                      nodes: [
                         NodeBluePrint<double>(
                           key: 'thickness',
                           initialProduct: 19.0,
@@ -1208,12 +1209,12 @@ void main() {
                         aliases: ['x'],
 
                         // The scope has a child scope
-                        scopeOverrides: [
+                        children: [
                           ScopeBluePrint(key: 'scAChild0'),
                         ],
 
                         // And a node
-                        nodeOverrides: [
+                        nodes: [
                           NodeBluePrint<int>(
                             key: 'scANode',
                             initialProduct: 0,
@@ -1228,12 +1229,12 @@ void main() {
                         aliases: ['x'],
 
                         // The scope has also a child scope
-                        scopeOverrides: [
+                        children: [
                           ScopeBluePrint(key: 'scAChild1'),
                         ],
 
                         // And it as also a node
-                        nodeOverrides: [
+                        nodes: [
                           NodeBluePrint<int>(
                             key: 'scANode',
                             initialProduct: 0,
