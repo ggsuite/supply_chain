@@ -9,17 +9,16 @@ import 'package:test/test.dart';
 
 void main() {
   /// A manager creating a row scope for each row
-  final SubScopeManagerBluePrint rowSubScopeManager =
-      SubScopeManagerBluePrint.example();
+  final ScopeBluePrintFactory factory = ScopeBluePrintFactory.example();
 
-  group('SubScopeManagerBluePrint', () {
+  group('ScopeBluePrintFactory', () {
     group('example', () {
       group('produce()', () {
         test('should turn components into a list of Scopes', () {
           // Test the produce function. It should return a scope blue print
           // for each row height
           final rowHeights = [10, 20, 30];
-          final rowScopes = rowSubScopeManager.produce([rowHeights], []);
+          final rowScopes = factory.produce([rowHeights], []);
           expect(rowScopes.length, 3);
 
           // Each scope should have a "RowHeight" node

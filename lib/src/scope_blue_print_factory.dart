@@ -9,9 +9,9 @@ import 'package:supply_chain/supply_chain.dart';
 
 /// Adds sub scope to the current scope depending on the products given
 /// by suppliers
-class SubScopeManagerBluePrint extends NodeBluePrint<List<ScopeBluePrint>> {
+class ScopeBluePrintFactory extends NodeBluePrint<List<ScopeBluePrint>> {
   /// Constructor
-  const SubScopeManagerBluePrint({
+  const ScopeBluePrintFactory({
     required super.key,
     required super.suppliers,
     super.initialProduct = const <ScopeBluePrint>[],
@@ -22,9 +22,9 @@ class SubScopeManagerBluePrint extends NodeBluePrint<List<ScopeBluePrint>> {
   /// Example instance for test purposes:
   /// A SubScopeManager that turns to a list of row heights
   /// into a list of scopes for each row.
-  factory SubScopeManagerBluePrint.example() {
-    final rowSubScopeManager = SubScopeManagerBluePrint(
-      key: 'subScopeManager',
+  factory ScopeBluePrintFactory.example() {
+    final rowSubScopeManager = ScopeBluePrintFactory(
+      key: 'scopeFactory',
       suppliers: ['rowHeights'],
       produce: (List<dynamic> components, _) {
         // Get the rowHeights from the suppliers
@@ -69,6 +69,5 @@ class SubScopeManagerBluePrint extends NodeBluePrint<List<ScopeBluePrint>> {
   }
 }
 
-/// Mock for [SubScopeManager]
-class MockSubScopeManagerBluePrint extends Mock
-    implements SubScopeManagerBluePrint {}
+/// Mock for [ScopeFactory]
+class MockScopeBluePrintFactory extends Mock implements ScopeBluePrintFactory {}

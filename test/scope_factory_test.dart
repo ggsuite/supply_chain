@@ -9,12 +9,12 @@ import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('subScopeManager', () {
+  group('scopeFactory', () {
     group('example', () {
       test('should work', () {
         // Get some variables
-        final subScopeManager = SubScopeManager.example();
-        final scope = subScopeManager.scope;
+        final scopeFactory = ScopeFactory.example();
+        final scope = scopeFactory.scope;
         final scm = scope.scm;
         final rowHeightsNode = scope.findNode<List<int>>('rowHeights')!;
         expect(rowHeightsNode, isNotNull);
@@ -70,12 +70,12 @@ void main() {
 
     test('should handle added and removed nodes correctly', () {
       // Instantiate a new sub scope manager
-      // and hand over a MockSubScopeManagerBluePrint.
-      final bluePrint = MockSubScopeManagerBluePrint();
+      // and hand over a MockScopeBluePrintFactory.
+      final bluePrint = MockScopeBluePrintFactory();
       var producedScopeBluePrints = <ScopeBluePrint>[];
 
       when(() => bluePrint.initialProduct).thenReturn([]);
-      when(() => bluePrint.key).thenReturn('subScopeManager');
+      when(() => bluePrint.key).thenReturn('scopeFactory');
       when(() => bluePrint.suppliers).thenReturn(['rowHeights']);
       when(() => bluePrint.allowedProducts).thenReturn([]);
       when(() => bluePrint.produce).thenReturn(
@@ -86,14 +86,14 @@ void main() {
       final scope = Scope.example();
       final scm = scope.scm;
 
-      final subScopeManager = SubScopeManager(
+      final scopeFactory = ScopeFactory(
         bluePrint: bluePrint,
         scope: scope,
       );
 
       // Call the produce method and make the blue print behaving in a way
       // adding and removing nodes is tested.
-      subScopeManager.produce(announce: false);
+      scopeFactory.produce(announce: false);
       expect(scm.nodes, hasLength(1));
 
       // Assume that the produce method adds a child scope
@@ -111,7 +111,7 @@ void main() {
         ),
       ];
 
-      subScopeManager.produce(announce: false);
+      scopeFactory.produce(announce: false);
       expect(scm.nodes, hasLength(2));
 
       // Change the produced scope. It should add one additional node.
@@ -135,7 +135,7 @@ void main() {
         ),
       ];
 
-      subScopeManager.produce(announce: false);
+      scopeFactory.produce(announce: false);
       expect(scm.nodes, hasLength(3));
 
       // Change the produced scope. It should remove the last node.
@@ -152,7 +152,7 @@ void main() {
           ],
         ),
       ];
-      subScopeManager.produce(announce: false);
+      scopeFactory.produce(announce: false);
       expect(scm.nodes, hasLength(2));
     });
   });

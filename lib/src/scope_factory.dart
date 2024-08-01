@@ -8,9 +8,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:supply_chain/supply_chain.dart';
 
 /// Creates or removes sub-scopes depending on components provided by suppliers
-class SubScopeManager extends Node<List<ScopeBluePrint>> {
+class ScopeFactory extends Node<List<ScopeBluePrint>> {
   /// Constructor
-  SubScopeManager({
+  ScopeFactory({
     required super.bluePrint,
     required super.scope,
   }) {
@@ -20,8 +20,13 @@ class SubScopeManager extends Node<List<ScopeBluePrint>> {
   // ...........................................................................
   @override
   void produce({bool announce = true}) {
+    // Remember the previous scopes
     final previousScopes = product;
+
+    // Produce the current scope blue prints
     super.produce(announce: false);
+
+    // Get the current scopes
     final currentScopes = product;
 
     // Assert currentScopes have different keys
@@ -68,8 +73,8 @@ class SubScopeManager extends Node<List<ScopeBluePrint>> {
 
   // ...........................................................................
   /// Example instance for test purposes.
-  /// See documentation of [SubScopeManagerBluePrint.example]
-  factory SubScopeManager.example() {
+  /// See documentation of [ScopeBluePrintFactory.example]
+  factory ScopeFactory.example() {
     // Create a root scope
     final scope = Scope.root(key: 'table', scm: Scm.example());
 
@@ -86,12 +91,12 @@ class SubScopeManager extends Node<List<ScopeBluePrint>> {
     );
 
     // Add a sub scope manager creating a row for each row height
-    return SubScopeManager(
-      bluePrint: SubScopeManagerBluePrint.example(),
+    return ScopeFactory(
+      bluePrint: ScopeBluePrintFactory.example(),
       scope: scope,
     );
   }
 }
 
-/// Mock for [SubScopeManager]
-class MockSubScopeManager extends Mock implements SubScopeManager {}
+/// Mock for [ScopeFactory]
+class MockSubScopeManager extends Mock implements ScopeFactory {}

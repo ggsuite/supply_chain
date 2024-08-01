@@ -93,6 +93,7 @@
 - Split node and rank separation
 - Rename nodeOverrides and scopeOverrides
 - Improve merging of built and constructor nodes and scopes
+- Rename SubScopeManager into ScopeFactory
 
 ### Fixed
 
