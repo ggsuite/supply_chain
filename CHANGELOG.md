@@ -5,8 +5,8 @@
 ### Added
 
 - Add SubChainManagerBluePrint
-- Add SubScopeManager
-- Add boilerplate for SubScopeManager
+- Add ScopeBluePrintFactory
+- Add boilerplate for ScopeBluePrintFactory
 - Add Scope.dispose
 - Add path to node and scope. Allow to specify a scope in supplier keys
 - Add built method to ScopeBluePrint
@@ -40,7 +40,7 @@
 
 - Turn NodeBluePrint into const constructor
 - Make sure disposing a node removes it from the SCM and it's scope
-- SubScopeManager can dynamically create new sub scopes
+- ScopeBluePrintFactory can dynamically create new sub scopes
 - Node and scope names must be camel case now
 - Scope:instantiate: Rename parentScope param into scope
 - ScopeBluePrints will alwas create a scope
@@ -93,7 +93,8 @@
 - Split node and rank separation
 - Rename nodeOverrides and scopeOverrides
 - Improve merging of built and constructor nodes and scopes
-- Rename SubScopeManager into ScopeFactory
+- Rename ScopeBluePrintFactory into ScopeFactory
+- Rename SubScopeManager into ScopeFactory, rename ScopeBluePrint.findNode() into findNode, offer methods to connect a blue print's node to other external nodes
 
 ### Fixed
 

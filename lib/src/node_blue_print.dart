@@ -131,8 +131,8 @@ class NodeBluePrint<T> {
         initialProduct: initialProduct,
       );
 
-  /// Maps the key of the blue print to another key
-  NodeBluePrint<T> switchSupplier(String supplier) => NodeBluePrint.map(
+  /// Makes the node forwarding the value of the supplier
+  NodeBluePrint<T> connectSupplier(String supplier) => NodeBluePrint.map(
         supplier: supplier,
         toKey: key,
         initialProduct: initialProduct,

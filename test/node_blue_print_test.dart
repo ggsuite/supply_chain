@@ -304,7 +304,7 @@ void main() {
             'c': {
               // Here we are forwarding the value from b.n0 to c.n1
               'n1': const NodeBluePrint<int>(key: 'n1', initialProduct: 374)
-                  .switchSupplier('b.n0'),
+                  .connectSupplier('b.n0'),
             },
           },
         });

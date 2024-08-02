@@ -99,4 +99,4 @@ class ScopeFactory extends Node<List<ScopeBluePrint>> {
 }
 
 /// Mock for [ScopeFactory]
-class MockSubScopeManager extends Mock implements ScopeFactory {}
+class MockScopeFactory extends Mock implements ScopeFactory {}

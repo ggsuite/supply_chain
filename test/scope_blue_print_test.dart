@@ -268,6 +268,153 @@ void main() {
           );
         });
       });
+
+      group('should apply connections', () {
+        test(
+          'and connect direct child nodes to specified suppliers',
+          () {
+            // Create a scope providing a width and a height
+            final wh0Bp = ScopeBluePrint.fromJson({
+              'wh0': {
+                'w': 100,
+                'h': 200,
+              },
+            });
+
+            // Create a second scope also providing a width2 and the height2
+            final wh1Bp = ScopeBluePrint.fromJson({
+              'wh1': {
+                'w': 300,
+                'h': 400,
+              },
+            });
+
+            // Instantiate the second scope and connect the width2 and height2
+            // to the width and height of the first scope.
+            final root = Scope.example();
+            final wh0 = wh0Bp.instantiate(scope: root);
+            final wh1 = wh1Bp.instantiate(
+              scope: root,
+              connections: {
+                'w': 'wh0.w',
+                'h': 'wh0.h',
+              },
+            );
+
+            // Changing width and height should change width2 and height2 too
+            final scm = root.scm;
+            scm.testFlushTasks();
+            final wh0Width = wh0.node<int>('w')!;
+            final wh0Height = wh0.node<int>('h')!;
+            final wh1Width = wh1.node<int>('w')!;
+            final wh1Height = wh1.node<int>('h')!;
+
+            expect(wh0Width.product, 100);
+            expect(wh0Height.product, 200);
+            expect(wh1Width.product, 100);
+            expect(wh1Height.product, 200);
+
+            // Change the width and height of the first scope
+            wh0Width.product = 101;
+            wh0Height.product = 201;
+            scm.testFlushTasks();
+
+            // Check if the width and height of the second scope changed
+            expect(wh1Width.product, 101);
+            expect(wh1Height.product, 201);
+          },
+        );
+
+        test('and connect deeper child nodes to specified suppliers', () {
+          // Create a deeper scope providing a width and a height
+          final wh0Bp = ScopeBluePrint.fromJson({
+            'wh0': {
+              'w': 100,
+              'h': 200,
+              'child': {
+                'w': 300,
+                'h': 400,
+              },
+            },
+          });
+
+          // Create another deeper scope providing a width2 and the height2
+          final wh1Bp = ScopeBluePrint.fromJson({
+            'wh1': {
+              'w': 500,
+              'h': 600,
+              'child': {
+                'w': 700,
+                'h': 800,
+              },
+            },
+          });
+
+          // Instantiate the second scope and connect the width2 and height2
+          // to the width and height of the first scope.
+          final root = Scope.example();
+          final wh0 = wh0Bp.instantiate(scope: root);
+          final wh1 = wh1Bp.instantiate(
+            scope: root,
+            connections: {
+              'child.w': 'wh0.child.w',
+              'child.h': 'wh0.child.h',
+            },
+          );
+
+          // Changing width and height should change width2 and height2 too
+          final scm = root.scm;
+          scm.testFlushTasks();
+          final wh0Width = wh0.findNode<int>('child.w')!;
+          final wh0Height = wh0.findNode<int>('child.h')!;
+          final wh1Width = wh1.findNode<int>('child.w')!;
+          final wh1Height = wh1.findNode<int>('child.h')!;
+
+          expect(wh0Width.product, 300);
+          expect(wh0Height.product, 400);
+
+          expect(wh1Width.product, 300);
+          expect(wh1Height.product, 400);
+
+          // Change the width and height of the first scope
+          wh0Width.product = 101;
+          wh0Height.product = 201;
+          scm.testFlushTasks();
+
+          // Check if the width and height of the second scope changed
+          expect(wh1Width.product, 101);
+          expect(wh1Height.product, 201);
+        });
+
+        test('and throw if a connection could not be established', () {
+          final wh0Bp = ScopeBluePrint.fromJson({
+            'wh0': {
+              'w': 100,
+              'h': 200,
+              'child': {
+                'w': 300,
+                'h': 400,
+              },
+            },
+          });
+
+          expect(
+            () => wh0Bp.instantiate(
+              scope: Scope.example(),
+              connections: {'x': 'y'},
+            ),
+            throwsA(
+              isA<ArgumentError>().having(
+                (e) => e.toString(),
+                'toString()',
+                contains(
+                  'The following connections could not be applied: {x: y}',
+                ),
+              ),
+            ),
+          );
+        });
+      });
     });
 
     group('saveGraphToFile', () {
@@ -282,16 +429,16 @@ void main() {
       });
     });
 
-    group('findNode(key)', () {
+    group('node(key)', () {
       test('should return null if no key with node is found', () {
         final bluePrint = ScopeBluePrint.example();
-        final node = bluePrint.findNode<int>('Unknown');
+        final node = bluePrint.node<int>('Unknown');
         expect(node, isNull);
       });
 
       test('should return the node with the given key', () {
         final bluePrint = ScopeBluePrint.example().children.first;
-        final node = bluePrint.findNode<int>('node');
+        final node = bluePrint.node<int>('node');
         expect(node, isNotNull);
       });
 
@@ -299,7 +446,7 @@ void main() {
         final bluePrint = ScopeBluePrint.example().children.first;
 
         expect(
-          () => bluePrint.findNode<String>('node'),
+          () => bluePrint.node<String>('node'),
           throwsA(
             isA<ArgumentError>().having(
               (e) => e.toString(),
@@ -308,6 +455,100 @@ void main() {
             ),
           ),
         );
+      });
+    });
+
+    group('findNode(path), absolutePath(path)', () {
+      final bluePrint = ScopeBluePrint.fromJson({
+        'a': {
+          'n': 0,
+          'b': {
+            'c': {
+              'd': 5,
+            },
+          },
+        },
+      });
+      group('with path containing only one segment', () {
+        group('should return null', () {
+          test('when no node with the given key is found at all', () {
+            final node = bluePrint.findNode<int>('x');
+            final path = bluePrint.absolutePath('x');
+            expect(node, isNull);
+            expect(path, isNull);
+          });
+        });
+
+        group('should return the node', () {
+          test('when it exists directly in the root', () {
+            final node = bluePrint.findNode<int>('n');
+            final path = bluePrint.absolutePath('n');
+            expect(node?.key, 'n');
+            expect(path, 'a.n');
+          });
+          test('when it exists somewhere deeper', () {
+            final node = bluePrint.findNode<int>('d');
+            final absolutePath = bluePrint.absolutePath('d');
+            expect(node?.key, 'd');
+            expect(absolutePath, 'a.b.c.d');
+          });
+        });
+
+        group('should throw', () {
+          test('when multiple nodes with the same path exist', () {
+            final bluePrint = ScopeBluePrint.fromJson({
+              'a': {
+                'k': 0,
+                'b': {
+                  'n': 1,
+                },
+                'c': {
+                  'n': 1,
+                },
+              },
+            });
+
+            expect(
+              () => bluePrint.findNode<int>('n'),
+              throwsA(
+                isA<ArgumentError>().having(
+                  (e) => e.toString(),
+                  'toString()',
+                  contains('Multiple nodes with path "n" found.'),
+                ),
+              ),
+            );
+          });
+        });
+      });
+
+      group('with path containing multiple segments', () {
+        group('should return null', () {
+          test('when no node matches the given path', () {
+            final node = bluePrint.findNode<int>('b.c.x');
+            expect(node, isNull);
+          });
+
+          test('when a path segment is missed', () {
+            final node = bluePrint.findNode<int>('b.d');
+            expect(node, isNull);
+          });
+        });
+        group('should return the node', () {
+          test('when the path matches', () {
+            final node = bluePrint.findNode<int>('b.c.d');
+            final path = bluePrint.absolutePath('b.c.d');
+            expect(node, isNotNull);
+            expect(path, 'a.b.c.d');
+          });
+
+          test('when the path contains the name of the root node', () {
+            final node = bluePrint.findNode<int>('a.b.c.d');
+            final path = bluePrint.absolutePath('a.b.c.d');
+            expect(node, isNotNull);
+            expect(path, 'a.b.c.d');
+          });
+        });
       });
     });
 
@@ -342,7 +583,7 @@ void main() {
             initialProduct: 5,
           );
           final copy = bluePrint.copyWith(modifiedNodes: [overriddenNode]);
-          expect(copy.findNode<int>('node'), overriddenNode);
+          expect(copy.node<int>('node'), overriddenNode);
         });
       });
     });

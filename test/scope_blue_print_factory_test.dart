@@ -25,7 +25,7 @@ void main() {
           // that produces the row height of the row
           var i = 0;
           for (final rowScope in rowScopes) {
-            final rowHeightNode = rowScope.findNode<int>('rowHeight')!;
+            final rowHeightNode = rowScope.node<int>('rowHeight')!;
             expect(rowHeightNode.produce([rowHeights], 0), rowHeights[i]);
             i++;
           }

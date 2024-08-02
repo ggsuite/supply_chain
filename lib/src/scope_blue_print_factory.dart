@@ -7,8 +7,8 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:supply_chain/supply_chain.dart';
 
-/// Adds sub scope to the current scope depending on the products given
-/// by suppliers
+/// A node producing scope blue prints depending on components
+///  provided by suppliers
 class ScopeBluePrintFactory extends NodeBluePrint<List<ScopeBluePrint>> {
   /// Constructor
   const ScopeBluePrintFactory({
@@ -20,10 +20,10 @@ class ScopeBluePrintFactory extends NodeBluePrint<List<ScopeBluePrint>> {
 
   // ...........................................................................
   /// Example instance for test purposes:
-  /// A SubScopeManager that turns to a list of row heights
+  /// A ScopeBluePrintFactory that turns to a list of row heights
   /// into a list of scopes for each row.
   factory ScopeBluePrintFactory.example() {
-    final rowSubScopeManager = ScopeBluePrintFactory(
+    final rowScopeBluePrintFactory = ScopeBluePrintFactory(
       key: 'scopeFactory',
       suppliers: ['rowHeights'],
       produce: (List<dynamic> components, _) {
@@ -65,7 +65,7 @@ class ScopeBluePrintFactory extends NodeBluePrint<List<ScopeBluePrint>> {
       },
     );
 
-    return rowSubScopeManager;
+    return rowScopeBluePrintFactory;
   }
 }
 
