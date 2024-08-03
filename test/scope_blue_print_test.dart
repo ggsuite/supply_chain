@@ -271,7 +271,7 @@ void main() {
 
       group('should apply connections', () {
         test(
-          'and connect direct child nodes to specified suppliers',
+          'and connect direct children to specified suppliers',
           () {
             // Create a scope providing a width and a height
             final wh0Bp = ScopeBluePrint.fromJson({
@@ -324,6 +324,64 @@ void main() {
             expect(wh1Height.product, 201);
           },
         );
+
+        test('and connect complete child scopes', () {
+          // Create a scope providing a width and a height
+          final wh0Bp = ScopeBluePrint.fromJson({
+            'wh0': {
+              'child': {
+                'w': 300,
+                'h': 400,
+              },
+            },
+          });
+
+          // Create another scope providing a width2 and the height2
+          final wh1Bp = ScopeBluePrint.fromJson({
+            'wh1': {
+              'child': {
+                'w': 700,
+                'h': 800,
+              },
+            },
+          });
+
+          // Instantiate the second scope and connect the width2 and height2
+          // to the width and height of the first scope.
+          final root = Scope.example();
+          final wh0 = wh0Bp.instantiate(scope: root);
+
+          // TODO: HIER WEITER: Kompletter Knoten muss verbunden werden können
+          final wh1 = wh1Bp.instantiate(
+            scope: root,
+            connections: {
+              'child': 'wh0.child',
+            },
+          );
+
+          // Changing width and height should change width2 and height2 too
+          final scm = root.scm;
+          scm.testFlushTasks();
+          final wh0Width = wh0.findNode<int>('child.w')!;
+          final wh0Height = wh0.findNode<int>('child.h')!;
+          final wh1Width = wh1.findNode<int>('child.w')!;
+          final wh1Height = wh1.findNode<int>('child.h')!;
+
+          expect(wh0Width.product, 300);
+          expect(wh0Height.product, 400);
+
+          expect(wh1Width.product, 300);
+          expect(wh1Height.product, 400);
+
+          // Change the width and height of the first scope
+          wh0Width.product = 101;
+          wh0Height.product = 201;
+          scm.testFlushTasks();
+
+          // Check if the width and height of the second scope changed
+          expect(wh1Width.product, 101);
+          expect(wh1Height.product, 201);
+        });
 
         test('and connect deeper child nodes to specified suppliers', () {
           // Create a deeper scope providing a width and a height
@@ -458,7 +516,7 @@ void main() {
       });
     });
 
-    group('findNode(path), absolutePath(path)', () {
+    group('findItem(path), findNode(path), findPath(path)', () {
       final bluePrint = ScopeBluePrint.fromJson({
         'a': {
           'n': 0,
@@ -472,8 +530,12 @@ void main() {
       group('with path containing only one segment', () {
         group('should return null', () {
           test('when no node with the given key is found at all', () {
-            final node = bluePrint.findNode<int>('x');
-            final path = bluePrint.absolutePath('x');
+            var (node, path) = bluePrint.findItem('x');
+            expect(node, isNull);
+            expect(path, isNull);
+
+            node = bluePrint.findNode<int>('x');
+            path = bluePrint.absoluteNodePath('x');
             expect(node, isNull);
             expect(path, isNull);
           });
@@ -481,16 +543,44 @@ void main() {
 
         group('should return the node', () {
           test('when it exists directly in the root', () {
-            final node = bluePrint.findNode<int>('n');
-            final path = bluePrint.absolutePath('n');
+            var (node, path) = bluePrint.findItem('n');
+            expect(node?.key, 'n');
+            expect(path, 'a.n');
+
+            node = bluePrint.findNode<int>('n');
+            path = bluePrint.absoluteNodePath('n');
             expect(node?.key, 'n');
             expect(path, 'a.n');
           });
           test('when it exists somewhere deeper', () {
-            final node = bluePrint.findNode<int>('d');
-            final absolutePath = bluePrint.absolutePath('d');
+            var (node, path) = bluePrint.findItem('d');
             expect(node?.key, 'd');
-            expect(absolutePath, 'a.b.c.d');
+            expect(path, 'a.b.c.d');
+
+            node = bluePrint.findNode<int>('d');
+            path = bluePrint.absoluteNodePath('d');
+            expect(node?.key, 'd');
+            expect(path, 'a.b.c.d');
+          });
+        });
+
+        group('should return the scope', () {
+          test('when the path segment matches a scope', () {
+            var (item, path) = bluePrint.findItem('a');
+            expect(item, isNotNull);
+            expect(path, 'a');
+            expect(item, isA<ScopeBluePrint>());
+            expect(item.key, 'a');
+
+            (item, path) = bluePrint.findItem('b');
+            expect(path, 'a.b');
+            expect(item, isA<ScopeBluePrint>());
+            expect(item.key, 'b');
+
+            (item, path) = bluePrint.findItem('c');
+            expect(path, 'a.b.c');
+            expect(item, isA<ScopeBluePrint>());
+            expect(item.key, 'c');
           });
         });
 
@@ -509,6 +599,17 @@ void main() {
             });
 
             expect(
+              () => bluePrint.findItem('n'),
+              throwsA(
+                isA<ArgumentError>().having(
+                  (e) => e.toString(),
+                  'toString()',
+                  contains('Multiple nodes with path "n" found.'),
+                ),
+              ),
+            );
+
+            expect(
               () => bluePrint.findNode<int>('n'),
               throwsA(
                 isA<ArgumentError>().having(
@@ -525,29 +626,72 @@ void main() {
       group('with path containing multiple segments', () {
         group('should return null', () {
           test('when no node matches the given path', () {
-            final node = bluePrint.findNode<int>('b.c.x');
+            var (node, path) = bluePrint.findItem('b.c.x');
+            expect(node, isNull);
+            expect(path, isNull);
+
+            node = bluePrint.findNode<int>('b.c.x');
             expect(node, isNull);
           });
 
           test('when a path segment is missed', () {
-            final node = bluePrint.findNode<int>('b.d');
+            var (node, path) = bluePrint.findItem('b.d');
+            expect(node, isNull);
+            expect(path, isNull);
+
+            node = bluePrint.findNode<int>('b.d');
             expect(node, isNull);
           });
         });
         group('should return the node', () {
           test('when the path matches', () {
-            final node = bluePrint.findNode<int>('b.c.d');
-            final path = bluePrint.absolutePath('b.c.d');
+            var (node, path) = bluePrint.findItem('b.c.d');
+            expect(node, isNotNull);
+            expect(path, 'a.b.c.d');
+
+            node = bluePrint.findNode<int>('b.c.d');
+            path = bluePrint.absoluteNodePath('b.c.d');
             expect(node, isNotNull);
             expect(path, 'a.b.c.d');
           });
 
           test('when the path contains the name of the root node', () {
-            final node = bluePrint.findNode<int>('a.b.c.d');
-            final path = bluePrint.absolutePath('a.b.c.d');
+            var (node, path) = bluePrint.findItem('a.b.c.d');
+            expect(node, isNotNull);
+            expect(path, 'a.b.c.d');
+
+            node = bluePrint.findNode<int>('a.b.c.d');
+            path = bluePrint.absoluteNodePath('a.b.c.d');
             expect(node, isNotNull);
             expect(path, 'a.b.c.d');
           });
+        });
+      });
+    });
+
+    group('allNodePathes', () {
+      final bluePrint = ScopeBluePrint.fromJson({
+        'a': {
+          'n': 0,
+          'b': {
+            'c': {
+              'd': 5,
+            },
+          },
+        },
+      });
+
+      group('with appendRootScopeKey == true', () {
+        test('should return all node pathes', () {
+          final pathes = bluePrint.allNodePathes(appendRootScopeKey: true);
+          expect(pathes, ['a.n', 'a.b.c.d']);
+        });
+      });
+
+      group('with appendRootScopeKey == fale', () {
+        test('should return all node pathes without root scope', () {
+          final pathes = bluePrint.allNodePathes(appendRootScopeKey: false);
+          expect(pathes, ['n', 'b.c.d']);
         });
       });
     });

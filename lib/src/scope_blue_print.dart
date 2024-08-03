@@ -226,6 +226,16 @@ class ScopeBluePrint {
   List<ScopeBluePrint> get children =>
       _mergeScopes(buildScopes(), _childrenFromConstructor);
 
+  /// The child with a given key or null if not found
+  ScopeBluePrint? child(String key) {
+    for (final child in children) {
+      if (child.key == key) {
+        return child;
+      }
+    }
+    return null;
+  }
+
   /// The list of key aliases
   final List<String> aliases;
 
@@ -238,22 +248,37 @@ class ScopeBluePrint {
 
   // ...........................................................................
   /// Returns the node for a given key
-  NodeBluePrint<T>? node<T>(String key) => _findNodeByKey<T>(key, nodes);
+  NodeBluePrint<T>? node<T>(String key) => _nodeWithKey<T>(key, nodes);
+
+  /// Returns the node or the scope
+  /// and its absolute path for a given search path
+  (dynamic, String?) findItem(String searchPath) {
+    final absolutePath = <String>[];
+    final item = _findItem<dynamic>(searchPath.split('.'), absolutePath);
+    return (item, item != null ? absolutePath.join('.') : null);
+  }
 
   /// Returns the node for a given path
   NodeBluePrint<T>? findNode<T>(String path) {
-    return _findNode<T>(path.split('.'), []);
+    final item = _findItem<T>(path.split('.'), [], matchAlsoScopes: false);
+    return item is NodeBluePrint<T> ? item : null;
   }
 
   /// Returns the absolute path of the node with path or null if not found
-  String? absolutePath(String path) {
+  String? absoluteNodePath(String path) {
     final absolutePath = <String>[];
-    final node = _findNode<dynamic>(path.split('.'), absolutePath);
+    final node = _findItem<dynamic>(path.split('.'), absolutePath);
     if (node == null) {
       return null;
     }
     return absolutePath.join('.');
   }
+
+  /// Returns the pathes of all nodes belonging to this scope
+  List<String> allNodePathes({
+    bool appendRootScopeKey = false,
+  }) =>
+      _allNodePathes(this, appendRootScopeKey: appendRootScopeKey);
 
   // ...........................................................................
   /// Turns the blue print into a scope and adds it to the parent scope.
@@ -264,7 +289,8 @@ class ScopeBluePrint {
     willInstantiate();
     connections = {...this.connections, ...connections};
 
-    // Apply connections
+    // Connect nodes of this scopes to suppliers from the outside.
+    // I.e. connected nodes will forward the value of the supplier.
     final self = _applyConnections(this, {...connections});
 
     // Allow parents to modify this child scope before instantiation
@@ -394,7 +420,7 @@ class ScopeBluePrint {
   // ...........................................................................
   /// Finds a node with a given key in a given list of nodes.
   /// Returns null if no one is found
-  static NodeBluePrint<T>? _findNodeByKey<T>(
+  static NodeBluePrint<T>? _nodeWithKey<T>(
     String key,
     List<NodeBluePrint<dynamic>> nodes,
   ) {
@@ -503,7 +529,7 @@ class ScopeBluePrint {
   }
 
   // ...........................................................................
-  static ScopeBluePrint _applyConnection(
+  static ScopeBluePrint _connectNodeToSupplier(
     ScopeBluePrint scope,
     List<String> path,
     String supplier,
@@ -521,7 +547,7 @@ class ScopeBluePrint {
     final childScope = scope.children.firstWhere(
       (element) => element.key == path.first,
     );
-    final modifiedScope = _applyConnection(
+    final modifiedScope = _connectNodeToSupplier(
       childScope,
       path.sublist(1),
       supplier,
@@ -534,6 +560,80 @@ class ScopeBluePrint {
   }
 
   // ...........................................................................
+  static List<String> _allNodePathes(
+    ScopeBluePrint scope, {
+    bool isFirstSegment = true,
+    bool appendRootScopeKey = false,
+  }) {
+    final pathes = <String>[];
+    final firstSegmentName =
+        isFirstSegment && appendRootScopeKey ? '${scope.key}.' : '';
+
+    for (final node in scope.nodes) {
+      pathes.add('$firstSegmentName${node.key}');
+    }
+
+    for (final child in scope.children) {
+      final childPathes = _allNodePathes(
+        child,
+        isFirstSegment: false,
+        appendRootScopeKey: false,
+      );
+
+      pathes.addAll(
+        childPathes
+            .map((childPath) => '$firstSegmentName${child.key}.$childPath'),
+      );
+    }
+
+    return pathes;
+  }
+
+  // ...........................................................................
+  static (
+    Map<String, String> mappedConnections,
+    Map<String, String> missingConnections
+  ) _convertScopePathToNodePathes(
+    ScopeBluePrint scope,
+    Map<String, String> connections,
+  ) {
+    // Iterate all connections
+    final processedConnections = <String, String>{};
+    final missingConnections = {...connections};
+
+    for (final connection in connections.entries) {
+      final path = connection.key;
+      final supplier = connection.value;
+
+      // Get the item belonging to the path
+      final (item, absolutePath) = scope.findItem(path);
+
+      if (item == null) {
+        continue;
+      }
+
+      missingConnections.remove(path);
+
+      // If item is a node, replace the path by the absolute path of the node
+      if (item is NodeBluePrint) {
+        processedConnections[absolutePath!] = supplier;
+      }
+
+      // If item is a scope, iterate all nodes of the scope and
+      // replace the path by the absolute path of the node
+      if (item is ScopeBluePrint) {
+        missingConnections.remove(path);
+        final nodePathes = _allNodePathes(item);
+        for (final nodePath in nodePathes) {
+          processedConnections[nodePath] = '$supplier.$nodePath';
+        }
+      }
+    }
+
+    return (processedConnections, missingConnections);
+  }
+
+  // ...........................................................................
   ScopeBluePrint _applyConnections(
     ScopeBluePrint scope,
     Map<String, String> connections,
@@ -542,51 +642,37 @@ class ScopeBluePrint {
       return scope;
     }
 
+    // Replace connected scopes by its connected nodes
+    final (mappedConnections, missingConnections) =
+        _convertScopePathToNodePathes(scope, connections);
+
     // Remaining connections
     final modifiedNodes = <NodeBluePrint<dynamic>>[];
     var modifiedSelf = this;
 
     // .............
     // Connect nodes
-    for (final connection in {...connections}.entries) {
+    for (final connection in [...mappedConnections.entries]) {
       final key = connection.key;
       final supplier = connection.value;
 
-      // ..........................
-      // Find the node in own nodes
-      final node = scope.node<dynamic>(key);
-      if (node != null) {
-        // Connect the node to the specified supplier
-        final modifiedNode = node.connectSupplier(supplier);
-
-        // Add the node to modified nodes
-        modifiedNodes.add(modifiedNode);
-
-        // Mark the connection as being applied
-        connections.remove(key);
-
-        continue;
-      }
-
-      // .............................
-      // Find the node in child scopes
-      final absolutePath = scope.absolutePath(key);
+      final absolutePath = scope.absoluteNodePath(key);
       if (absolutePath != null) {
         final segments = absolutePath.split('.');
-        modifiedSelf = _applyConnection(
+        modifiedSelf = _connectNodeToSupplier(
           modifiedSelf,
           segments.sublist(1),
           supplier,
         );
 
-        connections.remove(key);
+        mappedConnections.remove(key);
       }
     }
 
     // Throw if not all connections could be applied
-    if (connections.isNotEmpty) {
+    if (missingConnections.isNotEmpty) {
       throw ArgumentError(
-        'The following connections could not be applied: $connections',
+        'The following connections could not be applied: $missingConnections',
       );
     }
 
@@ -639,26 +725,44 @@ class ScopeBluePrint {
   }
 
   // ...........................................................................
-  NodeBluePrint<T>? _findNode<T>(
+  Object? _findItem<T>(
     List<String> path,
     List<String> absolutePath, {
     bool isFirstSegment = true,
+    bool matchAlsoScopes = true,
   }) {
-    NodeBluePrint<T>? result;
+    Object? result;
 
     if (key != path[0]) {
       absolutePath.add(key);
     }
 
-    // Only one segment? Find the node in the current scope
+    // Only one segment?
     if (path.length == 1) {
-      result = _findNodeByKey<T>(path[0], nodes);
+      // Return the node with the given key
+      final foundNode = node<T>(path[0]);
 
-      if (result != null) {
-        absolutePath.add(result.key);
-        return result;
+      if (foundNode != null) {
+        absolutePath.add(foundNode.key);
+        return foundNode;
       }
 
+      if (matchAlsoScopes) {
+        // Return the own scope if it matches the key
+        if (key == path[0]) {
+          absolutePath.add(key);
+          return this;
+        }
+
+        // Return the child scope if it matches the key
+        final foundChildScope = child(path[0]);
+        if (foundChildScope != null) {
+          absolutePath.add(foundChildScope.key);
+          return foundChildScope;
+        }
+      }
+
+      // If we are in the middle of a search, return null
       if (!isFirstSegment) {
         return null;
       }
@@ -675,7 +779,7 @@ class ScopeBluePrint {
     final remainingPath = path.sublist(1);
     final subPath = <String>[];
     if (childScope != null) {
-      result = childScope._findNode<T>(
+      result = childScope._findItem<T>(
         remainingPath,
         subPath,
         isFirstSegment: false,
@@ -692,26 +796,26 @@ class ScopeBluePrint {
 
     // Start searching deeper
     subPath.clear();
-    final foundNodes = <NodeBluePrint<T>>[];
+    final foundItems = <Object>[];
     for (final child in children) {
-      result = child._findNode<T>(
+      result = child._findItem<T>(
         path,
         subPath,
         isFirstSegment: true,
       );
       if (result != null) {
-        foundNodes.add(result);
+        foundItems.add(result);
       }
     }
 
-    if (foundNodes.length > 1) {
+    if (foundItems.length > 1) {
       throw ArgumentError(
         'Multiple nodes with path "${path.join('.')}" found.',
       );
     }
 
     absolutePath.addAll(subPath);
-    return foundNodes.isNotEmpty ? foundNodes.first : null;
+    return foundItems.isNotEmpty ? foundItems.first : null;
   }
 }
 

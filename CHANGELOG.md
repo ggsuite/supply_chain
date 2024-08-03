@@ -95,6 +95,7 @@
 - Improve merging of built and constructor nodes and scopes
 - Rename ScopeBluePrintFactory into ScopeFactory
 - Rename SubScopeManager into ScopeFactory, rename ScopeBluePrint.findNode() into findNode, offer methods to connect a blue print's node to other external nodes
+- Allow to connect nodes and scopes to nodes and scopes in the outside
 
 ### Fixed
 

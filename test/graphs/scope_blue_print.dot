@@ -4,20 +4,20 @@ digraph unix {
   fontname="Helvetica,Arial,sans-serif"
   node [fontname="Helvetica,Arial,sans-serif"]
   edge [fontname="Helvetica,Arial,sans-serif"]
-  subgraph cluster_outer_30 {
+  subgraph cluster_outer_36 {
     label = "outer"; // scope
     invisible [label = "", shape = point, style=invis]; // outer
-    subgraph cluster_scope_31 {
+    subgraph cluster_scope_37 {
       label = "scope"; // scope
-      dependency_28 [
+      dependency_32 [
         label = "dependency"; // node
       ];
-      subgraph cluster_childScope_32 {
+      subgraph cluster_childScope_38 {
         label = "childScope"; // scope
-        node_29 [
+        node_33 [
           label = "node"; // node
         ];
-        customer_30 [
+        customer_34 [
           label = "customer"; // node
         ];
         
