@@ -694,7 +694,7 @@ void main() {
 
     group('findOrCreateNodes', () {
       test('should return a list of nodes', () {
-        final bluePrint = ScopeBluePrint.example().children.first;
+        final bluePrint = ScopeBluePrint.example().children.last;
         final nodes = scope.findOrCreateNodes(bluePrint.nodes);
         expect(nodes, hasLength(2));
         expect(nodes[0].key, 'node');

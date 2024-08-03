@@ -157,12 +157,12 @@ class ScopeBluePrint {
   }) {
     // Merge the node overrides
     final mergedNodes = _mergeNodes(
-      _nodesFromConstructor,
+      nodes,
       modifiedNodes,
     );
 
     final mergedScopes = _mergeScopes(
-      _childrenFromConstructor,
+      children,
       modifiedScopes,
     );
 
@@ -368,7 +368,7 @@ class ScopeBluePrint {
     );
 
     /// return the result
-    return ScopeBluePrint(
+    return ExampleScopeBluePrintSimple(
       key: key,
       nodes: [
         dependency,
@@ -918,6 +918,44 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
         ],
       ),
       ScopeBluePrint.example(key: 'scopeToBeReplaced'),
+    ];
+  }
+}
+
+/// A very simple derived scope blue print.
+/// It adds one node and one scope using the override mechanism.
+class ExampleScopeBluePrintSimple extends ScopeBluePrint {
+  /// Constructor
+  ExampleScopeBluePrintSimple({
+    super.key = 'example',
+    super.nodes,
+    super.children,
+  });
+
+  @override
+  List<NodeBluePrint<dynamic>> buildNodes() {
+    return [
+      const NodeBluePrint<int>(
+        key: 'builtNode',
+        initialProduct: 0,
+        suppliers: [],
+      ),
+    ];
+  }
+
+  @override
+  List<ScopeBluePrint> buildScopes() {
+    return [
+      const ScopeBluePrint(
+        key: 'builtScope',
+        nodes: [
+          NodeBluePrint<int>(
+            key: 'builtNodeInScope',
+            initialProduct: 0,
+            suppliers: [],
+          ),
+        ],
+      ),
     ];
   }
 }

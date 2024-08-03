@@ -12,12 +12,16 @@ void main() {
     group('example', () {
       test('should provide a blue print with to nodes and one dependency', () {
         final scopeBluePrint = ScopeBluePrint.example();
-        final dependency = scopeBluePrint.nodes.first;
-        final subScope = scopeBluePrint.children.first;
+        final builtNode = scopeBluePrint.nodes[0];
+        final dependency = scopeBluePrint.nodes[1];
+        final builtScope = scopeBluePrint.children.first;
+        final subScope = scopeBluePrint.children.last;
         final node = subScope.nodes.first as NodeBluePrint<int>;
         final customer = subScope.nodes.last as NodeBluePrint<int>;
         expect(scopeBluePrint.toString(), scopeBluePrint.key);
+        expect(builtNode.key, 'builtNode');
         expect(dependency.key, 'dependency');
+        expect(builtScope.key, 'builtScope');
         expect(node.key, 'node');
         expect(customer.key, 'customer');
         expect(node.produce(<dynamic>[5], 0), 6);
@@ -278,6 +282,7 @@ void main() {
               'wh0': {
                 'w': 100,
                 'h': 200,
+                'd': 250, // Not connected
               },
             });
 
@@ -286,6 +291,7 @@ void main() {
               'wh1': {
                 'w': 300,
                 'h': 400,
+                'd': 450,
               },
             });
 
@@ -298,6 +304,7 @@ void main() {
               connections: {
                 'w': 'wh0.w',
                 'h': 'wh0.h',
+                // 'd': 'wh0.d', // Not connected
               },
             );
 
@@ -306,13 +313,87 @@ void main() {
             scm.testFlushTasks();
             final wh0Width = wh0.node<int>('w')!;
             final wh0Height = wh0.node<int>('h')!;
+            final wh0Depth = wh0.node<int>('d')!;
             final wh1Width = wh1.node<int>('w')!;
             final wh1Height = wh1.node<int>('h')!;
+            final wh1Depth = wh1.node<int>('d')!;
 
             expect(wh0Width.product, 100);
             expect(wh0Height.product, 200);
+            expect(wh0Depth.product, 250);
             expect(wh1Width.product, 100);
             expect(wh1Height.product, 200);
+            expect(
+              wh1Depth.product,
+              450,
+            ); // Not changed because it is not connected
+
+            // Change the width and height of the first scope
+            wh0Width.product = 101;
+            wh0Height.product = 201;
+            scm.testFlushTasks();
+
+            // Check if the width and height of the second scope changed
+            expect(wh1Width.product, 101);
+            expect(wh1Height.product, 201);
+          },
+        );
+
+        test(
+          'and connect deep children to specified suppliers',
+          () {
+            // Create a scope providing a width and a height
+            final wh0Bp = ScopeBluePrint.fromJson({
+              'wh0': {
+                'child': {
+                  'w': 100,
+                  'h': 200,
+                  'd': 250, // Not connected
+                },
+              },
+            });
+
+            // Create a second scope also providing a width2 and the height2
+            final wh1Bp = ScopeBluePrint.fromJson({
+              'wh1': {
+                'w': 300,
+                'h': 400,
+                'd': 450,
+              },
+            });
+
+            // Instantiate the second scope and connect the width2 and height2
+            // to the width and height of the first scope.
+            final root = Scope.example();
+            final wh0 = wh0Bp.instantiate(scope: root);
+            final wh1 = wh1Bp.instantiate(
+              scope: root,
+              connections: {
+                'w': 'wh0.child.w',
+                'h': 'wh0.child.h',
+                // 'child.d': 'wh0.child.d', // Not connected
+              },
+            );
+
+            // Changing width and height should change width2 and height2 too
+            final scm = root.scm;
+            scm.testFlushTasks();
+            final wh0Width = wh0.findNode<int>('child.w')!;
+            final wh0Height = wh0.findNode<int>('child.h')!;
+            final wh0Depth = wh0.findNode<int>('child.d')!;
+            final wh1Width = wh1.findNode<int>('w')!;
+            final wh1Height = wh1.findNode<int>('h')!;
+            final wh1Depth = wh1.findNode<int>('d')!;
+
+            expect(wh0Width.product, 100);
+            expect(wh0Height.product, 200);
+            expect(wh0Depth.product, 250);
+            expect(wh1Width.product, 100);
+            expect(wh1Height.product, 200);
+            expect(
+              wh1Depth.product,
+              450,
+            ); // Not changed because it is not connected
 
             // Change the width and height of the first scope
             wh0Width.product = 101;
@@ -351,7 +432,6 @@ void main() {
           final root = Scope.example();
           final wh0 = wh0Bp.instantiate(scope: root);
 
-          // TODO: HIER WEITER: Kompletter Knoten muss verbunden werden können
           final wh1 = wh1Bp.instantiate(
             scope: root,
             connections: {
@@ -495,13 +575,13 @@ void main() {
       });
 
       test('should return the node with the given key', () {
-        final bluePrint = ScopeBluePrint.example().children.first;
+        final bluePrint = ScopeBluePrint.example().children.last;
         final node = bluePrint.node<int>('node');
         expect(node, isNotNull);
       });
 
       test('should throw if the type does not match', () {
-        final bluePrint = ScopeBluePrint.example().children.first;
+        final bluePrint = ScopeBluePrint.example().children.last;
 
         expect(
           () => bluePrint.node<String>('node'),
@@ -716,7 +796,7 @@ void main() {
           final copy = bluePrint.copyWith(modifiedScopes: otherSubScopes);
           expect(
             copy.children,
-            same(bluePrint.children),
+            bluePrint.children,
           );
         });
 

@@ -103,6 +103,7 @@
 - Fix issues in relation with aliases
 - Fix various search issues
 - Fix an search error with scope aliases
+- Fix an error
 
 ### Removed
 

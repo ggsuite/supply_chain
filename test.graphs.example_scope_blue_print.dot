@@ -24,24 +24,34 @@ digraph unix {
     }
     subgraph cluster_scopeToBeReplaced_4 {
       label = "scopeToBeReplaced"; // scope
-      dependency_4 [
+      builtNode_4 [
+        label = "builtNode"; // node
+      ];
+      dependency_5 [
         label = "dependency"; // node
       ];
-      subgraph cluster_childScope_5 {
+      subgraph cluster_builtScope_5 {
+        label = "builtScope"; // scope
+        builtNodeInScope_6 [
+          label = "builtNodeInScope"; // node
+        ];
+        
+      }
+      subgraph cluster_childScope_6 {
         label = "childScope"; // scope
-        node_5 [
+        node_7 [
           label = "node"; // node
         ];
-        customer_6 [
+        customer_8 [
           label = "customer"; // node
         ];
         
       }
       
     }
-    subgraph cluster_childScopeConstructedByParent_6 {
+    subgraph cluster_childScopeConstructedByParent_7 {
       label = "childScopeConstructedByParent"; // scope
-      nodeConstructedByChildScope_7 [
+      nodeConstructedByChildScope_9 [
         label = "nodeConstructedByChildScope"; // node
       ];
       
