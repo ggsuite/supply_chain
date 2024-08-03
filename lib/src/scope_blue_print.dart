@@ -49,7 +49,21 @@ class ScopeBluePrint {
     List<ScopeBluePrint> children = const [],
     this.aliases = const [],
     this.connections = const {},
-    this.documentation = '',
+    ModifyNode modifyChildNode = _dontModifyMode,
+    ModifyScope modifyChildScope = _dontModifyScope,
+  })  : _modifyChildScope = modifyChildScope,
+        _modifyChildNode = modifyChildNode,
+        _nodesFromConstructor = nodes,
+        _childrenFromConstructor = children;
+
+  // ...........................................................................
+  /// Constructor of the scope
+  const ScopeBluePrint.old({
+    required this.key,
+    List<NodeBluePrint<dynamic>> nodes = const [],
+    List<ScopeBluePrint> children = const [],
+    this.aliases = const [],
+    this.connections = const {},
     ModifyNode modifyChildNode = _dontModifyMode,
     ModifyScope modifyChildScope = _dontModifyScope,
   })  : _modifyChildScope = modifyChildScope,
@@ -172,7 +186,6 @@ class ScopeBluePrint {
       nodes: mergedNodes,
       children: mergedScopes,
       connections: connections,
-      documentation: documentation,
       modifyChildNode: modifyChildNode ?? _modifyChildNode,
       modifyChildScope: modifyChildScope ?? _modifyChildScope,
     );
@@ -241,10 +254,6 @@ class ScopeBluePrint {
 
   /// Allows to connect scopes and nodes to sources from the outside
   final Map<String, String> connections;
-
-  // ...........................................................................
-  /// Returns a documentation for the node
-  final String documentation;
 
   // ...........................................................................
   /// Returns the node for a given key
@@ -397,7 +406,6 @@ class ScopeBluePrint {
     required List<NodeBluePrint<dynamic>> nodes,
     required List<ScopeBluePrint> children,
     required this.connections,
-    required this.documentation,
     required ModifyNode modifyChildNode,
     required ModifyScope modifyChildScope,
   })  : _modifyChildScope = modifyChildScope,
@@ -842,7 +850,6 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
     super.key = 'parentScope',
     List<NodeBluePrint<dynamic>> nodes = const [],
     List<ScopeBluePrint> childrenFromConstructor = const [],
-    super.documentation,
     ModifyNode? modifyChildNode,
     ModifyScope? modifyChildScope,
   }) : super(
