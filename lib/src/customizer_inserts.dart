@@ -6,21 +6,21 @@
 
 import 'package:supply_chain/supply_chain.dart';
 
-/// Manages the inserts of a plugin
+/// Manages the inserts of a customizer
 ///
-/// - Deeply iterates all nodes of the plugin's scope
+/// - Deeply iterates all nodes of the customizer's scope
 /// - Creates scopes for the inserts
 /// - Creates the insert nodes for each child
-class PluginInserts {
+class CustomizerInserts {
   /// The constructor
-  PluginInserts({
-    required this.plugin,
+  CustomizerInserts({
+    required this.customizer,
   }) {
-    _init(plugin.scope);
+    _init(customizer.scope);
   }
 
-  /// The plugin this inserts belongs to
-  final Plugin plugin;
+  /// The customizer this inserts belongs to
+  final Customizer customizer;
 
   // ...........................................................................
   /// Disposes the insert and removes it from the scope
@@ -32,9 +32,9 @@ class PluginInserts {
 
   // ...........................................................................
   /// Returns an example instance
-  factory PluginInserts.example() {
-    final plugin = Plugin.example();
-    final inserts = plugin.inserts;
+  factory CustomizerInserts.example() {
+    final customizer = Customizer.example();
+    final inserts = customizer.inserts;
     return inserts;
   }
 
@@ -57,20 +57,20 @@ class PluginInserts {
     // Iterare all nodes and child nodes and apply the insert
     for (final node in scope.nodes) {
       // Get the inserts for the node
-      final insertsForNode = plugin.bluePrint.inserts(hostNode: node);
+      final insertsForNode = customizer.bluePrint.inserts(hostNode: node);
       if (insertsForNode.isEmpty) {
         continue;
       }
 
-      // Create a scope hosting all the inserts of the current plugin
-      final Scope scopeForInsertsOfPlugin =
-          scope.findOrCreateChild(plugin.bluePrint.key);
-      _scopes.add(scopeForInsertsOfPlugin);
+      // Create a scope hosting all the inserts of the current customizer
+      final Scope scopeForInsertsOfCustomizer =
+          scope.findOrCreateChild(customizer.bluePrint.key);
+      _scopes.add(scopeForInsertsOfCustomizer);
 
       // Each node can have multiple inserts.
       // Therefore create a scope for each node
       Scope scopeForInsertsOfNode =
-          scopeForInsertsOfPlugin.findOrCreateChild('${node.key}Inserts');
+          scopeForInsertsOfCustomizer.findOrCreateChild('${node.key}Inserts');
 
       // Add the inserts to the node
       for (final insertNodeBluePrint in insertsForNode) {

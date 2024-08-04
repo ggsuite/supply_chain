@@ -6,28 +6,28 @@
 
 import 'package:supply_chain/supply_chain.dart';
 
-/// Manages the scopes added by a plugin
-class PluginScopeAdder {
+/// Manages the nodes added by a customizer
+class CustomizerNodeAdder {
   /// The constructor
-  PluginScopeAdder({
-    required this.plugin,
+  CustomizerNodeAdder({
+    required this.customizer,
   }) {
-    _init(plugin.scope);
+    _init(customizer.scope);
   }
 
   // ...........................................................................
-  /// Removes the added scopes again
+  /// Disposes the nodes and removes it from the scope
   void dispose() {
     for (final d in _dispose.reversed) {
       d();
     }
   }
 
-  /// The plugin this class belongs to
-  final Plugin plugin;
+  /// The customizer this class belongs to
+  final Customizer customizer;
 
   /// Returns an example instance for test purposes
-  static PluginScopeAdder get example {
+  static CustomizerNodeAdder get example {
     final scope = Scope.example();
 
     scope.mockContent({
@@ -40,9 +40,8 @@ class PluginScopeAdder {
       },
     });
 
-    final plugin = ExamplePluginAddingScopes().instantiate(scope: scope);
-    scope.scm.testFlushTasks();
-    return plugin.scopeAdder;
+    final customizer = ExampleCustomizerAddingNodes().instantiate(scope: scope);
+    return customizer.nodeAdder;
   }
 
   // ######################
@@ -61,28 +60,28 @@ class PluginScopeAdder {
 
   // ...........................................................................
   void _initScope(Scope scope) {
-    final bluePrints = plugin.bluePrint.addScopes(
+    final bluePrints = customizer.bluePrint.addNodes(
       hostScope: scope,
     );
 
-    // Make sure the scope does not already exist.
+    // Make sure the node does not already exist.
     for (final bluePrint in bluePrints) {
-      final childScope = scope.child(bluePrint.key);
-      if (childScope != null) {
+      final node = scope.node<dynamic>(bluePrint.key);
+      if (node != null) {
         throw Exception(
-          'Scope with key "${bluePrint.key}" already exists. '
-          'Please use "PluginBluePrint:replaceScope" instead.',
+          'Node with key "${bluePrint.key}" already exists. '
+          'Please use "CustomizerBluePrint:replaceNode" instead.',
         );
       }
     }
 
-    // Add the child scopes to the host scope
-    final addedScopes = scope.addChildren(bluePrints);
+    // Add the nodes to the scope
+    final addedNodes = scope.findOrCreateNodes(bluePrints);
 
-    // On dispose, we will also dispose all added scopes
+    // On dispose, we will dispose also all added nodes
     _dispose.add(() {
-      for (final addedScope in addedScopes) {
-        addedScope.dispose();
+      for (final node in addedNodes) {
+        node.dispose();
       }
     });
   }
@@ -96,34 +95,38 @@ class PluginScopeAdder {
 
 // #############################################################################
 /// An example node adder for test purposes
-class ExamplePluginAddingScopes extends PluginBluePrint {
+class ExampleCustomizerAddingNodes extends CustomizerBluePrint {
   /// The constructor
-  ExamplePluginAddingScopes() : super(key: 'example');
+  ExampleCustomizerAddingNodes() : super(key: 'example');
 
   @override
-  List<ScopeBluePrint> addScopes({
+  List<NodeBluePrint<dynamic>> addNodes({
     required Scope hostScope,
   }) {
     // Add k,j to example scope
     if (hostScope.key == 'example') {
-      return [
-        ScopeBluePrint.fromJson({
-          'k': {'kv': 767},
-        }),
-        ScopeBluePrint.fromJson({
-          'j': {'jv': 171},
-        }),
+      return const [
+        NodeBluePrint<int>(
+          key: 'k',
+          initialProduct: 12,
+        ),
+        NodeBluePrint<int>(
+          key: 'j',
+          initialProduct: 367,
+        ),
       ];
     }
     // Add x,y to c scope
     if (hostScope.key == 'c') {
-      return [
-        ScopeBluePrint.fromJson({
-          'x': {'xv': 530},
-        }),
-        ScopeBluePrint.fromJson({
-          'y': {'yv': 543},
-        }),
+      return const [
+        NodeBluePrint<int>(
+          key: 'x',
+          initialProduct: 966,
+        ),
+        NodeBluePrint<int>(
+          key: 'y',
+          initialProduct: 767,
+        ),
       ];
     } else {
       return []; // coverage:ignore-line

@@ -8,14 +8,14 @@ import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('PluginInserts', () {
+  group('CustomizerInserts', () {
     group('should recursively iterate all nodes of the host scope', () {
-      test('and add the inserts as defined in the plugin', () {
-        // Look into [ExamplePluginBluePrint] to see the node hierarchy
+      test('and add the inserts as defined in the customizer', () {
+        // Look into [ExampleCustomizerBluePrint] to see the node hierarchy
         // used for this example
-        final inserts = PluginInserts.example();
-        final plugin = inserts.plugin;
-        final scope = plugin.scope;
+        final inserts = CustomizerInserts.example();
+        final customizer = inserts.customizer;
+        final scope = customizer.scope;
 
         // Get the nodes out of the example hierarchy
         final hostA = scope.findNode<int>('hostA')!;
@@ -24,7 +24,7 @@ void main() {
         final other = scope.findNode<int>('other')!;
 
         // All nodes having a key starting with "host" should have two inserts
-        // added by ExamplePluginBluePrint
+        // added by ExampleCustomizerBluePrint
 
         // Scope should have 1 additional insert,
         // because
@@ -48,9 +48,9 @@ void main() {
         final productC = hostC.product;
         expect(productC, (initialC + 111) * 10 * 2);
 
-        // Finally let's dispose the plugin
-        plugin.dispose();
-        plugin.scope.scm.testFlushTasks();
+        // Finally let's dispose the customizer
+        customizer.dispose();
+        customizer.scope.scm.testFlushTasks();
 
         // Now the inserts should be removed from all nodes
         expect(hostA.inserts, hasLength(0));

@@ -6,51 +6,51 @@
 
 import 'package:supply_chain/supply_chain.dart';
 
-/// Realizes a plugin
-class Plugin {
-  /// Instante of a plugin blue print
-  Plugin({
+/// Realizes a customizer
+class Customizer {
+  /// Instante of a customizer blue print
+  Customizer({
     required this.bluePrint,
     required this.scope,
   }) {
     _init();
   }
 
-  /// Disposes the plugin
+  /// Disposes the customizer
   void dispose() {
     for (var dispose in _dispose.reversed) {
       dispose();
     }
   }
 
-  /// The blue print of the plugin
-  final PluginBluePrint bluePrint;
+  /// The blue print of the customizer
+  final CustomizerBluePrint bluePrint;
 
-  /// The scope this plugin is instantiated in
+  /// The scope this customizer is instantiated in
   final Scope scope;
 
-  /// Returns an example instance of the plugin
-  factory Plugin.example() {
-    return PluginBluePrint.example;
+  /// Returns an example instance of the customizer
+  factory Customizer.example() {
+    return CustomizerBluePrint.example;
   }
 
-  /// The inserts of the plugin
-  late final PluginInserts inserts;
+  /// The inserts of the customizer
+  late final CustomizerInserts inserts;
 
-  /// The node replacer of the plugin
-  late final PluginNodeReplacer nodeReplacer;
+  /// The node replacer of the customizer
+  late final CustomizerNodeReplacer nodeReplacer;
 
-  /// The node adder of the plugin
-  late final PluginNodeAdder nodeAdder;
+  /// The node adder of the customizer
+  late final CustomizerNodeAdder nodeAdder;
 
-  /// The scope adder of the plugin
-  late final PluginScopeAdder scopeAdder;
+  /// The scope adder of the customizer
+  late final CustomizerScopeAdder scopeAdder;
 
   // ######################
   // Private
   // ######################
 
-  final List<Plugin> _children = [];
+  final List<Customizer> _children = [];
 
   final List<void Function()> _dispose = [];
 
@@ -64,40 +64,42 @@ class Plugin {
   }
 
   void _initScope() {
-    if (scope.plugin(bluePrint.key) != null) {
-      throw ArgumentError('Another plugin with key ${bluePrint.key} is added.');
+    if (scope.customizer(bluePrint.key) != null) {
+      throw ArgumentError(
+        'Another customizer with key ${bluePrint.key} is added.',
+      );
     }
 
-    scope.addPlugin(this);
+    scope.addCustomizer(this);
 
     _dispose.add(
-      () => scope.removePlugin(this),
+      () => scope.removeCustomizer(this),
     );
   }
 
   void _initInserts() {
-    inserts = PluginInserts(plugin: this);
+    inserts = CustomizerInserts(customizer: this);
     _dispose.add(inserts.dispose);
   }
 
   void _initNodeReplacer() {
-    nodeReplacer = PluginNodeReplacer(plugin: this);
+    nodeReplacer = CustomizerNodeReplacer(customizer: this);
     _dispose.add(nodeReplacer.dispose);
   }
 
   void _initNodeAdder() {
-    nodeAdder = PluginNodeAdder(plugin: this);
+    nodeAdder = CustomizerNodeAdder(customizer: this);
     _dispose.add(nodeAdder.dispose);
   }
 
   void _initScopeAdder() {
-    scopeAdder = PluginScopeAdder(plugin: this);
+    scopeAdder = CustomizerScopeAdder(customizer: this);
     _dispose.add(scopeAdder.dispose);
   }
 
   void _initChildren(Scope scope) {
     // Init own children
-    for (final child in bluePrint.plugins(hostScope: scope)) {
+    for (final child in bluePrint.customizers(hostScope: scope)) {
       _children.add(child.instantiate(scope: scope));
     }
 

@@ -6,20 +6,20 @@
 
 import 'package:supply_chain/supply_chain.dart';
 
-/// A plugin changes various aspects of a scope and its children
-class PluginBluePrint {
+/// A customizer changes various aspects of a scope and its children
+class CustomizerBluePrint {
   ///  Constructor
-  const PluginBluePrint({
+  const CustomizerBluePrint({
     required this.key,
   });
 
-  /// Instantiates this plugin and it's children within the given hostScope
+  /// Instantiates this customizer and it's children within the given hostScope
   ///
-  /// - [hostScope]: The scope this plugin will be instantiated in
+  /// - [hostScope]: The scope this customizer will be instantiated in
   /// - The callbacks below will be applied to the hostScope and all its
   ///   children
-  Plugin instantiate({required Scope scope}) {
-    return Plugin(bluePrint: this, scope: scope);
+  Customizer instantiate({required Scope scope}) {
+    return Customizer(bluePrint: this, scope: scope);
   }
 
   // ...........................................................................
@@ -85,34 +85,34 @@ class PluginBluePrint {
   }
 
   // ...........................................................................
-  // Child plugins
+  // Child customizers
 
-  /// A plugin can define plugins for child scopes
+  /// A customizer can define customizers for child scopes
   ///
-  /// - Returns: A list of child plugins
-  List<PluginBluePrint> plugins({required Scope hostScope}) {
+  /// - Returns: A list of child customizers
+  List<CustomizerBluePrint> customizers({required Scope hostScope}) {
     return [];
   }
 
   // ...........................................................................
-  /// Returns an example instance of the plugin
-  static Plugin get example {
-    return ExamplePluginBluePrint.example;
+  /// Returns an example instance of the customizer
+  static Customizer get example {
+    return ExampleCustomizerBluePrint.example;
   }
 
   // ######################
   // Private
   // ######################
 
-  /// The key of the plugin
+  /// The key of the customizer
   final String key;
 }
 
 // #############################################################################
-/// An example plugin
-class ExamplePluginBluePrint extends PluginBluePrint {
+/// An example customizer
+class ExampleCustomizerBluePrint extends CustomizerBluePrint {
   /// The constructor
-  const ExamplePluginBluePrint({super.key = 'examplePlugin'});
+  const ExampleCustomizerBluePrint({super.key = 'exampleCustomizer'});
 
   // ...........................................................................
   /// Inserts
@@ -145,17 +145,17 @@ class ExamplePluginBluePrint extends PluginBluePrint {
   }
 
   // ...........................................................................
-  /// All scopes with key 'b' will get a child plugin
+  /// All scopes with key 'b' will get a child customizer
   @override
-  List<PluginBluePrint> plugins({required Scope hostScope}) {
+  List<CustomizerBluePrint> customizers({required Scope hostScope}) {
     return [
-      if (hostScope.key == 'b') const ExampleChildPluginBluePrint(),
+      if (hostScope.key == 'b') const ExampleChildCustomizerBluePrint(),
     ];
   }
 
   // ...........................................................................
-  /// Returns an example instance of the ExamplePlugin
-  static Plugin get example {
+  /// Returns an example instance of the ExampleCustomizer
+  static Customizer get example {
     // The example applies inserts to all nodes with a key
     // starting with 'host'.
 
@@ -173,18 +173,19 @@ class ExamplePluginBluePrint extends PluginBluePrint {
       },
     });
 
-    // Apply the plugin to the scope
-    final plugin = const ExamplePluginBluePrint().instantiate(scope: scope);
-    plugin.scope.scm.testFlushTasks();
-    return plugin;
+    // Apply the customizer to the scope
+    final customizer =
+        const ExampleCustomizerBluePrint().instantiate(scope: scope);
+    customizer.scope.scm.testFlushTasks();
+    return customizer;
   }
 }
 
 // #############################################################################
-/// An example plugin
-class ExampleChildPluginBluePrint extends PluginBluePrint {
+/// An example customizer
+class ExampleChildCustomizerBluePrint extends CustomizerBluePrint {
   /// The constructor
-  const ExampleChildPluginBluePrint({super.key = 'exampleChildPlugin'});
+  const ExampleChildCustomizerBluePrint({super.key = 'exampleChildCustomizer'});
 
   // ...........................................................................
   /// Inserts

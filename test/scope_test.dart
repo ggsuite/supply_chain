@@ -1273,8 +1273,8 @@ void main() {
 
       group('with skipInserts', () {
         test('should return inserts when skipInserts is false ', () {
-          final plugin = Plugin.example();
-          final scope = plugin.scope;
+          final customizer = Customizer.example();
+          final scope = customizer.scope;
           final hostB = scope.findNode<int>('hostB')!;
           expect(hostB.inserts.first.key, 'add111');
 
@@ -1430,8 +1430,8 @@ void main() {
       });
     });
 
-    group('addPlugin, removePlugin, plugin', () {
-      test('should add and remove a plugin', () {
+    group('addCustomizer, removeCustomizer, customizer', () {
+      test('should add and remove a customizer', () {
         final scope = Scope.example();
         scope.mockContent({
           'a': {
@@ -1440,19 +1440,19 @@ void main() {
             },
           },
         });
-        final bluePrint = PluginBluePrint.example.bluePrint;
-        expect(scope.plugins, isEmpty);
+        final bluePrint = CustomizerBluePrint.example.bluePrint;
+        expect(scope.customizers, isEmpty);
 
-        // Instantiating the plugin should call addPlugin
-        final plugin = bluePrint.instantiate(scope: scope);
-        expect(scope.plugins, contains(plugin));
+        // Instantiating the customizer should call addCustomizer
+        final customizer = bluePrint.instantiate(scope: scope);
+        expect(scope.customizers, contains(customizer));
 
-        // Now we can get the plugin by key
-        expect(scope.plugin(bluePrint.key), plugin);
+        // Now we can get the customizer by key
+        expect(scope.customizer(bluePrint.key), customizer);
 
-        // Disposing the plugin should call removePlugin
-        plugin.dispose();
-        expect(scope.plugins, isNot(contains(bluePrint)));
+        // Disposing the customizer should call removeCustomizer
+        customizer.dispose();
+        expect(scope.customizers, isNot(contains(bluePrint)));
       });
     });
   });

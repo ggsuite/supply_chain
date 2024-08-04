@@ -6,13 +6,13 @@
 
 import 'package:supply_chain/supply_chain.dart';
 
-/// Manages the nodes added by a plugin
-class PluginNodeReplacer {
+/// Manages the nodes added by a customizer
+class CustomizerNodeReplacer {
   /// The constructor
-  PluginNodeReplacer({
-    required this.plugin,
+  CustomizerNodeReplacer({
+    required this.customizer,
   }) {
-    _init(plugin.scope);
+    _init(customizer.scope);
   }
 
   // ...........................................................................
@@ -23,11 +23,11 @@ class PluginNodeReplacer {
     }
   }
 
-  /// The plugin this class belongs to
-  final Plugin plugin;
+  /// The customizer this class belongs to
+  final Customizer customizer;
 
   /// Returns an example instance for test purposes
-  static PluginNodeReplacer get example {
+  static CustomizerNodeReplacer get example {
     final scope = Scope.example();
 
     scope.mockContent({
@@ -40,8 +40,9 @@ class PluginNodeReplacer {
       },
     });
 
-    final plugin = ExamplePluginReplacingIntNodes().instantiate(scope: scope);
-    return plugin.nodeReplacer;
+    final customizer =
+        ExampleCustomizerReplacingIntNodes().instantiate(scope: scope);
+    return customizer.nodeReplacer;
   }
 
   // ######################
@@ -61,8 +62,8 @@ class PluginNodeReplacer {
   // ...........................................................................
   void _initScope(Scope scope) {
     for (final node in scope.nodes) {
-      // Get the replacement for the node from the plugin
-      final newBluePrint = plugin.bluePrint.replaceNode(
+      // Get the replacement for the node from the customizer
+      final newBluePrint = customizer.bluePrint.replaceNode(
         hostScope: scope,
         nodeToBeReplaced: node,
       );
@@ -90,10 +91,10 @@ class PluginNodeReplacer {
 }
 
 // #############################################################################
-/// An example plugin replacing a node
-class ExamplePluginReplacingIntNodes extends PluginBluePrint {
+/// An example customizer replacing a node
+class ExampleCustomizerReplacingIntNodes extends CustomizerBluePrint {
   /// The constructor
-  ExamplePluginReplacingIntNodes() : super(key: 'example');
+  ExampleCustomizerReplacingIntNodes() : super(key: 'example');
 
   @override
   NodeBluePrint<dynamic> replaceNode({

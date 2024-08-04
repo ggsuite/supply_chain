@@ -430,22 +430,22 @@ class Scope {
 
   // ...........................................................................
   /// This method is called by scopeInsert to add the insert
-  void addPlugin(Plugin plugin) {
-    _plugins.add(plugin);
+  void addCustomizer(Customizer customizer) {
+    _customizers.add(customizer);
   }
 
   /// Removes a scope insert
-  void removePlugin(Plugin plugin) {
-    _plugins.remove(plugin);
+  void removeCustomizer(Customizer customizer) {
+    _customizers.remove(customizer);
   }
 
-  /// Retruns the plugin with given key or null if not found
-  Plugin? plugin(String key) => _plugins.firstWhereOrNull(
+  /// Retruns the customizer with given key or null if not found
+  Customizer? customizer(String key) => _customizers.firstWhereOrNull(
         (element) => element.bluePrint.key == key,
       );
 
   /// Returns the scope inserts
-  List<Plugin> get plugins => _plugins;
+  List<Customizer> get customizers => _customizers;
 
   // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz
@@ -633,7 +633,7 @@ class Scope {
   static int _idCounter = 0;
 
   // ...........................................................................
-  final List<Plugin> _plugins = [];
+  final List<Customizer> _customizers = [];
 
   // ...........................................................................
   void _init() {

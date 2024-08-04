@@ -301,7 +301,7 @@ void main() {
             final wh0 = wh0Bp.instantiate(scope: root);
             final wh1 = wh1Bp.instantiate(
               scope: root,
-              connections: {
+              connect: {
                 'w': 'wh0.w',
                 'h': 'wh0.h',
                 // 'd': 'wh0.d', // Not connected
@@ -368,7 +368,7 @@ void main() {
             final wh0 = wh0Bp.instantiate(scope: root);
             final wh1 = wh1Bp.instantiate(
               scope: root,
-              connections: {
+              connect: {
                 'w': 'wh0.child.w',
                 'h': 'wh0.child.h',
                 // 'child.d': 'wh0.child.d', // Not connected
@@ -406,6 +406,66 @@ void main() {
           },
         );
 
+        test('and connect a complete scope', () {
+          // Create a scope providing a width and a height
+          final parentBp = ScopeBluePrint.fromJson({
+            'parent': {
+              'wh0': {
+                'child': {
+                  'w': 300,
+                  'h': 400,
+                },
+              },
+            },
+          });
+
+          // Create another scope providing a width2 and the height2
+          final wh1Bp = ScopeBluePrint.fromJson({
+            'wh1': {
+              'child': {
+                'w': 700,
+                'h': 800,
+              },
+            },
+          });
+
+          // Instantiate the second scope and connect the width2 and height2
+          // to the width and height of the first scope.
+          final root = Scope.example();
+          final parent = parentBp.instantiate(scope: root);
+
+          final wh1 = wh1Bp.instantiate(
+            scope: root,
+            connect: {
+              'wh1': 'parent.wh0', // The complete scope is connected
+            },
+          );
+          final wh0 = parent.findScope('wh0')!;
+
+          // Changing width and height should change width2 and height2 too
+          final scm = root.scm;
+          scm.testFlushTasks();
+          final wh0Width = wh0.findNode<int>('child.w')!;
+          final wh0Height = wh0.findNode<int>('child.h')!;
+          final wh1Width = wh1.findNode<int>('child.w')!;
+          final wh1Height = wh1.findNode<int>('child.h')!;
+
+          expect(wh0Width.product, 300);
+          expect(wh0Height.product, 400);
+
+          expect(wh1Width.product, 300);
+          expect(wh1Height.product, 400);
+
+          // Change the width and height of the first scope
+          wh0Width.product = 101;
+          wh0Height.product = 201;
+          scm.testFlushTasks();
+
+          // Check if the width and height of the second scope changed
+          expect(wh1Width.product, 101);
+          expect(wh1Height.product, 201);
+        });
+
         test('and connect complete child scopes', () {
           // Create a scope providing a width and a height
           final wh0Bp = ScopeBluePrint.fromJson({
@@ -434,7 +494,7 @@ void main() {
 
           final wh1 = wh1Bp.instantiate(
             scope: root,
-            connections: {
+            connect: {
               'child': 'wh0.child',
             },
           );
@@ -494,7 +554,7 @@ void main() {
           final wh0 = wh0Bp.instantiate(scope: root);
           final wh1 = wh1Bp.instantiate(
             scope: root,
-            connections: {
+            connect: {
               'child.w': 'wh0.child.w',
               'child.h': 'wh0.child.h',
             },
@@ -539,7 +599,7 @@ void main() {
           expect(
             () => wh0Bp.instantiate(
               scope: Scope.example(),
-              connections: {'x': 'y'},
+              connect: {'x': 'y'},
             ),
             throwsA(
               isA<ArgumentError>().having(

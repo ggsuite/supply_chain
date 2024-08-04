@@ -70,7 +70,7 @@ class Node<T> {
   }
 
   // ...........................................................................
-  /// Plugins use this method to replace the present blue print
+  /// Customizers use this method to replace the present blue print
   void addBluePrint(NodeBluePrint<T> bluePrint) {
     if (_bluePrints.contains(bluePrint)) {
       throw ArgumentError(
@@ -95,7 +95,7 @@ class Node<T> {
     }
   }
 
-  /// Plugins use this method to remove a formerly added blue print
+  /// Customizers use this method to remove a formerly added blue print
   void removeBluePrint(NodeBluePrint<T> bp) {
     if (!_bluePrints.contains(bp)) {
       throw ArgumentError('The blue print "${bp.key}" does not exist.');

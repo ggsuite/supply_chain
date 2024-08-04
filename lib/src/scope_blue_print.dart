@@ -8,6 +8,7 @@ import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:supply_chain/supply_chain.dart';
 
+// coverage:ignore-start
 NodeBluePrint<dynamic> _dontModifyMode(
   Scope scope,
   NodeBluePrint<dynamic> node,
@@ -19,6 +20,7 @@ ScopeBluePrint _dontModifyScope(
   ScopeBluePrint scope,
 ) =>
     scope;
+// coverage:ignore-end
 
 /// A function that allows to modify a node
 typedef ModifyNode = NodeBluePrint<dynamic> Function(
@@ -41,9 +43,25 @@ typedef ModifyScope = ScopeBluePrint Function(
 /// - [childrenFromConstructor]: Allows to override or extend nodes built
 ///   by buildScopes().
 class ScopeBluePrint {
+  // coverage:ignore-start
   // ...........................................................................
   /// Constructor of the scope
   const ScopeBluePrint({
+    required this.key,
+    List<NodeBluePrint<dynamic>> nodes = const [],
+    List<ScopeBluePrint> children = const [],
+    this.aliases = const [],
+    Map<String, String> connect = const {},
+  })  : connections = connect,
+        _modifyChildScope = null,
+        _modifyChildNode = null,
+        _nodesFromConstructor = nodes,
+        _childrenFromConstructor = children;
+  // coverage:ignore-end
+
+  // ...........................................................................
+  /// Constructor of the scope
+  const ScopeBluePrint.fat({
     required this.key,
     List<NodeBluePrint<dynamic>> nodes = const [],
     List<ScopeBluePrint> children = const [],
@@ -57,6 +75,7 @@ class ScopeBluePrint {
         _childrenFromConstructor = children;
 
   // ...........................................................................
+  // coverage:ignore-start
   /// Constructor of the scope
   const ScopeBluePrint.old({
     required this.key,
@@ -70,6 +89,7 @@ class ScopeBluePrint {
         _modifyChildNode = modifyChildNode,
         _nodesFromConstructor = nodes,
         _childrenFromConstructor = children;
+  // coverage:ignore-end
 
   // ...........................................................................
   /// Creates a blue print with children from JSON
@@ -214,7 +234,7 @@ class ScopeBluePrint {
     Scope scope,
     NodeBluePrint<dynamic> node,
   ) =>
-      _modifyChildNode(scope, node);
+      _modifyChildNode?.call(scope, node) ?? node;
 
   /// Override this method in sub classes to replace single scopes by others
   @mustCallSuper
@@ -222,7 +242,7 @@ class ScopeBluePrint {
     Scope parentScope,
     ScopeBluePrint scope,
   ) =>
-      _modifyChildScope(parentScope, scope);
+      _modifyChildScope?.call(parentScope, scope) ?? scope;
 
   // ...........................................................................
   /// The key of the scope
@@ -293,10 +313,10 @@ class ScopeBluePrint {
   /// Turns the blue print into a scope and adds it to the parent scope.
   Scope instantiate({
     required Scope scope,
-    Map<String, String> connections = const {},
+    Map<String, String> connect = const {},
   }) {
     willInstantiate();
-    connections = {...this.connections, ...connections};
+    final connections = {...this.connections, ...connect};
 
     // Connect nodes of this scopes to suppliers from the outside.
     // I.e. connected nodes will forward the value of the supplier.
@@ -406,8 +426,8 @@ class ScopeBluePrint {
     required List<NodeBluePrint<dynamic>> nodes,
     required List<ScopeBluePrint> children,
     required this.connections,
-    required ModifyNode modifyChildNode,
-    required ModifyScope modifyChildScope,
+    required ModifyNode? modifyChildNode,
+    required ModifyScope? modifyChildScope,
   })  : _modifyChildScope = modifyChildScope,
         _modifyChildNode = modifyChildNode,
         _nodesFromConstructor = nodes,
@@ -419,11 +439,11 @@ class ScopeBluePrint {
 
   // ...........................................................................
   /// Set this method to override single nodes of a scope
-  final ModifyNode _modifyChildNode;
+  final ModifyNode? _modifyChildNode;
 
   /// Override this method in sub classes to replace scope blue prints by
   /// other ones.
-  final ModifyScope _modifyChildScope;
+  final ModifyScope? _modifyChildScope;
 
   // ...........................................................................
   /// Finds a node with a given key in a given list of nodes.
@@ -852,7 +872,7 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
     List<ScopeBluePrint> childrenFromConstructor = const [],
     ModifyNode? modifyChildNode,
     ModifyScope? modifyChildScope,
-  }) : super(
+  }) : super.fat(
           nodes: [
             const NodeBluePrint<int>(
               key: 'nodeConstructedByParent',

@@ -8,12 +8,12 @@ import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('PluginNodeReplacer', () {
+  group('CustomizerNodeReplacer', () {
     group('example', () {
       test('should work', () {
-        final pluginNodeReplacer = PluginNodeReplacer.example;
-        final plugin = pluginNodeReplacer.plugin;
-        final scope = plugin.scope;
+        final customizerNodeReplacer = CustomizerNodeReplacer.example;
+        final customizer = customizerNodeReplacer.customizer;
+        final scope = customizer.scope;
         scope.scm.testFlushTasks();
 
         // Get the nodes a,b and d,e out of the hierarchy
@@ -23,7 +23,7 @@ void main() {
         final e = scope.findNode<int>('e')!;
         final f = scope.findNode<String>('f')!;
 
-        // Because of the ReplaceIntNodesBy42 plugin,
+        // Because of the ReplaceIntNodesBy42 customizer,
         // the nodes a, b, d, and e should be deliver 42
         expect(a.product, 42);
         expect(b.product, 42);
@@ -31,9 +31,9 @@ void main() {
         expect(e.product, 42);
         expect(f.product, 'f');
 
-        // Lets dispose the plugin.
+        // Lets dispose the customizer.
         // The nodes a, b, d, and e should be deliver 1, 2, 4, and 5 again
-        plugin.dispose();
+        customizer.dispose();
         scope.scm.testFlushTasks();
 
         expect(a.product, 1);
@@ -42,7 +42,7 @@ void main() {
         expect(e.product, 5);
         expect(f.product, 'f');
 
-        expect(pluginNodeReplacer, isNotNull);
+        expect(customizerNodeReplacer, isNotNull);
       });
     });
   });

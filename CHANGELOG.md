@@ -31,10 +31,10 @@
 - Add possibility to set a mocked product
 - Add set get mockedProduct
 - Add NodeBluePrint
-- Add base of Plugin
-- Add the concept of child plugins
-- Add plugin node adder
-- Add PluginScopeAdder
+- Add base of Customizer
+- Add the concept of child customizers
+- Add customizer node adder
+- Add CustomizerScopeAdder
 
 ### Changed
 
@@ -84,18 +84,21 @@
 - Rename modifyNode into modifyChildNode
 - Improve assertion
 - Rework modifyChildScopes
-- Rename ScopePlugin into ScopeInserts
-- Work on plugin and inserts
-- Plugins can define plugins for certain child scopes
+- Rename ScopeCustomizer into ScopeInserts
+- Work on customizer and inserts
+- Customizers can define customizers for certain child scopes
 - findNode will skip inserts by default
-- Rename Inserts into PluginInserts
-- Plugins can replace nodes now
+- Rename Inserts into CustomizerInserts
+- Customizers can replace nodes now
 - Split node and rank separation
 - Rename nodeOverrides and scopeOverrides
 - Improve merging of built and constructor nodes and scopes
 - Rename ScopeBluePrintFactory into ScopeFactory
-- Rename SubScopeManager into ScopeFactory, rename ScopeBluePrint.findNode() into findNode, offer methods to connect a blue print's node to other external nodes
+- Rename SubScopeManager into ScopeFactory, rename ScopeBluePrint.findNode()
+into findNode, offer methods to connect a blue print's node to other external
+nodes
 - Allow to connect nodes and scopes to nodes and scopes in the outside
+- Rename Plugin into Customizer
 
 ### Fixed
 
