@@ -501,10 +501,15 @@ class Scope {
     Scm? scm,
     String key = 'example',
     List<String> aliases = const [],
+    List<CustomizerBluePrint> customizers = const [],
   }) {
     scm ??= Scm.example();
     final root = Scope.root(key: 'root', scm: scm);
-    final bluePrint = ScopeBluePrint(key: key, aliases: aliases);
+    final bluePrint = ScopeBluePrint(
+      key: key,
+      aliases: aliases,
+      customizers: customizers,
+    );
     final result = bluePrint.instantiate(scope: root);
     return result;
   }

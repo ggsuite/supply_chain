@@ -162,6 +162,7 @@ class ExampleCustomizerBluePrint extends CustomizerBluePrint {
     // Let's create a node hiearchy with nodes starting with keys
     // starting with hosts
     final scope = Scope.example();
+
     scope.mockContent({
       'a': {
         'hostA': 0xA,
@@ -173,11 +174,11 @@ class ExampleCustomizerBluePrint extends CustomizerBluePrint {
       },
     });
 
+    const ExampleCustomizerBluePrint().instantiate(scope: scope);
+
     // Apply the customizer to the scope
-    final customizer =
-        const ExampleCustomizerBluePrint().instantiate(scope: scope);
-    customizer.scope.scm.testFlushTasks();
-    return customizer;
+    scope.scm.testFlushTasks();
+    return scope.customizers.first;
   }
 }
 

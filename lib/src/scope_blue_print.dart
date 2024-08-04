@@ -52,7 +52,9 @@ class ScopeBluePrint {
     List<ScopeBluePrint> children = const [],
     this.aliases = const [],
     Map<String, String> connect = const {},
-  })  : connections = connect,
+    List<CustomizerBluePrint> customizers = const [],
+  })  : _customizers = customizers,
+        connections = connect,
         _modifyChildScope = null,
         _modifyChildNode = null,
         _nodesFromConstructor = nodes,
@@ -67,9 +69,11 @@ class ScopeBluePrint {
     List<ScopeBluePrint> children = const [],
     this.aliases = const [],
     this.connections = const {},
+    List<CustomizerBluePrint> customizers = const [],
     ModifyNode modifyChildNode = _dontModifyMode,
     ModifyScope modifyChildScope = _dontModifyScope,
-  })  : _modifyChildScope = modifyChildScope,
+  })  : _customizers = customizers,
+        _modifyChildScope = modifyChildScope,
         _modifyChildNode = modifyChildNode,
         _nodesFromConstructor = nodes,
         _childrenFromConstructor = children;
@@ -83,9 +87,11 @@ class ScopeBluePrint {
     List<ScopeBluePrint> children = const [],
     this.aliases = const [],
     this.connections = const {},
+    List<CustomizerBluePrint> customizers = const [],
     ModifyNode modifyChildNode = _dontModifyMode,
     ModifyScope modifyChildScope = _dontModifyScope,
-  })  : _modifyChildScope = modifyChildScope,
+  })  : _customizers = customizers,
+        _modifyChildScope = modifyChildScope,
         _modifyChildNode = modifyChildNode,
         _nodesFromConstructor = nodes,
         _childrenFromConstructor = children;
@@ -185,6 +191,7 @@ class ScopeBluePrint {
     String? key,
     List<NodeBluePrint<dynamic>>? modifiedNodes,
     List<ScopeBluePrint>? modifiedScopes,
+    List<CustomizerBluePrint>? customizers,
     List<String>? aliases,
     ModifyNode? modifyChildNode,
     ModifyScope? modifyChildScope,
@@ -208,6 +215,7 @@ class ScopeBluePrint {
       connections: connections,
       modifyChildNode: modifyChildNode ?? _modifyChildNode,
       modifyChildScope: modifyChildScope ?? _modifyChildScope,
+      customizers: customizers ?? this.customizers,
     );
   }
 
@@ -226,6 +234,12 @@ class ScopeBluePrint {
   /// Override this method in sub classes to define the child scopes
   List<ScopeBluePrint> buildScopes() {
     return [];
+  }
+
+  /// Override this method in sub classes to modify the customizers
+  @mustCallSuper
+  List<CustomizerBluePrint> buildCustomizers() {
+    return _customizers;
   }
 
   /// Override this method in sub classes to replace single nodes by others
@@ -274,6 +288,9 @@ class ScopeBluePrint {
 
   /// Allows to connect scopes and nodes to sources from the outside
   final Map<String, String> connections;
+
+  /// The customizers that are installed when the scope is instantiated.
+  List<CustomizerBluePrint> get customizers => buildCustomizers();
 
   // ...........................................................................
   /// Returns the node for a given key
@@ -425,17 +442,20 @@ class ScopeBluePrint {
     required this.aliases,
     required List<NodeBluePrint<dynamic>> nodes,
     required List<ScopeBluePrint> children,
+    required List<CustomizerBluePrint> customizers,
     required this.connections,
     required ModifyNode? modifyChildNode,
     required ModifyScope? modifyChildScope,
   })  : _modifyChildScope = modifyChildScope,
         _modifyChildNode = modifyChildNode,
         _nodesFromConstructor = nodes,
-        _childrenFromConstructor = children;
+        _childrenFromConstructor = children,
+        _customizers = customizers;
 
   // ...........................................................................
   final List<NodeBluePrint<dynamic>> _nodesFromConstructor;
   final List<ScopeBluePrint> _childrenFromConstructor;
+  final List<CustomizerBluePrint> _customizers;
 
   // ...........................................................................
   /// Set this method to override single nodes of a scope
