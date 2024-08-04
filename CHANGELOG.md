@@ -99,6 +99,7 @@ into findNode, offer methods to connect a blue print's node to other external
 nodes
 - Allow to connect nodes and scopes to nodes and scopes in the outside
 - Rename Plugin into Customizer
+- Change Scope.example - Use instantiate
 
 ### Fixed
 

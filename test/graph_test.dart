@@ -609,7 +609,9 @@ void main() {
                 expect(root.children, hasLength(1));
                 expect(root.nodeItems, isEmpty);
 
-                final l3 = root.children.first;
+                final butterFly = root.children.first;
+
+                final l3 = butterFly.children.first;
                 expect(l3.scope, level3);
                 expect(l3.children, hasLength(1));
                 expect(l3.nodeItems.length, 2);
@@ -626,7 +628,7 @@ void main() {
 
                 //// Check dot
                 expectNodes(dot, allNodes);
-                expectScopes(dot, allScopes);
+                expectScopes(dot, [...allScopes, level0.root]);
                 expectEdgeCount(dot, 14);
               },
             );
@@ -636,9 +638,11 @@ void main() {
             test(
               'when childScopeDepth == -1',
               () async {
+                final start = level0.root.children.first;
+
                 // Create the tree
                 final root = graph.treeForScope(
-                  scope: level0.root,
+                  scope: start,
                   childScopeDepth: -1,
                 );
 
@@ -647,7 +651,7 @@ void main() {
                 await writeDotFile(dot, '12');
 
                 // Check tree
-                expect(root.scope, level0.root);
+                expect(root.scope, start);
                 expect(root.children, hasLength(1));
                 expect(root.nodeItems, isEmpty);
 

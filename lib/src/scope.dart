@@ -28,9 +28,8 @@ class Scope {
   Scope.root({
     required String key,
     required this.scm,
-    List<String> aliases = const [],
   })  : parent = null,
-        bluePrint = ScopeBluePrint(key: key, aliases: aliases),
+        bluePrint = ScopeBluePrint(key: key),
         assert(key.isCamelCase) {
     _init();
   }
@@ -504,7 +503,10 @@ class Scope {
     List<String> aliases = const [],
   }) {
     scm ??= Scm.example();
-    return Scope.root(key: key, scm: scm, aliases: aliases);
+    final root = Scope.root(key: 'root', scm: scm);
+    final bluePrint = ScopeBluePrint(key: key, aliases: aliases);
+    final result = bluePrint.instantiate(scope: root);
+    return result;
   }
 
   // ...........................................................................

@@ -4,62 +4,67 @@ digraph unix {
   fontname="Helvetica,Arial,sans-serif"
   node [fontname="Helvetica,Arial,sans-serif"]
   edge [fontname="Helvetica,Arial,sans-serif"]
-  subgraph cluster_butterFly_1 {
-    label = "butterFly"; // scope
-    invisible [label = "", shape = point, style=invis]; // butterFly
-    subgraph cluster_level3_2 {
-      label = "level3"; // scope
-      s111_0 [
-        label = "s111"; // node
-      ];
-      c111_14 [
-        label = "c111"; // node
-      ];
-      subgraph cluster_level2_3 {
-        label = "level2"; // scope
-        s11_1 [
-          label = "s11"; // node
+  subgraph cluster_root_1 {
+    label = "root"; // scope
+    invisible [label = "", shape = point, style=invis]; // root
+    subgraph cluster_butterFly_2 {
+      label = "butterFly"; // scope
+      invisible [label = "", shape = point, style=invis]; // butterFly
+      subgraph cluster_level3_3 {
+        label = "level3"; // scope
+        s111_0 [
+          label = "s111"; // node
         ];
-        s10_2 [
-          label = "s10"; // node
+        c111_14 [
+          label = "c111"; // node
         ];
-        s01_3 [
-          label = "s01"; // node
-        ];
-        s00_4 [
-          label = "s00"; // node
-        ];
-        c00_10 [
-          label = "c00"; // node
-        ];
-        c01_11 [
-          label = "c01"; // node
-        ];
-        c10_12 [
-          label = "c10"; // node
-        ];
-        c11_13 [
-          label = "c11"; // node
-        ];
-        subgraph cluster_level1_4 {
-          label = "level1"; // scope
-          s1_5 [
-            label = "s1"; // node
+        subgraph cluster_level2_4 {
+          label = "level2"; // scope
+          s11_1 [
+            label = "s11"; // node
           ];
-          s0_6 [
-            label = "s0"; // node
+          s10_2 [
+            label = "s10"; // node
           ];
-          c0_8 [
-            label = "c0"; // node
+          s01_3 [
+            label = "s01"; // node
           ];
-          c1_9 [
-            label = "c1"; // node
+          s00_4 [
+            label = "s00"; // node
           ];
-          subgraph cluster_level0_5 {
-            label = "level0"; // scope
-            x_7 [
-              label = "x"; // node
+          c00_10 [
+            label = "c00"; // node
+          ];
+          c01_11 [
+            label = "c01"; // node
+          ];
+          c10_12 [
+            label = "c10"; // node
+          ];
+          c11_13 [
+            label = "c11"; // node
+          ];
+          subgraph cluster_level1_5 {
+            label = "level1"; // scope
+            s1_5 [
+              label = "s1"; // node
             ];
+            s0_6 [
+              label = "s0"; // node
+            ];
+            c0_8 [
+              label = "c0"; // node
+            ];
+            c1_9 [
+              label = "c1"; // node
+            ];
+            subgraph cluster_level0_6 {
+              label = "level0"; // scope
+              x_7 [
+                label = "x"; // node
+              ];
+              
+            }
             
           }
           

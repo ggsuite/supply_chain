@@ -118,10 +118,10 @@ void main() {
         group('should return all parents / children', () {
           test('when depth = -1 or 1000', () {
             var parents = x.deepParents(depth: 1000).map((e) => e.key).toList();
-            expect(parents, ['p0', 'p1', 'p2', 'example']);
+            expect(parents, ['p0', 'p1', 'p2', 'example', 'root']);
 
             parents = x.deepParents(depth: -1).map((e) => e.key).toList();
-            expect(parents, ['p0', 'p1', 'p2', 'example']);
+            expect(parents, ['p0', 'p1', 'p2', 'example', 'root']);
 
             var children =
                 x.deepChildren(depth: 1000).map((e) => e.key).toList();
@@ -203,12 +203,12 @@ void main() {
 
     group('root', () {
       test('should return the scope itself, if scope is the root', () {
-        final root = Scope.example();
-        expect(root.root, root);
+        final root = Scope.example().root;
+        expect(root.root.root, root);
       });
 
       test('should return the root node', () {
-        final root = Scope.example();
+        final root = Scope.example().root;
         root.mockContent({
           'a': {
             'b': {
@@ -258,8 +258,8 @@ void main() {
         });
 
         test('should throw if no common parent is found', () {
-          final scope = Scope.example();
-          final scopeB = Scope.example();
+          final scope = Scope.example().root;
+          final scopeB = Scope.example().root;
           expect(
             () => scopeB.commonParent(scope),
             throwsA(
@@ -472,7 +472,7 @@ void main() {
 
           final corpus = scope.findScope('corpus')!;
           final right = corpus.findScope('corpus.panels.right')!;
-          expect(right.path, 'example.corpus.panels.right');
+          expect(right.path, 'root.example.corpus.panels.right');
         });
       });
       group('should return null', () {
