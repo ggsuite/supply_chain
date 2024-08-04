@@ -12,7 +12,7 @@ class CustomizerNodeReplacer {
   CustomizerNodeReplacer({
     required this.customizer,
   }) {
-    _init(customizer.scope);
+    init(customizer.scope);
   }
 
   // ...........................................................................
@@ -45,19 +45,19 @@ class CustomizerNodeReplacer {
     return customizer.nodeReplacer;
   }
 
-  // ######################
-  // Private
-  // ######################
-
   // ...........................................................................
-  void _init(Scope scope) {
-    // Deeply iterate through all child nodes and replace nodes
+  /// Deeply iterate through all child nodes and replace nodes
+  void init(Scope scope) {
     _initScope(scope);
 
     for (final childScope in scope.children) {
-      _init(childScope);
+      init(childScope);
     }
   }
+
+  // ######################
+  // Private
+  // ######################
 
   // ...........................................................................
   void _initScope(Scope scope) {

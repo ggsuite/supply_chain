@@ -14,6 +14,7 @@ class Customizer {
     required this.scope,
   }) {
     _init();
+    init(scope);
   }
 
   /// Disposes the customizer
@@ -21,6 +22,11 @@ class Customizer {
     for (var dispose in _dispose.reversed) {
       dispose();
     }
+  }
+
+  /// Applies the customizer to this scope and all its children
+  void init(Scope scope) {
+    // inserts.init(scope);
   }
 
   /// The blue print of the customizer
