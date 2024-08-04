@@ -100,6 +100,7 @@ nodes
 - Allow to connect nodes and scopes to nodes and scopes in the outside
 - Rename Plugin into Customizer
 - Change Scope.example - Use instantiate
+- Customizer: Allow to init additional scopes later
 
 ### Fixed
 

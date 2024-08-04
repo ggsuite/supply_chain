@@ -26,7 +26,11 @@ class Customizer {
 
   /// Applies the customizer to this scope and all its children
   void init(Scope scope) {
-    // inserts.init(scope);
+    inserts.init(scope);
+    nodeReplacer.init(scope);
+    nodeAdder.init(scope);
+    scopeAdder.init(scope);
+    _initChildren(scope);
   }
 
   /// The blue print of the customizer
@@ -66,7 +70,6 @@ class Customizer {
     _initNodeReplacer();
     _initNodeAdder();
     _initScopeAdder();
-    _initChildren(scope);
   }
 
   void _initScope() {

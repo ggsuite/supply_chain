@@ -11,9 +11,7 @@ class CustomizerNodeReplacer {
   /// The constructor
   CustomizerNodeReplacer({
     required this.customizer,
-  }) {
-    init(customizer.scope);
-  }
+  });
 
   // ...........................................................................
   /// Disposes the nodes and removes it from the scope

@@ -15,9 +15,7 @@ class CustomizerInserts {
   /// The constructor
   CustomizerInserts({
     required this.customizer,
-  }) {
-    init(customizer.scope);
-  }
+  });
 
   /// The customizer this inserts belongs to
   final Customizer customizer;

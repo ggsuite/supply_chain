@@ -11,9 +11,7 @@ class CustomizerScopeAdder {
   /// The constructor
   CustomizerScopeAdder({
     required this.customizer,
-  }) {
-    init(customizer.scope);
-  }
+  });
 
   // ...........................................................................
   /// Removes the added scopes again
