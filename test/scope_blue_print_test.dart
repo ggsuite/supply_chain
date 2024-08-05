@@ -210,17 +210,6 @@ void main() {
             isNotNull,
           );
 
-          // Check if modifyChildNode and modifyChildScope did work
-          expect(
-            scope.findNode<int>('nodeToBeReplaced')!.bluePrint.initialProduct,
-            807,
-          );
-
-          expect(
-            scope.findScope('scopeToBeReplaced')!.bluePrint.aliases,
-            ['replacedScope'],
-          );
-
           // Write image
           await scope
               .writeImageFile('test.graphs.example_scope_blue_print.dot');
@@ -877,34 +866,6 @@ void main() {
           final copy = bluePrint.copyWith(modifiedNodes: [overriddenNode]);
           expect(copy.node<int>('node'), overriddenNode);
         });
-      });
-    });
-
-    group('special cases', () {
-      test('modifyChildNodes of child scopes', () {
-        // Instantiate the ExampleScopeBluePrint with modifyChildNode set
-        const modifiedNode = NodeBluePrint<int>(
-          key: 'nodeBuiltByChildScope',
-          initialProduct: 312,
-        );
-
-        final scope = ExampleScopeBluePrint(
-          modifyChildNode: (scope, node) {
-            if (scope.path.endsWith(
-                  'childScopeBuiltByParent',
-                ) &&
-                node.key == 'nodeBuiltByChildScope') {
-              return modifiedNode;
-            } else {
-              return node;
-            }
-          },
-        ).instantiate(
-          scope: Scope.example(),
-        );
-
-        final modifiedNodeOut = scope.findNode<int>('nodeBuiltByChildScope')!;
-        expect(modifiedNodeOut.bluePrint, modifiedNode);
       });
     });
   });

@@ -102,6 +102,7 @@ nodes
 - Change Scope.example - Use instantiate
 - Customizer: Allow to init additional scopes later
 - Customizers can be applied to nodes and scopes after instantiation
+- BREAKING CHANGE: Remove modifyChildScope and modifyChildNode. Modifications can only be done via customizers.
 
 ### Fixed
 

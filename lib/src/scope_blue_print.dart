@@ -8,32 +8,6 @@ import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:supply_chain/supply_chain.dart';
 
-// coverage:ignore-start
-NodeBluePrint<dynamic> _dontModifyMode(
-  Scope scope,
-  NodeBluePrint<dynamic> node,
-) =>
-    node;
-
-ScopeBluePrint _dontModifyScope(
-  Scope parentScope,
-  ScopeBluePrint scope,
-) =>
-    scope;
-// coverage:ignore-end
-
-/// A function that allows to modify a node
-typedef ModifyNode = NodeBluePrint<dynamic> Function(
-  Scope scope,
-  NodeBluePrint<dynamic> node,
-);
-
-/// A function that allows to modify a node
-typedef ModifyScope = ScopeBluePrint Function(
-  Scope parentScope,
-  ScopeBluePrint scope,
-);
-
 /// A scope blue print is a collection of related node blue prints.
 /// that can form or build a scope.
 ///
@@ -55,8 +29,6 @@ class ScopeBluePrint {
     List<CustomizerBluePrint> customizers = const [],
   })  : _customizers = customizers,
         connections = connect,
-        _modifyChildScope = null,
-        _modifyChildNode = null,
         _nodesFromConstructor = nodes,
         _childrenFromConstructor = children;
   // coverage:ignore-end
@@ -70,11 +42,7 @@ class ScopeBluePrint {
     this.aliases = const [],
     this.connections = const {},
     List<CustomizerBluePrint> customizers = const [],
-    ModifyNode modifyChildNode = _dontModifyMode,
-    ModifyScope modifyChildScope = _dontModifyScope,
   })  : _customizers = customizers,
-        _modifyChildScope = modifyChildScope,
-        _modifyChildNode = modifyChildNode,
         _nodesFromConstructor = nodes,
         _childrenFromConstructor = children;
 
@@ -88,11 +56,7 @@ class ScopeBluePrint {
     this.aliases = const [],
     this.connections = const {},
     List<CustomizerBluePrint> customizers = const [],
-    ModifyNode modifyChildNode = _dontModifyMode,
-    ModifyScope modifyChildScope = _dontModifyScope,
   })  : _customizers = customizers,
-        _modifyChildScope = modifyChildScope,
-        _modifyChildNode = modifyChildNode,
         _nodesFromConstructor = nodes,
         _childrenFromConstructor = children;
   // coverage:ignore-end
@@ -193,8 +157,6 @@ class ScopeBluePrint {
     List<ScopeBluePrint>? modifiedScopes,
     List<CustomizerBluePrint>? customizers,
     List<String>? aliases,
-    ModifyNode? modifyChildNode,
-    ModifyScope? modifyChildScope,
   }) {
     // Merge the node overrides
     final mergedNodes = _mergeNodes(
@@ -213,8 +175,6 @@ class ScopeBluePrint {
       nodes: mergedNodes,
       children: mergedScopes,
       connections: connections,
-      modifyChildNode: modifyChildNode ?? _modifyChildNode,
-      modifyChildScope: modifyChildScope ?? _modifyChildScope,
       customizers: customizers ?? this.customizers,
     );
   }
@@ -241,22 +201,6 @@ class ScopeBluePrint {
   List<CustomizerBluePrint> buildCustomizers() {
     return _customizers;
   }
-
-  /// Override this method in sub classes to replace single nodes by others
-  @mustCallSuper
-  NodeBluePrint<dynamic> modifyChildNode(
-    Scope scope,
-    NodeBluePrint<dynamic> node,
-  ) =>
-      _modifyChildNode?.call(scope, node) ?? node;
-
-  /// Override this method in sub classes to replace single scopes by others
-  @mustCallSuper
-  ScopeBluePrint modifyChildScope(
-    Scope parentScope,
-    ScopeBluePrint scope,
-  ) =>
-      _modifyChildScope?.call(parentScope, scope) ?? scope;
 
   // ...........................................................................
   /// The key of the scope
@@ -340,36 +284,15 @@ class ScopeBluePrint {
     // I.e. connected nodes will forward the value of the supplier.
     final self = _applyConnections(this, {...connections});
 
-    final modifiedScope = _modifyScopeByParents(
-      parentScopeOfModifiedScope: scope,
-      currentParentScope: scope,
-      scope: self,
-    );
-
     // Create an inner scope
-    final innerScope = Scope(parent: scope, bluePrint: modifiedScope);
-
-    // Instantiate the nodes of the scope
-    final modifiedNodes = self.nodes.map((n) {
-      // Allow parents to modify this child node before instantiation
-      final modifiedNode = _modifyNodeByParents(
-        scopeOfNode: innerScope,
-        currentScope: innerScope,
-        node: n,
-      );
-      assert(
-        modifiedNode.key == n.key,
-        'The key of the node must not be changed.',
-      );
-      return modifiedNode;
-    }).toList();
+    final innerScope = Scope(parent: scope, bluePrint: self);
 
     // Make sure there are no duplicate keys
-    _checkForDuplicateKeys(modifiedNodes);
+    _checkForDuplicateKeys(self.nodes);
 
     // Create node
     innerScope.findOrCreateNodes(
-      modifiedNodes,
+      self.nodes,
 
       /// Customizers are initialized after all nodes are created
       applyCustomizers: false,
@@ -460,11 +383,7 @@ class ScopeBluePrint {
     required List<ScopeBluePrint> children,
     required List<CustomizerBluePrint> customizers,
     required this.connections,
-    required ModifyNode? modifyChildNode,
-    required ModifyScope? modifyChildScope,
-  })  : _modifyChildScope = modifyChildScope,
-        _modifyChildNode = modifyChildNode,
-        _nodesFromConstructor = nodes,
+  })  : _nodesFromConstructor = nodes,
         _childrenFromConstructor = children,
         _customizers = customizers;
 
@@ -472,14 +391,6 @@ class ScopeBluePrint {
   final List<NodeBluePrint<dynamic>> _nodesFromConstructor;
   final List<ScopeBluePrint> _childrenFromConstructor;
   final List<CustomizerBluePrint> _customizers;
-
-  // ...........................................................................
-  /// Set this method to override single nodes of a scope
-  final ModifyNode? _modifyChildNode;
-
-  /// Override this method in sub classes to replace scope blue prints by
-  /// other ones.
-  final ModifyScope? _modifyChildScope;
 
   // ...........................................................................
   /// Finds a node with a given key in a given list of nodes.
@@ -746,49 +657,6 @@ class ScopeBluePrint {
   }
 
   // ...........................................................................
-  NodeBluePrint<dynamic> _modifyNodeByParents({
-    required Scope scopeOfNode,
-    required Scope currentScope,
-    required NodeBluePrint<dynamic> node,
-  }) {
-    final modifiedNode = modifyChildNode(scopeOfNode, node);
-
-    final newModifyingParentScope = currentScope.parent;
-
-    final nodeModifiedByParentScope =
-        newModifyingParentScope?.bluePrint._modifyNodeByParents(
-      scopeOfNode: scopeOfNode,
-      currentScope: newModifyingParentScope,
-      node: modifiedNode,
-    );
-
-    return nodeModifiedByParentScope ?? modifiedNode;
-  }
-
-  // ...........................................................................
-  ScopeBluePrint _modifyScopeByParents({
-    required Scope parentScopeOfModifiedScope,
-    required Scope? currentParentScope,
-    required ScopeBluePrint scope,
-  }) {
-    final modifiedScope = modifyChildScope(parentScopeOfModifiedScope, scope);
-
-    assert(
-      modifiedScope.key == scope.key,
-      'The key of the scope must not be changed.',
-    );
-
-    final scopeModifiedByParentScope =
-        currentParentScope?.bluePrint._modifyScopeByParents(
-      parentScopeOfModifiedScope: parentScopeOfModifiedScope,
-      currentParentScope: currentParentScope.parent,
-      scope: modifiedScope,
-    );
-
-    return scopeModifiedByParentScope ?? modifiedScope;
-  }
-
-  // ...........................................................................
   void _applyParentCustomizers({
     required Scope scope,
   }) {
@@ -920,8 +788,6 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
     super.key = 'parentScope',
     List<NodeBluePrint<dynamic>> nodes = const [],
     List<ScopeBluePrint> childrenFromConstructor = const [],
-    ModifyNode? modifyChildNode,
-    ModifyScope? modifyChildScope,
   }) : super.fat(
           nodes: [
             const NodeBluePrint<int>(
@@ -944,25 +810,6 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
             ),
             ...childrenFromConstructor,
           ],
-
-          // Modify the node with the key 'nodeToBeReplaced'
-          modifyChildNode: modifyChildNode ??
-              (Scope scope, NodeBluePrint<dynamic> node) {
-                return switch (node.key) {
-                  'nodeToBeReplaced' => node.copyWith(initialProduct: 807),
-                  _ => node,
-                };
-              },
-
-          // Modify the scope with the key 'scopeToBeReplaced'
-          modifyChildScope: modifyChildScope ??
-              (Scope parentScope, ScopeBluePrint scope) {
-                return switch (scope.key) {
-                  'scopeToBeReplaced' =>
-                    scope.copyWith(aliases: ['replacedScope']),
-                  _ => scope,
-                };
-              },
         );
 
   @override
