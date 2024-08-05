@@ -14,7 +14,7 @@ import 'package:supply_chain/supply_chain.dart';
 /// - [key]: The key of the blue print
 /// - [nodesFromConstructor]: Allows to override or extend the nodes built
 ///   by buildNodes().
-/// - [childrenFromConstructor]: Allows to override or extend nodes built
+/// - [scopes]: Allows to override or extend nodes built
 ///   by buildScopes().
 class ScopeBluePrint {
   // coverage:ignore-start
@@ -803,7 +803,7 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
   ExampleScopeBluePrint({
     super.key = 'parentScope',
     List<NodeBluePrint<dynamic>> nodes = const [],
-    List<ScopeBluePrint> childrenFromConstructor = const [],
+    List<ScopeBluePrint> children = const [],
   }) : super.fat(
           nodes: [
             const NodeBluePrint<int>(
@@ -824,7 +824,7 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
                 ),
               ],
             ),
-            ...childrenFromConstructor,
+            ...children,
           ],
         );
 

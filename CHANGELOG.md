@@ -104,6 +104,7 @@ nodes
 - Customizers can be applied to nodes and scopes after instantiation
 - BREAKING CHANGE: Remove modifyChildScope and modifyChildNode. Modifications can only be done via customizers.
 - Rework scope nodes and scope children
+- Some renamings
 
 ### Fixed
 

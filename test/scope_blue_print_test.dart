@@ -168,7 +168,7 @@ void main() {
           // Instantiate ExampleScopeBluePrint
           // and override the childScopeConstructedByParent
           final bluePrint = ExampleScopeBluePrint(
-            childrenFromConstructor: [
+            children: [
               overridenScope,
             ],
           );
