@@ -25,11 +25,18 @@ void main() {
 
         // All nodes having a key starting with "host" should have two inserts
         // added by ExampleCustomizerBluePrint
-
-        // Scope should have 1 additional insert,
-        // because
         expect(hostA.inserts, hasLength(2));
+        expect(hostA.inserts.elementAt(0).key, 'p0Add111'); // Parent
+        expect(hostA.inserts.elementAt(1).key, 'p1MultiplyByTen'); // Parent
+
+        // ScopeB should have 1 additional insert,
         expect(hostB.inserts, hasLength(2 + 1));
+
+        // Root customizers a added first, followed by child customizers
+        expect(hostB.inserts.elementAt(0).key, 'p0Add111'); // Parent
+        expect(hostB.inserts.elementAt(1).key, 'p1MultiplyByTen');
+        expect(hostB.inserts.elementAt(2).key, 'c0MultiplyByTwo'); // Child
+
         expect(hostC.inserts, hasLength(2 + 1));
 
         // Nodes not starting with 'host' should not have inserts
@@ -47,6 +54,11 @@ void main() {
         final initialC = hostC.bluePrint.initialProduct;
         final productC = hostC.product;
         expect(productC, (initialC + 111) * 10 * 2);
+
+        // Add another node to the scope
+        final hostD = const NodeBluePrint<int>(key: 'hostD', initialProduct: 0)
+            .instantiate(scope: scope);
+        expect(hostD.inserts, isNotEmpty);
 
         // Finally let's dispose the customizer
         customizer.dispose();

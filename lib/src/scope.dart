@@ -342,11 +342,15 @@ class Scope {
 
   /// Returns the node with key. If not available in scope the node is created.
   List<Node<dynamic>> findOrCreateNodes(
-    List<NodeBluePrint<dynamic>> bluePrints,
-  ) {
+    List<NodeBluePrint<dynamic>> bluePrints, {
+    bool applyCustomizers = true,
+  }) {
     final result = <Node<dynamic>>[];
     for (final bluePrint in bluePrints) {
-      final newNode = bluePrint.instantiate(scope: this);
+      final newNode = bluePrint.instantiate(
+        scope: this,
+        applyCustomizers: true,
+      );
       result.add(newNode);
     }
     return result;
@@ -502,6 +506,7 @@ class Scope {
     String key = 'example',
     List<String> aliases = const [],
     List<CustomizerBluePrint> customizers = const [],
+    List<ScopeBluePrint> children = const [],
   }) {
     scm ??= Scm.example();
     final root = Scope.root(key: 'root', scm: scm);
@@ -509,6 +514,7 @@ class Scope {
       key: key,
       aliases: aliases,
       customizers: customizers,
+      children: children,
     );
     final result = bluePrint.instantiate(scope: root);
     return result;

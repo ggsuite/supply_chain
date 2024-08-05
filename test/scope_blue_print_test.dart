@@ -613,6 +613,14 @@ void main() {
           );
         });
       });
+
+      test('should apply customizers', () {
+        final customizer = Customizer.example();
+        final scope = customizer.scope;
+        expect(scope.customizers.first, customizer);
+
+        // See Customizer tests for more details
+      });
     });
 
     group('saveGraphToFile', () {

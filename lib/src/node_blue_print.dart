@@ -81,6 +81,7 @@ class NodeBluePrint<T> {
   /// Instantiates the blue print in the given scope
   Node<T> instantiate({
     required Scope scope,
+    bool applyCustomizers = true,
   }) {
     final node = scope.nodes.firstWhereOrNull((n) => n.key == key);
 
@@ -89,10 +90,16 @@ class NodeBluePrint<T> {
       return node as Node<T>;
     }
 
-    return Node<T>(
+    final result = Node<T>(
       bluePrint: this,
       scope: scope,
     );
+
+    if (applyCustomizers) {
+      _applyCustomizers(result);
+    }
+
+    return result;
   }
 
   /// Instantiates the blue print as insert in the given scope
@@ -178,4 +185,20 @@ class NodeBluePrint<T> {
 
   @override
   String toString() => key;
+
+  // ######################
+  // Private
+  // ######################
+
+  void _applyCustomizers(Node<dynamic> node, {Scope? scope}) {
+    scope ??= node.scope;
+
+    for (final customizer in scope.customizers) {
+      customizer.applyToNode(node);
+    }
+
+    if (scope.parent != null) {
+      _applyCustomizers(node, scope: scope.parent);
+    }
+  }
 }

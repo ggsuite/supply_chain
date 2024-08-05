@@ -45,12 +45,18 @@ class CustomizerNodeReplacer {
 
   // ...........................................................................
   /// Deeply iterate through all child nodes and replace nodes
-  void init(Scope scope) {
-    _initScope(scope);
+  void applyToScope(Scope scope) {
+    // TODO: Rename into applyToScope
+    _applyToScope(scope);
 
     for (final childScope in scope.children) {
-      init(childScope);
+      applyToScope(childScope);
     }
+  }
+
+  /// Apply the customizer to a node
+  void applyToNode(Node<dynamic> node) {
+    _applyToNode(node);
   }
 
   // ######################
@@ -58,27 +64,32 @@ class CustomizerNodeReplacer {
   // ######################
 
   // ...........................................................................
-  void _initScope(Scope scope) {
+  void _applyToScope(Scope scope) {
     for (final node in scope.nodes) {
-      // Get the replacement for the node from the customizer
-      final newBluePrint = customizer.bluePrint.replaceNode(
-        hostScope: scope,
-        nodeToBeReplaced: node,
-      );
-
-      // No change? Continue
-      if (newBluePrint == node.bluePrint) {
-        continue;
-      }
-
-      // Replace the blue print
-      node.addBluePrint(newBluePrint);
-
-      // On dispose we will revert the replacement
-      _dispose.add(() {
-        node.removeBluePrint(newBluePrint);
-      });
+      _applyToNode(node);
     }
+  }
+
+  // ...........................................................................
+  void _applyToNode(Node<dynamic> node) {
+    // Get the replacement for the node from the customizer
+    final newBluePrint = customizer.bluePrint.replaceNode(
+      hostScope: node.scope,
+      nodeToBeReplaced: node,
+    );
+
+    // No change? Continue
+    if (newBluePrint == node.bluePrint) {
+      return;
+    }
+
+    // Replace the blue print
+    node.addBluePrint(newBluePrint);
+
+    // On dispose we will revert the replacement
+    _dispose.add(() {
+      node.removeBluePrint(newBluePrint);
+    });
   }
 
   // ######################

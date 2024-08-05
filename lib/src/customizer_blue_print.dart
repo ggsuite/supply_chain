@@ -89,8 +89,12 @@ class CustomizerBluePrint {
 
   /// A customizer can define customizers for child scopes
   ///
+  /// Child customizers are instantiated before parent customizers.
+  /// I.e. the parent's customizers will be applied after the child customizers.
+  ///
+  ///
   /// - Returns: A list of child customizers
-  List<CustomizerBluePrint> customizers({required Scope hostScope}) {
+  List<CustomizerBluePrint> children({required Scope hostScope}) {
     return [];
   }
 
@@ -117,7 +121,7 @@ class ExampleCustomizerBluePrint extends CustomizerBluePrint {
   // ...........................................................................
   /// Inserts
 
-  /// Will add two inserts "add111" and "multiplyByTen" to all nodes
+  /// Will add two inserts "add111" and "p1MultiplyByTen" to all nodes
   /// starting with host
   @override
   List<NodeBluePrint<dynamic>> inserts({required Node<dynamic> hostNode}) {
@@ -125,14 +129,14 @@ class ExampleCustomizerBluePrint extends CustomizerBluePrint {
     if (hostNode.key.startsWith('host') && hostNode is Node<int>) {
       return [
         NodeBluePrint<int>(
-          key: 'add111',
+          key: 'p0Add111',
           initialProduct: 0,
           produce: (components, previousProduct) {
             return previousProduct + 111;
           },
         ),
         NodeBluePrint<int>(
-          key: 'multiplyBeTen',
+          key: 'p1MultiplyByTen',
           initialProduct: 0,
           produce: (components, previousProduct) {
             return previousProduct * 10;
@@ -147,7 +151,7 @@ class ExampleCustomizerBluePrint extends CustomizerBluePrint {
   // ...........................................................................
   /// All scopes with key 'b' will get a child customizer
   @override
-  List<CustomizerBluePrint> customizers({required Scope hostScope}) {
+  List<CustomizerBluePrint> children({required Scope hostScope}) {
     return [
       if (hostScope.key == 'b') const ExampleChildCustomizerBluePrint(),
     ];
@@ -161,20 +165,21 @@ class ExampleCustomizerBluePrint extends CustomizerBluePrint {
 
     // Let's create a node hiearchy with nodes starting with keys
     // starting with hosts
-    final scope = Scope.example();
-
-    scope.mockContent({
-      'a': {
-        'hostA': 0xA,
-        'other': 1,
-        'b': {
-          'hostB': 0xB,
-          'hostC': 0xC,
-        },
-      },
-    });
-
-    const ExampleCustomizerBluePrint().instantiate(scope: scope);
+    final scope = Scope.example(
+      customizers: const [ExampleCustomizerBluePrint()],
+      children: [
+        ScopeBluePrint.fromJson({
+          'a': {
+            'hostA': 0xA,
+            'other': 1,
+            'b': {
+              'hostB': 0xB,
+              'hostC': 0xC,
+            },
+          },
+        }),
+      ],
+    );
 
     // Apply the customizer to the scope
     scope.scm.testFlushTasks();
@@ -191,14 +196,14 @@ class ExampleChildCustomizerBluePrint extends CustomizerBluePrint {
   // ...........................................................................
   /// Inserts
 
-  /// Will an insert "diveByTwo" to all nodes starting with host
+  /// Will an insert "c0MultiplyByTwo" to all nodes starting with host
   @override
   List<NodeBluePrint<dynamic>> inserts({required Node<dynamic> hostNode}) {
     // Add an insert to all nodes which keys start with "host"
     if (hostNode.key.startsWith('host') && hostNode is Node<int>) {
       return [
         NodeBluePrint<int>(
-          key: 'multiplyByTwo',
+          key: 'c0MultiplyByTwo',
           initialProduct: 0,
           produce: (components, previousProduct) {
             return previousProduct * 2;

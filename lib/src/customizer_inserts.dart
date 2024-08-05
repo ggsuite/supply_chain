@@ -38,12 +38,18 @@ class CustomizerInserts {
 
   // ...........................................................................
   /// Deeply iterate through all child nodes and init the inserts
-  void init(Scope scope) {
-    _initScope(scope);
+  void applyToScope(Scope scope) {
+    _applyToScope(scope);
 
     for (final childScope in scope.children) {
-      init(childScope);
+      applyToScope(childScope);
     }
+  }
+
+  // ...........................................................................
+  /// Deeply iterate through all child nodes and init the inserts
+  void applyToNode(Node<dynamic> node) {
+    _applyToNode(node);
   }
 
   // ######################
@@ -51,32 +57,37 @@ class CustomizerInserts {
   // ######################
 
   // ...........................................................................
-  void _initScope(Scope scope) {
+  void _applyToScope(Scope scope) {
     // Iterare all nodes and child nodes and apply the insert
     for (final node in scope.nodes) {
-      // Get the inserts for the node
-      final insertsForNode = customizer.bluePrint.inserts(hostNode: node);
-      if (insertsForNode.isEmpty) {
-        continue;
-      }
+      _applyToNode(node);
+    }
+  }
 
-      // Create a scope hosting all the inserts of the current customizer
-      final Scope scopeForInsertsOfCustomizer =
-          scope.findOrCreateChild(customizer.bluePrint.key);
-      _scopes.add(scopeForInsertsOfCustomizer);
+  // ...........................................................................
+  void _applyToNode(Node<dynamic> node) {
+    // Get the inserts for the node
+    final insertsForNode = customizer.bluePrint.inserts(hostNode: node);
+    if (insertsForNode.isEmpty) {
+      return;
+    }
 
-      // Each node can have multiple inserts.
-      // Therefore create a scope for each node
-      Scope scopeForInsertsOfNode =
-          scopeForInsertsOfCustomizer.findOrCreateChild('${node.key}Inserts');
+    // Create a scope hosting all the inserts of the current customizer
+    final Scope scopeForInsertsOfCustomizer =
+        node.scope.findOrCreateChild(customizer.bluePrint.key);
+    _scopes.add(scopeForInsertsOfCustomizer);
 
-      // Add the inserts to the node
-      for (final insertNodeBluePrint in insertsForNode) {
-        insertNodeBluePrint.instantiateAsInsert(
-          host: node,
-          scope: scopeForInsertsOfNode,
-        );
-      }
+    // Each node can have multiple inserts.
+    // Therefore create a scope for each node
+    Scope scopeForInsertsOfNode =
+        scopeForInsertsOfCustomizer.findOrCreateChild('${node.key}Inserts');
+
+    // Add the inserts to the node
+    for (final insertNodeBluePrint in insertsForNode) {
+      insertNodeBluePrint.instantiateAsInsert(
+        host: node,
+        scope: scopeForInsertsOfNode,
+      );
     }
   }
 

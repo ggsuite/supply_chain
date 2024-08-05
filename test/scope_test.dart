@@ -1276,17 +1276,30 @@ void main() {
           final customizer = Customizer.example();
           final scope = customizer.scope;
           final hostB = scope.findNode<int>('hostB')!;
-          expect(hostB.inserts.first.key, 'add111');
+
+          expect(
+            hostB.inserts.map(
+              (e) => e.key,
+            ),
+            [
+              // Currently we instantiate the root customizers first
+              'p0Add111',
+              'p1MultiplyByTen',
+
+              // Followed by child customizers
+              'c0MultiplyByTwo',
+            ],
+          );
 
           // skipInserts is false. The insert node will be found.
           expect(
-            scope.findNode<int>('hostBInserts.add111', skipInserts: false),
+            scope.findNode<int>('hostBInserts.p0Add111', skipInserts: false),
             isNotNull,
           );
 
           // skipInserts is true. The insert node will not be found.
           expect(
-            scope.findNode<int>('hostBInserts.add111', skipInserts: true),
+            scope.findNode<int>('hostBInserts.p0Add111', skipInserts: true),
             isNull,
           );
         });

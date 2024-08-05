@@ -331,6 +331,7 @@ class ScopeBluePrint {
   Scope instantiate({
     required Scope scope,
     Map<String, String> connect = const {},
+    bool initCustomizers = true,
   }) {
     willInstantiate();
     final connections = {...this.connections, ...connect};
@@ -339,7 +340,6 @@ class ScopeBluePrint {
     // I.e. connected nodes will forward the value of the supplier.
     final self = _applyConnections(this, {...connections});
 
-    // Allow parents to modify this child scope before instantiation
     final modifiedScope = _modifyScopeByParents(
       parentScopeOfModifiedScope: scope,
       currentParentScope: scope,
@@ -368,14 +368,30 @@ class ScopeBluePrint {
     _checkForDuplicateKeys(modifiedNodes);
 
     // Create node
-    innerScope.findOrCreateNodes(modifiedNodes);
+    innerScope.findOrCreateNodes(
+      modifiedNodes,
+
+      /// Customizers are initialized after all nodes are created
+      applyCustomizers: false,
+    );
 
     // Init sub scopes
     for (final child in self.children) {
       child.instantiate(
         scope: innerScope,
+
+        /// Customizers are initialized after all nodes are created
+        initCustomizers: false,
       );
     }
+
+    // Add customizers
+    for (final customizer in customizers) {
+      customizer.instantiate(scope: innerScope);
+    }
+
+    // Apply parent customizers
+    _applyParentCustomizers(scope: innerScope);
 
     /// Returns the created exampleScope
     return innerScope;
@@ -770,6 +786,20 @@ class ScopeBluePrint {
     );
 
     return scopeModifiedByParentScope ?? modifiedScope;
+  }
+
+  // ...........................................................................
+  void _applyParentCustomizers({
+    required Scope scope,
+  }) {
+    var parent = scope.parent;
+
+    while (parent != null) {
+      for (final customizer in parent.customizers) {
+        customizer.applyToScope(scope);
+      }
+      parent = parent.parent;
+    }
   }
 
   // ...........................................................................

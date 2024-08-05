@@ -44,11 +44,11 @@ class CustomizerNodeAdder {
 
   // ...........................................................................
   /// Deeply iterate through all child nodes and replace nodes
-  void init(Scope scope) {
-    _initScope(scope);
+  void applyToScope(Scope scope) {
+    _applyToScope(scope);
 
     for (final childScope in scope.children) {
-      init(childScope);
+      applyToScope(childScope);
     }
   }
 
@@ -57,7 +57,7 @@ class CustomizerNodeAdder {
   // ######################
 
   // ...........................................................................
-  void _initScope(Scope scope) {
+  void _applyToScope(Scope scope) {
     final bluePrints = customizer.bluePrint.addNodes(
       hostScope: scope,
     );

@@ -14,7 +14,7 @@ class Customizer {
     required this.scope,
   }) {
     _init();
-    init(scope);
+    applyToScope(scope);
   }
 
   /// Disposes the customizer
@@ -25,12 +25,18 @@ class Customizer {
   }
 
   /// Applies the customizer to this scope and all its children
-  void init(Scope scope) {
-    inserts.init(scope);
-    nodeReplacer.init(scope);
-    nodeAdder.init(scope);
-    scopeAdder.init(scope);
+  void applyToScope(Scope scope) {
+    inserts.applyToScope(scope);
+    nodeReplacer.applyToScope(scope);
+    nodeAdder.applyToScope(scope);
+    scopeAdder.applyToScope(scope);
     _initChildren(scope);
+  }
+
+  /// Applies the customizer to this node
+  void applyToNode(Node<dynamic> node) {
+    inserts.applyToNode(node);
+    nodeReplacer.applyToNode(node);
   }
 
   /// The blue print of the customizer
@@ -108,7 +114,7 @@ class Customizer {
 
   void _initChildren(Scope scope) {
     // Init own children
-    for (final child in bluePrint.customizers(hostScope: scope)) {
+    for (final child in bluePrint.children(hostScope: scope)) {
       _children.add(child.instantiate(scope: scope));
     }
 

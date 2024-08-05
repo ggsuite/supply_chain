@@ -101,6 +101,7 @@ nodes
 - Rename Plugin into Customizer
 - Change Scope.example - Use instantiate
 - Customizer: Allow to init additional scopes later
+- Customizers can be applied to nodes and scopes after instantiation
 
 ### Fixed
 
