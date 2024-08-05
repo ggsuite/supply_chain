@@ -106,6 +106,7 @@ nodes
 - Rework scope nodes and scope children
 - Some renamings
 - Refactor aliases. Add buildAliases
+- Rebuild connections
 
 ### Fixed
 

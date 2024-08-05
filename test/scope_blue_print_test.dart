@@ -876,5 +876,13 @@ void main() {
         expect(bluePrint.buildAliases(), ['hello']);
       });
     });
+
+    group('connections', () {
+      test('should return the connections of the scope', () {
+        const bluePrint = ScopeBluePrint(key: 'test', connect: {'a': 'b'});
+        expect(bluePrint.connections, const {'a': 'b'});
+        expect(bluePrint.buildConnections(), const {'a': 'b'});
+      });
+    });
   });
 }

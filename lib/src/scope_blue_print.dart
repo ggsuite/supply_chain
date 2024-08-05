@@ -29,7 +29,7 @@ class ScopeBluePrint {
     List<CustomizerBluePrint> customizers = const [],
   })  : _aliases = aliases,
         _customizers = customizers,
-        connections = connect,
+        _connections = connect,
         _nodes = nodes,
         _children = children;
   // coverage:ignore-end
@@ -41,9 +41,10 @@ class ScopeBluePrint {
     List<NodeBluePrint<dynamic>> nodes = const [],
     List<ScopeBluePrint> children = const [],
     List<String> aliases = const [],
-    this.connections = const {},
+    Map<String, String> connections = const {},
     List<CustomizerBluePrint> customizers = const [],
-  })  : _aliases = aliases,
+  })  : _connections = connections,
+        _aliases = aliases,
         _customizers = customizers,
         _nodes = nodes,
         _children = children;
@@ -56,9 +57,10 @@ class ScopeBluePrint {
     List<NodeBluePrint<dynamic>> nodes = const [],
     List<ScopeBluePrint> children = const [],
     List<String> aliases = const [],
-    this.connections = const {},
+    Map<String, String> connections = const {},
     List<CustomizerBluePrint> customizers = const [],
-  })  : _aliases = aliases,
+  })  : _connections = connections,
+        _aliases = aliases,
         _customizers = customizers,
         _nodes = nodes,
         _children = children;
@@ -177,7 +179,7 @@ class ScopeBluePrint {
       aliases: aliases ?? _aliases,
       nodes: mergedNodes,
       children: mergedScopes,
-      connections: connections,
+      connections: _connections,
       customizers: customizers ?? this.customizers,
     );
   }
@@ -211,6 +213,12 @@ class ScopeBluePrint {
   @mustCallSuper
   List<String> buildAliases() {
     return _aliases;
+  }
+
+  /// Override this method in sub classes to define the connections of the scope
+  @mustCallSuper
+  Map<String, String> buildConnections() {
+    return _connections;
   }
 
   // ...........................................................................
@@ -256,7 +264,7 @@ class ScopeBluePrint {
   }
 
   /// Allows to connect scopes and nodes to sources from the outside
-  final Map<String, String> connections;
+  Map<String, String> get connections => buildConnections();
 
   /// The customizers that are installed when the scope is instantiated.
   List<CustomizerBluePrint> get customizers => buildCustomizers();
@@ -303,7 +311,7 @@ class ScopeBluePrint {
     bool initCustomizers = true,
   }) {
     willInstantiate();
-    final connections = {...this.connections, ...connect};
+    final connections = {..._connections, ...connect};
 
     // Connect nodes of this scopes to suppliers from the outside.
     // I.e. connected nodes will forward the value of the supplier.
@@ -407,8 +415,9 @@ class ScopeBluePrint {
     required List<NodeBluePrint<dynamic>> nodes,
     required List<ScopeBluePrint> children,
     required List<CustomizerBluePrint> customizers,
-    required this.connections,
-  })  : _aliases = aliases,
+    required Map<String, String> connections,
+  })  : _connections = connections,
+        _aliases = aliases,
         _nodes = nodes,
         _children = children,
         _customizers = customizers;
@@ -418,6 +427,7 @@ class ScopeBluePrint {
   final List<ScopeBluePrint> _children;
   final List<CustomizerBluePrint> _customizers;
   final List<String> _aliases;
+  final Map<String, String> _connections;
 
   // ...........................................................................
   /// Finds a node with a given key in a given list of nodes.
