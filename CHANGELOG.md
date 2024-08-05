@@ -123,6 +123,7 @@ nodes
 - Remove key named parameter from node
 - Remove ScopeInsert
 - Remove concept of InsertBluePrint. NodeBluePrint is enough.
+- Remove mustCallSuper
 
 ## [1.0.13] - 2024-05-17
 

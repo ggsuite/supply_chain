@@ -5,7 +5,6 @@
 // found in the LICENSE file in the root of this package.
 
 import 'package:collection/collection.dart';
-import 'package:meta/meta.dart';
 import 'package:supply_chain/supply_chain.dart';
 
 /// A scope blue print is a collection of related node blue prints.
@@ -192,31 +191,27 @@ class ScopeBluePrint {
 
   // ...........................................................................
   /// Override this method in sub classes to define the nodes of the scope
-  @mustCallSuper
+
   List<NodeBluePrint<dynamic>> buildNodes() {
     return _nodes;
   }
 
   /// Override this method in sub classes to define the child scopes
-  @mustCallSuper
   List<ScopeBluePrint> buildScopes() {
     return _children;
   }
 
   /// Override this method in sub classes to modify the customizers
-  @mustCallSuper
   List<CustomizerBluePrint> buildCustomizers() {
     return _customizers;
   }
 
   /// Override this method in sub classes to define the aliases of the scope
-  @mustCallSuper
   List<String> buildAliases() {
     return _aliases;
   }
 
   /// Override this method in sub classes to define the connections of the scope
-  @mustCallSuper
   Map<String, String> buildConnections() {
     return _connections;
   }
