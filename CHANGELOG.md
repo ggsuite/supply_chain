@@ -107,6 +107,7 @@ nodes
 - Some renamings
 - Refactor aliases. Add buildAliases
 - Rebuild connections
+- Simplify overrides
 
 ### Fixed
 

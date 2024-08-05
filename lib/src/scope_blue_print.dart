@@ -31,7 +31,6 @@ class ScopeBluePrint {
         _connections = connect,
         _nodes = nodes,
         _children = children;
-  // coverage:ignore-end
 
   // ...........................................................................
   /// Constructor of the scope
@@ -47,6 +46,8 @@ class ScopeBluePrint {
         _customizers = customizers,
         _nodes = nodes,
         _children = children;
+
+  // coverage:ignore-end
 
   // ...........................................................................
   // coverage:ignore-start

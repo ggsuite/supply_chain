@@ -234,7 +234,6 @@ void main() {
           );
         });
       });
-
       group('should throw if blueprints contain nodes with the same key', () {
         test('when the keys are the same', () {
           const bluePrint = ScopeBluePrint(
@@ -882,6 +881,120 @@ void main() {
         const bluePrint = ScopeBluePrint(key: 'test', connect: {'a': 'b'});
         expect(bluePrint.connections, const {'a': 'b'});
         expect(bluePrint.buildConnections(), const {'a': 'b'});
+      });
+    });
+
+    group('mergeNodes(original, overrides)', () {
+      final a0 = NodeBluePrint.example(key: 'a');
+      final a1 = NodeBluePrint.example(key: 'a');
+      final b0 = NodeBluePrint.example(key: 'b');
+      final b1 = NodeBluePrint.example(key: 'b');
+      final c = NodeBluePrint.example(key: 'c');
+
+      final all0 = [a0, b0];
+      final all1 = [a1, b1];
+
+      test('should return the original when overrides is null', () {
+        expect(
+          ScopeBluePrint.mergeNodes(original: all0, overrides: null),
+          same(all0),
+        );
+
+        expect(
+          ScopeBluePrint.mergeNodes(original: all1, overrides: null),
+          same(all1),
+        );
+      });
+
+      test('should return the original, when overrides is empty', () {
+        expect(
+          ScopeBluePrint.mergeNodes(original: all0, overrides: []),
+          same(all0),
+        );
+
+        expect(
+          ScopeBluePrint.mergeNodes(original: all1, overrides: []),
+          same(all1),
+        );
+      });
+
+      test('should replace the original with the overrides', () {
+        final result = ScopeBluePrint.mergeNodes(
+          original: all0,
+          overrides: all1,
+        );
+        expect(result, all1);
+
+        final result1 = ScopeBluePrint.mergeNodes(
+          original: all0,
+          overrides: [b1],
+        );
+        expect(result1, [a0, b1]);
+      });
+
+      test('should add overrides that are not part of the original', () {
+        final result = ScopeBluePrint.mergeNodes(
+          original: all0,
+          overrides: [c],
+        );
+        expect(result, [a0, b0, c]);
+      });
+    });
+
+    group('mergeScopes(original, overrides)', () {
+      final a0 = ScopeBluePrint.example(key: 'a');
+      final a1 = ScopeBluePrint.example(key: 'a');
+      final b0 = ScopeBluePrint.example(key: 'b');
+      final b1 = ScopeBluePrint.example(key: 'b');
+      final c = ScopeBluePrint.example(key: 'c');
+
+      final all0 = [a0, b0];
+      final all1 = [a1, b1];
+
+      test('should return the original when overrides is null', () {
+        expect(
+          ScopeBluePrint.mergeScopes(original: all0, overrides: null),
+          same(all0),
+        );
+
+        expect(
+          ScopeBluePrint.mergeScopes(original: all1, overrides: null),
+          same(all1),
+        );
+      });
+
+      test('should return the original, when overrides is empty', () {
+        expect(
+          ScopeBluePrint.mergeScopes(original: all0, overrides: []),
+          same(all0),
+        );
+
+        expect(
+          ScopeBluePrint.mergeScopes(original: all1, overrides: []),
+          same(all1),
+        );
+      });
+
+      test('should replace the original with the overrides', () {
+        final result = ScopeBluePrint.mergeScopes(
+          original: all0,
+          overrides: all1,
+        );
+        expect(result, all1);
+
+        final result1 = ScopeBluePrint.mergeScopes(
+          original: all0,
+          overrides: [b1],
+        );
+        expect(result1, [a0, b1]);
+      });
+
+      test('should add overrides that are not part of the original', () {
+        final result = ScopeBluePrint.mergeScopes(
+          original: all0,
+          overrides: [c],
+        );
+        expect(result, [a0, b0, c]);
       });
     });
   });
