@@ -24,10 +24,11 @@ class ScopeBluePrint {
     required this.key,
     List<NodeBluePrint<dynamic>> nodes = const [],
     List<ScopeBluePrint> children = const [],
-    this.aliases = const [],
+    List<String> aliases = const [],
     Map<String, String> connect = const {},
     List<CustomizerBluePrint> customizers = const [],
-  })  : _customizers = customizers,
+  })  : _aliases = aliases,
+        _customizers = customizers,
         connections = connect,
         _nodes = nodes,
         _children = children;
@@ -39,10 +40,11 @@ class ScopeBluePrint {
     required this.key,
     List<NodeBluePrint<dynamic>> nodes = const [],
     List<ScopeBluePrint> children = const [],
-    this.aliases = const [],
+    List<String> aliases = const [],
     this.connections = const {},
     List<CustomizerBluePrint> customizers = const [],
-  })  : _customizers = customizers,
+  })  : _aliases = aliases,
+        _customizers = customizers,
         _nodes = nodes,
         _children = children;
 
@@ -53,10 +55,11 @@ class ScopeBluePrint {
     required this.key,
     List<NodeBluePrint<dynamic>> nodes = const [],
     List<ScopeBluePrint> children = const [],
-    this.aliases = const [],
+    List<String> aliases = const [],
     this.connections = const {},
     List<CustomizerBluePrint> customizers = const [],
-  })  : _customizers = customizers,
+  })  : _aliases = aliases,
+        _customizers = customizers,
         _nodes = nodes,
         _children = children;
   // coverage:ignore-end
@@ -171,7 +174,7 @@ class ScopeBluePrint {
 
     return ScopeBluePrint._private(
       key: key ?? this.key,
-      aliases: aliases ?? this.aliases,
+      aliases: aliases ?? _aliases,
       nodes: mergedNodes,
       children: mergedScopes,
       connections: connections,
@@ -204,6 +207,12 @@ class ScopeBluePrint {
     return _customizers;
   }
 
+  /// Override this method in sub classes to define the aliases of the scope
+  @mustCallSuper
+  List<String> buildAliases() {
+    return _aliases;
+  }
+
   // ...........................................................................
   /// Merge nodes with overrides
   static List<NodeBluePrint<dynamic>> mergeNodes({
@@ -224,8 +233,11 @@ class ScopeBluePrint {
   /// The key of the scope
   final String key;
 
+  /// Returns the aliases of the scope
+  List<String> get aliases => buildAliases();
+
   /// Returns true if the key matches the given key or one of the aliases
-  bool matchesKey(String key) => key == this.key || aliases.contains(key);
+  bool matchesKey(String key) => key == this.key || _aliases.contains(key);
 
   /// The nodes of the scope
   List<NodeBluePrint<dynamic>> get nodes => buildNodes();
@@ -242,9 +254,6 @@ class ScopeBluePrint {
     }
     return null;
   }
-
-  /// The list of key aliases
-  final List<String> aliases;
 
   /// Allows to connect scopes and nodes to sources from the outside
   final Map<String, String> connections;
@@ -394,12 +403,13 @@ class ScopeBluePrint {
   /// Private constructor
   ScopeBluePrint._private({
     required this.key,
-    required this.aliases,
+    required List<String> aliases,
     required List<NodeBluePrint<dynamic>> nodes,
     required List<ScopeBluePrint> children,
     required List<CustomizerBluePrint> customizers,
     required this.connections,
-  })  : _nodes = nodes,
+  })  : _aliases = aliases,
+        _nodes = nodes,
         _children = children,
         _customizers = customizers;
 
@@ -407,6 +417,7 @@ class ScopeBluePrint {
   final List<NodeBluePrint<dynamic>> _nodes;
   final List<ScopeBluePrint> _children;
   final List<CustomizerBluePrint> _customizers;
+  final List<String> _aliases;
 
   // ...........................................................................
   /// Finds a node with a given key in a given list of nodes.

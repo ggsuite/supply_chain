@@ -105,6 +105,7 @@ nodes
 - BREAKING CHANGE: Remove modifyChildScope and modifyChildNode. Modifications can only be done via customizers.
 - Rework scope nodes and scope children
 - Some renamings
+- Refactor aliases. Add buildAliases
 
 ### Fixed
 

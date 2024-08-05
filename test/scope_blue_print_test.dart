@@ -868,5 +868,13 @@ void main() {
         });
       });
     });
+
+    group('aliases', () {
+      test('should return the aliases of the scope', () {
+        const bluePrint = ScopeBluePrint(key: 'test', aliases: ['hello']);
+        expect(bluePrint.aliases, ['hello']);
+        expect(bluePrint.buildAliases(), ['hello']);
+      });
+    });
   });
 }
