@@ -75,7 +75,10 @@ class ScopeBluePrint {
   /// The values of the value map are the initial products of the nodes.
   /// If the value of the value map is a map, it is a child scope.
   /// If the value of the value map is a node blue print, it is a node.
-  factory ScopeBluePrint.fromJson(Map<String, dynamic> json) {
+  factory ScopeBluePrint.fromJson(
+    Map<String, dynamic> json, {
+    Map<String, String> connect = const {},
+  }) {
     // Iterate all entries of the map
 
     assert(json.keys.length == 1, 'Only one key is allowed in the root map.');
@@ -147,6 +150,7 @@ class ScopeBluePrint {
       key: key,
       nodes: nodes,
       children: children,
+      connect: connect,
     );
   }
 
@@ -162,6 +166,7 @@ class ScopeBluePrint {
     List<ScopeBluePrint>? modifiedScopes,
     List<CustomizerBluePrint>? customizers,
     List<String>? aliases,
+    Map<String, String>? connections,
   }) {
     // Merge the node overrides
     final mergedNodes = _mergeNodes(
@@ -174,12 +179,14 @@ class ScopeBluePrint {
       modifiedScopes,
     );
 
+    final mergedConnections = {..._connections, ...connections ?? {}};
+
     return ScopeBluePrint._private(
       key: key ?? this.key,
       aliases: aliases ?? _aliases,
       nodes: mergedNodes,
       children: mergedScopes,
-      connections: _connections,
+      connections: mergedConnections,
       customizers: customizers ?? this.customizers,
     );
   }

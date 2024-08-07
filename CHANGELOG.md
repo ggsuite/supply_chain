@@ -108,6 +108,7 @@ nodes
 - Refactor aliases. Add buildAliases
 - Rebuild connections
 - Simplify overrides
+- Allow to submit connections when creating a scope from JSON
 
 ### Fixed
 
