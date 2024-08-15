@@ -8,11 +8,30 @@ import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final builderBluePrint = ScBuilderBluePrint.example.bluePrint;
-  final hostScope = Scope.example();
-  final scopeToBeReplaced = ScopeBluePrint.example();
+  final builder = ScBuilderBluePrint.example;
+  final builderBluePrint = builder.bluePrint as ExampleScBuilderBluePrint;
+  final hostScope = builder.scope;
 
   group('ScBuilderBluePrint', () {
+    group('example', () {
+      test('should trigger "needsUpdate" when a.other changes', () {
+        // Check state before
+        final scope = builder.scope;
+        expect(builderBluePrint.needsUpdateCalls, hasLength(1));
+
+        // Change a.other which is set as "needsUpdateSuppliers"
+        final a = scope.findNode<int>('a.other')!;
+        a.product = 2;
+        scope.scm.testFlushTasks();
+
+        // Check state after
+        expect(builderBluePrint.needsUpdateCalls, hasLength(2));
+        final (Scope s, value) = builderBluePrint.needsUpdateCalls.last;
+        expect(value.first, 2);
+        expect(s, scope);
+      });
+    });
+
     group('instantiate', () {
       test('should create  a builder and add it to scope', () {
         final scope = Scope.example();
@@ -32,6 +51,8 @@ void main() {
       });
 
       test('replaceScope', () {
+        final scopeToBeReplaced = ScopeBluePrint.example();
+
         final replacedScope = builderBluePrint.replaceScope(
           hostScope: hostScope,
           scopeToBeReplaced: scopeToBeReplaced,

@@ -11,6 +11,7 @@ class ScBuilderBluePrint {
   ///  Constructor
   const ScBuilderBluePrint({
     required this.key,
+    this.needsUpdateSuppliers = const [],
   });
 
   /// Instantiates this builder and it's children within the given hostScope
@@ -104,19 +105,32 @@ class ScBuilderBluePrint {
     return ExampleScBuilderBluePrint.example;
   }
 
-  // ######################
-  // Private
-  // ######################
-
   /// The key of the builder
   final String key;
+
+  // ...........................................................................
+  /// When one of these suppliers change, the rebuild method will be called
+  final List<String> needsUpdateSuppliers;
+
+  /// Override this method to react to do something when one of the suppliers
+  /// in [needsUpdateSuppliers] has a new product.
+  ///
+  /// [hostScope]: The scope this builder is instantiated in
+  /// [components]: The latest components of the suppliers
+  void needsUpdate({
+    required Scope hostScope,
+    required List<dynamic> components,
+  }) {}
 }
 
 // #############################################################################
 /// An example builder
 class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
   /// The constructor
-  const ExampleScBuilderBluePrint({super.key = 'exampleScBuilder'});
+  ExampleScBuilderBluePrint({
+    super.key = 'exampleScBuilder',
+    super.needsUpdateSuppliers,
+  });
 
   // ...........................................................................
   /// Inserts
@@ -166,7 +180,13 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
     // Let's create a node hiearchy with nodes starting with keys
     // starting with hosts
     final scope = Scope.example(
-      builders: const [ExampleScBuilderBluePrint()],
+      builders: [
+        ExampleScBuilderBluePrint(
+          needsUpdateSuppliers: [
+            'a.other',
+          ],
+        ),
+      ],
       children: [
         ScopeBluePrint.fromJson({
           'a': {
@@ -184,6 +204,22 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
     // Apply the builder to the scope
     scope.scm.testFlushTasks();
     return scope.builders.first;
+  }
+
+  /// Returns how often needsUpdate was called
+  Iterable<(Scope, List<dynamic> components)> get needsUpdateCalls =>
+      _needsUpdateCalls;
+
+  final List<(Scope, List<dynamic> components)> _needsUpdateCalls = [];
+
+  // ...........................................................................
+  @override
+  void needsUpdate({
+    required Scope hostScope,
+    required List<dynamic> components,
+  }) {
+    super.needsUpdate(hostScope: hostScope, components: components);
+    _needsUpdateCalls.add((hostScope, components));
   }
 }
 

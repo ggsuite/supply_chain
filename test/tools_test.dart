@@ -11,6 +11,7 @@ void main() {
   group('Tools', () {
     group('IsCamelCaseExtension', () {
       test('should return true if a string has camel case format', () {
+        expect('_helloWorld'.isCamelCase, isTrue);
         expect('helloWorld'.isCamelCase, isTrue);
         expect('hello85'.isCamelCase, isTrue);
         expect('hello'.isCamelCase, isTrue);

@@ -4,7 +4,7 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-final _camelCase = RegExp(r'^[a-z][a-z0-9]*([A-Z0-9][a-z0-9]*)*$');
+final _camelCase = RegExp(r'^_?[a-z][a-z0-9]*([A-Z0-9][a-z0-9]*)*$');
 
 /// Extension for lower camel case
 extension IsCamelCaseExtension on String {

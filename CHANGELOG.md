@@ -35,6 +35,7 @@
 - Add the concept of child builders
 - Add builder node adder
 - Add ScBuilderScopeAdder
+- Add a needsUpdate method and needsUpdate supplier to allow triggering a builder on the basis of previous events
 
 ### Changed
 

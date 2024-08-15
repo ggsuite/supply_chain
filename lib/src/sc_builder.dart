@@ -76,6 +76,7 @@ class ScBuilder {
     _initNodeReplacer();
     _initNodeAdder();
     _initScopeAdder();
+    _updateOnSupplierChange();
   }
 
   void _initScope() {
@@ -129,5 +130,31 @@ class ScBuilder {
     for (final childScope in scope.children) {
       _initChildren(childScope);
     }
+  }
+
+  // ...........................................................................
+  void _updateOnSupplierChange() {
+    // No suppliers? Do nothing.
+    if (bluePrint.needsUpdateSuppliers.isEmpty) {
+      return;
+    }
+
+    // Create a node blue print listening to changes on the supplier
+    final onChangeBluePrint = NodeBluePrint<void>(
+      key: '_${bluePrint.key}BuilderNeedsUpdate',
+      suppliers: bluePrint.needsUpdateSuppliers,
+      initialProduct: null,
+      produce: (components, previousProduct) => bluePrint.needsUpdate(
+        hostScope: scope,
+        components: components,
+      ),
+    );
+
+    // Instantiate the blue print within host scospe
+    final onChangeNode = onChangeBluePrint.instantiate(scope: scope);
+
+    _dispose.add(
+      () => onChangeNode.dispose(),
+    );
   }
 }
