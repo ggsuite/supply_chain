@@ -416,12 +416,12 @@ class Scope {
 
   /// Returns the node of key in this or any parent nodes
   Node<T>? findNode<T>(
-    String key, {
+    String path, {
     bool throwIfNotFound = false,
     bool skipInserts = false,
   }) {
     return findItem<T>(
-      key,
+      path,
       throwIfNotFound: throwIfNotFound,
       skipInserts: skipInserts,
       findNodes: true,
@@ -430,16 +430,40 @@ class Scope {
   }
 
   /// Returns the node of key in this or any parent nodes
+  Scope? findScope2(
+    String path, {
+    bool throwIfNotFound = false,
+    bool skipInserts = false,
+  }) {
+    return findItem<dynamic>(
+      path,
+      throwIfNotFound: throwIfNotFound,
+      skipInserts: skipInserts,
+      findNodes: false,
+      findScopes: true,
+    ) as Scope?;
+  }
+
+  /// Returns the node of key in this or any parent nodes
   Object? findItem<T>(
     String key, {
     bool throwIfNotFound = false,
     bool skipInserts = false,
-    bool findNodes = true,
-    bool findScopes = true,
+    required bool findNodes,
+    required bool findScopes,
   }) {
+    if (findNodes == false && findScopes == false) {
+      throw ArgumentError('findNodes and findScopes cannot be both false.');
+    }
+
+    if (findNodes && findScopes) {
+      throw ArgumentError('findNodes and findScopes cannot be both true.');
+    }
+
     final keyParts = key.split('.');
     final nodeKey = keyParts.last;
-    final scopePath = keyParts.sublist(0, keyParts.length - 1);
+    final scopePath =
+        findNodes ? keyParts.sublist(0, keyParts.length - 1) : keyParts;
 
     final node = _findNodeInOwnScope<T>(
           nodeKey,
@@ -478,7 +502,8 @@ class Scope {
         );
 
     if (node == null && throwIfNotFound) {
-      throw ArgumentError('Node with key "$key" not found.');
+      final item = findNodes ? 'Node' : 'Scope';
+      throw ArgumentError('$item with path "$key" not found.');
     }
 
     return node;
@@ -753,6 +778,14 @@ class Scope {
     bool findNodes,
     bool findScopes,
   ) {
+    // If path matches own scope and path segment is the last one
+    // Return this scope.
+    if (findScopes && scopePath.length == 1) {
+      final result = _children[scopePath.first];
+      return result;
+    }
+
+    // If path matches own scope and path segment is not the last one
     bool pathMatchesOwnScope =
         scopePath.isNotEmpty && matchesPathArray(scopePath);
 
@@ -770,6 +803,11 @@ class Scope {
           findScopes,
         );
       }
+    }
+
+    // Return null, if we do not want to find nodes
+    if (!findNodes) {
+      return null;
     }
 
     // Find the node in the current scope

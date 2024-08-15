@@ -1327,7 +1327,7 @@ void main() {
             throwsA(
               predicate<ArgumentError>(
                 (e) =>
-                    e.toString().contains('Node with key "unknown" not found'),
+                    e.toString().contains('Node with path "unknown" not found'),
               ),
             ),
           );
@@ -1344,6 +1344,99 @@ void main() {
                       'with key "grandChildNodeA" and '
                       'Type<int> found:',
                     ),
+              ),
+            ),
+          );
+        });
+      });
+    });
+
+    group('findScope2(key)', () {
+      final scope = Scope.example();
+      scope.mockContent({
+        'a': {
+          'b': {
+            'c': {
+              'd': 0,
+            },
+          },
+          'e': {
+            'f': {
+              'g': 2,
+            },
+          },
+        },
+      });
+
+      group('should return', () {
+        test('null', () {
+          expect(scope.findScope2('a.b.c.d'), isNull);
+        });
+
+        group('the scope,', () {
+          test('if the address matches the full path', () {
+            final c = scope.findScope2('a.b.c')!;
+            expect(c.key, 'c');
+          });
+
+          test('if the address matches a scope with a sub part of the path',
+              () {
+            final b = scope.findScope2('a.b')!;
+            expect(b.key, 'b');
+          });
+
+          test('if the address matches a scope in the parent', () {
+            final c = scope.findScope2('a')!;
+            final a = c.findScope2('a')!;
+            expect(a.key, 'a');
+          });
+        });
+      });
+
+      group('should throw', () {
+        test('when throwIfNotFound is true and the scope is not found', () {
+          expect(
+            () => scope.findScope2('a.b.c.d', throwIfNotFound: true),
+            throwsA(
+              predicate<ArgumentError>(
+                (e) => e.toString().contains(
+                      'Scope with path "a.b.c.d" not found.',
+                    ),
+              ),
+            ),
+          );
+        });
+      });
+    });
+
+    group('findItem', () {
+      group('should throw', () {
+        test('when findNodes and findScopes is both true', () {
+          expect(
+            () =>
+                scope.findItem<dynamic>('a', findNodes: true, findScopes: true),
+            throwsA(
+              isA<ArgumentError>().having(
+                (e) => e.message,
+                'message',
+                contains('findNodes and findScopes cannot be both true.'),
+              ),
+            ),
+          );
+        });
+
+        test('when findNodes and findScopes is both false', () {
+          expect(
+            () => scope.findItem<dynamic>(
+              'a',
+              findNodes: false,
+              findScopes: false,
+            ),
+            throwsA(
+              isA<ArgumentError>().having(
+                (e) => e.message,
+                'message',
+                contains('findNodes and findScopes cannot be both false.'),
               ),
             ),
           );
