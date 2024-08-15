@@ -147,12 +147,6 @@ class Scope {
   /// Returns the child scope with the given key
   Scope? child(String key) => _children[key];
 
-  /// Returns the first scope with the given path.
-  /// Throws if multiple scopes with the same path exist.
-  Scope? findChildScope(String path) {
-    return _findChildScope(path.split('.'));
-  }
-
   /// The parent supply scope
   Scope? parent;
 
@@ -429,8 +423,14 @@ class Scope {
     ) as Node<T>?;
   }
 
+  /// Returns the first scope with the given path.
+  /// Throws if multiple scopes with the same path exist.
+  Scope? findChildScope(String path) {
+    return _findChildScope(path.split('.'));
+  }
+
   /// Returns the node of key in this or any parent nodes
-  Scope? findScope2(
+  Scope? findScope(
     String path, {
     bool throwIfNotFound = false,
     bool skipInserts = false,

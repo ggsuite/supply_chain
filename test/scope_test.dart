@@ -1351,7 +1351,7 @@ void main() {
       });
     });
 
-    group('findScope2(key)', () {
+    group('findScope(path)', () {
       final scope = Scope.example();
       scope.mockContent({
         'a': {
@@ -1370,24 +1370,24 @@ void main() {
 
       group('should return', () {
         test('null', () {
-          expect(scope.findScope2('a.b.c.d'), isNull);
+          expect(scope.findScope('a.b.c.d'), isNull);
         });
 
         group('the scope,', () {
           test('if the address matches the full path', () {
-            final c = scope.findScope2('a.b.c')!;
+            final c = scope.findScope('a.b.c')!;
             expect(c.key, 'c');
           });
 
           test('if the address matches a scope with a sub part of the path',
               () {
-            final b = scope.findScope2('a.b')!;
+            final b = scope.findScope('a.b')!;
             expect(b.key, 'b');
           });
 
           test('if the address matches a scope in the parent', () {
-            final c = scope.findScope2('a')!;
-            final a = c.findScope2('a')!;
+            final c = scope.findScope('a')!;
+            final a = c.findScope('a')!;
             expect(a.key, 'a');
           });
         });
@@ -1396,7 +1396,7 @@ void main() {
       group('should throw', () {
         test('when throwIfNotFound is true and the scope is not found', () {
           expect(
-            () => scope.findScope2('a.b.c.d', throwIfNotFound: true),
+            () => scope.findScope('a.b.c.d', throwIfNotFound: true),
             throwsA(
               predicate<ArgumentError>(
                 (e) => e.toString().contains(

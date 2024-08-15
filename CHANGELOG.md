@@ -115,6 +115,7 @@ Modifications can only be done via builders.
 - Allow to submit connections when creating a scope from JSON
 - Rename customizer into builder
 - Rename findScope into findChildScope
+- Rename findScope2 into findScope
 
 ### Fixed
 
