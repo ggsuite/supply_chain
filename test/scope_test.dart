@@ -84,7 +84,7 @@ void main() {
             },
           });
 
-        final x = scope.findScope('x')!;
+        final x = scope.findChildScope('x')!;
 
         test('should return empty array, when depth = 0', () {
           final parents = x.deepParents(depth: 0).map((e) => e.key);
@@ -218,7 +218,7 @@ void main() {
             },
           },
         });
-        final c = root.findScope('a.b.c')!;
+        final c = root.findChildScope('a.b.c')!;
         expect(c.root, root);
       });
     });
@@ -341,13 +341,13 @@ void main() {
             },
           });
 
-          final c = scope.findScope('a.b.c0')!;
+          final c = scope.findChildScope('a.b.c0')!;
           expect(c.matchesPath('a.b.c0'), isTrue);
           expect(c.matchesPath('a.b.c1'), isTrue);
           expect(c.matchesPath('a.b.c2'), isTrue);
           expect(c.matchesPath('a.b.c3'), isFalse);
 
-          final b = scope.findScope('a.b')!;
+          final b = scope.findChildScope('a.b')!;
           expect(b.matchesPath('c0'), isFalse);
         });
       });
@@ -404,19 +404,19 @@ void main() {
       });
     });
 
-    group('findScope(path)', () {
+    group('findChildScope(path)', () {
       group('should return the scope with the given path', () {
         test('when the path has the name of the scope', () {
           final scope = Scope.example();
-          expect(scope.findScope('example'), scope);
+          expect(scope.findChildScope('example'), scope);
         });
 
         test('when the path has the name of an alias', () {
           final scope = Scope.example(aliases: ['x', 'y', 'z']);
-          expect(scope.findScope('x'), scope);
-          expect(scope.findScope('y'), scope);
-          expect(scope.findScope('z'), scope);
-          expect(scope.findScope('u'), isNull);
+          expect(scope.findChildScope('x'), scope);
+          expect(scope.findChildScope('y'), scope);
+          expect(scope.findChildScope('z'), scope);
+          expect(scope.findChildScope('u'), isNull);
         });
         test('when the path has the name of a child node', () {
           final scope = Scope.example();
@@ -427,9 +427,9 @@ void main() {
               },
             },
           });
-          expect(scope.findScope('a')?.key, 'a');
-          expect(scope.findScope('b')?.key, 'b');
-          expect(scope.findScope('c')?.key, null);
+          expect(scope.findChildScope('a')?.key, 'a');
+          expect(scope.findChildScope('b')?.key, 'b');
+          expect(scope.findChildScope('c')?.key, null);
         });
         test('when the path contains multiple path segments', () {
           final scope = Scope.example();
@@ -442,9 +442,9 @@ void main() {
               },
             },
           });
-          expect(scope.findScope('a.b')?.key, 'b');
-          expect(scope.findScope('a.b.c')?.key, 'c');
-          expect(scope.findScope('a.b.c.d'), isNull);
+          expect(scope.findChildScope('a.b')?.key, 'b');
+          expect(scope.findChildScope('a.b.c')?.key, 'c');
+          expect(scope.findChildScope('a.b.c.d'), isNull);
         });
 
         test('when the scope name is repated down the hiearchy', () {
@@ -470,19 +470,19 @@ void main() {
             },
           });
 
-          final corpus = scope.findScope('corpus')!;
-          final right = corpus.findScope('corpus.panels.right')!;
+          final corpus = scope.findChildScope('corpus')!;
+          final right = corpus.findChildScope('corpus.panels.right')!;
           expect(right.path, 'root.example.corpus.panels.right');
         });
       });
       group('should return null', () {
         test('if the scope does not exist', () {
           final root = ExampleScopeRoot(scm: Scm.testInstance);
-          expect(root.findScope('unknown'), isNull);
+          expect(root.findChildScope('unknown'), isNull);
         });
         test('if the key is empty', () {
           final root = ExampleScopeRoot(scm: Scm.testInstance);
-          expect(root.findScope(''), isNull);
+          expect(root.findChildScope(''), isNull);
         });
       });
 
@@ -578,11 +578,11 @@ void main() {
               },
             });
 
-            final a = scope.findScope('a')!;
-            final b = scope.findScope('a.b')!;
+            final a = scope.findChildScope('a')!;
+            final b = scope.findChildScope('a.b')!;
             final c = scope.findNode<int>('a.b.c')!;
-            final x = scope.findScope('a.x')!;
-            final y = scope.findScope('a.x.y')!;
+            final x = scope.findChildScope('a.x')!;
+            final y = scope.findChildScope('a.x.y')!;
             final z = scope.findNode<int>('a.x.y.z')!;
 
             // Replace the scope
@@ -600,10 +600,10 @@ void main() {
 
             scope.replaceChild(newScope, path: 'a');
 
-            final aOut = scope.findScope('a')!;
-            final bout = scope.findScope('a.b')!;
+            final aOut = scope.findChildScope('a')!;
+            final bout = scope.findChildScope('a.b')!;
             final cOut = scope.findNode<int>('a.b.c')!;
-            final kOut = scope.findScope('a.k');
+            final kOut = scope.findChildScope('a.k');
             final pOut = scope.findNode<int>('a.b.p');
 
             // The original scopes should be kept
@@ -620,10 +620,10 @@ void main() {
             expect(cOut.bluePrint.initialProduct, 5);
 
             // The scopes x, y, z should be removed and disposed
-            expect(scope.findScope('a.x'), isNull);
+            expect(scope.findChildScope('a.x'), isNull);
             expect(x.isDisposed, isTrue);
 
-            expect(scope.findScope('a.x.y'), isNull);
+            expect(scope.findChildScope('a.x.y'), isNull);
             expect(y.isDisposed, isTrue);
 
             expect(scope.findNode<int>('a.x.z'), isNull);
@@ -1005,7 +1005,7 @@ void main() {
                   },
                 });
 
-                final panel = corpus.findScope('bottomPanel')!;
+                final panel = corpus.findChildScope('bottomPanel')!;
                 final corpusWidth = panel.findNode<double>('corpus.width');
                 expect(corpusWidth, isNotNull);
               });
@@ -1079,14 +1079,14 @@ void main() {
                   },
                 });
 
-                final startScope = scope.findScope('backTopRight')!;
+                final startScope = scope.findChildScope('backTopRight')!;
                 expect(
                   startScope.findNode<int>('frontTopRightMiterCut')!.path,
                   endsWith('yInserts.frontTopRightMiterCut'),
                 );
 
-                final startScope1 =
-                    scope.findScope('backTopRight.leftPanelMiterCut.yInserts')!;
+                final startScope1 = scope
+                    .findChildScope('backTopRight.leftPanelMiterCut.yInserts')!;
 
                 expect(
                   startScope1.findNode<int>('frontTopRightMiterCut')!.path,
@@ -1120,7 +1120,7 @@ void main() {
               });
 
               final frontBottomLeft =
-                  scope.findScope('corners.frontBottomLeft')!;
+                  scope.findChildScope('corners.frontBottomLeft')!;
               final xLeft = frontBottomLeft.findNode<dynamic>('bounds.xLeft')!;
               expect(xLeft.path, endsWith('corpus.bounds.xLeft'));
             });
@@ -1245,7 +1245,7 @@ void main() {
                 );
 
                 // Get one of the child scopes
-                final scAChild0 = scope.findScope('scAChild0')!;
+                final scAChild0 = scope.findChildScope('scAChild0')!;
 
                 // Search for a node in the parent scope using the alias
                 final scANode = scAChild0.findNode<int>('x.scANode');
@@ -1490,10 +1490,10 @@ void main() {
         expect(scope.findNode<bool>('a.b.bool')?.product, true);
         expect(scope.findNode<TestEnum>('a.b.enum')?.product, TestEnum.a);
 
-        expect(scope.findScope('a.b.c.d')!.key, 'd');
-        expect(scope.findScope('a.b.c.e')!.key, 'e');
-        expect(scope.findScope('a.b.c.f')!.key, 'f');
-        expect(scope.findScope('a.b.g')!.key, 'g');
+        expect(scope.findChildScope('a.b.c.d')!.key, 'd');
+        expect(scope.findChildScope('a.b.c.e')!.key, 'e');
+        expect(scope.findChildScope('a.b.c.f')!.key, 'f');
+        expect(scope.findChildScope('a.b.g')!.key, 'g');
       });
 
       group('should throw', () {

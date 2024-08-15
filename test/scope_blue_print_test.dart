@@ -184,7 +184,7 @@ void main() {
           );
 
           expect(
-            scope.findScope('childScopeConstructedByParent')!.bluePrint,
+            scope.findChildScope('childScopeConstructedByParent')!.bluePrint,
             overridenScope,
           );
 
@@ -428,7 +428,7 @@ void main() {
               'wh1': 'parent.wh0', // The complete scope is connected
             },
           );
-          final wh0 = parent.findScope('wh0')!;
+          final wh0 = parent.findChildScope('wh0')!;
 
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;

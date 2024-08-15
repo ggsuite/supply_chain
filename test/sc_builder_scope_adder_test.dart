@@ -50,7 +50,7 @@ void main() {
         expect(jv.product, 171);
 
         // Did ExampleScBuilderAddingScopes add scope x and y to scope c?
-        final scopeC = scope.findScope('c')!;
+        final scopeC = scope.findChildScope('c')!;
         final x = scopeC.child('x')!;
         final xv = x.node<int>('xv')!;
         expect(xv.product, 530);

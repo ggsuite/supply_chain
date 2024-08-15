@@ -86,7 +86,7 @@ void main() {
           },
         });
 
-        final k = parent.findScope('k')!;
+        final k = parent.findChildScope('k')!;
         final b = parent.findNode<int>('b')!;
         final c = parent.findNode<int>('d')!;
 

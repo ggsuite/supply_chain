@@ -718,10 +718,10 @@ class ButterFlyExample {
     c11.addCustomer(c111);
 
     if (withScopes) {
-      level0 = scope.findScope('level0')!;
-      level1 = scope.findScope('level1')!;
-      level2 = scope.findScope('level2')!;
-      level3 = scope.findScope('level3')!;
+      level0 = scope.findChildScope('level0')!;
+      level1 = scope.findChildScope('level1')!;
+      level2 = scope.findChildScope('level2')!;
+      level3 = scope.findChildScope('level3')!;
 
       allScopes = [level0, level1, level2, level3, scope];
     } else {
@@ -818,8 +818,8 @@ class TriangleExample {
     rightNode = triangle.findNode<int>('right')!;
 
     topScope = triangle;
-    leftScope = triangle.findScope('left')!;
-    rightScope = triangle.findScope('right')!;
+    leftScope = triangle.findChildScope('left')!;
+    rightScope = triangle.findChildScope('right')!;
 
     topNode.addCustomer(leftNode);
     topNode.addCustomer(rightNode);

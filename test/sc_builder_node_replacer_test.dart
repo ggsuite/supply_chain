@@ -19,7 +19,7 @@ void main() {
         // Get the nodes a,b and d, e out of the hierarchy
         final a = scope.findNode<int>('a')!;
         final b = scope.findNode<int>('b')!;
-        final c = scope.findScope('c')!;
+        final c = scope.findChildScope('c')!;
         final d = scope.findNode<int>('d')!;
         final e = scope.findNode<int>('e')!;
         final f = scope.findNode<String>('f')!;

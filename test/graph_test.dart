@@ -703,8 +703,8 @@ void main() {
               },
             });
 
-            final b = a.findScope('b')!;
-            final c = b.findScope('c')!;
+            final b = a.findChildScope('b')!;
+            final c = b.findChildScope('c')!;
 
             final tree = graph.treeForScope(
               scope: a,

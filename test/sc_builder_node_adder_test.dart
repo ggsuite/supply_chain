@@ -50,7 +50,7 @@ void main() {
         expect(j!.product, 367);
 
         // Did ExampleScBuilderAddingNodes add x and y to scope c?
-        final scopeC = scope.findScope('c')!;
+        final scopeC = scope.findChildScope('c')!;
         final x = scopeC.node<int>('x');
         expect(x, isNotNull);
         expect(x!.product, 966);

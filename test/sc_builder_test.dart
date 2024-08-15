@@ -33,8 +33,8 @@ void main() {
         expect(hostC.inserts, hasLength(3));
 
         // Let's add two more nodes to the scopeA and scopeB
-        final scopeA = scope.findScope('a')!;
-        final scopeB = scope.findScope('b')!;
+        final scopeA = scope.findChildScope('a')!;
+        final scopeB = scope.findChildScope('b')!;
 
         final hostA1 =
             const NodeBluePrint<int>(key: 'hostA1', initialProduct: 11)

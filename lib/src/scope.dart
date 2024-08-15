@@ -149,8 +149,8 @@ class Scope {
 
   /// Returns the first scope with the given path.
   /// Throws if multiple scopes with the same path exist.
-  Scope? findScope(String path) {
-    return _findScope(path.split('.'));
+  Scope? findChildScope(String path) {
+    return _findChildScope(path.split('.'));
   }
 
   /// The parent supply scope
@@ -231,7 +231,7 @@ class Scope {
     String? path,
   }) {
     path ??= replacement.key;
-    final oldScope = findScope(path);
+    final oldScope = findChildScope(path);
 
     if (oldScope == null) {
       throw ArgumentError('Scope with path "$path" not found.');
@@ -990,7 +990,7 @@ class Scope {
   }
 
   // ...........................................................................
-  Scope? _findScope(List<String> path, {bool didFindFirstScope = false}) {
+  Scope? _findChildScope(List<String> path, {bool didFindFirstScope = false}) {
     if (path.isEmpty) {
       return null;
     }
@@ -1000,7 +1000,7 @@ class Scope {
     }
 
     if (path.first == key) {
-      return _findScope(path.sublist(1), didFindFirstScope: true);
+      return _findChildScope(path.sublist(1), didFindFirstScope: true);
     }
 
     if (didFindFirstScope) {
@@ -1011,12 +1011,12 @@ class Scope {
         final restPath = path.sublist(1);
         return restPath.isEmpty
             ? directChild
-            : directChild._findScope(restPath, didFindFirstScope: true);
+            : directChild._findChildScope(restPath, didFindFirstScope: true);
       }
     }
 
     for (final child in _children.values) {
-      final result = child._findScope(path);
+      final result = child._findChildScope(path);
       if (result != null) {
         return result;
       }
