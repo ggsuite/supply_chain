@@ -8,22 +8,22 @@ import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final customizer = Customizer.example();
+  final builder = ScBuilder.example();
 
-  group('Customizer', () {
+  group('ScBuilder', () {
     group('example', () {
       test('should add itself the the host scope', () {
-        expect(customizer.scope.customizers, contains(customizer));
+        expect(builder.scope.builders, contains(builder));
       });
 
       test('should be applied to nodes added after instantiation', () {
-        final customizer = ExampleCustomizerBluePrint.example;
+        final builder = ExampleScBuilderBluePrint.example;
 
-        // Make sure, example customizer is added to the scope
-        final scope = customizer.scope;
-        expect(scope.customizers.first, customizer);
+        // Make sure, example builder is added to the scope
+        final scope = builder.scope;
+        expect(scope.builders.first, builder);
 
-        // The customizer applied inserts
+        // The builder applied inserts
         final hostA = scope.findNode<int>('hostA')!;
         final hostB = scope.findNode<int>('hostB')!;
         final hostC = scope.findNode<int>('hostC')!;
@@ -44,35 +44,35 @@ void main() {
             const NodeBluePrint<int>(key: 'hostB1', initialProduct: 12)
                 .instantiate(scope: scopeB);
 
-        // The customizers are applied to the newly added nodes
+        // The builders are applied to the newly added nodes
         expect(hostA1.inserts, hasLength(2));
         expect(hostB1.inserts, hasLength(3));
       });
     });
 
     group('dispose', () {
-      test('should remove the customizer from its scope', () {
-        final customizer = Customizer.example();
-        expect(customizer.scope.customizers, contains(customizer));
-        customizer.dispose();
-        expect(customizer.scope.customizers, isNot(contains(customizer)));
+      test('should remove the builder from its scope', () {
+        final builder = ScBuilder.example();
+        expect(builder.scope.builders, contains(builder));
+        builder.dispose();
+        expect(builder.scope.builders, isNot(contains(builder)));
       });
     });
 
     group('should throw', () {
       test(
-          'test when another customizer with the same key '
+          'test when another builder with the same key '
           'already exists in scope', () {
         // Create a scope
         final scope = Scope.example();
         // Create two blue prints with the same key
-        final bluePrint0 = CustomizerBluePrint.example.bluePrint;
-        final bluePrint1 = CustomizerBluePrint.example.bluePrint;
+        final bluePrint0 = ScBuilderBluePrint.example.bluePrint;
+        final bluePrint1 = ScBuilderBluePrint.example.bluePrint;
 
-        // Instantiate the first customizer
+        // Instantiate the first builder
         bluePrint0.instantiate(scope: scope);
 
-        // Instantiating another customizer with the same key should throw
+        // Instantiating another builder with the same key should throw
         expect(
           () => bluePrint1.instantiate(scope: scope),
           throwsA(
@@ -80,7 +80,7 @@ void main() {
               (e) => e.message,
               'message',
               contains(
-                'Another customizer with key exampleCustomizer is added.',
+                'Another builder with key exampleScBuilder is added.',
               ),
             ),
           ),

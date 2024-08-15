@@ -343,13 +343,13 @@ class Scope {
   /// Returns the node with key. If not available in scope the node is created.
   List<Node<dynamic>> findOrCreateNodes(
     List<NodeBluePrint<dynamic>> bluePrints, {
-    bool applyCustomizers = true,
+    bool applyScBuilders = true,
   }) {
     final result = <Node<dynamic>>[];
     for (final bluePrint in bluePrints) {
       final newNode = bluePrint.instantiate(
         scope: this,
-        applyCustomizers: true,
+        applyScBuilders: true,
       );
       result.add(newNode);
     }
@@ -433,22 +433,22 @@ class Scope {
 
   // ...........................................................................
   /// This method is called by scopeInsert to add the insert
-  void addCustomizer(Customizer customizer) {
-    _customizers.add(customizer);
+  void addScBuilder(ScBuilder builder) {
+    _builders.add(builder);
   }
 
   /// Removes a scope insert
-  void removeCustomizer(Customizer customizer) {
-    _customizers.remove(customizer);
+  void removeScBuilder(ScBuilder builder) {
+    _builders.remove(builder);
   }
 
-  /// Retruns the customizer with given key or null if not found
-  Customizer? customizer(String key) => _customizers.firstWhereOrNull(
+  /// Retruns the builder with given key or null if not found
+  ScBuilder? builder(String key) => _builders.firstWhereOrNull(
         (element) => element.bluePrint.key == key,
       );
 
   /// Returns the scope inserts
-  List<Customizer> get customizers => _customizers;
+  List<ScBuilder> get builders => _builders;
 
   // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz
@@ -505,7 +505,7 @@ class Scope {
     Scm? scm,
     String key = 'example',
     List<String> aliases = const [],
-    List<CustomizerBluePrint> customizers = const [],
+    List<ScBuilderBluePrint> builders = const [],
     List<ScopeBluePrint> children = const [],
   }) {
     scm ??= Scm.example();
@@ -513,7 +513,7 @@ class Scope {
     final bluePrint = ScopeBluePrint(
       key: key,
       aliases: aliases,
-      customizers: customizers,
+      builders: builders,
       children: children,
     );
     final result = bluePrint.instantiate(scope: root);
@@ -646,7 +646,7 @@ class Scope {
   static int _idCounter = 0;
 
   // ...........................................................................
-  final List<Customizer> _customizers = [];
+  final List<ScBuilder> _builders = [];
 
   // ...........................................................................
   void _init() {

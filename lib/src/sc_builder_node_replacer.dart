@@ -6,11 +6,11 @@
 
 import 'package:supply_chain/supply_chain.dart';
 
-/// Manages the nodes added by a customizer
-class CustomizerNodeReplacer {
+/// Manages the nodes added by a builder
+class ScBuilderNodeReplacer {
   /// The constructor
-  CustomizerNodeReplacer({
-    required this.customizer,
+  ScBuilderNodeReplacer({
+    required this.builder,
   });
 
   // ...........................................................................
@@ -21,11 +21,11 @@ class CustomizerNodeReplacer {
     }
   }
 
-  /// The customizer this class belongs to
-  final Customizer customizer;
+  /// The builder this class belongs to
+  final ScBuilder builder;
 
   /// Returns an example instance for test purposes
-  static CustomizerNodeReplacer get example {
+  static ScBuilderNodeReplacer get example {
     final scope = Scope.example();
 
     scope.mockContent({
@@ -38,9 +38,9 @@ class CustomizerNodeReplacer {
       },
     });
 
-    final customizer =
-        ExampleCustomizerReplacingIntNodes().instantiate(scope: scope);
-    return customizer.nodeReplacer;
+    final builder =
+        ExampleScBuilderReplacingIntNodes().instantiate(scope: scope);
+    return builder.nodeReplacer;
   }
 
   // ...........................................................................
@@ -54,7 +54,7 @@ class CustomizerNodeReplacer {
     }
   }
 
-  /// Apply the customizer to a node
+  /// Apply the builder to a node
   void applyToNode(Node<dynamic> node) {
     _applyToNode(node);
   }
@@ -72,8 +72,8 @@ class CustomizerNodeReplacer {
 
   // ...........................................................................
   void _applyToNode(Node<dynamic> node) {
-    // Get the replacement for the node from the customizer
-    final newBluePrint = customizer.bluePrint.replaceNode(
+    // Get the replacement for the node from the builder
+    final newBluePrint = builder.bluePrint.replaceNode(
       hostScope: node.scope,
       nodeToBeReplaced: node,
     );
@@ -100,10 +100,10 @@ class CustomizerNodeReplacer {
 }
 
 // #############################################################################
-/// An example customizer replacing a node
-class ExampleCustomizerReplacingIntNodes extends CustomizerBluePrint {
+/// An example builder replacing a node
+class ExampleScBuilderReplacingIntNodes extends ScBuilderBluePrint {
   /// The constructor
-  ExampleCustomizerReplacingIntNodes() : super(key: 'example');
+  ExampleScBuilderReplacingIntNodes() : super(key: 'example');
 
   @override
   NodeBluePrint<dynamic> replaceNode({

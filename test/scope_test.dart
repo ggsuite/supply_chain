@@ -1273,8 +1273,8 @@ void main() {
 
       group('with skipInserts', () {
         test('should return inserts when skipInserts is false ', () {
-          final customizer = Customizer.example();
-          final scope = customizer.scope;
+          final builder = ScBuilder.example();
+          final scope = builder.scope;
           final hostB = scope.findNode<int>('hostB')!;
 
           expect(
@@ -1282,11 +1282,11 @@ void main() {
               (e) => e.key,
             ),
             [
-              // Currently we instantiate the root customizers first
+              // Currently we instantiate the root builders first
               'p0Add111',
               'p1MultiplyByTen',
 
-              // Followed by child customizers
+              // Followed by child builders
               'c0MultiplyByTwo',
             ],
           );
@@ -1443,8 +1443,8 @@ void main() {
       });
     });
 
-    group('addCustomizer, removeCustomizer, customizer', () {
-      test('should add and remove a customizer', () {
+    group('addScBuilder, removeScBuilder, builder', () {
+      test('should add and remove a builder', () {
         final scope = Scope.example();
         scope.mockContent({
           'a': {
@@ -1453,19 +1453,19 @@ void main() {
             },
           },
         });
-        final bluePrint = CustomizerBluePrint.example.bluePrint;
-        expect(scope.customizers, isEmpty);
+        final bluePrint = ScBuilderBluePrint.example.bluePrint;
+        expect(scope.builders, isEmpty);
 
-        // Instantiating the customizer should call addCustomizer
-        final customizer = bluePrint.instantiate(scope: scope);
-        expect(scope.customizers, contains(customizer));
+        // Instantiating the builder should call addScBuilder
+        final builder = bluePrint.instantiate(scope: scope);
+        expect(scope.builders, contains(builder));
 
-        // Now we can get the customizer by key
-        expect(scope.customizer(bluePrint.key), customizer);
+        // Now we can get the builder by key
+        expect(scope.builder(bluePrint.key), builder);
 
-        // Disposing the customizer should call removeCustomizer
-        customizer.dispose();
-        expect(scope.customizers, isNot(contains(bluePrint)));
+        // Disposing the builder should call removeScBuilder
+        builder.dispose();
+        expect(scope.builders, isNot(contains(bluePrint)));
       });
     });
   });

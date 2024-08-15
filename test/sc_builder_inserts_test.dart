@@ -8,14 +8,14 @@ import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('CustomizerInserts', () {
+  group('ScBuilderInserts', () {
     group('should recursively iterate all nodes of the host scope', () {
-      test('and add the inserts as defined in the customizer', () {
-        // Look into [ExampleCustomizerBluePrint] to see the node hierarchy
+      test('and add the inserts as defined in the builder', () {
+        // Look into [ExampleScBuilderBluePrint] to see the node hierarchy
         // used for this example
-        final inserts = CustomizerInserts.example();
-        final customizer = inserts.customizer;
-        final scope = customizer.scope;
+        final inserts = ScBuilderInserts.example();
+        final builder = inserts.builder;
+        final scope = builder.scope;
 
         // Get the nodes out of the example hierarchy
         final hostA = scope.findNode<int>('hostA')!;
@@ -24,7 +24,7 @@ void main() {
         final other = scope.findNode<int>('other')!;
 
         // All nodes having a key starting with "host" should have two inserts
-        // added by ExampleCustomizerBluePrint
+        // added by ExampleScBuilderBluePrint
         expect(hostA.inserts, hasLength(2));
         expect(hostA.inserts.elementAt(0).key, 'p0Add111'); // Parent
         expect(hostA.inserts.elementAt(1).key, 'p1MultiplyByTen'); // Parent
@@ -32,7 +32,7 @@ void main() {
         // ScopeB should have 1 additional insert,
         expect(hostB.inserts, hasLength(2 + 1));
 
-        // Root customizers a added first, followed by child customizers
+        // Root builders a added first, followed by child builders
         expect(hostB.inserts.elementAt(0).key, 'p0Add111'); // Parent
         expect(hostB.inserts.elementAt(1).key, 'p1MultiplyByTen');
         expect(hostB.inserts.elementAt(2).key, 'c0MultiplyByTwo'); // Child
@@ -60,9 +60,9 @@ void main() {
             .instantiate(scope: scope);
         expect(hostD.inserts, isNotEmpty);
 
-        // Finally let's dispose the customizer
-        customizer.dispose();
-        customizer.scope.scm.testFlushTasks();
+        // Finally let's dispose the builder
+        builder.dispose();
+        builder.scope.scm.testFlushTasks();
 
         // Now the inserts should be removed from all nodes
         expect(hostA.inserts, hasLength(0));

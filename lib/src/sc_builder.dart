@@ -6,10 +6,10 @@
 
 import 'package:supply_chain/supply_chain.dart';
 
-/// Realizes a customizer
-class Customizer {
-  /// Instante of a customizer blue print
-  Customizer({
+/// Realizes a builder
+class ScBuilder {
+  /// Instante of a builder blue print
+  ScBuilder({
     required this.bluePrint,
     required this.scope,
   }) {
@@ -17,14 +17,14 @@ class Customizer {
     applyToScope(scope);
   }
 
-  /// Disposes the customizer
+  /// Disposes the builder
   void dispose() {
     for (var dispose in _dispose.reversed) {
       dispose();
     }
   }
 
-  /// Applies the customizer to this scope and all its children
+  /// Applies the builder to this scope and all its children
   void applyToScope(Scope scope) {
     inserts.applyToScope(scope);
     nodeReplacer.applyToScope(scope);
@@ -33,40 +33,40 @@ class Customizer {
     _initChildren(scope);
   }
 
-  /// Applies the customizer to this node
+  /// Applies the builder to this node
   void applyToNode(Node<dynamic> node) {
     inserts.applyToNode(node);
     nodeReplacer.applyToNode(node);
   }
 
-  /// The blue print of the customizer
-  final CustomizerBluePrint bluePrint;
+  /// The blue print of the builder
+  final ScBuilderBluePrint bluePrint;
 
-  /// The scope this customizer is instantiated in
+  /// The scope this builder is instantiated in
   final Scope scope;
 
-  /// Returns an example instance of the customizer
-  factory Customizer.example() {
-    return CustomizerBluePrint.example;
+  /// Returns an example instance of the builder
+  factory ScBuilder.example() {
+    return ScBuilderBluePrint.example;
   }
 
-  /// The inserts of the customizer
-  late final CustomizerInserts inserts;
+  /// The inserts of the builder
+  late final ScBuilderInserts inserts;
 
-  /// The node replacer of the customizer
-  late final CustomizerNodeReplacer nodeReplacer;
+  /// The node replacer of the builder
+  late final ScBuilderNodeReplacer nodeReplacer;
 
-  /// The node adder of the customizer
-  late final CustomizerNodeAdder nodeAdder;
+  /// The node adder of the builder
+  late final ScBuilderNodeAdder nodeAdder;
 
-  /// The scope adder of the customizer
-  late final CustomizerScopeAdder scopeAdder;
+  /// The scope adder of the builder
+  late final ScBuilderScopeAdder scopeAdder;
 
   // ######################
   // Private
   // ######################
 
-  final List<Customizer> _children = [];
+  final List<ScBuilder> _children = [];
 
   final List<void Function()> _dispose = [];
 
@@ -79,36 +79,36 @@ class Customizer {
   }
 
   void _initScope() {
-    if (scope.customizer(bluePrint.key) != null) {
+    if (scope.builder(bluePrint.key) != null) {
       throw ArgumentError(
-        'Another customizer with key ${bluePrint.key} is added.',
+        'Another builder with key ${bluePrint.key} is added.',
       );
     }
 
-    scope.addCustomizer(this);
+    scope.addScBuilder(this);
 
     _dispose.add(
-      () => scope.removeCustomizer(this),
+      () => scope.removeScBuilder(this),
     );
   }
 
   void _initInserts() {
-    inserts = CustomizerInserts(customizer: this);
+    inserts = ScBuilderInserts(builder: this);
     _dispose.add(inserts.dispose);
   }
 
   void _initNodeReplacer() {
-    nodeReplacer = CustomizerNodeReplacer(customizer: this);
+    nodeReplacer = ScBuilderNodeReplacer(builder: this);
     _dispose.add(nodeReplacer.dispose);
   }
 
   void _initNodeAdder() {
-    nodeAdder = CustomizerNodeAdder(customizer: this);
+    nodeAdder = ScBuilderNodeAdder(builder: this);
     _dispose.add(nodeAdder.dispose);
   }
 
   void _initScopeAdder() {
-    scopeAdder = CustomizerScopeAdder(customizer: this);
+    scopeAdder = ScBuilderScopeAdder(builder: this);
     _dispose.add(scopeAdder.dispose);
   }
 

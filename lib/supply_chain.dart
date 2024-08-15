@@ -6,12 +6,12 @@
 
 library;
 
-export 'src/customizer_blue_print.dart';
-export 'src/customizer_inserts.dart';
-export 'src/customizer_node_adder.dart';
-export 'src/customizer_node_replacer.dart';
-export 'src/customizer_scope_adder.dart';
-export 'src/customizer.dart';
+export 'src/sc_builder_blue_print.dart';
+export 'src/sc_builder_inserts.dart';
+export 'src/sc_builder_node_adder.dart';
+export 'src/sc_builder_node_replacer.dart';
+export 'src/sc_builder_scope_adder.dart';
+export 'src/sc_builder.dart';
 export 'src/doc.dart';
 export 'src/graph.dart';
 export 'src/insert.dart';

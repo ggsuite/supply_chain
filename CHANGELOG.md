@@ -31,10 +31,10 @@
 - Add possibility to set a mocked product
 - Add set get mockedProduct
 - Add NodeBluePrint
-- Add base of Customizer
-- Add the concept of child customizers
-- Add customizer node adder
-- Add CustomizerScopeAdder
+- Add base of ScBuilder
+- Add the concept of child builders
+- Add builder node adder
+- Add ScBuilderScopeAdder
 
 ### Changed
 
@@ -84,12 +84,12 @@
 - Rename modifyNode into modifyChildNode
 - Improve assertion
 - Rework modifyChildScopes
-- Rename ScopeCustomizer into ScopeInserts
-- Work on customizer and inserts
-- Customizers can define customizers for certain child scopes
+- Rename ScopeScBuilder into ScopeInserts
+- Work on builder and inserts
+- ScBuilders can define builders for certain child scopes
 - findNode will skip inserts by default
-- Rename Inserts into CustomizerInserts
-- Customizers can replace nodes now
+- Rename Inserts into ScBuilderInserts
+- ScBuilders can replace nodes now
 - Split node and rank separation
 - Rename nodeOverrides and scopeOverrides
 - Improve merging of built and constructor nodes and scopes
@@ -98,17 +98,19 @@
 into findNode, offer methods to connect a blue print's node to other external
 nodes
 - Allow to connect nodes and scopes to nodes and scopes in the outside
-- Rename Plugin into Customizer
+- Rename Plugin into ScBuilder
 - Change Scope.example - Use instantiate
-- Customizer: Allow to init additional scopes later
-- Customizers can be applied to nodes and scopes after instantiation
-- BREAKING CHANGE: Remove modifyChildScope and modifyChildNode. Modifications can only be done via customizers.
+- ScBuilder: Allow to init additional scopes later
+- ScBuilders can be applied to nodes and scopes after instantiation
+- BREAKING CHANGE: Remove modifyChildScope and modifyChildNode.
+Modifications can only be done via builders.
 - Rework scope nodes and scope children
 - Some renamings
 - Refactor aliases. Add buildAliases
 - Rebuild connections
 - Simplify overrides
 - Allow to submit connections when creating a scope from JSON
+- Rename customizer into builder
 
 ### Fixed
 

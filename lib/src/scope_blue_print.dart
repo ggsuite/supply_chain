@@ -25,9 +25,9 @@ class ScopeBluePrint {
     List<ScopeBluePrint> children = const [],
     List<String> aliases = const [],
     Map<String, String> connect = const {},
-    List<CustomizerBluePrint> customizers = const [],
+    List<ScBuilderBluePrint> builders = const [],
   })  : _aliases = aliases,
-        _customizers = customizers,
+        _builders = builders,
         _connections = connect,
         _nodes = nodes,
         _children = children;
@@ -40,10 +40,10 @@ class ScopeBluePrint {
     List<ScopeBluePrint> children = const [],
     List<String> aliases = const [],
     Map<String, String> connections = const {},
-    List<CustomizerBluePrint> customizers = const [],
+    List<ScBuilderBluePrint> builders = const [],
   })  : _connections = connections,
         _aliases = aliases,
-        _customizers = customizers,
+        _builders = builders,
         _nodes = nodes,
         _children = children;
 
@@ -58,10 +58,10 @@ class ScopeBluePrint {
     List<ScopeBluePrint> children = const [],
     List<String> aliases = const [],
     Map<String, String> connections = const {},
-    List<CustomizerBluePrint> customizers = const [],
+    List<ScBuilderBluePrint> builders = const [],
   })  : _connections = connections,
         _aliases = aliases,
-        _customizers = customizers,
+        _builders = builders,
         _nodes = nodes,
         _children = children;
   // coverage:ignore-end
@@ -164,7 +164,7 @@ class ScopeBluePrint {
     String? key,
     List<NodeBluePrint<dynamic>>? modifiedNodes,
     List<ScopeBluePrint>? modifiedScopes,
-    List<CustomizerBluePrint>? customizers,
+    List<ScBuilderBluePrint>? builders,
     List<String>? aliases,
     Map<String, String>? connections,
   }) {
@@ -187,7 +187,7 @@ class ScopeBluePrint {
       nodes: mergedNodes,
       children: mergedScopes,
       connections: mergedConnections,
-      customizers: customizers ?? this.customizers,
+      builders: builders ?? this.builders,
     );
   }
 
@@ -209,9 +209,9 @@ class ScopeBluePrint {
     return _children;
   }
 
-  /// Override this method in sub classes to modify the customizers
-  List<CustomizerBluePrint> buildCustomizers() {
-    return _customizers;
+  /// Override this method in sub classes to modify the builders
+  List<ScBuilderBluePrint> buildScBuilders() {
+    return _builders;
   }
 
   /// Override this method in sub classes to define the aliases of the scope
@@ -269,8 +269,8 @@ class ScopeBluePrint {
   /// Allows to connect scopes and nodes to sources from the outside
   Map<String, String> get connections => buildConnections();
 
-  /// The customizers that are installed when the scope is instantiated.
-  List<CustomizerBluePrint> get customizers => buildCustomizers();
+  /// The builders that are installed when the scope is instantiated.
+  List<ScBuilderBluePrint> get builders => buildScBuilders();
 
   // ...........................................................................
   /// Returns the node for a given key
@@ -311,7 +311,7 @@ class ScopeBluePrint {
   Scope instantiate({
     required Scope scope,
     Map<String, String> connect = const {},
-    bool initCustomizers = true,
+    bool initScBuilders = true,
   }) {
     willInstantiate();
     final connections = {..._connections, ...connect};
@@ -330,8 +330,8 @@ class ScopeBluePrint {
     innerScope.findOrCreateNodes(
       self.nodes,
 
-      /// Customizers are initialized after all nodes are created
-      applyCustomizers: false,
+      /// ScBuilders are initialized after all nodes are created
+      applyScBuilders: false,
     );
 
     // Init sub scopes
@@ -339,18 +339,18 @@ class ScopeBluePrint {
       child.instantiate(
         scope: innerScope,
 
-        /// Customizers are initialized after all nodes are created
-        initCustomizers: false,
+        /// ScBuilders are initialized after all nodes are created
+        initScBuilders: false,
       );
     }
 
-    // Add customizers
-    for (final customizer in customizers) {
-      customizer.instantiate(scope: innerScope);
+    // Add builders
+    for (final builder in builders) {
+      builder.instantiate(scope: innerScope);
     }
 
-    // Apply parent customizers
-    _applyParentCustomizers(scope: innerScope);
+    // Apply parent builders
+    _applyParentScBuilders(scope: innerScope);
 
     /// Returns the created exampleScope
     return innerScope;
@@ -417,18 +417,18 @@ class ScopeBluePrint {
     required List<String> aliases,
     required List<NodeBluePrint<dynamic>> nodes,
     required List<ScopeBluePrint> children,
-    required List<CustomizerBluePrint> customizers,
+    required List<ScBuilderBluePrint> builders,
     required Map<String, String> connections,
   })  : _connections = connections,
         _aliases = aliases,
         _nodes = nodes,
         _children = children,
-        _customizers = customizers;
+        _builders = builders;
 
   // ...........................................................................
   final List<NodeBluePrint<dynamic>> _nodes;
   final List<ScopeBluePrint> _children;
-  final List<CustomizerBluePrint> _customizers;
+  final List<ScBuilderBluePrint> _builders;
   final List<String> _aliases;
   final Map<String, String> _connections;
 
@@ -697,14 +697,14 @@ class ScopeBluePrint {
   }
 
   // ...........................................................................
-  void _applyParentCustomizers({
+  void _applyParentScBuilders({
     required Scope scope,
   }) {
     var parent = scope.parent;
 
     while (parent != null) {
-      for (final customizer in parent.customizers) {
-        customizer.applyToScope(scope);
+      for (final builder in parent.builders) {
+        builder.applyToScope(scope);
       }
       parent = parent.parent;
     }

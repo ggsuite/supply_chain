@@ -8,31 +8,31 @@ import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final customizerBluePrint = CustomizerBluePrint.example.bluePrint;
+  final builderBluePrint = ScBuilderBluePrint.example.bluePrint;
   final hostScope = Scope.example();
   final scopeToBeReplaced = ScopeBluePrint.example();
 
-  group('CustomizerBluePrint', () {
+  group('ScBuilderBluePrint', () {
     group('instantiate', () {
-      test('should create  a customizer and add it to scope', () {
+      test('should create  a builder and add it to scope', () {
         final scope = Scope.example();
-        final customizer = CustomizerBluePrint.example.bluePrint.instantiate(
+        final builder = ScBuilderBluePrint.example.bluePrint.instantiate(
           scope: scope,
         );
-        expect(scope.customizers, contains(customizer));
+        expect(scope.builders, contains(builder));
       });
     });
 
     group('base class methods', () {
       test('addScopes', () {
         expect(
-          customizerBluePrint.addScopes(hostScope: Scope.example()),
+          builderBluePrint.addScopes(hostScope: Scope.example()),
           <ScopeBluePrint>[],
         );
       });
 
       test('replaceScope', () {
-        final replacedScope = customizerBluePrint.replaceScope(
+        final replacedScope = builderBluePrint.replaceScope(
           hostScope: hostScope,
           scopeToBeReplaced: scopeToBeReplaced,
         );
@@ -40,7 +40,7 @@ void main() {
         expect(replacedScope, scopeToBeReplaced);
 
         expect(
-          customizerBluePrint.addNodes(hostScope: hostScope),
+          builderBluePrint.addNodes(hostScope: hostScope),
           <NodeBluePrint<dynamic>>[],
         );
       });
@@ -48,7 +48,7 @@ void main() {
       test('replaceNode', () {
         final node = Node.example();
 
-        final replacedNode = customizerBluePrint.replaceNode(
+        final replacedNode = builderBluePrint.replaceNode(
           hostScope: hostScope,
           nodeToBeReplaced: node,
         );
@@ -58,25 +58,25 @@ void main() {
 
       test('inserts(hostNode)', () {
         final hostNode = Node.example();
-        expect(customizerBluePrint.inserts(hostNode: hostNode), isEmpty);
+        expect(builderBluePrint.inserts(hostNode: hostNode), isEmpty);
       });
     });
 
     group('scopes', () {
       group('addScopes', () {
-        group('when instantiating the customizer', () {
-          group('should apply the customizer', () {
+        group('when instantiating the builder', () {
+          group('should apply the builder', () {
             test('to the scope and all existing child scopes', () {});
           });
         });
         group('when instantiating new scopes', () {
-          group('should apply the customizer', () {
+          group('should apply the builder', () {
             test('to the new scope and all new child scopes', () {});
           });
         });
       });
       group('replaceScope', () {
-        group('when instantiating the customizer', () {
+        group('when instantiating the builder', () {
           group('should replace the scope', () {
             test('in all existing child scopes', () {});
           });
@@ -88,7 +88,7 @@ void main() {
         });
       });
       group('bypass', () {
-        group('should bypass all inserts added by the customizer', () {});
+        group('should bypass all inserts added by the builder', () {});
       });
       group('dispose', () {
         test('should remove all added scopes and their children', () {});
@@ -116,7 +116,7 @@ void main() {
 
     group('nodes', () {
       group('addNodes', () {
-        group('when instantiating the customizer', () {
+        group('when instantiating the builder', () {
           test('add the nodes to the host scope and its children', () {});
         });
         group('when instantiating a new scope', () {
@@ -124,7 +124,7 @@ void main() {
         });
       });
       group('replaceNode', () {
-        group('when instantiating the customizer', () {
+        group('when instantiating the builder', () {
           group('should replace the node', () {
             test('in all existing matching child scopes', () {});
           });
@@ -168,7 +168,7 @@ void main() {
     });
     group('inserts', () {
       group('addInserts', () {
-        group('when instantiating the customizer', () {
+        group('when instantiating the builder', () {
           test('should add the inserts to all matching existing nodes', () {});
         });
         group('when instantiating new scopes', () {

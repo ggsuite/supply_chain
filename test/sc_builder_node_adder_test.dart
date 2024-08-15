@@ -9,9 +9,9 @@ import 'package:test/test.dart';
 
 // #############################################################################
 /// An example node adder for test purposes
-class _AddExistingNodeCustomizer extends CustomizerBluePrint {
+class _AddExistingNodeScBuilder extends ScBuilderBluePrint {
   /// The constructor
-  _AddExistingNodeCustomizer() : super(key: 'addExistingNodeCustomizer');
+  _AddExistingNodeScBuilder() : super(key: 'addExistingNodeScBuilder');
 
   @override
   List<NodeBluePrint<dynamic>> addNodes({
@@ -30,17 +30,17 @@ class _AddExistingNodeCustomizer extends CustomizerBluePrint {
 
 // ###########################################################################
 void main() {
-  group('CustomizerNodeAdder', () {
+  group('ScBuilderNodeAdder', () {
     group('instantiate, dispose()', () {
       test('should add and remove the added nodes', () {
         // Create the node adder
-        final customizerNodeAdder = CustomizerNodeAdder.example;
+        final builderNodeAdder = ScBuilderNodeAdder.example;
 
         // Get the scope
-        final scope = customizerNodeAdder.customizer.scope;
+        final scope = builderNodeAdder.builder.scope;
         expect(scope.key, 'example');
 
-        // Did ExampleCustomizerAddingNodes add k and j to the example scope?
+        // Did ExampleScBuilderAddingNodes add k and j to the example scope?
         final k = scope.node<int>('k');
         expect(k, isNotNull);
         expect(k!.product, 12);
@@ -49,7 +49,7 @@ void main() {
         expect(j, isNotNull);
         expect(j!.product, 367);
 
-        // Did ExampleCustomizerAddingNodes add x and y to scope c?
+        // Did ExampleScBuilderAddingNodes add x and y to scope c?
         final scopeC = scope.findScope('c')!;
         final x = scopeC.node<int>('x');
         expect(x, isNotNull);
@@ -59,8 +59,8 @@ void main() {
         expect(y, isNotNull);
         expect(y!.product, 767);
 
-        // Dispose the customizer -> Added nodes should be removed again
-        customizerNodeAdder.dispose();
+        // Dispose the builder -> Added nodes should be removed again
+        builderNodeAdder.dispose();
         expect(scope.node<int>('k'), isNull);
         expect(scope.node<int>('j'), isNull);
         expect(scopeC.node<int>('x'), isNull);
@@ -74,7 +74,7 @@ void main() {
       });
 
       group('should throw', () {
-        test('when the customizer adds a node already existing', () {
+        test('when the builder adds a node already existing', () {
           // Create an example scope containing one node
           final scope = Scope.example();
           expect(scope.nodes, hasLength(0));
@@ -84,17 +84,17 @@ void main() {
             const NodeBluePrint<int>(key: 'existing', initialProduct: 12),
           );
 
-          // Create a customizer trying to add the already existing node
+          // Create a builder trying to add the already existing node
           // "existing". Should throw.
           expect(
-            () => _AddExistingNodeCustomizer().instantiate(scope: scope),
+            () => _AddExistingNodeScBuilder().instantiate(scope: scope),
             throwsA(
               isA<Exception>().having(
                 (e) => e.toString(),
                 'toString',
                 contains(
                   'Node with key "existing" already exists. '
-                  'Please use "CustomizerBluePrint:replaceNode" instead.',
+                  'Please use "ScBuilderBluePrint:replaceNode" instead.',
                 ),
               ),
             ),

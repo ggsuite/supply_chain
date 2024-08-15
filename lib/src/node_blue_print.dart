@@ -81,7 +81,7 @@ class NodeBluePrint<T> {
   /// Instantiates the blue print in the given scope
   Node<T> instantiate({
     required Scope scope,
-    bool applyCustomizers = true,
+    bool applyScBuilders = true,
   }) {
     final node = scope.nodes.firstWhereOrNull((n) => n.key == key);
 
@@ -95,8 +95,8 @@ class NodeBluePrint<T> {
       scope: scope,
     );
 
-    if (applyCustomizers) {
-      _applyCustomizers(result);
+    if (applyScBuilders) {
+      _applyScBuilders(result);
     }
 
     return result;
@@ -190,15 +190,15 @@ class NodeBluePrint<T> {
   // Private
   // ######################
 
-  void _applyCustomizers(Node<dynamic> node, {Scope? scope}) {
+  void _applyScBuilders(Node<dynamic> node, {Scope? scope}) {
     scope ??= node.scope;
 
-    for (final customizer in scope.customizers) {
-      customizer.applyToNode(node);
+    for (final builder in scope.builders) {
+      builder.applyToNode(node);
     }
 
     if (scope.parent != null) {
-      _applyCustomizers(node, scope: scope.parent);
+      _applyScBuilders(node, scope: scope.parent);
     }
   }
 }

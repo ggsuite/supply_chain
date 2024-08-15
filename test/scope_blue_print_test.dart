@@ -602,12 +602,12 @@ void main() {
         });
       });
 
-      test('should apply customizers', () {
-        final customizer = Customizer.example();
-        final scope = customizer.scope;
-        expect(scope.customizers.first, customizer);
+      test('should apply builders', () {
+        final builder = ScBuilder.example();
+        final scope = builder.scope;
+        expect(scope.builders.first, builder);
 
-        // See Customizer tests for more details
+        // See ScBuilder tests for more details
       });
     });
 

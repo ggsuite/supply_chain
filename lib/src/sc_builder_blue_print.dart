@@ -6,20 +6,20 @@
 
 import 'package:supply_chain/supply_chain.dart';
 
-/// A customizer changes various aspects of a scope and its children
-class CustomizerBluePrint {
+/// A builder changes various aspects of a scope and its children
+class ScBuilderBluePrint {
   ///  Constructor
-  const CustomizerBluePrint({
+  const ScBuilderBluePrint({
     required this.key,
   });
 
-  /// Instantiates this customizer and it's children within the given hostScope
+  /// Instantiates this builder and it's children within the given hostScope
   ///
-  /// - [hostScope]: The scope this customizer will be instantiated in
+  /// - [hostScope]: The scope this builder will be instantiated in
   /// - The callbacks below will be applied to the hostScope and all its
   ///   children
-  Customizer instantiate({required Scope scope}) {
-    return Customizer(bluePrint: this, scope: scope);
+  ScBuilder instantiate({required Scope scope}) {
+    return ScBuilder(bluePrint: this, scope: scope);
   }
 
   // ...........................................................................
@@ -85,38 +85,38 @@ class CustomizerBluePrint {
   }
 
   // ...........................................................................
-  // Child customizers
+  // Child builders
 
-  /// A customizer can define customizers for child scopes
+  /// A builder can define builders for child scopes
   ///
-  /// Child customizers are instantiated before parent customizers.
-  /// I.e. the parent's customizers will be applied after the child customizers.
+  /// Child builders are instantiated before parent builders.
+  /// I.e. the parent's builders will be applied after the child builders.
   ///
   ///
-  /// - Returns: A list of child customizers
-  List<CustomizerBluePrint> children({required Scope hostScope}) {
+  /// - Returns: A list of child builders
+  List<ScBuilderBluePrint> children({required Scope hostScope}) {
     return [];
   }
 
   // ...........................................................................
-  /// Returns an example instance of the customizer
-  static Customizer get example {
-    return ExampleCustomizerBluePrint.example;
+  /// Returns an example instance of the builder
+  static ScBuilder get example {
+    return ExampleScBuilderBluePrint.example;
   }
 
   // ######################
   // Private
   // ######################
 
-  /// The key of the customizer
+  /// The key of the builder
   final String key;
 }
 
 // #############################################################################
-/// An example customizer
-class ExampleCustomizerBluePrint extends CustomizerBluePrint {
+/// An example builder
+class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
   /// The constructor
-  const ExampleCustomizerBluePrint({super.key = 'exampleCustomizer'});
+  const ExampleScBuilderBluePrint({super.key = 'exampleScBuilder'});
 
   // ...........................................................................
   /// Inserts
@@ -149,24 +149,24 @@ class ExampleCustomizerBluePrint extends CustomizerBluePrint {
   }
 
   // ...........................................................................
-  /// All scopes with key 'b' will get a child customizer
+  /// All scopes with key 'b' will get a child builder
   @override
-  List<CustomizerBluePrint> children({required Scope hostScope}) {
+  List<ScBuilderBluePrint> children({required Scope hostScope}) {
     return [
-      if (hostScope.key == 'b') const ExampleChildCustomizerBluePrint(),
+      if (hostScope.key == 'b') const ExampleChildScBuilderBluePrint(),
     ];
   }
 
   // ...........................................................................
-  /// Returns an example instance of the ExampleCustomizer
-  static Customizer get example {
+  /// Returns an example instance of the ExampleScBuilder
+  static ScBuilder get example {
     // The example applies inserts to all nodes with a key
     // starting with 'host'.
 
     // Let's create a node hiearchy with nodes starting with keys
     // starting with hosts
     final scope = Scope.example(
-      customizers: const [ExampleCustomizerBluePrint()],
+      builders: const [ExampleScBuilderBluePrint()],
       children: [
         ScopeBluePrint.fromJson({
           'a': {
@@ -181,17 +181,17 @@ class ExampleCustomizerBluePrint extends CustomizerBluePrint {
       ],
     );
 
-    // Apply the customizer to the scope
+    // Apply the builder to the scope
     scope.scm.testFlushTasks();
-    return scope.customizers.first;
+    return scope.builders.first;
   }
 }
 
 // #############################################################################
-/// An example customizer
-class ExampleChildCustomizerBluePrint extends CustomizerBluePrint {
+/// An example builder
+class ExampleChildScBuilderBluePrint extends ScBuilderBluePrint {
   /// The constructor
-  const ExampleChildCustomizerBluePrint({super.key = 'exampleChildCustomizer'});
+  const ExampleChildScBuilderBluePrint({super.key = 'exampleChildScBuilder'});
 
   // ...........................................................................
   /// Inserts

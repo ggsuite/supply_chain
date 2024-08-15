@@ -270,9 +270,9 @@ void main() {
         expect(newBluePrint.produce([], 0), 1);
       });
 
-      test('should apply customizers', () {
-        final customizer = Customizer.example();
-        final scope = customizer.scope;
+      test('should apply builders', () {
+        final builder = ScBuilder.example();
+        final scope = builder.scope;
         final newNode =
             const NodeBluePrint<int>(key: 'hostX', initialProduct: 0)
                 .instantiate(scope: scope);
