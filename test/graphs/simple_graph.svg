@@ -14,39 +14,39 @@
 <polygon fill="none" stroke="black" points="8,-8 8,-191 184,-191 184,-8 8,-8"/>
 <text text-anchor="middle" x="96" y="-173.7" font-family="Helvetica,Arial,sans-serif" font-size="14.00">example</text>
 </g>
-<!-- node_3 -->
+<!-- node_6 -->
 <g id="node1" class="node">
-<title>node_3</title>
+<title>node_6</title>
 <ellipse fill="none" stroke="black" cx="146" cy="-142" rx="29.9" ry="18"/>
 <text text-anchor="middle" x="146" y="-136.2" font-family="Helvetica,Arial,sans-serif" font-size="14.00">node</text>
 </g>
-<!-- supplier_4 -->
+<!-- supplier_7 -->
 <g id="node2" class="node">
-<title>supplier_4</title>
+<title>supplier_7</title>
 <ellipse fill="none" stroke="black" cx="57" cy="-142" rx="41.11" ry="18"/>
 <text text-anchor="middle" x="57" y="-136.2" font-family="Helvetica,Arial,sans-serif" font-size="14.00">supplier</text>
 </g>
-<!-- producer_5 -->
+<!-- producer_8 -->
 <g id="node3" class="node">
-<title>producer_5</title>
+<title>producer_8</title>
 <ellipse fill="none" stroke="black" cx="62" cy="-88" rx="45.01" ry="18"/>
 <text text-anchor="middle" x="62" y="-82.2" font-family="Helvetica,Arial,sans-serif" font-size="14.00">producer</text>
 </g>
-<!-- supplier_4&#45;&gt;producer_5 -->
+<!-- supplier_7&#45;&gt;producer_8 -->
 <g id="edge1" class="edge">
-<title>supplier_4&#45;&gt;producer_5</title>
+<title>supplier_7&#45;&gt;producer_8</title>
 <path fill="none" stroke="black" d="M58.66,-123.68C58.85,-121.78 59.04,-119.8 59.23,-117.79"/>
 <polygon fill="black" stroke="black" points="62.71,-118.21 60.18,-107.92 55.74,-117.54 62.71,-118.21"/>
 </g>
-<!-- customer_6 -->
+<!-- customer_9 -->
 <g id="node4" class="node">
-<title>customer_6</title>
+<title>customer_9</title>
 <ellipse fill="none" stroke="black" cx="63" cy="-34" rx="46.96" ry="18"/>
 <text text-anchor="middle" x="63" y="-28.2" font-family="Helvetica,Arial,sans-serif" font-size="14.00">customer</text>
 </g>
-<!-- producer_5&#45;&gt;customer_6 -->
+<!-- producer_8&#45;&gt;customer_9 -->
 <g id="edge2" class="edge">
-<title>producer_5&#45;&gt;customer_6</title>
+<title>producer_8&#45;&gt;customer_9</title>
 <path fill="none" stroke="black" d="M62.33,-69.68C62.37,-67.78 62.41,-65.8 62.45,-63.79"/>
 <polygon fill="black" stroke="black" points="65.94,-64 62.64,-53.93 58.94,-63.86 65.94,-64"/>
 </g>

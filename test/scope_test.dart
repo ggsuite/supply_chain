@@ -1588,13 +1588,219 @@ void main() {
           expect(nodeC?.key, 'c');
         });
       });
+    });
 
-      group('on', () {
-        group('change', () {
-          test('should exist', () {
-            final onChange = scope.findNode<void>('on.change')!;
-            expect(onChange.key, 'change');
-          });
+    group('on', () {
+      final scope = Scope.example();
+      scope.mockContent({
+        'a': {
+          'a0': 0,
+          'b': {
+            'b0': 1,
+            'b1': 2,
+            'c': {
+              'c0': 0,
+              'c1': 1,
+            },
+          },
+        },
+      });
+      final scm = scope.scm;
+
+      final a = scope.findScope('a')!;
+      final a0 = scope.findNode<int>('a.a0')!;
+      final b = scope.findScope('b')!;
+      final b0 = scope.findNode<int>('b0')!;
+      final b1 = scope.findNode<int>('b1')!;
+      final c = scope.findScope('c')!;
+      final c0 = scope.findNode<int>('c0')!;
+      final c1 = scope.findNode<int>('c1')!;
+
+      setUp(() {
+        scope.reset();
+      });
+
+      group('change', () {
+        test('should exist', () {
+          final onChange = scope.findNode<void>('on.change')!;
+          expect(onChange.key, 'change');
+        });
+
+        test('should allow to observe all changes of in a scope', () {
+          // ........................................
+          // Create nodes observing scopes a,b and e
+
+          // Observere changes on a
+          final aChanges = <Scope>[];
+          NodeBluePrint<void>(
+            key: 'aObserver',
+            initialProduct: null,
+            suppliers: ['a.on.change'],
+            produce: (components, _) => aChanges.add(components.first as Scope),
+          ).instantiate(scope: scope);
+
+          // Observere changes on b
+          final bChanges = <Scope>[];
+          NodeBluePrint<void>(
+            key: 'bObserver',
+            initialProduct: null,
+            suppliers: ['a.b.on.change'],
+            produce: (components, _) => bChanges.add(components.first as Scope),
+          ).instantiate(scope: scope);
+
+          // Observere changes on c
+          final cChanges = <Scope>[];
+          NodeBluePrint<void>(
+            key: 'cObserver',
+            initialProduct: null,
+            suppliers: ['a.b.c.on.change'],
+            produce: (components, _) => cChanges.add(components.first as Scope),
+          ).instantiate(scope: scope);
+
+          scm.testFlushTasks();
+          aChanges.clear();
+          bChanges.clear();
+          cChanges.clear();
+
+          // .....................
+          // Change something in a
+          // and check if the changes were observed only by a
+          a0.product = 1;
+          scm.testFlushTasks();
+
+          expect(aChanges, [a]);
+          expect(bChanges, isEmpty);
+          expect(cChanges, isEmpty);
+          aChanges.clear();
+
+          // .....................
+          // Change something in b
+          // and check if the changes were observed only by b
+          b0.product = 2;
+          scm.testFlushTasks();
+
+          expect(aChanges, isEmpty);
+          expect(bChanges, [b]);
+          expect(cChanges, isEmpty);
+
+          b1.product = 3;
+          scm.testFlushTasks();
+
+          expect(aChanges, isEmpty);
+          expect(bChanges, [b, b]);
+          expect(cChanges, isEmpty);
+          bChanges.clear();
+
+          // .....................
+          // Change something in c
+          // and check if the changes were observed only by c
+          c0.product = 2;
+          scm.testFlushTasks();
+
+          expect(aChanges, isEmpty);
+          expect(bChanges, isEmpty);
+          expect(cChanges, [c]);
+
+          c1.product = 3;
+          scm.testFlushTasks();
+
+          expect(aChanges, isEmpty);
+          expect(bChanges, isEmpty);
+          expect(cChanges, [c, c]);
+        });
+      });
+
+      group('changeRecursive', () {
+        test('should exist', () {
+          final onChange = scope.findNode<void>('on.changeRecursive')!;
+          expect(onChange.key, 'changeRecursive');
+        });
+
+        test(
+            'should allow to observe all changes of in a scope '
+            'and its child scopes.', () {
+          // ........................................
+          // Create nodes observing scopes a,b and e
+
+          // Observere changes on a
+          final aChanges = <Scope>[];
+          NodeBluePrint<void>(
+            key: 'aObserverRecursive',
+            initialProduct: null,
+            suppliers: ['a.on.changeRecursive'],
+            produce: (components, _) => aChanges.add(components.first as Scope),
+          ).instantiate(scope: scope);
+
+          // Observere changes on b
+          final bChanges = <Scope>[];
+          NodeBluePrint<void>(
+            key: 'bObserverRecursive',
+            initialProduct: null,
+            suppliers: ['a.b.on.changeRecursive'],
+            produce: (components, _) => bChanges.add(components.first as Scope),
+          ).instantiate(scope: scope);
+
+          // Observere changes on c
+          final cChanges = <Scope>[];
+          NodeBluePrint<void>(
+            key: 'cObserverRecursive',
+            initialProduct: null,
+            suppliers: ['a.b.c.on.changeRecursive'],
+            produce: (components, _) => cChanges.add(components.first as Scope),
+          ).instantiate(scope: scope);
+
+          scm.testFlushTasks();
+          aChanges.clear();
+          bChanges.clear();
+          cChanges.clear();
+
+          // .....................
+          // Change something in a
+          // and check if the changes were observed only by a
+          a0.product = 1;
+          scm.testFlushTasks();
+
+          expect(aChanges, [a]);
+          expect(bChanges, isEmpty);
+          expect(cChanges, isEmpty);
+          aChanges.clear();
+
+          // .....................
+          // Change something in b
+          // and check if the changes were observed by b and its parent a
+          b0.product = 2;
+          scm.testFlushTasks();
+
+          expect(aChanges, [a]);
+          expect(bChanges, [b]);
+          expect(cChanges, isEmpty);
+
+          b1.product = 3;
+          scm.testFlushTasks();
+
+          expect(aChanges, [a, a]);
+          expect(bChanges, [b, b]);
+          expect(cChanges, isEmpty);
+          aChanges.clear();
+          bChanges.clear();
+
+          // .....................
+          // Change something in c
+          // and check if the changes were observed by c
+          // and its ancestors b and a
+          c0.product = 2;
+          scm.testFlushTasks();
+
+          expect(aChanges, [a]);
+          expect(bChanges, [b]);
+          expect(cChanges, [c]);
+
+          c1.product = 3;
+          scm.testFlushTasks();
+
+          expect(aChanges, [a, a]);
+          expect(bChanges, [b, b]);
+          expect(cChanges, [c, c]);
         });
       });
     });

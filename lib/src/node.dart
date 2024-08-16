@@ -263,6 +263,7 @@ class Node<T> {
     // Announce
     if (announce) {
       scm.hasNewProduct(this);
+      _triggerOnChange();
     }
   }
 
@@ -405,6 +406,35 @@ class Node<T> {
     result.ownPriority = Priority.realtime;
 
     return result;
+  }
+
+  // ...........................................................................
+  /// Returns the all onChange meta nodes depending on this node
+  Iterable<Node<dynamic>> get _onChangeNodes {
+    if (this.isMetaNode) {
+      return const [];
+    }
+
+    final result = <Node<dynamic>>[];
+
+    // Add the onChange node of the own scope
+    result.add(scope.onChange);
+
+    // Add onChangeRecursive of this node and it's parents
+    Scope? parent = this.scope;
+    while (parent != null) {
+      result.add(parent.onChangeRecursive);
+      parent = parent.parent;
+    }
+
+    return result;
+  }
+
+  // ...........................................................................
+  void _triggerOnChange() {
+    for (final node in _onChangeNodes) {
+      scm.nominate(node);
+    }
   }
 
   // ######################

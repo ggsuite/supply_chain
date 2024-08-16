@@ -6,21 +6,21 @@ digraph unix {
   edge [fontname="Helvetica,Arial,sans-serif"]
   subgraph cluster_level1_10 {
     label = "level1"; // scope
-    c0_15 [
+    c0_22 [
       label = "c0"; // node
     ];
-    c1_16 [
+    c1_23 [
       label = "c1"; // node
     ];
     subgraph cluster_level0_12 {
       label = "level0"; // scope
-      x_14 [
+      x_21 [
         label = "x"; // node
       ];
       
     }
     
   }
-  "x_14" -> "c0_15";
-  "x_14" -> "c1_16";
+  "x_21" -> "c0_22";
+  "x_21" -> "c1_23";
 }

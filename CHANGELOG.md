@@ -120,6 +120,7 @@ Modifications can only be done via builders.
 - Introduce metaScopes to provide suppliers informing about scope changes
 - Improve instantiation of MetaScopes
 - Rename \_findNode into \_findItem
+- Using supplier pathes like a.on.change or a.on.changeRecursive it is now possible to observe changes on complete scopes or children
 
 ### Fixed
 

@@ -6,20 +6,20 @@ digraph unix {
   edge [fontname="Helvetica,Arial,sans-serif"]
   subgraph cluster_example_4 {
     label = "example"; // scope
-    node_3 [
+    node_6 [
       label = "node"; // node
     ];
-    supplier_4 [
+    supplier_7 [
       label = "supplier"; // node
     ];
-    producer_5 [
+    producer_8 [
       label = "producer"; // node
     ];
-    customer_6 [
+    customer_9 [
       label = "customer"; // node
     ];
     
   }
-  "supplier_4" -> "producer_5";
-  "producer_5" -> "customer_6";
+  "supplier_7" -> "producer_8";
+  "producer_8" -> "customer_9";
 }

@@ -316,7 +316,7 @@ class Scope {
   }
 
   // ...........................................................................
-  /// Meta scopes
+  /// Meta scopes & nodes
 
   /// Returns meta scopes. These scopes manage suppliers providing informations
   /// about the scope.
@@ -342,6 +342,12 @@ class Scope {
 
   /// Returns true if scope is a meta scope
   bool get isMetaScope => parent != null && parent!.metaScopes.contains(this);
+
+  /// A node informing about changes in the scope or one of it's children
+  late final Node<Scope> onChangeRecursive;
+
+  /// A node informing about changes in the scope
+  late final Node<Scope> onChange;
 
   // ...........................................................................
   /// The nodes of this scope
@@ -758,6 +764,7 @@ class Scope {
 
     _initOnMetaScope();
     _initOnChangeNode();
+    _initOnChangeRecursiveNode();
   }
 
   // ...........................................................................
@@ -773,13 +780,26 @@ class Scope {
   void _initOnChangeNode() {
     final onScope = metaScope('on')!;
 
-    final onChangeNode = NodeBluePrint<void>(
+    final bluePrint = NodeBluePrint<Scope>(
       key: 'change',
-      initialProduct: null,
-      produce: (components, previous) {},
+      initialProduct: this,
+      produce: (components, previous) => this,
     );
 
-    onChangeNode.instantiate(scope: onScope);
+    onChange = bluePrint.instantiate(scope: onScope);
+  }
+
+  // ...........................................................................
+  void _initOnChangeRecursiveNode() {
+    final onScope = metaScope('on')!;
+
+    final bluePrint = NodeBluePrint<Scope>(
+      key: 'changeRecursive',
+      initialProduct: this,
+      produce: (components, previous) => this,
+    );
+
+    onChangeRecursive = bluePrint.instantiate(scope: onScope);
   }
 
   // ...........................................................................

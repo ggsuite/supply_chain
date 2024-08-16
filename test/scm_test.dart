@@ -393,7 +393,12 @@ void main() {
       // .....................................
       // After having processed all realtime nodes, visual nodes follow.
       expectIsReady(allNodes, true, except: [screen, grid]);
-      expect(scm.preparedNodes, [screen]);
+      expect(
+        scm.preparedNodes.where(
+          (element) => !element.isMetaNode,
+        ),
+        [screen],
+      );
 
       // Lets flush all tasks
       scm.testFlushTasks(tick: false);
