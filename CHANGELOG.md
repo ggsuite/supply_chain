@@ -118,6 +118,7 @@ Modifications can only be done via builders.
 - Rename findScope2 into findScope
 - Introduce metaScopes to provide suppliers informing about scope changes
 - Improve instantiation of MetaScopes
+- Rename \_findNode into \_findItem
 
 ### Fixed
 

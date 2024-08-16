@@ -345,7 +345,7 @@ class Scope {
   Iterable<Node<dynamic>> get nodes => _nodes.values;
 
   /// Returns the own node for a given key or null if not found
-  Node<T>? node<T>(String key) => _findNodeInOwnScope<T>(
+  Node<T>? node<T>(String key) => _findItemInOwnScope<T>(
         key,
         [],
         true,
@@ -783,35 +783,35 @@ class Scope {
     final scopePath =
         findNodes ? keyParts.sublist(0, keyParts.length - 1) : keyParts;
 
-    final node = _findNodeInOwnScope<T>(
+    final node = _findItemInOwnScope<T>(
           nodeKey,
           scopePath,
           skipInserts,
           findNodes,
           findScopes,
         ) ??
-        _findNodeNodeInParentScopes<T>(
+        _findItemNodeInParentScopes<T>(
           nodeKey,
           scopePath,
           skipInserts,
           findNodes,
           findScopes,
         ) ??
-        _findOneNodeInChildScopes<T>(
+        _findOneItemInChildScopes<T>(
           nodeKey,
           scopePath,
           skipInserts,
           findNodes,
           findScopes,
         ) ??
-        _findNodeInDirectSiblingScopes<T>(
+        _findItemInDirectSiblingScopes<T>(
           nodeKey,
           scopePath,
           skipInserts,
           findNodes,
           findScopes,
         ) ??
-        _findNodeInParentsChildScopes<T>(
+        _findItemInParentsChildScopes<T>(
           nodeKey,
           scopePath,
           skipInserts,
@@ -828,7 +828,7 @@ class Scope {
   }
 
   // ...........................................................................
-  Object? _findNodeInOwnScope<T>(
+  Object? _findItemInOwnScope<T>(
     String nodeKey,
     List<String> scopePath,
     bool skipInserts,
@@ -852,7 +852,7 @@ class Scope {
       if (childScope == null) {
         return null;
       } else {
-        return childScope._findNodeInOwnScope<T>(
+        return childScope._findItemInOwnScope<T>(
           nodeKey,
           scopePath.sublist(1),
           skipInserts,
@@ -892,21 +892,21 @@ class Scope {
   }
 
   // ...........................................................................
-  Object? _findNodeNodeInParentScopes<T>(
+  Object? _findItemNodeInParentScopes<T>(
     String key,
     List<String> scopePath,
     bool skipInserts,
     bool findNodes,
     bool findScopes,
   ) {
-    return parent?._findNodeInOwnScope<T>(
+    return parent?._findItemInOwnScope<T>(
           key,
           scopePath,
           skipInserts,
           findNodes,
           findScopes,
         ) ??
-        parent?._findNodeNodeInParentScopes<T>(
+        parent?._findItemNodeInParentScopes<T>(
           key,
           scopePath,
           skipInserts,
@@ -916,7 +916,7 @@ class Scope {
   }
 
   // ...........................................................................
-  Object? _findNodeInDirectSiblingScopes<T>(
+  Object? _findItemInDirectSiblingScopes<T>(
     String key,
     List<String> scopePath,
     bool skipInserts,
@@ -928,7 +928,7 @@ class Scope {
     }
 
     for (final sibling in parent!._children.values) {
-      final node = sibling._findNodeInOwnScope<T>(
+      final node = sibling._findItemInOwnScope<T>(
         key,
         scopePath,
         skipInserts,
@@ -944,7 +944,7 @@ class Scope {
   }
 
   // ...........................................................................
-  Object? _findOneNodeInChildScopes<T>(
+  Object? _findOneItemInChildScopes<T>(
     String key,
     List<String> scopePath,
     bool skipInserts,
@@ -983,7 +983,7 @@ class Scope {
     final result = <Object>[];
 
     for (final child in _children.values) {
-      final node = child._findNodeInOwnScope<T>(
+      final node = child._findItemInOwnScope<T>(
         key,
         scopePath,
         skipInserts,
@@ -1014,7 +1014,7 @@ class Scope {
   }
 
   // ...........................................................................
-  dynamic _findNodeInParentsChildScopes<T>(
+  dynamic _findItemInParentsChildScopes<T>(
     String key,
     List<String> scopePath,
     bool skipInserts,
@@ -1025,7 +1025,7 @@ class Scope {
       return null;
     }
 
-    final result = parent!._findOneNodeInChildScopes<T>(
+    final result = parent!._findOneItemInChildScopes<T>(
       key,
       scopePath,
       skipInserts,
@@ -1036,7 +1036,7 @@ class Scope {
     if (result != null) {
       return result;
     } else {
-      return parent!._findNodeInParentsChildScopes<T>(
+      return parent!._findItemInParentsChildScopes<T>(
         key,
         scopePath,
         skipInserts,
