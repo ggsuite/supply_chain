@@ -139,9 +139,12 @@ class ScBuilder {
       return;
     }
 
+    // Get the builders meta scope
+    final buildersMetaScope = scope.metaScopeFindOrCreate('builders');
+
     // Create a node blue print listening to changes on the supplier
-    final onChangeBluePrint = NodeBluePrint<void>(
-      key: '_${bluePrint.key}BuilderNeedsUpdate',
+    final needsUpdate = NodeBluePrint<void>(
+      key: '${bluePrint.key}NeedsUpdate',
       suppliers: bluePrint.needsUpdateSuppliers,
       initialProduct: null,
       produce: (components, previousProduct) => bluePrint.needsUpdate(
@@ -151,7 +154,7 @@ class ScBuilder {
     );
 
     // Instantiate the blue print within host scospe
-    final onChangeNode = onChangeBluePrint.instantiate(scope: scope);
+    final onChangeNode = needsUpdate.instantiate(scope: buildersMetaScope);
 
     _dispose.add(
       () => onChangeNode.dispose(),

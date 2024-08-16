@@ -34,6 +34,15 @@ class Scope {
     _init();
   }
 
+  /// Instantiates the scope as a meta scope
+  Scope.metaScope({
+    required String key,
+    required this.parent,
+  })  : scm = parent!.scm,
+        bluePrint = ScopeBluePrint(key: key) {
+    _init(isMetaScope: true);
+  }
+
   /// Disposes the scope
   void dispose() {
     for (final d in _dispose.reversed) {
@@ -316,6 +325,21 @@ class Scope {
   /// Returns the meta scope with the given key
   Scope? metaScope(String key) => _metaScopes[key];
 
+  /// Allows to add nodes to the meta scope
+  Scope metaScopeFindOrCreate(String key) {
+    final existingMetaScope = metaScope(key);
+    if (existingMetaScope != null) {
+      return existingMetaScope;
+    }
+
+    final result = Scope.metaScope(
+      key: key,
+      parent: this,
+    );
+    _metaScopes[key] = result;
+    return result;
+  }
+
   // ...........................................................................
   /// The nodes of this scope
   Iterable<Node<dynamic>> get nodes => _nodes.values;
@@ -424,7 +448,7 @@ class Scope {
     bool throwIfNotFound = false,
     bool skipInserts = false,
   }) {
-    return findItem<T>(
+    return _findItem<T>(
       path,
       throwIfNotFound: throwIfNotFound,
       skipInserts: skipInserts,
@@ -445,78 +469,13 @@ class Scope {
     bool throwIfNotFound = false,
     bool skipInserts = false,
   }) {
-    return findItem<dynamic>(
+    return _findItem<dynamic>(
       path,
       throwIfNotFound: throwIfNotFound,
       skipInserts: skipInserts,
       findNodes: false,
       findScopes: true,
     ) as Scope?;
-  }
-
-  /// Returns the node of key in this or any parent nodes
-  Object? findItem<T>(
-    String key, {
-    bool throwIfNotFound = false,
-    bool skipInserts = false,
-    required bool findNodes,
-    required bool findScopes,
-  }) {
-    if (findNodes == false && findScopes == false) {
-      throw ArgumentError('findNodes and findScopes cannot be both false.');
-    }
-
-    if (findNodes && findScopes) {
-      throw ArgumentError('findNodes and findScopes cannot be both true.');
-    }
-
-    final keyParts = key.split('.');
-    final nodeKey = keyParts.last;
-    final scopePath =
-        findNodes ? keyParts.sublist(0, keyParts.length - 1) : keyParts;
-
-    final node = _findNodeInOwnScope<T>(
-          nodeKey,
-          scopePath,
-          skipInserts,
-          findNodes,
-          findScopes,
-        ) ??
-        _findNodeNodeInParentScopes<T>(
-          nodeKey,
-          scopePath,
-          skipInserts,
-          findNodes,
-          findScopes,
-        ) ??
-        _findOneNodeInChildScopes<T>(
-          nodeKey,
-          scopePath,
-          skipInserts,
-          findNodes,
-          findScopes,
-        ) ??
-        _findNodeInDirectSiblingScopes<T>(
-          nodeKey,
-          scopePath,
-          skipInserts,
-          findNodes,
-          findScopes,
-        ) ??
-        _findNodeInParentsChildScopes<T>(
-          nodeKey,
-          scopePath,
-          skipInserts,
-          findNodes,
-          findScopes,
-        );
-
-    if (node == null && throwIfNotFound) {
-      final item = findNodes ? 'Node' : 'Scope';
-      throw ArgumentError('$item with path "$key" not found.');
-    }
-
-    return node;
   }
 
   // ...........................................................................
@@ -738,25 +697,30 @@ class Scope {
   final List<ScBuilder> _builders = [];
 
   // ...........................................................................
-  void _init() {
-    _initParent();
+  void _init({
+    bool isMetaScope = false,
+  }) {
+    _initParent(isMetaScope);
     _initPath();
     _initNodes();
     _initChildren();
     _initMetaScopes();
   }
 
-  void _initParent() {
+  void _initParent(bool isMetaScope) {
     if (parent == null) {
       return;
     }
 
+    // Get the container
+    final container = isMetaScope ? parent!._metaScopes : parent!._children;
+
     // Add scope to parent scope
-    parent!._children[key] = this;
+    container[key] = this;
 
     // Remove scope from parent scope on dispose
     _dispose.add(() {
-      parent!._children.remove(key);
+      container.remove(key);
     });
   }
 
@@ -788,13 +752,79 @@ class Scope {
       return;
     }
 
-    // The on scope can be accessed via findScope or findChildScope
-    final onEvents = Scope.root(
+    // Adds a 'on' meta scope providing event suppliers like on.change, etc.
+    Scope.metaScope(
       key: 'on',
-      scm: scm,
+      parent: this,
     );
+  }
 
-    _metaScopes['on'] = onEvents;
+  // ...........................................................................
+  /// Returns the node of key in this or any parent nodes
+  Object? _findItem<T>(
+    String key, {
+    bool throwIfNotFound = false,
+    bool skipInserts = false,
+    required bool findNodes,
+    required bool findScopes,
+  }) {
+    // coverage:ignore-start
+    if (findNodes == false && findScopes == false) {
+      throw ArgumentError('findNodes and findScopes cannot be both false.');
+    }
+
+    if (findNodes && findScopes) {
+      throw ArgumentError('findNodes and findScopes cannot be both true.');
+    }
+    // coverage:ignore-end
+
+    final keyParts = key.split('.');
+    final nodeKey = keyParts.last;
+    final scopePath =
+        findNodes ? keyParts.sublist(0, keyParts.length - 1) : keyParts;
+
+    final node = _findNodeInOwnScope<T>(
+          nodeKey,
+          scopePath,
+          skipInserts,
+          findNodes,
+          findScopes,
+        ) ??
+        _findNodeNodeInParentScopes<T>(
+          nodeKey,
+          scopePath,
+          skipInserts,
+          findNodes,
+          findScopes,
+        ) ??
+        _findOneNodeInChildScopes<T>(
+          nodeKey,
+          scopePath,
+          skipInserts,
+          findNodes,
+          findScopes,
+        ) ??
+        _findNodeInDirectSiblingScopes<T>(
+          nodeKey,
+          scopePath,
+          skipInserts,
+          findNodes,
+          findScopes,
+        ) ??
+        _findNodeInParentsChildScopes<T>(
+          nodeKey,
+          scopePath,
+          skipInserts,
+          findNodes,
+          findScopes,
+        );
+
+    if (node == null && throwIfNotFound) {
+      final item = findNodes ? 'Node' : 'Scope';
+      throw ArgumentError('$item with path "$key" not found.');
+    }
+
+    return node;
   }
 
   // ...........................................................................

@@ -1409,41 +1409,6 @@ void main() {
       });
     });
 
-    group('findItem', () {
-      group('should throw', () {
-        test('when findNodes and findScopes is both true', () {
-          expect(
-            () =>
-                scope.findItem<dynamic>('a', findNodes: true, findScopes: true),
-            throwsA(
-              isA<ArgumentError>().having(
-                (e) => e.message,
-                'message',
-                contains('findNodes and findScopes cannot be both true.'),
-              ),
-            ),
-          );
-        });
-
-        test('when findNodes and findScopes is both false', () {
-          expect(
-            () => scope.findItem<dynamic>(
-              'a',
-              findNodes: false,
-              findScopes: false,
-            ),
-            throwsA(
-              isA<ArgumentError>().having(
-                (e) => e.message,
-                'message',
-                contains('findNodes and findScopes cannot be both false.'),
-              ),
-            ),
-          );
-        });
-      });
-    });
-
     group('hasNode(key)', () {
       test('should return true if the scope has a node with the given key', () {
         final rootScope = ExampleScopeRoot(scm: Scm.testInstance);
@@ -1605,6 +1570,13 @@ void main() {
           expect(scope.findChildScope('a.on'), isNotNull);
           expect(scope.findChildScope('a.b.on'), isNotNull);
         });
+      });
+
+      test('should find other suppliers in the hierarchy', () {
+        final onScopeB = scope.findScope('a.b.on')!;
+        final nodeC = onScopeB.findNode<int>('b.c');
+        expect(nodeC, isNotNull);
+        expect(nodeC?.key, 'c');
       });
     });
   });
