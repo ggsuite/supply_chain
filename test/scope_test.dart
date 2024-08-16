@@ -1561,5 +1561,51 @@ void main() {
         expect(scope.builders, isNot(contains(bluePrint)));
       });
     });
+
+    group('metaScopes', () {
+      final scope = Scope.example();
+      scope.mockContent({
+        'a': {
+          'b': {
+            'c': 0,
+          },
+        },
+      });
+
+      test('should return the scope providing event suppliers', () {
+        final onScopeA = scope.metaScope('on')!;
+        expect(onScopeA.key, 'on');
+        final onScopeB = scope.findChildScope('a.b')!.metaScope('on')!;
+        expect(onScopeB.key, 'on');
+      });
+      test('should not be part of the on scope itself', () {
+        final onScopeA = scope.metaScope('on')!;
+        expect(onScopeA.metaScopes, isEmpty);
+      });
+      group('should be findable', () {
+        test('via findNode()', () {
+          // Add a node to the  on scope
+          final onScopeA = scope.metaScope('on')!;
+          onScopeA.mockContent({
+            'change': 0,
+          });
+
+          // Try to find the node
+          final onChange = onScopeA.findNode<int>('on.change');
+          expect(onChange, isNotNull);
+          expect(onChange?.key, 'change');
+        });
+        test('via findScope()', () {
+          expect(scope.findScope('on'), isNotNull);
+          expect(scope.findScope('a.on'), isNotNull);
+          expect(scope.findScope('a.b.on'), isNotNull);
+        });
+        test('via findChildScope()', () {
+          expect(scope.findChildScope('on'), isNotNull);
+          expect(scope.findChildScope('a.on'), isNotNull);
+          expect(scope.findChildScope('a.b.on'), isNotNull);
+        });
+      });
+    });
   });
 }

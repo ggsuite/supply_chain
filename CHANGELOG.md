@@ -116,6 +116,7 @@ Modifications can only be done via builders.
 - Rename customizer into builder
 - Rename findScope into findChildScope
 - Rename findScope2 into findScope
+- Introduce metaScopes to provide suppliers informing about scope changes
 
 ### Fixed
 

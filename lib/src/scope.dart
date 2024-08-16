@@ -307,6 +307,16 @@ class Scope {
   }
 
   // ...........................................................................
+  /// Meta scopes
+
+  /// Returns meta scopes. These scopes manage suppliers providing informations
+  /// about the scope.
+  Iterable<Scope> get metaScopes => _metaScopes.values;
+
+  /// Returns the meta scope with the given key
+  Scope? metaScope(String key) => _metaScopes[key];
+
+  // ...........................................................................
   /// The nodes of this scope
   Iterable<Node<dynamic>> get nodes => _nodes.values;
 
@@ -720,6 +730,7 @@ class Scope {
 
   // ...........................................................................
   final Map<String, Scope> _children = {};
+  final Map<String, Scope> _metaScopes = {};
   final Map<String, Node<dynamic>> _nodes = {};
   static int _idCounter = 0;
 
@@ -732,6 +743,7 @@ class Scope {
     _initPath();
     _initNodes();
     _initChildren();
+    _initMetaScopes();
   }
 
   void _initParent() {
@@ -770,6 +782,21 @@ class Scope {
     _path = parent == null ? key : '${parent!.path}.$key';
   }
 
+  void _initMetaScopes() {
+    // Don't create a §on scope for the meta scope
+    if (key == 'on') {
+      return;
+    }
+
+    // The on scope can be accessed via findScope or findChildScope
+    final onEvents = Scope.root(
+      key: 'on',
+      scm: scm,
+    );
+
+    _metaScopes['on'] = onEvents;
+  }
+
   // ...........................................................................
   Object? _findNodeInOwnScope<T>(
     String nodeKey,
@@ -781,7 +808,7 @@ class Scope {
     // If path matches own scope and path segment is the last one
     // Return this scope.
     if (findScopes && scopePath.length == 1) {
-      final result = _children[scopePath.first];
+      final result = _children[scopePath.first] ?? _metaScopes[scopePath.first];
       return result;
     }
 
@@ -995,8 +1022,14 @@ class Scope {
       return null;
     }
 
-    if (path.length == 1 && bluePrint.matchesKey(path.first)) {
-      return this;
+    if (path.length == 1) {
+      if (bluePrint.matchesKey(path.first)) {
+        return this;
+      }
+      final metaScope = _metaScopes[path.first];
+      if (metaScope != null) {
+        return metaScope;
+      }
     }
 
     if (path.first == key) {
