@@ -6,23 +6,23 @@ digraph unix {
   edge [fontname="Helvetica,Arial,sans-serif"]
   subgraph cluster_exampleRoot_6 {
     label = "exampleRoot"; // scope
-    rootA_1 [
+    rootA_5 [
       label = "rootA"; // node
     ];
-    rootB_2 [
+    rootB_6 [
       label = "rootB"; // node
     ];
     subgraph cluster_childScopeA_8 {
       label = "childScopeA"; // scope
-      childNodeA_3 [
+      childNodeA_8 [
         label = "childNodeA"; // node
       ];
-      childNodeB_4 [
+      childNodeB_9 [
         label = "childNodeB"; // node
       ];
       subgraph cluster_grandChildScope_10 {
         label = "grandChildScope"; // scope
-        grandChildNodeA_5 [
+        grandChildNodeA_11 [
           label = "grandChildNodeA"; // node
         ];
         
@@ -31,15 +31,15 @@ digraph unix {
     }
     subgraph cluster_childScopeB_12 {
       label = "childScopeB"; // scope
-      childNodeA_6 [
+      childNodeA_13 [
         label = "childNodeA"; // node
       ];
-      childNodeB_7 [
+      childNodeB_14 [
         label = "childNodeB"; // node
       ];
       subgraph cluster_grandChildScope_14 {
         label = "grandChildScope"; // scope
-        grandChildNodeA_8 [
+        grandChildNodeA_16 [
           label = "grandChildNodeA"; // node
         ];
         

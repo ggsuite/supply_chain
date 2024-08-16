@@ -6,28 +6,28 @@ digraph unix {
   edge [fontname="Helvetica,Arial,sans-serif"]
   subgraph cluster_example_4 {
     label = "example"; // scope
-    node_0 [
+    node_3 [
       label = "node"; // node
     ];
-    key_1 [
+    key_4 [
       label = "key"; // node
     ];
-    synth_2 [
+    synth_5 [
       label = "synth"; // node
     ];
-    audio_3 [
+    audio_6 [
       label = "audio"; // node
     ];
-    screen_4 [
+    screen_7 [
       label = "screen"; // node
     ];
-    grid_5 [
+    grid_8 [
       label = "grid"; // node
     ];
     
   }
-  "key_1" -> "synth_2";
-  "key_1" -> "screen_4";
-  "synth_2" -> "audio_3";
-  "screen_4" -> "grid_5";
+  "key_4" -> "synth_5";
+  "key_4" -> "screen_7";
+  "synth_5" -> "audio_6";
+  "screen_7" -> "grid_8";
 }

@@ -97,10 +97,13 @@ void main() {
     test('product, produce(), reportUpdate()', () {
       // Check initial values
       expect(node.product, 0);
-      expect(scm.nominatedNodes, [node]);
+      expect(
+        scm.nominatedNodes.where((element) => !element.isMetaNode),
+        [node],
+      );
       expect(node.suppliers, isEmpty);
       expect(node.customers, isEmpty);
-      expect(scm.nodes, [node]);
+      expect(scm.nodes.where((element) => !element.isMetaNode), [node]);
 
       // Call produce method
       final productBefore = node.product;
@@ -137,7 +140,10 @@ void main() {
       final supplier1 = Node.example(scope: chain);
 
       // Add supplier the first time
-      expect(scm.nominatedNodes, [node, supplier0, supplier1]);
+      expect(scm.nominatedNodes, contains(node));
+      expect(scm.nominatedNodes, contains(supplier0));
+      expect(scm.nominatedNodes, contains(supplier1));
+
       node.addSupplier(supplier0);
 
       // Was supplier added?
@@ -659,7 +665,7 @@ void main() {
           otherBluePrint,
         );
 
-        expect(scm.nominatedNodes, [node]);
+        expect(scm.nominatedNodes.where((n) => !n.isMetaNode), [node]);
       });
     });
 

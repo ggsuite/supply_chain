@@ -38,6 +38,7 @@
 - Add a needsUpdate method and needsUpdate supplier to allow triggering a builder on the basis of previous events
 - Add findItem method which returns either a Scope or Node
 - Add findScope2 using the same algorithm as findNode
+- Add an on.change meta node
 
 ### Changed
 

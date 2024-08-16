@@ -33,7 +33,8 @@ void main() {
     :level3,
   ) = butterFly;
 
-  final allNodes = x.scope.scm.nodes.toList();
+  final allNodes =
+      x.scope.scm.nodes.where((n) => !n.scope.isMetaScope).toList();
   final allScopes = butterFly.allScopes;
   final allNodeKeys = allNodes.map((n) => n.key).toList();
   assert(level2.key == 'level2');

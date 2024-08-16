@@ -72,6 +72,7 @@ void main() {
     test('should initialize correctly', () {
       // ..............
       // Initialization
+      scm.testFlushTasks();
 
       // Add one supplier, producer and customer
       initSupplierProducerCustomer();
@@ -806,6 +807,7 @@ void main() {
     test('should be provided during testing', () {
       // Create some variables
       final scm = Scm.example();
+      scm.testFlushTasks();
       expect(scm.isTest, isTrue);
       var fastTaskCounter = 0;
       var normalTaskCounter = 0;
@@ -870,6 +872,7 @@ void main() {
         final scm = Scm.testInstance;
 
         final node = Node.example(scope: scope);
+        final id = node.id;
         node.dispose();
 
         expect(
@@ -879,7 +882,7 @@ void main() {
               (AssertionError p0) {
                 expect(
                   p0.message,
-                  contains('example/aaliyah with id 0 is disposed.'),
+                  contains('example/aaliyah with id $id is disposed.'),
                 );
                 return true;
               },

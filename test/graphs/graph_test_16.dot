@@ -9,19 +9,19 @@ digraph unix {
     invisible [label = "", shape = point, style=invis]; // triangle
     subgraph cluster_left_20 {
       label = "left"; // scope
-      left_16 [
+      left_27 [
         label = "left"; // node
       ];
       
     }
     subgraph cluster_right_22 {
       label = "right"; // scope
-      right_17 [
+      right_29 [
         label = "right"; // node
       ];
       
     }
     
   }
-  "left_16" -> "right_17";
+  "left_27" -> "right_29";
 }

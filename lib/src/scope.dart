@@ -340,6 +340,9 @@ class Scope {
     return result;
   }
 
+  /// Returns true if scope is a meta scope
+  bool get isMetaScope => parent != null && parent!.metaScopes.contains(this);
+
   // ...........................................................................
   /// The nodes of this scope
   Iterable<Node<dynamic>> get nodes => _nodes.values;
@@ -704,7 +707,7 @@ class Scope {
     _initPath();
     _initNodes();
     _initChildren();
-    _initMetaScopes();
+    _initMetaScopesAndNodes();
   }
 
   void _initParent(bool isMetaScope) {
@@ -746,17 +749,37 @@ class Scope {
     _path = parent == null ? key : '${parent!.path}.$key';
   }
 
-  void _initMetaScopes() {
-    // Don't create a §on scope for the meta scope
-    if (key == 'on') {
+  // ...........................................................................
+  void _initMetaScopesAndNodes() {
+    /// Meta scopes will not have meta scopes
+    if (isMetaScope) {
       return;
     }
 
+    _initOnMetaScope();
+    _initOnChangeNode();
+  }
+
+  // ...........................................................................
+  void _initOnMetaScope() {
     // Adds a 'on' meta scope providing event suppliers like on.change, etc.
     Scope.metaScope(
       key: 'on',
       parent: this,
     );
+  }
+
+  // ...........................................................................
+  void _initOnChangeNode() {
+    final onScope = metaScope('on')!;
+
+    final onChangeNode = NodeBluePrint<void>(
+      key: 'change',
+      initialProduct: null,
+      produce: (components, previous) {},
+    );
+
+    onChangeNode.instantiate(scope: onScope);
   }
 
   // ...........................................................................
@@ -848,7 +871,8 @@ class Scope {
 
     // If the scope path is not empty, find the child scope
     if (scopePath.isNotEmpty && !pathMatchesOwnScope) {
-      final childScope = _children[scopePath.first];
+      final childScope =
+          _children[scopePath.first] ?? _metaScopes[scopePath.first];
       if (childScope == null) {
         return null;
       } else {

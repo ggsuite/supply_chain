@@ -6,43 +6,43 @@ digraph unix {
   edge [fontname="Helvetica,Arial,sans-serif"]
   subgraph cluster_parentScope_4 {
     label = "parentScope"; // scope
-    nodeBuiltByParent_0 [
+    nodeBuiltByParent_3 [
       label = "nodeBuiltByParent"; // node
     ];
-    nodeToBeReplaced_1 [
+    nodeToBeReplaced_4 [
       label = "nodeToBeReplaced"; // node
     ];
-    nodeConstructedByParent_2 [
+    nodeConstructedByParent_5 [
       label = "nodeConstructedByParent"; // node
     ];
     subgraph cluster_childScopeBuiltByParent_6 {
       label = "childScopeBuiltByParent"; // scope
-      nodeBuiltByChildScope_3 [
+      nodeBuiltByChildScope_7 [
         label = "nodeBuiltByChildScope"; // node
       ];
       
     }
     subgraph cluster_scopeToBeReplaced_8 {
       label = "scopeToBeReplaced"; // scope
-      builtNode_4 [
+      builtNode_9 [
         label = "builtNode"; // node
       ];
-      dependency_5 [
+      dependency_10 [
         label = "dependency"; // node
       ];
       subgraph cluster_builtScope_10 {
         label = "builtScope"; // scope
-        builtNodeInScope_6 [
+        builtNodeInScope_12 [
           label = "builtNodeInScope"; // node
         ];
         
       }
       subgraph cluster_childScope_12 {
         label = "childScope"; // scope
-        node_7 [
+        node_14 [
           label = "node"; // node
         ];
-        customer_8 [
+        customer_15 [
           label = "customer"; // node
         ];
         
@@ -51,7 +51,7 @@ digraph unix {
     }
     subgraph cluster_childScopeConstructedByParent_14 {
       label = "childScopeConstructedByParent"; // scope
-      nodeConstructedByChildScope_9 [
+      nodeConstructedByChildScope_17 [
         label = "nodeConstructedByChildScope"; // node
       ];
       

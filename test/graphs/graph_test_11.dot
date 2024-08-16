@@ -12,55 +12,55 @@ digraph unix {
       invisible [label = "", shape = point, style=invis]; // butterFly
       subgraph cluster_level3_6 {
         label = "level3"; // scope
-        s111_0 [
+        s111_4 [
           label = "s111"; // node
         ];
-        c111_14 [
+        c111_21 [
           label = "c111"; // node
         ];
         subgraph cluster_level2_8 {
           label = "level2"; // scope
-          s11_1 [
+          s11_6 [
             label = "s11"; // node
           ];
-          s10_2 [
+          s10_7 [
             label = "s10"; // node
           ];
-          s01_3 [
+          s01_8 [
             label = "s01"; // node
           ];
-          s00_4 [
+          s00_9 [
             label = "s00"; // node
           ];
-          c00_10 [
+          c00_17 [
             label = "c00"; // node
           ];
-          c01_11 [
+          c01_18 [
             label = "c01"; // node
           ];
-          c10_12 [
+          c10_19 [
             label = "c10"; // node
           ];
-          c11_13 [
+          c11_20 [
             label = "c11"; // node
           ];
           subgraph cluster_level1_10 {
             label = "level1"; // scope
-            s1_5 [
+            s1_11 [
               label = "s1"; // node
             ];
-            s0_6 [
+            s0_12 [
               label = "s0"; // node
             ];
-            c0_8 [
+            c0_15 [
               label = "c0"; // node
             ];
-            c1_9 [
+            c1_16 [
               label = "c1"; // node
             ];
             subgraph cluster_level0_12 {
               label = "level0"; // scope
-              x_7 [
+              x_14 [
                 label = "x"; // node
               ];
               
@@ -75,18 +75,18 @@ digraph unix {
     }
     
   }
-  "s111_0" -> "s11_1";
-  "s11_1" -> "s1_5";
-  "s10_2" -> "s1_5";
-  "s01_3" -> "s0_6";
-  "s00_4" -> "s0_6";
-  "c11_13" -> "c111_14";
-  "s1_5" -> "x_7";
-  "s0_6" -> "x_7";
-  "c0_8" -> "c00_10";
-  "c0_8" -> "c01_11";
-  "c1_9" -> "c10_12";
-  "c1_9" -> "c11_13";
-  "x_7" -> "c0_8";
-  "x_7" -> "c1_9";
+  "s111_4" -> "s11_6";
+  "s11_6" -> "s1_11";
+  "s10_7" -> "s1_11";
+  "s01_8" -> "s0_12";
+  "s00_9" -> "s0_12";
+  "c11_20" -> "c111_21";
+  "s1_11" -> "x_14";
+  "s0_12" -> "x_14";
+  "c0_15" -> "c00_17";
+  "c0_15" -> "c01_18";
+  "c1_16" -> "c10_19";
+  "c1_16" -> "c11_20";
+  "x_14" -> "c0_15";
+  "x_14" -> "c1_16";
 }

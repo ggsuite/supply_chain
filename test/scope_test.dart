@@ -1537,46 +1537,65 @@ void main() {
         },
       });
 
-      test('should return the scope providing event suppliers', () {
-        final onScopeA = scope.metaScope('on')!;
-        expect(onScopeA.key, 'on');
-        final onScopeB = scope.findChildScope('a.b')!.metaScope('on')!;
-        expect(onScopeB.key, 'on');
-      });
-      test('should not be part of the on scope itself', () {
-        final onScopeA = scope.metaScope('on')!;
-        expect(onScopeA.metaScopes, isEmpty);
-      });
-      group('should be findable', () {
-        test('via findNode()', () {
-          // Add a node to the  on scope
+      group('general', () {
+        test('should return the scope providing event suppliers', () {
           final onScopeA = scope.metaScope('on')!;
-          onScopeA.mockContent({
-            'change': 0,
+          expect(onScopeA.key, 'on');
+          final onScopeB = scope.findChildScope('a.b')!.metaScope('on')!;
+          expect(onScopeB.key, 'on');
+        });
+        test('should not be part of the on scope itself', () {
+          final onScopeA = scope.metaScope('on')!;
+          expect(onScopeA.metaScopes, isEmpty);
+        });
+        group('should be findable', () {
+          test('via findNode()', () {
+            // Try to find the node
+            final onScopeA = scope.metaScope('on')!;
+            final onChange = onScopeA.findNode<void>('on.change');
+            expect(onChange, isNotNull);
+            expect(onChange?.key, 'change');
           });
+          test('via findScope()', () {
+            expect(scope.findScope('on'), isNotNull);
+            expect(scope.findScope('a.on'), isNotNull);
+            expect(scope.findScope('a.b.on'), isNotNull);
+          });
+          test('via findChildScope()', () {
+            expect(scope.findChildScope('on'), isNotNull);
+            expect(scope.findChildScope('a.on'), isNotNull);
+            expect(scope.findChildScope('a.b.on'), isNotNull);
+          });
+        });
 
-          // Try to find the node
-          final onChange = onScopeA.findNode<int>('on.change');
-          expect(onChange, isNotNull);
-          expect(onChange?.key, 'change');
+        group('isMetaScope', () {
+          test(
+              'should return true if a scope is a meta scope '
+              'and false otherwise', () {
+            expect(scope.findChildScope('on')!.isMetaScope, isTrue);
+            expect(scope.findChildScope('a.on')!.isMetaScope, isTrue);
+            expect(scope.findChildScope('a.b.on')!.isMetaScope, isTrue);
+
+            expect(scope.findChildScope('a')!.isMetaScope, isFalse);
+            expect(scope.findChildScope('a.b')!.isMetaScope, isFalse);
+          });
         });
-        test('via findScope()', () {
-          expect(scope.findScope('on'), isNotNull);
-          expect(scope.findScope('a.on'), isNotNull);
-          expect(scope.findScope('a.b.on'), isNotNull);
-        });
-        test('via findChildScope()', () {
-          expect(scope.findChildScope('on'), isNotNull);
-          expect(scope.findChildScope('a.on'), isNotNull);
-          expect(scope.findChildScope('a.b.on'), isNotNull);
+
+        test('should find other suppliers in the hierarchy', () {
+          final onScopeB = scope.findScope('a.b.on')!;
+          final nodeC = onScopeB.findNode<int>('b.c');
+          expect(nodeC, isNotNull);
+          expect(nodeC?.key, 'c');
         });
       });
 
-      test('should find other suppliers in the hierarchy', () {
-        final onScopeB = scope.findScope('a.b.on')!;
-        final nodeC = onScopeB.findNode<int>('b.c');
-        expect(nodeC, isNotNull);
-        expect(nodeC?.key, 'c');
+      group('on', () {
+        group('change', () {
+          test('should exist', () {
+            final onChange = scope.findNode<void>('on.change')!;
+            expect(onChange.key, 'change');
+          });
+        });
       });
     });
   });

@@ -383,6 +383,10 @@ class Node<T> {
   Duration productionStartTime = Duration.zero;
 
   // ...........................................................................
+  /// Returns true if the node is a meta node
+  bool get isMetaNode => scope.isMetaScope;
+
+  // ...........................................................................
   /// Example node for test purposes
   static Node<int> example({
     NodeBluePrint<int>? bluePrint,
