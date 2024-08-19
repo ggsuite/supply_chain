@@ -142,6 +142,7 @@ Modifications can only be done via builders.
 - Remove ScopeInsert
 - Remove concept of InsertBluePrint. NodeBluePrint is enough.
 - Remove mustCallSuper
+- Remove scaling of images again
 
 ## [1.0.13] - 2024-05-17
 
