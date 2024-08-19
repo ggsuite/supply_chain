@@ -123,6 +123,7 @@ Modifications can only be done via builders.
 - Using supplier pathes like a.on.change or a.on.changeRecursive it is now possible to observe changes on complete scopes or children
 - Write svg instead of dot files. Fix an error causing cropped SVG window for dot graphs.
 - Set graph quality to 300 dpi
+- Set output quality to 150dpi
 
 ### Fixed
 
