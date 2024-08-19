@@ -124,6 +124,7 @@ Modifications can only be done via builders.
 - Write svg instead of dot files. Fix an error causing cropped SVG window for dot graphs.
 - Set graph quality to 300 dpi
 - Set output quality to 150dpi
+- Set Gsize=0.5 when exporting graphs
 
 ### Fixed
 

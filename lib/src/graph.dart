@@ -195,7 +195,7 @@ class Graph {
         // Convert dot file to target format
         final process = await Process.run(
           'dot',
-          ['-T$format', '-Gdpi=150', tempPath, '-o$path'],
+          ['-T$format', '-Gsize=0.5', '-Gdpi=150', tempPath, '-o$path'],
         );
 
         // Fix result and write it to the output file
