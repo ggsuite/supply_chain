@@ -161,6 +161,11 @@ void main() {
   Future<void> writeDotFile(String dot, String postfix) async {
     await graph.writeImageFile(
       dot: dot,
+      path: 'test/graphs/graph_test_$postfix.svg',
+    );
+
+    await graph.writeImageFile(
+      dot: dot,
       path: 'test/graphs/graph_test_$postfix.dot',
     );
   }
@@ -796,6 +801,16 @@ void main() {
             writeDotFile(dot, '17');
           });
         });
+      });
+    });
+
+    group('fixViewBox', () {
+      test('should write width and height to the view box width and height',
+          () {
+        const svg =
+            '<svg width="98pt" height="103pt" viewBox="0.00 0.00 94.00 99.00"';
+        final fixed = Graph.fixSvgViewBox(svg);
+        expect(fixed, contains('viewBox="0.00 0.00 98 103"'));
       });
     });
   });

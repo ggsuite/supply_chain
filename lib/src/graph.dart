@@ -197,11 +197,48 @@ class Graph {
           'dot',
           ['-T$format', tempPath, '-o$path'],
         );
+
+        // Fix result and write it to the output file
+        if (format == 'svg') {
+          final svgFile = File(path);
+          final svgContent = await svgFile.readAsString();
+          final result = fixSvgViewBox(svgContent);
+          await File(path).writeAsString(result);
+        }
+
+        // Delete the temporary directory
         await tempDir.delete(recursive: true);
         assert(process.exitCode == 0, process.stderr);
       }
     }
     // coverage:ignore-end
+  }
+
+  // ...........................................................................
+  /// Fixes the viewBox of an SVG file. By default it does cut the content.
+  static String fixSvgViewBox(String content) {
+    // Regular expressions to find width and height
+    RegExp widthRegex = RegExp(r'width="(\d+\.?\d*)pt"');
+    RegExp heightRegex = RegExp(r'height="(\d+\.?\d*)pt"');
+
+    // Find width and height matches
+    Match? widthMatch = widthRegex.firstMatch(content);
+    Match? heightMatch = heightRegex.firstMatch(content);
+
+    if (widthMatch != null && heightMatch != null) {
+      String width = widthMatch.group(1)!;
+      String height = heightMatch.group(1)!;
+
+      // Regular expression to replace the viewBox values
+      RegExp viewBoxRegex =
+          RegExp(r'viewBox="\d+\.?\d*\s+\d+\.?\d*\s+\d+\.?\d*\s+\d+\.?\d*"');
+      String newViewBox = 'viewBox="0.00 0.00 $width $height"';
+
+      // Replace the viewBox in the SVG content
+      content = content.replaceFirst(viewBoxRegex, newViewBox);
+    }
+
+    return content;
   }
 
   // ######################
