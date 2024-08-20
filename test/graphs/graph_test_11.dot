@@ -6,10 +6,10 @@ digraph unix {
   edge [fontname="Helvetica,Arial,sans-serif"]
   subgraph cluster_root_2 {
     label = "root"; // scope
-    invisible [label = "", shape = point, style=invis]; // root
+    invisible0 [label = "", shape = point, style=invis]; // root
     subgraph cluster_butterFly_4 {
       label = "butterFly"; // scope
-      invisible [label = "", shape = point, style=invis]; // butterFly
+      invisible1 [label = "", shape = point, style=invis]; // butterFly
       subgraph cluster_level3_6 {
         label = "level3"; // scope
         s111_8 [

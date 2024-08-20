@@ -465,6 +465,9 @@ class Graph {
   }
 
   // ...........................................................................
+  static int _invisibleCounter = 0;
+
+  // ...........................................................................
   // Graph
   String _dotNodes(
     GraphScopeItem scopeItem,
@@ -486,7 +489,7 @@ class Graph {
       // Write an empty node, if nodeItems is empty
       if (scopeItem.nodeItems.isEmpty) {
         result +=
-            'invisible [label = "", shape = point, style=invis]; // ${scope.key}\n';
+            'invisible${_invisibleCounter++} [label = "", shape = point, style=invis]; // ${scope.key}\n';
       }
 
       // Write each node

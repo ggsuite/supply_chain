@@ -152,7 +152,7 @@ void main() {
       dot,
       matches(
         RegExp(
-          'invisible \\[label = "", shape = point, style=invis\\]; // ${scope.key}',
+          'invisible[0-9]+ \\[label = "", shape = point, style=invis\\]; // ${scope.key}',
         ),
       ),
     );

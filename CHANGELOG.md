@@ -137,6 +137,7 @@ Modifications can only be done via builders.
 - Fix an search error with scope aliases
 - Fix an error
 - Fix an error with forwarding dpi
+- Fix an issue with hidden scopes in graph print outs
 
 ### Removed
 
