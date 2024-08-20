@@ -551,6 +551,7 @@ class Scope {
     await const Graph().writeImageFile(
       dot: dot,
       path: path,
+      dpi: dpi,
     );
   }
 

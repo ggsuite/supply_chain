@@ -135,6 +135,7 @@ Modifications can only be done via builders.
 - Fix various search issues
 - Fix an search error with scope aliases
 - Fix an error
+- Fix an error with forwarding dpi
 
 ### Removed
 
