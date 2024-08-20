@@ -174,6 +174,7 @@ class Graph {
   Future<void> writeImageFile({
     required String dot,
     required String path,
+    int dpi = 300,
   }) async {
     final format = path.split('.').last;
 
@@ -195,7 +196,7 @@ class Graph {
         // Convert dot file to target format
         final process = await Process.run(
           'dot',
-          ['-T$format', tempPath, '-o$path'],
+          ['-T$format', tempPath, '-o$path', '-Gdpi=$dpi'],
         );
 
         // Fix result and write it to the output file

@@ -736,7 +736,7 @@ void main() {
       });
     });
 
-    group('saveGraphToFile', () {
+    group('writeImageFile', () {
       test('should save the graph to a file', () async {
         final node = ButterFlyExample(withScopes: true).x;
         const path = 'test/graphs/graph_test/node_test_saveGraphToFile.dot';

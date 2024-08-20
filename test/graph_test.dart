@@ -714,6 +714,33 @@ void main() {
               });
             });
           });
+
+          test('when the scopes are empty', () async {
+            // Create a scope hierarchy without nodes
+
+            final scopesWithoutNodes = Scope.example()
+              ..mockContent(
+                {
+                  'a': {
+                    'b': {'c': <String, dynamic>{}},
+                  },
+                },
+              );
+
+            // Create a graph
+            final graphNode = graph.treeForScope(
+              scope: scopesWithoutNodes,
+              childScopeDepth: 2,
+            );
+
+            // The graph should contain the scopes
+            expect(graphNode.children, hasLength(1));
+            expect(graphNode.children.first.children, hasLength(1));
+
+            // Print the dot graph
+            final dot = graph.dot(tree: graphNode);
+            await writeDotFile(dot, '19');
+          });
         });
       });
 

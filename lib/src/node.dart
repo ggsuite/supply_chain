@@ -509,6 +509,7 @@ class Node<T> {
     int customerDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
+    int dpi = 300,
   }) async {
     const graph = Graph();
 
@@ -518,7 +519,7 @@ class Node<T> {
       highlightedNodes: highlightedNodes,
       highlightedScopes: highlightedScopes,
     );
-    await graph.writeImageFile(path: path, dot: dot);
+    await graph.writeImageFile(path: path, dot: dot, dpi: dpi);
   }
 
   // ...........................................................................
