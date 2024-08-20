@@ -109,6 +109,9 @@ class Graph {
   /// Constructor
   const Graph();
 
+  /// The default dpi used for exporting the graph
+  static const int defaultDpi = 100;
+
   // ...........................................................................
   /// Returns graph for a node that can be converted to the dot format later
   GraphScopeItem treeForNode({
@@ -174,7 +177,7 @@ class Graph {
   Future<void> writeImageFile({
     required String dot,
     required String path,
-    int dpi = 300,
+    int dpi = Graph.defaultDpi,
   }) async {
     final format = path.split('.').last;
 

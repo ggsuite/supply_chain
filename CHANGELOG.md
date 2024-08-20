@@ -127,6 +127,7 @@ Modifications can only be done via builders.
 - Set Gsize=0.5 when exporting graphs
 - Show empty scopes beside nodes in the last shown graph level
 - Increase default graph dpi to 300dpi
+- Set default quality to 100 dpi
 
 ### Fixed
 

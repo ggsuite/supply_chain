@@ -509,7 +509,7 @@ class Node<T> {
     int customerDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
-    int dpi = 300,
+    int dpi = Graph.defaultDpi,
   }) async {
     const graph = Graph();
 

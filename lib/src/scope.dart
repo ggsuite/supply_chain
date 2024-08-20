@@ -539,7 +539,7 @@ class Scope {
     int parentScopeDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
-    int dpi = 300,
+    int dpi = Graph.defaultDpi,
   }) async {
     final dot = this.dot(
       childScopeDepth: childScopeDepth,
