@@ -257,10 +257,13 @@ class Graph {
     final parentScopes = scope.deepParents(depth: parentScopeDepth);
     final childScopes = scope.deepChildren(depth: childScopeDepth);
     final scopesToBeShown = [...parentScopes, scope, ...childScopes];
+    final scopesToBeShownWithChildren = [...scopesToBeShown];
+    final scopesToBeShownEmpty = _scopesToBeShownEmpty(scopesToBeShown);
+    scopesToBeShown.addAll(scopesToBeShownEmpty);
 
     // Show all nodes that are in the specified scopes
     final shownNodes = <Node<dynamic>>[];
-    for (final scope in scopesToBeShown) {
+    for (final scope in scopesToBeShownWithChildren) {
       shownNodes.addAll(scope.nodes);
     }
 
@@ -277,6 +280,24 @@ class Graph {
     );
 
     return graph;
+  }
+
+  // ...........................................................................
+  List<Scope> _scopesToBeShownEmpty(List<Scope> scopesToBeShown) {
+    // We want to show child scopes of scopes to be shown as shells
+    // without nodes and child scope.
+    // Thus we are collecting all child scopes of the scopes to be shown
+    // If a child scope is not part of scopesTeBeShown it is shown empty.
+    final result = <Scope>[];
+    for (final scope in scopesToBeShown) {
+      for (final child in scope.children) {
+        if (!scopesToBeShown.contains(child)) {
+          result.add(child);
+        }
+      }
+    }
+
+    return result;
   }
 
   // ...........................................................................

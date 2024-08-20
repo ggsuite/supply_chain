@@ -684,6 +684,37 @@ void main() {
             );
           });
         });
+
+        group('should print shells of child scope', () {
+          group('when the child scopes would exceed the childScopeDepth', () {
+            group('with scope shells', () {
+              test('when a scope exceeds the level', () async {
+                final start = level1;
+
+                // Create the tree with a childScopeDepth of 0.
+                final graphNode = graph.treeForScope(
+                  scope: start,
+                  childScopeDepth: 0,
+                );
+
+                // The nodes of the graphNode should be shown
+                expect(graphNode.nodeItems, hasLength(4));
+
+                // But also the direct child node should be shown.
+                expect(graphNode.children, hasLength(1));
+
+                // But the child node should be shown without and children.
+                final firstChild = graphNode.children.first;
+                expect(firstChild.children, isEmpty);
+                expect(firstChild.nodeItems, isEmpty);
+
+                // Print the dot graph
+                final dot = graph.dot(tree: graphNode);
+                await writeDotFile(dot, '18');
+              });
+            });
+          });
+        });
       });
 
       group('special cases', () {
