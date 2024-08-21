@@ -39,6 +39,7 @@
 - Add findItem method which returns either a Scope or Node
 - Add findScope2 using the same algorithm as findNode
 - Add an on.change meta node
+- Add a write2x option to save files also in double resolution
 
 ### Changed
 

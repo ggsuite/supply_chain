@@ -110,7 +110,7 @@ class Graph {
   const Graph();
 
   /// The default dpi used for exporting the graph
-  static const int defaultDpi = 100;
+  static const int defaultDpi = 150;
 
   // ...........................................................................
   /// Returns graph for a node that can be converted to the dot format later
@@ -152,10 +152,11 @@ class Graph {
   /// Turn a graph into dot format
   String dot({
     required GraphScopeItem tree,
+    int dpi = defaultDpi,
   }) {
     var result = '';
     result += 'digraph unix {\n';
-    result += 'graph [ dpi = 75 ]; \n';
+    result += 'graph [ dpi = $dpi ]; \n';
     result += 'graph [nodesep = $nodeSeparation; ranksep=$rankSeparation];\n';
     result += 'fontname="Helvetica,Arial,sans-serif"\n';
     result += 'node [fontname="Helvetica,Arial,sans-serif"]\n';
@@ -178,6 +179,7 @@ class Graph {
     required String dot,
     required String path,
     int dpi = Graph.defaultDpi,
+    bool write2x = false,
   }) async {
     final format = path.split('.').last;
 
@@ -191,16 +193,35 @@ class Graph {
       if (!isGitHub) {
         // Write dot file to tmp
         final fileName = path.split('/').last;
+
         final tempDir = await Directory.systemTemp.createTemp();
         final tempPath = '${tempDir.path}/$fileName.dot';
         final tempFile = File(tempPath);
+
         tempFile.writeAsStringSync(dot);
 
+        // ..................................
         // Convert dot file to target format
         final process = await Process.run(
           'dot',
           ['-T$format', tempPath, '-o$path', '-Gdpi=$dpi'],
         );
+        assert(process.exitCode == 0, process.stderr);
+
+        // ..............
+        // Write 2x image
+        if (write2x && ['png', 'webp', 'jpg', 'jpeg'].contains(format)) {
+          final path2x = path.replaceAll(RegExp('\\.$format\$'), '@2x.$format');
+
+          final process = await Process.run(
+            'dot',
+            ['-T$format', tempPath, '-o$path2x', '-Gdpi=${dpi * 2}'],
+          );
+          assert(process.exitCode == 0, process.stderr);
+        }
+
+        // Delete the temporary directory
+        await tempDir.delete(recursive: true);
 
         // Fix result and write it to the output file
         if (format == 'svg') {
@@ -209,10 +230,6 @@ class Graph {
           final result = fixSvgViewBox(svgContent);
           await File(path).writeAsString(result);
         }
-
-        // Delete the temporary directory
-        await tempDir.delete(recursive: true);
-        assert(process.exitCode == 0, process.stderr);
       }
     }
     // coverage:ignore-end

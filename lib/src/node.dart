@@ -510,6 +510,7 @@ class Node<T> {
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
     int dpi = Graph.defaultDpi,
+    bool write2x = false,
   }) async {
     const graph = Graph();
 
@@ -519,7 +520,12 @@ class Node<T> {
       highlightedNodes: highlightedNodes,
       highlightedScopes: highlightedScopes,
     );
-    await graph.writeImageFile(path: path, dot: dot, dpi: dpi);
+    await graph.writeImageFile(
+      path: path,
+      dot: dot,
+      dpi: dpi,
+      write2x: write2x,
+    );
   }
 
   // ...........................................................................
@@ -529,6 +535,8 @@ class Node<T> {
     int customerDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
+    int dpi = Graph.defaultDpi,
+    bool write2x = false,
   }) {
     const graph = Graph();
     final tree = graph.treeForNode(
@@ -538,7 +546,7 @@ class Node<T> {
       highlightedNodes: highlightedNodes ?? [this],
       highlightedScopes: highlightedScopes,
     );
-    final dot = graph.dot(tree: tree);
+    final dot = graph.dot(tree: tree, dpi: dpi);
     return dot;
   }
 

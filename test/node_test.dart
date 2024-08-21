@@ -4,6 +4,8 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'dart:io';
+
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
@@ -741,6 +743,16 @@ void main() {
         final node = ButterFlyExample(withScopes: true).x;
         const path = 'test/graphs/graph_test/node_test_saveGraphToFile.dot';
         await node.writeImageFile(path);
+      });
+
+      test('should save a 2x version when write2x is defined', () async {
+        final node = ButterFlyExample(withScopes: true).x;
+        const path = 'test/graphs/graph_test/node_test_saveGraphToFile.webp';
+        const path2x =
+            'test/graphs/graph_test/node_test_saveGraphToFile@2x.webp';
+        await node.writeImageFile(path, write2x: true);
+        await (File(path).exists());
+        await (File(path2x).exists());
       });
     });
 

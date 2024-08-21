@@ -513,6 +513,7 @@ class Scope {
     int parentScopeDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
+    int dpi = Graph.defaultDpi,
   }) {
     final tree = const Graph().treeForScope(
       scope: this,
@@ -522,7 +523,7 @@ class Scope {
       highlightedScopes: highlightedScopes,
     );
 
-    final dot = const Graph().dot(tree: tree);
+    final dot = const Graph().dot(tree: tree, dpi: dpi);
     return dot;
   }
 
@@ -540,6 +541,7 @@ class Scope {
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
     int dpi = Graph.defaultDpi,
+    bool write2x = false,
   }) async {
     final dot = this.dot(
       childScopeDepth: childScopeDepth,
@@ -552,6 +554,7 @@ class Scope {
       dot: dot,
       path: path,
       dpi: dpi,
+      write2x: write2x,
     );
   }
 
