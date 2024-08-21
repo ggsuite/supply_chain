@@ -110,7 +110,7 @@ class Graph {
   const Graph();
 
   /// The default dpi used for exporting the graph
-  static const int defaultDpi = 150;
+  static const int defaultDpi = 72;
 
   // ...........................................................................
   /// Returns graph for a node that can be converted to the dot format later

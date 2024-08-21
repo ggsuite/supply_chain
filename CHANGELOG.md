@@ -129,6 +129,7 @@ Modifications can only be done via builders.
 - Show empty scopes beside nodes in the last shown graph level
 - Increase default graph dpi to 300dpi
 - Set default quality to 100 dpi
+- Change default resolution to 72dpi
 
 ### Fixed
 
