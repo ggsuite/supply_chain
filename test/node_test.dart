@@ -229,12 +229,12 @@ void main() {
       expect(customer1.suppliers, [node]);
 
       // Remove first customer
-      node.removeCustomer(customer0);
+      customer0.dispose();
       expect(node.customers, [customer1]);
       expect(customer0.suppliers, <Node<dynamic>>[]);
 
       // Remove second customer
-      node.removeCustomer(customer1);
+      customer1.dispose();
       expect(node.customers, <Node<dynamic>>[]);
       expect(customer1.suppliers, <Node<dynamic>>[]);
     });

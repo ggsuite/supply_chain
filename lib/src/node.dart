@@ -351,9 +351,6 @@ class Node<T> {
   /// Add a customer to the node
   void addCustomer(Customer<dynamic> customer) => _addCustomer(customer);
 
-  /// Remove a customer from the node
-  void removeCustomer(Customer<dynamic> customer) => _removeCustomer(customer);
-
   /// Get suppliers of the node of a given depth
   Iterable<Node<dynamic>> deepCustomers({int depth = 1}) {
     if (depth == 0) {
@@ -627,7 +624,7 @@ class Node<T> {
     }
 
     _suppliers.remove(supplier);
-    supplier.removeCustomer(this);
+    supplier._removeCustomer(this);
     if (!isDisposed) {
       scm.nominate(this);
     }

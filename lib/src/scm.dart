@@ -51,7 +51,7 @@ class Scm {
 
   /// Adds a node to scm
   void addNode(Node<dynamic> node) {
-    _assertNodeIsNotDisposed(node);
+    _assertNodeIsNotErased(node);
     _nodes.add(node);
     nominate(node);
   }
@@ -64,7 +64,7 @@ class Scm {
     _preparedNodes.remove(node);
     _producingNodes.remove(node);
 
-    _assertNoNodeIsDisposed(nodes: _nominatedNodes);
+    _assertNoNodeIsErased(nodes: _nominatedNodes);
   }
 
   /// Adds node for initialization of suppliers
@@ -74,7 +74,7 @@ class Scm {
 
   /// Nominate node for production
   void nominate(Node<dynamic> node) {
-    _assertNodeIsNotDisposed(node);
+    _assertNodeIsNotErased(node);
     _nominatedNodes.add(node);
     _schedulePreparation.trigger();
   }
@@ -290,7 +290,7 @@ class Scm {
     }
 
     // Nominate all animated nodes
-    _assertNoNodeIsDisposed(nodes: _animatedNodes);
+    _assertNoNodeIsErased(nodes: _animatedNodes);
     _nominatedNodes.addAll(_animatedNodes);
 
     // Start preparation
@@ -338,7 +338,7 @@ class Scm {
 
     // All nominated nodes have been prepared.
     // Add it to prepared nodes
-    _assertNoNodeIsDisposed(nodes: _nominatedNodes);
+    _assertNoNodeIsErased(nodes: _nominatedNodes);
     _preparedNodes.addAll(_nominatedNodes);
 
     // Clear nominated nodes
@@ -420,7 +420,7 @@ class Scm {
 
   /// Produce all nodes
   void _produce() {
-    _assertNoNodeIsDisposed(nodes: _preparedNodes);
+    _assertNoNodeIsErased(nodes: _preparedNodes);
 
     // For all nodes that are ready to produce
     final nodesReadyToProduce = preparedNodes
@@ -675,19 +675,19 @@ class Scm {
   late GgFakeStopwatch _testStopwatch;
 
   // ...........................................................................
-  static void _assertNodeIsNotDisposed(Node<dynamic> node) {
+  static void _assertNodeIsNotErased(Node<dynamic> node) {
     assert(
-      !node.isDisposed,
+      !node.isErased,
       '${node.scope}/${node.key} with id ${node.id} is disposed.',
     );
   }
 
   // ...........................................................................
-  static void _assertNoNodeIsDisposed({
+  static void _assertNoNodeIsErased({
     required Iterable<Node<dynamic>> nodes,
   }) {
     for (final node in nodes) {
-      _assertNodeIsNotDisposed(node);
+      _assertNodeIsNotErased(node);
     }
   }
 }
