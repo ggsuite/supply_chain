@@ -79,7 +79,7 @@ class Node<T> {
 
     // Cleanup suppliers
     for (final supplier in [...suppliers]) {
-      removeSupplier(supplier);
+      _removeSupplier(supplier);
     }
 
     _isErased = true;
@@ -325,9 +325,6 @@ class Node<T> {
 
   /// Add a supplier to the node
   void addSupplier(Supplier<dynamic> supplier) => _addSupplier(supplier);
-
-  /// Remove a supplier from the node
-  void removeSupplier(Supplier<dynamic> supplier) => _removeSupplier(supplier);
 
   /// Get suppliers of the node of a given depth
   Iterable<Node<dynamic>> deepSuppliers({int depth = 1}) {
@@ -653,7 +650,7 @@ class Node<T> {
     }
 
     _customers.remove(customer);
-    customer.removeSupplier(this);
+    customer._removeSupplier(this);
     if (customers.isEmpty) {
       erase();
     }

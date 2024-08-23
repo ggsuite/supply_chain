@@ -137,7 +137,7 @@ void main() {
       });
     });
 
-    test('suppliers, addSupplier(), removeSupplier()', () {
+    test('suppliers, addSupplier()', () {
       final supplier0 = Node.example(scope: chain);
       final supplier1 = Node.example(scope: chain);
 
@@ -171,24 +171,34 @@ void main() {
       // Is node now also customer of supplier1?
       expect(supplier1.customers, [node]);
 
-      // Remove first supplier
+      // Dispose first supplier
+      // Supplier will not be removed because it has customers
       scm.clear();
       expect(scm.nominatedNodes, isEmpty);
-      node.removeSupplier(supplier0);
-      expect(node.suppliers, [supplier1]);
-      expect(supplier0.customers, <Node<dynamic>>[]);
+      supplier0.dispose();
+      expect(node.suppliers, [supplier0, supplier1]);
+      expect(supplier0.customers, <Node<dynamic>>[node]);
 
-      // Was node nominated?
-      expect(scm.nominatedNodes, [node]);
+      // Node was not nominated because nothing effectively changed
+      expect(scm.nominatedNodes, <Node<dynamic>>[]);
 
-      // Remove second supplier
+      // Dispose second supplier
       scm.clear();
-      node.removeSupplier(supplier1);
-      expect(node.suppliers, <Node<dynamic>>[]);
-      expect(supplier1.customers, <Node<dynamic>>[]);
+      supplier1.dispose();
+      expect(node.suppliers, <Node<dynamic>>[supplier0, supplier1]);
+      expect(supplier1.customers, <Node<dynamic>>[node]);
 
-      // Was node be nominated?
-      expect(scm.nominatedNodes, [node]);
+      // Node was not nominated because nothing effectively changed
+      expect(scm.nominatedNodes, <Node<dynamic>>[]);
+
+      // Dispose the node
+      node.dispose();
+
+      // Both suppliers should have no customers and be erased therefore
+      expect(supplier0.customers, <Node<dynamic>>[]);
+      expect(supplier0.isErased, true);
+      expect(supplier1.customers, <Node<dynamic>>[]);
+      expect(supplier1.isErased, true);
     });
 
     test('customers, addSupplier(), removeSupplier()', () {
