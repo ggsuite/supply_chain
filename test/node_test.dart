@@ -603,6 +603,15 @@ void main() {
           expect(customer.isDisposed, true);
           expect(scm.nodes, isNot(contains(customer)));
         });
+
+        test('and remove it from its scope', () {
+          expect(customer.isDisposed, false);
+          expect(customer.scope.hasNode(customer.key), true);
+          customer.dispose();
+          expect(customer.isDisposed, true);
+          expect(customer.scope.hasNode(customer.key), false);
+          expect(scm.nodes, isNot(contains(customer)));
+        });
       });
     });
 

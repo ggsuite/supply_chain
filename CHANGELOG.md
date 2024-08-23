@@ -40,6 +40,7 @@
 - Add findScope2 using the same algorithm as findNode
 - Add an on.change meta node
 - Add a write2x option to save files also in double resolution
+- Add some tests
 
 ### Changed
 
