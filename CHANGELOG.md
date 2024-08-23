@@ -134,6 +134,7 @@ Modifications can only be done via builders.
 - Distinguish between disposal of and removal nodes. Nodes can only be erased when they have no customers. Nodes that have customers can be disposed. But they will remain in the node hierarchy until the last customers has been removed.
 - Make removeSupplier private. Only dispose and erase can be used.
 - Make removeCustomer private. Only dispose and erase can be used.
+- Make erase private. Publicly nodes can only be disposed. Erasal happens when the last customer is removed from a node.
 
 ### Fixed
 

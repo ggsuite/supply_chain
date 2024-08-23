@@ -515,10 +515,15 @@ void main() {
       });
 
       test('should erase the node, when it has no customers', () {
+        expect(customer.scope.hasNode(customer.key), true);
+        expect(scm.nodes, contains(customer));
         expect(customer.isErased, false);
         expect(customer.customers, isEmpty);
         customer.dispose();
         expect(customer.isErased, true);
+        expect(customer.isDisposed, true);
+        expect(scm.nodes, isNot(contains(customer)));
+        expect(customer.scope.hasNode(customer.key), false);
       });
 
       test('should not erase the node, when it has customers', () {
@@ -551,78 +556,6 @@ void main() {
           expect(replacedSuppliers, isNot(supplier));
         },
       );
-    });
-
-    group('erase', () {
-      late Scope scope;
-      late Node<int> supplier;
-      late Node<int> customer;
-      late Scm scm;
-
-      setUp(() {
-        scope = Scope.example();
-        scope.mockContent({
-          'supplier': 0,
-          'customer': NodeBluePrint.map(
-            supplier: 'supplier',
-            toKey: 'customer',
-            initialProduct: 0,
-          ),
-        });
-        scope.scm.testFlushTasks();
-        supplier = scope.findNode<int>('supplier')!;
-        customer = scope.findNode<int>('customer')!;
-        scm = scope.scm;
-      });
-
-      group('should throw', () {
-        test('when the node to be erased still has customers', () {
-          expect(
-            () => supplier.erase(),
-            throwsA(
-              isA<StateError>().having(
-                (e) => e.message,
-                'message',
-                contains(
-                  'Node "supplier" cannot be erased because it has customers.',
-                ),
-              ),
-            ),
-          );
-        });
-      });
-
-      group('should erase the node', () {
-        test('when the node has no customers', () {
-          expect(customer.isErased, false);
-          expect(customer.customers, isEmpty);
-          customer.erase();
-          expect(customer.isErased, true);
-        });
-
-        test('and mark the node as disposed', () {
-          expect(customer.isDisposed, false);
-          customer.erase();
-          expect(customer.isDisposed, true);
-        });
-
-        test('and remove it from the SCM', () {
-          expect(customer.isDisposed, false);
-          expect(scm.nodes, contains(customer));
-          customer.dispose();
-          expect(customer.isDisposed, true);
-          expect(scm.nodes, isNot(contains(customer)));
-        });
-
-        test('and remove it from its scope', () {
-          expect(customer.isDisposed, false);
-          expect(customer.scope.hasNode(customer.key), true);
-          customer.dispose();
-          expect(customer.isDisposed, true);
-          expect(customer.scope.hasNode(customer.key), false);
-          expect(scm.nodes, isNot(contains(customer)));
-        });
-      });
     });
 
     test('reset', () {

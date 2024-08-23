@@ -62,36 +62,23 @@ class Node<T> {
 
     // Erase the node if it should not have customers relying on it
     if (customers.isEmpty) {
-      erase();
+      _erase();
     }
   }
 
   // ...........................................................................
   /// Disposes the node
-  void erase() {
-    if (customers.isNotEmpty) {
-      throw StateError(
-        'Node "$key" cannot be erased because it has customers.',
-      );
-    }
+  void _erase() {
+    assert(customers.isEmpty);
 
+    scope.removeNode(this.key);
     scm.removeNode(this);
-
-    // Cleanup suppliers
-    for (final supplier in [...suppliers]) {
-      _removeSupplier(supplier);
-    }
 
     _isErased = true;
 
     if (!_isDisposed) {
       dispose();
     }
-
-    for (final d in _erase.reversed) {
-      d();
-    }
-    _erase.clear();
   }
 
   /// Returns true if node is erased
@@ -500,9 +487,6 @@ class Node<T> {
   // ...........................................................................
   void _initScope() {
     scope.addNode(this);
-    _erase.add(() {
-      scope.removeNode(this.key);
-    });
   }
 
   // ...........................................................................
@@ -577,9 +561,6 @@ class Node<T> {
   // Private
   // ######################
 
-  // ...........................................................................
-  final List<void Function()> _erase = [];
-
   bool _isDisposed = false;
   bool _isErased = false;
 
@@ -625,9 +606,6 @@ class Node<T> {
 
     _suppliers.remove(supplier);
     supplier._removeCustomer(this);
-    if (!isDisposed) {
-      scm.nominate(this);
-    }
   }
 
   // ...........................................................................
@@ -649,7 +627,7 @@ class Node<T> {
     _customers.remove(customer);
     customer._removeSupplier(this);
     if (customers.isEmpty) {
-      erase();
+      _erase();
     }
   }
 
@@ -698,6 +676,10 @@ class Node<T> {
       final supplierIndex = customer._suppliers.indexOf(this);
 
       customer._suppliers[supplierIndex] = targetNode;
+    }
+
+    if (isDisposed) {
+      _erase();
     }
   }
 }

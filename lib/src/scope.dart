@@ -407,7 +407,7 @@ class Scope {
     final existingNode = _nodes[node.key];
     if (existingNode?.isDisposed == true) {
       existingNode!.moveCustomersTo(node);
-      existingNode.erase();
+      assert(existingNode.isErased);
     }
 
     // Throw if node with key already exists
