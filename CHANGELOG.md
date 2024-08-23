@@ -130,6 +130,7 @@ Modifications can only be done via builders.
 - Increase default graph dpi to 300dpi
 - Set default quality to 100 dpi
 - Change default resolution to 72dpi
+- Distinguish between disposal of and removal nodes. Nodes can only be erased when they have no customers. Nodes that have customers can be disposed. But they will remain in the node hierarchy until the last customers has been removed.
 
 ### Fixed
 

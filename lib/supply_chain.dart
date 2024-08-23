@@ -19,7 +19,6 @@ export 'src/keys.dart';
 export 'src/node_blue_print.dart';
 export 'src/node.dart';
 export 'src/priority.dart';
-export 'src/producer.dart';
 export 'src/scm.dart';
 export 'src/scope_blue_print_factory.dart';
 export 'src/scope_blue_print.dart';

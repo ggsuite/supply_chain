@@ -402,8 +402,16 @@ class Scope {
   /// Adds an existing node to the scope
   void addNode<T>(Node<T> node) {
     assert(node.runtimeType != Node<dynamic>);
+
+    // Take over customers from an existing disposed node
+    final existingNode = _nodes[node.key];
+    if (existingNode?.isDisposed == true) {
+      existingNode!.moveCustomersTo(node);
+      existingNode.erase();
+    }
+
     // Throw if node with key already exists
-    if (_nodes.containsKey(node.key)) {
+    else if (_nodes.containsKey(node.key)) {
       throw ArgumentError(
         'Node with key ${node.key} already exists in scope "$key"',
       );

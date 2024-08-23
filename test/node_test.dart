@@ -455,41 +455,155 @@ void main() {
       });
     });
 
-    test('dispose() should work fine', () {
-      // Create a supplier -> producer -> customer chain
-      final supplier = Node.example(
-        scope: chain,
-        bluePrint: NodeBluePrint.example(key: 'supplier'),
+    group('dispose()', () {
+      late Scope scope;
+      late Node<int> supplier;
+      late Node<int> customer;
+      late Scm scm;
+
+      setUp(() {
+        scope = Scope.example();
+        scope.mockContent({
+          'supplier': 0,
+          'customer': NodeBluePrint.map(
+            supplier: 'supplier',
+            toKey: 'customer',
+            initialProduct: 0,
+          ),
+        });
+        scope.scm.testFlushTasks();
+        supplier = scope.findNode<int>('supplier')!;
+        customer = scope.findNode<int>('customer')!;
+        scm = scope.scm;
+      });
+
+      test('should not remove the node from the SCM', () {
+        expect(supplier.isDisposed, false);
+        expect(scm.nodes, contains(supplier));
+        supplier.dispose();
+        expect(supplier.isDisposed, true);
+        expect(scm.nodes, contains(supplier));
+      });
+
+      test('should remove all suppliers from the node', () {
+        expect(customer.suppliers, isNotEmpty);
+        customer.dispose();
+        expect(customer.suppliers, isEmpty);
+      });
+
+      test('should remove itself from its suppliers customers', () {
+        expect(customer.suppliers, isNotEmpty);
+        expect(supplier.customers, contains(customer));
+        customer.dispose();
+        expect(supplier.customers, isNot(contains(customer)));
+      });
+
+      test('should mark the node as disposed', () {
+        expect(customer.isDisposed, false);
+        customer.dispose();
+        expect(customer.isDisposed, true);
+      });
+
+      test('should erase the node, when it has no customers', () {
+        expect(customer.isErased, false);
+        expect(customer.customers, isEmpty);
+        customer.dispose();
+        expect(customer.isErased, true);
+      });
+
+      test('should not erase the node, when it has customers', () {
+        expect(customer.isErased, false);
+        expect(customer.customers, isEmpty);
+        customer.dispose();
+        expect(customer.isErased, true);
+      });
+
+      test('should erase the node after the last customer was removed', () {
+        expect(supplier.isErased, false);
+        expect(supplier.customers, isNotEmpty);
+        customer.dispose();
+        expect(supplier.customers, isEmpty);
+        expect(supplier.isErased, isTrue);
+      });
+
+      test(
+        'should erase the node, when it is replaced by another node',
+        () {
+          supplier.dispose();
+          expect(supplier.isErased, isFalse);
+
+          // Replace the node by another node with the same key
+          supplier.bluePrint.instantiate(scope: supplier.scope);
+          scope.scm.testFlushTasks();
+
+          expect(supplier.isErased, isTrue);
+          final replacedSuppliers = scope.findNode<int>('supplier');
+          expect(replacedSuppliers, isNot(supplier));
+        },
       );
-      final producer = Node.example(
-        scope: chain,
-        bluePrint: NodeBluePrint.example(key: 'producer'),
-      );
-      final customer = Node.example(
-        scope: chain,
-        bluePrint: NodeBluePrint.example(key: 'customer'),
-      );
-      producer.addCustomer(customer);
-      producer.addSupplier(supplier);
+    });
 
-      // Before node is managed by SCM and part of it's scope
-      expect(scm.nodes, contains(producer));
-      expect(chain.findNode<int>('producer'), producer);
+    group('erase', () {
+      late Scope scope;
+      late Node<int> supplier;
+      late Node<int> customer;
+      late Scm scm;
 
-      // Dispose supplier
-      // It should be removed from suppliers's customer list
-      // It should be removed from customers's supplier list
-      producer.dispose();
-      expect(producer.suppliers, isEmpty);
-      expect(producer.customers, isEmpty);
-      expect(supplier.customers, isEmpty);
-      expect(customer.suppliers, isEmpty);
+      setUp(() {
+        scope = Scope.example();
+        scope.mockContent({
+          'supplier': 0,
+          'customer': NodeBluePrint.map(
+            supplier: 'supplier',
+            toKey: 'customer',
+            initialProduct: 0,
+          ),
+        });
+        scope.scm.testFlushTasks();
+        supplier = scope.findNode<int>('supplier')!;
+        customer = scope.findNode<int>('customer')!;
+        scm = scope.scm;
+      });
 
-      // Should remove the node from the scm
-      expect(scm.nodes, isNot(contains(producer)));
+      group('should throw', () {
+        test('when the node to be erased still has customers', () {
+          expect(
+            () => supplier.erase(),
+            throwsA(
+              isA<StateError>().having(
+                (e) => e.message,
+                'message',
+                contains(
+                  'Node "supplier" cannot be erased because it has customers.',
+                ),
+              ),
+            ),
+          );
+        });
+      });
 
-      // Should remove the node from the scope
-      expect(chain.findNode<int>('producer'), isNull);
+      group('should erase the node', () {
+        test('when the node has no customers', () {
+          expect(customer.isErased, false);
+          expect(customer.customers, isEmpty);
+          customer.erase();
+          expect(customer.isErased, true);
+        });
+
+        test('and mark the node as disposed', () {
+          expect(customer.isDisposed, false);
+          customer.erase();
+          expect(customer.isDisposed, true);
+        });
+
+        test('and remove it from the SCM', () {
+          expect(customer.isDisposed, false);
+          expect(scm.nodes, contains(customer));
+          customer.dispose();
+          expect(customer.isDisposed, true);
+          expect(scm.nodes, isNot(contains(customer)));
+        });
+      });
     });
 
     test('reset', () {

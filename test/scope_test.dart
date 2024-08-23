@@ -730,6 +730,25 @@ void main() {
       test('should add the node to the chain\'s nodes', () {
         expect(scope.nodes, [node]);
       });
+
+      test('should replace an existing disposed node', () {
+        final scope = Scope.example();
+        scope.mockContent({
+          'a': 0,
+          'b': NodeBluePrint.map(supplier: 'a', toKey: 'b', initialProduct: 1),
+        });
+        scope.scm.testFlushTasks();
+
+        final a = scope.findNode<int>('a')!;
+        a.dispose();
+        expect(a.isDisposed, isTrue);
+        expect(a.isErased, isFalse);
+
+        // Replace the node
+        final aNew = a.bluePrint.instantiate(scope: a.scope);
+        final aNewCheck = scope.findNode<int>('a')!;
+        expect(aNew, aNewCheck);
+      });
     });
 
     group('replaceNode()', () {

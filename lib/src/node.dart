@@ -47,15 +47,57 @@ class Node<T> {
 
   // ...........................................................................
   /// Disposes the node
+  /// - All suppliers are removed: node will not update anymore
+  /// - Node is marked as disposed
+  /// - When node has no customers anymore it will also be erased
+  /// - As long the node has still customers it remains in the node hiearchy
+  ///   to not break the chain
   void dispose() {
     _isDisposed = true;
-    for (final d in _dispose.reversed) {
-      d();
+
+    // Remove all suppliers
+    for (final supplier in [...suppliers]) {
+      _removeSupplier(supplier);
     }
-    _dispose.clear();
+
+    // Erase the node if it should not have customers relying on it
+    if (customers.isEmpty) {
+      erase();
+    }
   }
 
-  /// Returns true if node is disposed
+  // ...........................................................................
+  /// Disposes the node
+  void erase() {
+    if (customers.isNotEmpty) {
+      throw StateError(
+        'Node "$key" cannot be erased because it has customers.',
+      );
+    }
+
+    scm.removeNode(this);
+
+    // Cleanup suppliers
+    for (final supplier in [...suppliers]) {
+      removeSupplier(supplier);
+    }
+
+    _isErased = true;
+
+    if (!_isDisposed) {
+      dispose();
+    }
+
+    for (final d in _erase.reversed) {
+      d();
+    }
+    _erase.clear();
+  }
+
+  /// Returns true if node is erased
+  bool get isErased => _isErased;
+
+  /// Returns true if the node is disposed
   bool get isDisposed => _isDisposed;
 
   // ...........................................................................
@@ -459,25 +501,12 @@ class Node<T> {
   void _initScm() {
     scm.addNode(this);
     scm.needsInitSuppliers(this);
-    _dispose.add(() {
-      scm.removeNode(this);
-
-      // Cleanup suppliers
-      for (final supplier in [...suppliers]) {
-        removeSupplier(supplier);
-      }
-
-      // Cleanup customers
-      for (final customer in [...customers]) {
-        removeCustomer(customer);
-      }
-    });
   }
 
   // ...........................................................................
   void _initScope() {
     scope.addNode(this);
-    _dispose.add(() {
+    _erase.add(() {
       scope.removeNode(this.key);
     });
   }
@@ -555,9 +584,10 @@ class Node<T> {
   // ######################
 
   // ...........................................................................
-  final List<void Function()> _dispose = [];
+  final List<void Function()> _erase = [];
 
   bool _isDisposed = false;
+  bool _isErased = false;
 
   T? _mockedProduct;
 
@@ -624,6 +654,9 @@ class Node<T> {
 
     _customers.remove(customer);
     customer.removeSupplier(this);
+    if (customers.isEmpty) {
+      erase();
+    }
   }
 
   // ...........................................................................
@@ -655,6 +688,22 @@ class Node<T> {
             'is not in the list of allowed products '
             '[${bluePrint.allowedProducts.join(', ')}].');
       }
+    }
+  }
+
+  // ...........................................................................
+  /// Moves the customers of this node to the target node
+  void moveCustomersTo(Node<T> targetNode) {
+    for (final customer in [...customers]) {
+      // Move the customer to the placeholder
+
+      targetNode._customers.add(customer);
+      _customers.remove(customer);
+
+      // Replace the old suppliers by the placeholder
+      final supplierIndex = customer._suppliers.indexOf(this);
+
+      customer._suppliers[supplierIndex] = targetNode;
     }
   }
 }

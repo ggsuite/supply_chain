@@ -85,7 +85,7 @@ class NodeBluePrint<T> {
   }) {
     final node = scope.nodes.firstWhereOrNull((n) => n.key == key);
 
-    if (node != null) {
+    if (node != null && !node.isDisposed) {
       assert(node is Node<T>, 'The node must be of type Node<T>');
       return node as Node<T>;
     }
