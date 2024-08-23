@@ -60,6 +60,12 @@ class Node<T> {
       _removeSupplier(supplier);
     }
 
+    // Mute suppliers in the bluePrint
+    if (bluePrint.suppliers.isNotEmpty) {
+      final muted = bluePrint.copyWith(produce: doNothing, suppliers: []);
+      addBluePrint(muted);
+    }
+
     // Erase the node if it should not have customers relying on it
     if (customers.isEmpty) {
       _erase();

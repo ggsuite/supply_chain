@@ -508,6 +508,12 @@ void main() {
         expect(supplier.customers, isNot(contains(customer)));
       });
 
+      test('should mute the customers from the blueprint', () {
+        expect(customer.bluePrint.suppliers, isNotEmpty);
+        customer.dispose();
+        expect(supplier.bluePrint.suppliers, isEmpty);
+      });
+
       test('should mark the node as disposed', () {
         expect(customer.isDisposed, false);
         customer.dispose();
