@@ -140,6 +140,7 @@ Modifications can only be done via builders.
 - Mute suppliers in the blue print when a node is disposed
 - Move all scope disposal steps to \_dispose
 - Don't erase scopes until the last node and child scope has been erased
+- Allow to add an owner to nodes who is informed about disposal or erasal
 
 ### Fixed
 

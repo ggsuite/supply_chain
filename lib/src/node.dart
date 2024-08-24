@@ -34,11 +34,14 @@ class Node<T> {
   /// - [scope]: The scope the node belongs to
   /// - [key]: The key of the node
   /// - [cacheSize]: The number of items in the cache
+  /// - [owner]: The owner of the node
   Node({
     required NodeBluePrint<T> bluePrint,
     required this.scope,
     this.isInsert = false,
+    Owner<Node<T>>? owner,
   })  : scm = scope.scm,
+        _owner = owner,
         _originalProduct = bluePrint.initialProduct,
         assert(bluePrint.key.isCamelCase) {
     _bluePrints.add(bluePrint);
@@ -53,6 +56,7 @@ class Node<T> {
   /// - As long the node has still customers it remains in the node hiearchy
   ///   to not break the chain
   void dispose() {
+    _owner?.willDispose?.call(this);
     _isDisposed = true;
 
     // Remove all suppliers
@@ -75,11 +79,14 @@ class Node<T> {
     else {
       _erase();
     }
+
+    _owner?.didDispose?.call(this);
   }
 
   // ...........................................................................
   /// Erases the node
   void _erase() {
+    _owner?.willErase?.call(this);
     assert(customers.isEmpty);
     assert(isDisposed);
 
@@ -88,6 +95,7 @@ class Node<T> {
     scm.disposedItems.removeNode(this);
 
     _isErased = true;
+    _owner?.didErase?.call(this);
   }
 
   /// Returns true if node is erased
@@ -474,7 +482,9 @@ class Node<T> {
   // ######################
 
   // ...........................................................................
+  final Owner<Node<T>>? _owner;
 
+  // ...........................................................................
   /// Reset Id counter for tests
   static void testResetIdCounter() => _idCounter = 0;
 

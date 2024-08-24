@@ -586,6 +586,54 @@ void main() {
       expect(node2.product, 5);
     });
 
+    group('owner', () {
+      test('should be informed when the node is disposed or erased', () {
+        // Create an owner that will be informed about disposal and erasal
+        final willDisposeCalls = <Node<int>>[];
+        final didDisposeCalls = <Node<int>>[];
+        final willEraseCalls = <Node<int>>[];
+        final didEraseCalls = <Node<int>>[];
+        final owner = Owner<Node<int>>(
+          willDispose: (node) => willDisposeCalls.add(node),
+          didDispose: (node) => didDisposeCalls.add(node),
+          willErase: (node) => willEraseCalls.add(node),
+          didErase: (node) => didEraseCalls.add(node),
+        );
+
+        // Create a node that has an owner
+        final scope = Scope.example();
+        final supplier = const NodeBluePrint<int>(
+          key: 'supplier',
+          initialProduct: 0,
+        ).instantiate(scope: scope, owner: owner);
+
+        final customer = const NodeBluePrint<int>(
+          key: 'customer',
+          suppliers: ['supplier'],
+          initialProduct: 0,
+        ).instantiate(scope: scope, owner: owner);
+        scope.scm.testFlushTasks();
+
+        // Dispose the node
+        supplier.dispose();
+
+        // The owner should be informed about the disposal
+        expect(willDisposeCalls, [supplier]);
+        expect(didDisposeCalls, [supplier]);
+
+        // The supplier is not erased yet, because it has customers
+        expect(willEraseCalls, isEmpty);
+        expect(didEraseCalls, isEmpty);
+
+        // Erase the customer. All nodes will be erased.
+        customer.dispose();
+        expect(willDisposeCalls, [supplier, customer]);
+        expect(didDisposeCalls, [supplier, customer]);
+        expect(willEraseCalls, [supplier, customer]);
+        expect(didEraseCalls, [supplier, customer]);
+      });
+    });
+
     group('isAnimated', () {
       test('should return true if node is animated', () {
         expect(node.isAnimated, false);

@@ -13,6 +13,7 @@ export 'src/insert.dart';
 export 'src/keys.dart';
 export 'src/node_blue_print.dart';
 export 'src/node.dart';
+export 'src/owner.dart';
 export 'src/priority.dart';
 export 'src/sc_builder_blue_print.dart';
 export 'src/sc_builder_inserts.dart';
