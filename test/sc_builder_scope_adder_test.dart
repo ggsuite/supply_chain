@@ -58,6 +58,7 @@ void main() {
       test('should add and remove the added nodes', () {
         // Create the scope adder builder
         final builderNodeAdder = ScBuilderScopeAdder.example;
+        expect(builderNodeAdder.managedScopes, hasLength(4));
 
         // Get the scope
         final scope = builderNodeAdder.builder.scope;
@@ -83,6 +84,18 @@ void main() {
         final yv = y.node<int>('yv')!;
         expect(yv.product, 543);
 
+        // Try to apply the builder to one of the scopes created by the builder.
+        // This should have no effect
+        final scopeCreatedByBuilder = builderNodeAdder.managedScopes.first;
+        builderNodeAdder.applyToScope(scopeCreatedByBuilder);
+        expect(builderNodeAdder.managedScopes, hasLength(4));
+
+        // Dispose one of the scopes created by the builder.
+        // The builder should be informed and remove the scope from the
+        // managed scopes.
+        scopeCreatedByBuilder.dispose();
+        expect(builderNodeAdder.managedScopes, hasLength(3));
+
         // Dispose the builder -> Added scopes and their nodes should
         // be removed again
         builderNodeAdder.dispose();
@@ -90,6 +103,9 @@ void main() {
         expect(scope.child('j'), isNull);
         expect(scopeC.child('x'), isNull);
         expect(scopeC.child('y'), isNull);
+
+        // Managed scopes should be empty
+        expect(builderNodeAdder.managedScopes, isEmpty);
 
         // Added scopes should also be disposed
         expect(k.isDisposed, isTrue);

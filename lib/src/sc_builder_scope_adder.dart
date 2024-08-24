@@ -13,13 +13,14 @@ class ScBuilderScopeAdder {
     required this.builder,
   }) {
     _check();
+    _initOwner();
   }
 
   // ...........................................................................
   /// Removes the added scopes again
   void dispose() {
-    for (final d in _dispose.reversed) {
-      d();
+    for (final scope in [...managedScopes]) {
+      scope.dispose();
     }
   }
 
@@ -48,6 +49,11 @@ class ScBuilderScopeAdder {
   // ...........................................................................
   /// Deeply iterate through all child nodes and replace nodes
   void applyToScope(Scope scope) {
+    // We will not apply this builder to scopes created by this builder
+    if (scope.owner == _owner) {
+      return;
+    }
+
     _applyToScope(scope);
 
     for (final childScope in scope.children) {
@@ -55,9 +61,22 @@ class ScBuilderScopeAdder {
     }
   }
 
+  /// Returns the added scopes
+  List<Scope> managedScopes = [];
+
   // ######################
   // Private
   // ######################
+
+  // ...........................................................................
+  late final Owner<Scope> _owner;
+
+  // ...........................................................................
+  void _initOwner() {
+    _owner = Owner<Scope>(
+      willErase: (p0) => managedScopes.remove(p0),
+    );
+  }
 
   // ...........................................................................
   void _check() {
@@ -70,6 +89,7 @@ class ScBuilderScopeAdder {
 
   // ...........................................................................
   void _applyToScope(Scope scope) {
+    // Add the scopes to the host scope
     final bluePrints = builder.bluePrint.addScopes(
       hostScope: scope,
     );
@@ -86,21 +106,18 @@ class ScBuilderScopeAdder {
     }
 
     // Add the child scopes to the host scope
-    final addedScopes = scope.addChildren(bluePrints);
+    final addedScopes = scope.addChildren(
+      bluePrints,
+      owner: _owner,
+    );
 
-    // On dispose, we will also dispose all added scopes
-    _dispose.add(() {
-      for (final addedScope in addedScopes) {
-        addedScope.dispose();
-      }
-    });
+    // Remember created scopes
+    managedScopes.addAll(addedScopes);
   }
 
   // ######################
   // Private
   // ######################
-
-  final List<void Function()> _dispose = [];
 }
 
 // #############################################################################

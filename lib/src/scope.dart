@@ -36,6 +36,9 @@ class Scope {
     _init();
   }
 
+  /// Returns the owner of the scope when available
+  Owner<Scope>? get owner => _owner;
+
   /// Instantiates the scope as a meta scope
   Scope.metaScope({
     required String key,
@@ -205,15 +208,24 @@ class Scope {
   }
 
   /// Adds a child scope
-  Scope addChild(ScopeBluePrint bluePrint) {
-    return bluePrint.instantiate(scope: this);
+  Scope addChild(
+    ScopeBluePrint bluePrint, {
+    Owner<Scope>? owner,
+  }) {
+    return bluePrint.instantiate(
+      scope: this,
+      owner: owner,
+    );
   }
 
   /// Adds a number of children
-  List<Scope> addChildren(List<ScopeBluePrint> bluePrints) {
+  List<Scope> addChildren(
+    List<ScopeBluePrint> bluePrints, {
+    Owner<Scope>? owner,
+  }) {
     final result = <Scope>[];
     for (final bluePrint in bluePrints) {
-      result.add(addChild(bluePrint));
+      result.add(addChild(bluePrint, owner: owner));
     }
 
     return result;
