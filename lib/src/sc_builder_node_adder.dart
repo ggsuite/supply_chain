@@ -11,7 +11,9 @@ class ScBuilderNodeAdder {
   /// The constructor
   ScBuilderNodeAdder({
     required this.builder,
-  });
+  }) {
+    _check();
+  }
 
   // ...........................................................................
   /// Disposes the nodes and removes it from the scope
@@ -84,11 +86,16 @@ class ScBuilderNodeAdder {
     });
   }
 
-  // ######################
-  // Private
-  // ######################
-
   final List<void Function()> _dispose = [];
+
+  // ...........................................................................
+  void _check() {
+    final nodes = builder.bluePrint.addNodes(hostScope: ScBuilder.testScope);
+    if (nodes.isNotEmpty) {
+      throw Exception('ScScopeBluePrint.addNodes(hostScope) '
+          'must evaluate the hostScope and not add nodes to all scopes.');
+    }
+  }
 }
 
 // #############################################################################

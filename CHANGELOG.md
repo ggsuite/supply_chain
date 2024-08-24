@@ -151,6 +151,7 @@ Modifications can only be done via builders.
 - Fix an error with forwarding dpi
 - Fix an issue with hidden scopes in graph print outs
 - Fix aliases did not work accross multiple search scenarios
+- Fix no error was thrown when nodes were added to every scope without checking
 
 ### Removed
 

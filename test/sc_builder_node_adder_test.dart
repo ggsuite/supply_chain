@@ -19,9 +19,33 @@ class _AddExistingNodeScBuilder extends ScBuilderBluePrint {
   }) {
     // Try to add the already existing node "existing" to the host scope
     // Will throw.
+    if (hostScope.key == 'example') {
+      return const [
+        NodeBluePrint<int>(
+          key: 'existing',
+          initialProduct: 12,
+        ),
+      ];
+    }
+
+    return super.addNodes(hostScope: hostScope);
+  }
+}
+
+// #############################################################################
+class _AddNodesToEveryScopeBuilder extends ScBuilderBluePrint {
+  /// The constructor
+  _AddNodesToEveryScopeBuilder() : super(key: 'addNodesToEveryScopeBuilder');
+
+  @override
+  List<NodeBluePrint<dynamic>> addNodes({
+    required Scope hostScope,
+  }) {
+    // Try to add the already existing node "existing" to the host scope
+    // Will throw.
     return const [
       NodeBluePrint<int>(
-        key: 'existing',
+        key: 'noEvaluation',
         initialProduct: 12,
       ),
     ];
@@ -100,6 +124,34 @@ void main() {
             ),
           );
         });
+      });
+    });
+
+    group('should throw', () {
+      test('when addNodes() adds nodes to all scopes', () {
+        // Create an example scope containing one node
+        final scope = Scope.example();
+        expect(scope.nodes, hasLength(0));
+
+        // Add a node "existing" to the scope
+        scope.findOrCreateNode<int>(
+          const NodeBluePrint<int>(key: 'existing', initialProduct: 12),
+        );
+
+        // Try to add nodes to all scopes. Should throw.
+        expect(
+          () => _AddNodesToEveryScopeBuilder().instantiate(scope: scope),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'toString',
+              contains(
+                'ScScopeBluePrint.addNodes(hostScope) '
+                'must evaluate the hostScope and not add nodes to all scopes.',
+              ),
+            ),
+          ),
+        );
       });
     });
   });

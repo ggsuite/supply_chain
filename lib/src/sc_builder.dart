@@ -4,6 +4,8 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'dart:math';
+
 import 'package:supply_chain/supply_chain.dart';
 
 /// Realizes a builder
@@ -61,6 +63,10 @@ class ScBuilder {
 
   /// The scope adder of the builder
   late final ScBuilderScopeAdder scopeAdder;
+
+  /// This scope is used to perform checks
+  static final testScope =
+      Scope.example(key: 'scBuilderTestScope${Random().nextInt(1000)}');
 
   // ######################
   // Private
