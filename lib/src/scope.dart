@@ -220,63 +220,6 @@ class Scope {
     return ScopeBluePrint(key: key).instantiate(scope: this);
   }
 
-  /// Replaces a scope with a new scope
-  void replaceChild(
-    ScopeBluePrint replacement, {
-    String? path,
-  }) {
-    path ??= replacement.key;
-    final oldScope = findChildScope(path);
-
-    if (oldScope == null) {
-      throw ArgumentError('Scope with path "$path" not found.');
-    }
-
-    // ................................
-    // Existing scope has the same key?
-    // Update the nodes in the old scope
-    if (oldScope.key == replacement.key) {
-      _updateNodesInScope(oldScope, replacement);
-
-      // Remove all children not existing in replacement anymore
-      final removedChildren = oldScope.children
-          .where(
-            (element) => !replacement.children.any((c) => c.key == element.key),
-          )
-          .toList();
-
-      for (final child in removedChildren.toList()) {
-        child.dispose();
-      }
-
-      // Also replace child scopes
-      for (final newChildScope in replacement.children) {
-        // Get the associated oldChildScope
-        final oldChildScope = oldScope.child(newChildScope.key);
-
-        // If no old child scope exists, instantiate the new child scope
-        if (oldChildScope == null) {
-          newChildScope.instantiate(scope: oldScope);
-        }
-
-        // If the old scope exists, replace it
-        else {
-          oldChildScope.replaceChild(
-            newChildScope,
-          );
-        }
-      }
-    }
-
-    // ....................................................
-    // Replacement has a different key than the old scope?
-    // Delete the old scope.
-    else {
-      replacement.instantiate(scope: oldScope.parent!);
-      oldScope.dispose();
-    }
-  }
-
   /// Returns true if this scope is an ancestor of the given scope
   bool isAncestorOf(Scope scope) {
     if (_children.containsKey(scope.key)) {
@@ -1194,45 +1137,6 @@ class Scope {
     }
 
     return null;
-  }
-
-  // ...........................................................................
-  void _updateNodesInScope(Scope previous, ScopeBluePrint current) {
-    // ....................
-    // Estimate added nodes
-    final addedNodes =
-        current.nodes.where((c) => !previous.nodes.any((p) => c.key == p.key));
-
-    // Estimate removed nodes
-    final removedNodes =
-        previous.nodes.where((p) => !current.nodes.any((c) => c.key == p.key));
-
-    // Estimate changed nodes
-    final changedNodes = current.nodes.where(
-      (c) => previous.nodes.any(
-        (p) => c.key == p.key && c != p.bluePrint,
-      ),
-    );
-
-    // .....................
-    // Dispose removed nodes
-    for (final removedNodeBluePrint in removedNodes.toList()) {
-      final removedNode = previous.node<dynamic>(removedNodeBluePrint.key);
-      assert(removedNode != null);
-      removedNode?.dispose();
-    }
-
-    // Instantiate added nodes
-    for (final addedNode in addedNodes) {
-      addedNode.instantiate(scope: previous);
-    }
-
-    // Update changed nodes
-    for (final changedNodeBluePrint in changedNodes) {
-      previous.replaceNode(
-        changedNodeBluePrint,
-      );
-    }
   }
 
   // ...........................................................................
