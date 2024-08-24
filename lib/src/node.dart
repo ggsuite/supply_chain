@@ -39,7 +39,7 @@ class Node<T> {
     required NodeBluePrint<T> bluePrint,
     required this.scope,
     this.isInsert = false,
-    Owner<Node<T>>? owner,
+    Owner<Node<dynamic>>? owner,
   })  : scm = scope.scm,
         _owner = owner,
         _originalProduct = bluePrint.initialProduct,
@@ -482,7 +482,7 @@ class Node<T> {
   // ######################
 
   // ...........................................................................
-  final Owner<Node<T>>? _owner;
+  final Owner<Node<dynamic>>? _owner;
 
   // ...........................................................................
   /// Reset Id counter for tests

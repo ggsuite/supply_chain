@@ -142,6 +142,7 @@ Modifications can only be done via builders.
 - Don't erase scopes until the last node and child scope has been erased
 - Allow to add an owner to nodes who is informed about disposal or erasal
 - Allow to add an owner to scopes who is informat about disposal, undisposal and erasal
+- ScBuilderNodeAdder is informed when one of the created nodes is erased
 
 ### Fixed
 

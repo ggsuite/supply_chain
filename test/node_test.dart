@@ -589,11 +589,11 @@ void main() {
     group('owner', () {
       test('should be informed when the node is disposed or erased', () {
         // Create an owner that will be informed about disposal and erasal
-        final willDisposeCalls = <Node<int>>[];
-        final didDisposeCalls = <Node<int>>[];
-        final willEraseCalls = <Node<int>>[];
-        final didEraseCalls = <Node<int>>[];
-        final owner = Owner<Node<int>>(
+        final willDisposeCalls = <Node<dynamic>>[];
+        final didDisposeCalls = <Node<dynamic>>[];
+        final willEraseCalls = <Node<dynamic>>[];
+        final didEraseCalls = <Node<dynamic>>[];
+        final owner = Owner<Node<dynamic>>(
           willDispose: (node) => willDisposeCalls.add(node),
           didDispose: (node) => didDisposeCalls.add(node),
           willErase: (node) => willEraseCalls.add(node),

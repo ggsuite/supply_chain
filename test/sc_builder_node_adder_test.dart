@@ -55,10 +55,11 @@ class _AddNodesToEveryScopeBuilder extends ScBuilderBluePrint {
 // ###########################################################################
 void main() {
   group('ScBuilderNodeAdder', () {
-    group('instantiate, dispose()', () {
+    group('instantiate, dispose, managedNodes', () {
       test('should add and remove the added nodes', () {
         // Create the node adder
         final builderNodeAdder = ScBuilderNodeAdder.example;
+        expect(builderNodeAdder.managedNodes, hasLength(4));
 
         // Get the scope
         final scope = builderNodeAdder.builder.scope;
@@ -83,12 +84,19 @@ void main() {
         expect(y, isNotNull);
         expect(y!.product, 767);
 
+        // Dispose one of the nodes -> It should be removed from managed nodes
+        expect(builderNodeAdder.managedNodes, hasLength(4));
+        final managedNode = builderNodeAdder.managedNodes.first;
+        managedNode.dispose();
+        expect(builderNodeAdder.managedNodes, hasLength(3));
+
         // Dispose the builder -> Added nodes should be removed again
         builderNodeAdder.dispose();
         expect(scope.node<int>('k'), isNull);
         expect(scope.node<int>('j'), isNull);
         expect(scopeC.node<int>('x'), isNull);
         expect(scopeC.node<int>('y'), isNull);
+        expect(builderNodeAdder.managedNodes, isEmpty);
 
         // Added nodes should also be disposed
         expect(k.isDisposed, isTrue);

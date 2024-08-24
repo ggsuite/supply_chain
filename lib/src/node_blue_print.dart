@@ -82,7 +82,7 @@ class NodeBluePrint<T> {
   Node<T> instantiate({
     required Scope scope,
     bool applyScBuilders = true,
-    Owner<Node<T>>? owner,
+    Owner<Node<dynamic>>? owner,
   }) {
     final node = scope.nodes.firstWhereOrNull((n) => n.key == key);
 

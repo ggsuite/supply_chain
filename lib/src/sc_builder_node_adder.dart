@@ -13,13 +13,14 @@ class ScBuilderNodeAdder {
     required this.builder,
   }) {
     _check();
+    _initOwner();
   }
 
   // ...........................................................................
   /// Disposes the nodes and removes it from the scope
   void dispose() {
-    for (final d in _dispose.reversed) {
-      d();
+    for (final node in [...managedNodes]) {
+      node.dispose();
     }
   }
 
@@ -54,9 +55,22 @@ class ScBuilderNodeAdder {
     }
   }
 
+  /// Returns the added nodes
+  List<Node<dynamic>> managedNodes = [];
+
   // ######################
   // Private
   // ######################
+
+  // ...........................................................................
+  late final Owner<Node<dynamic>> _owner;
+
+  // ...........................................................................
+  void _initOwner() {
+    _owner = Owner<Node<dynamic>>(
+      willErase: (p0) => managedNodes.remove(p0),
+    );
+  }
 
   // ...........................................................................
   void _applyToScope(Scope scope) {
@@ -76,17 +90,14 @@ class ScBuilderNodeAdder {
     }
 
     // Add the nodes to the scope
-    final addedNodes = scope.findOrCreateNodes(bluePrints);
+    final addedNodes = scope.findOrCreateNodes(
+      bluePrints,
+      owner: _owner,
+    );
 
-    // On dispose, we will dispose also all added nodes
-    _dispose.add(() {
-      for (final node in addedNodes) {
-        node.dispose();
-      }
-    });
+    // Remember the managed nodes
+    managedNodes.addAll(addedNodes);
   }
-
-  final List<void Function()> _dispose = [];
 
   // ...........................................................................
   void _check() {

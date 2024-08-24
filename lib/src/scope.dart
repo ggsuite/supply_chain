@@ -331,12 +331,14 @@ class Scope {
   List<Node<dynamic>> findOrCreateNodes(
     List<NodeBluePrint<dynamic>> bluePrints, {
     bool applyScBuilders = true,
+    Owner<Node<dynamic>>? owner,
   }) {
     final result = <Node<dynamic>>[];
     for (final bluePrint in bluePrints) {
       final newNode = bluePrint.instantiate(
         scope: this,
         applyScBuilders: true,
+        owner: owner,
       );
       result.add(newNode);
     }
