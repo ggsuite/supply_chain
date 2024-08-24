@@ -220,11 +220,6 @@ class Scope {
     return ScopeBluePrint(key: key).instantiate(scope: this);
   }
 
-  /// Removes the scope from it's parent scope
-  void remove() {
-    dispose();
-  }
-
   /// Replaces a scope with a new scope
   void replaceChild(
     ScopeBluePrint replacement, {

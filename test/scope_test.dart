@@ -488,7 +488,7 @@ void main() {
       });
     });
 
-    group('addChild(child), addChildren(children) remove()', () {
+    group('addChild(child), addChildren(children), dispose()', () {
       test('should instantiate and add the child to the scope', () {
         final scope = Scope.example();
         const c0 = ScopeBluePrint(key: 'child0');
@@ -498,8 +498,8 @@ void main() {
         expect(scope.children.first, children.first);
         expect(scope.children.last, children.last);
 
-        children.first.remove();
-        children.last.remove();
+        children.first.dispose();
+        children.last.dispose();
         expect(children.first.isDisposed, isTrue);
         expect(children.last.isDisposed, isTrue);
         expect(scope.children, isEmpty);
