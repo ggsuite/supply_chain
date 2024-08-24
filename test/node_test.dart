@@ -540,6 +540,7 @@ void main() {
       });
 
       test('should erase the node after the last customer was removed', () {
+        supplier.dispose();
         expect(supplier.isErased, false);
         expect(supplier.customers, isNotEmpty);
         customer.dispose();

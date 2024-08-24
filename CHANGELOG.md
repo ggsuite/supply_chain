@@ -42,6 +42,7 @@
 - Add a write2x option to save files also in double resolution
 - Add some tests
 - Add class Disposed to manage disposed nodes and test disposal and recreation of nodes cleanly
+- Add additional unit tests for removal and recreation of nodes and scopes
 
 ### Changed
 

@@ -81,16 +81,13 @@ class Node<T> {
   /// Erases the node
   void _erase() {
     assert(customers.isEmpty);
+    assert(isDisposed);
 
     scope.removeNode(this.key);
     scm.removeNode(this);
     scm.disposedItems.removeNode(this);
 
     _isErased = true;
-
-    if (!_isDisposed) {
-      dispose();
-    }
   }
 
   /// Returns true if node is erased
@@ -638,7 +635,7 @@ class Node<T> {
 
     _customers.remove(customer);
     customer._removeSupplier(this);
-    if (customers.isEmpty) {
+    if (isDisposed && customers.isEmpty) {
       _erase();
     }
   }
