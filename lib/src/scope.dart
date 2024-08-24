@@ -44,13 +44,7 @@ class Scope {
   }
 
   /// Disposes the scope
-  void dispose() {
-    for (final d in _dispose.reversed) {
-      d();
-    }
-
-    _dispose.clear();
-  }
+  void dispose() => _dispose();
 
   /// Sets back all nodes to it's inital products
   void reset() {
@@ -64,7 +58,7 @@ class Scope {
   }
 
   /// Returns true if the scope is disposed
-  bool get isDisposed => _dispose.isEmpty;
+  bool get isDisposed => _isDisposed;
 
   // ...........................................................................
   /// Returns the node as string
@@ -705,9 +699,9 @@ class Scope {
   // ######################
 
   // ...........................................................................
-  final List<void Function()> _dispose = [];
   late final String _path;
   late final List<String> _pathArray;
+  bool _isDisposed = false;
 
   // ...........................................................................
   final Map<String, Scope> _children = {};
@@ -724,8 +718,6 @@ class Scope {
   }) {
     _initParent(isMetaScope);
     _initPath();
-    _initNodes();
-    _initChildren();
     _initMetaScopesAndNodes();
   }
 
@@ -739,28 +731,6 @@ class Scope {
 
     // Add scope to parent scope
     container[key] = this;
-
-    // Remove scope from parent scope on dispose
-    _dispose.add(() {
-      container.remove(key);
-    });
-  }
-
-  void _initNodes() {
-    // On dispose, all nodes should be disposed
-    _dispose.add(() {
-      for (final node in [..._nodes.values]) {
-        node.dispose();
-      }
-    });
-  }
-
-  void _initChildren() {
-    _dispose.add(() {
-      for (final child in children.toList()) {
-        child.dispose();
-      }
-    });
   }
 
   void _initPath() {
@@ -788,6 +758,32 @@ class Scope {
       parent: this,
     );
   }
+
+  // ...........................................................................
+  void _dispose() {
+    if (_isDisposed) {
+      return;
+    }
+
+    _isDisposed = true;
+
+    // Remove the scope from its parent container
+    _parentContainer.remove(key);
+
+    // Dispose the scope's nodes
+    for (final node in [..._nodes.values]) {
+      node.dispose();
+    }
+
+    // Dispose the scope's child scopes
+    for (final child in children.toList()) {
+      child.dispose();
+    }
+  }
+
+  // ...........................................................................
+  Map<String, Scope> get _parentContainer =>
+      isMetaScope ? parent!._metaScopes : parent!._children;
 
   // ...........................................................................
   void _initOnChangeNode() {

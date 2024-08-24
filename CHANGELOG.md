@@ -136,6 +136,7 @@ Modifications can only be done via builders.
 - Make removeCustomer private. Only dispose and erase can be used.
 - Make erase private. Publicly nodes can only be disposed. Erasal happens when the last customer is removed from a node.
 - Mute suppliers in the blue print when a node is disposed
+- Move all scope disposal steps to \_dispose
 
 ### Fixed
 
