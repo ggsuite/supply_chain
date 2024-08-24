@@ -60,6 +60,9 @@ class Scope {
   /// Returns true if the scope is disposed
   bool get isDisposed => _isDisposed;
 
+  /// Returns true if the scope is erased
+  bool get isErased => _isErased;
+
   // ...........................................................................
   /// Returns the node as string
   @override
@@ -422,6 +425,11 @@ class Scope {
     node?.clearInserts();
 
     _nodes.remove(key);
+
+    // Erase the scope if it is disposed and empty
+    if (_isDisposed && _isEmpty) {
+      _erase();
+    }
   }
 
   /// Remove the nodes from the scope
@@ -702,6 +710,7 @@ class Scope {
   late final String _path;
   late final List<String> _pathArray;
   bool _isDisposed = false;
+  bool _isErased = false;
 
   // ...........................................................................
   final Map<String, Scope> _children = {};
@@ -767,9 +776,6 @@ class Scope {
 
     _isDisposed = true;
 
-    // Remove the scope from its parent container
-    _parentContainer.remove(key);
-
     // Dispose the scope's nodes
     for (final node in [..._nodes.values]) {
       node.dispose();
@@ -778,6 +784,33 @@ class Scope {
     // Dispose the scope's child scopes
     for (final child in children.toList()) {
       child.dispose();
+    }
+
+    // Dispose the meta scopes
+    for (final metaScope in metaScopes.toList()) {
+      metaScope.dispose();
+    }
+
+    // Erase the scope if it has no content anymore
+    if (_isEmpty) {
+      _erase();
+    }
+  }
+
+  // ...........................................................................
+  void _erase() {
+    if (_isErased) {
+      return;
+    }
+
+    _isErased = true;
+
+    // Remove the scope from its parent container
+    _parentContainer.remove(key);
+
+    // Erase parent container if it is disposed and empty now
+    if (parent?.isDisposed == true && parent?._isEmpty == true) {
+      parent?._erase();
     }
   }
 
@@ -1197,6 +1230,10 @@ class Scope {
 
     return true;
   }
+
+  // ...........................................................................
+  bool get _isEmpty =>
+      _nodes.isEmpty && _children.isEmpty && _metaScopes.isEmpty;
 }
 
 // #############################################################################

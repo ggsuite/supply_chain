@@ -73,7 +73,7 @@ class Node<T> {
   }
 
   // ...........................................................................
-  /// Disposes the node
+  /// Erases the node
   void _erase() {
     assert(customers.isEmpty);
 

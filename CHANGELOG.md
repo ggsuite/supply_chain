@@ -137,6 +137,7 @@ Modifications can only be done via builders.
 - Make erase private. Publicly nodes can only be disposed. Erasal happens when the last customer is removed from a node.
 - Mute suppliers in the blue print when a node is disposed
 - Move all scope disposal steps to \_dispose
+- Don't erase scopes until the last node and child scope has been erased
 
 ### Fixed
 

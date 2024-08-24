@@ -275,38 +275,173 @@ void main() {
     );
 
     group('dispose', () {
-      test('should remove the scope from its parent', () {
-        final parent = Scope.example(scm: scm);
-        final scope =
-            const ScopeBluePrint(key: 'child').instantiate(scope: parent);
+      late Scope scope;
+      late Scm scm;
+      late Scope a;
+      late Scope b;
+      late Node<int> supplier;
+      late Scope d;
+      late Node<int> customer;
 
-        // Before dispose the scope belongs to it's parent
-        expect(scope.parent!.children, contains(scope));
+      setUp(() {
+        scope = Scope.example();
+        scm = scope.scm;
 
-        // Dispose the scope
-        scope.dispose();
+        // Define a supplier a.b.c that has a customer a.d.e;
+        scope.mockContent({
+          'a': {
+            'b': {
+              'supplier': 0,
+            },
+            'd': {
+              'customer': NodeBluePrint.map(
+                supplier: 'b.supplier',
+                toKey: 'customer',
+                initialProduct: 0,
+              ),
+            },
+          },
+        });
 
-        // After dispose the scope is removed from it's parent
-        expect(scope.parent!.children, isNot(contains(scope)));
+        a = scope.findScope('a')!;
+        b = scope.findScope('a.b')!;
+        supplier = scope.findNode<int>('a.b.supplier')!;
+        d = scope.findScope('a.d')!;
+        customer = scope.findNode<int>('a.d.customer')!;
       });
 
-      test('should dispose all nodes', () {
-        // Before dispose the scope has nodes.
-        // These nodes are part of the scm
-        expect(scope.nodes, isNotEmpty);
-        for (final node in scope.nodes) {
-          expect(scm.nodes, contains(node));
-        }
+      test('should deeply dispose all scopes and nodes', () {
+        // Nothing is disposed
+        expect(a.isDisposed, isFalse);
+        expect(b.isDisposed, isFalse);
+        expect(supplier.isDisposed, isFalse);
+        expect(d.isDisposed, isFalse);
+        expect(customer.isDisposed, isFalse);
 
-        // Dispose the scope
+        // Dispsoe the root scope
         scope.dispose();
 
-        // After dispose the scope's nodes are removed
-        // from the scope and also the SCM
-        expect(scope.nodes, isEmpty);
-        for (final node in scope.nodes) {
-          expect(scm.nodes, isNot(contains(node)));
-        }
+        // All scopes and nodes are disposed
+        expect(a.isDisposed, isTrue);
+        expect(b.isDisposed, isTrue);
+        expect(supplier.isDisposed, isTrue);
+        expect(d.isDisposed, isTrue);
+        expect(customer.isDisposed, isTrue);
+      });
+
+      group('should erase the scope', () {
+        test('when the scope has no children and no nodes', () {
+          // Before dispose the scope belongs to it's parent
+          final scope = Scope.example();
+          expect(scope.children, isEmpty);
+          expect(scope.nodes, isEmpty);
+          expect(scope.parent!.children, contains(scope));
+
+          // Dispose the scope
+          // After dispose the scope is removed from it's parent
+          scope.dispose();
+          expect(scope.parent!.children, isEmpty);
+          expect(scope.isDisposed, isTrue);
+          expect(scope.isErased, isTrue);
+        });
+
+        test('when the last customer is removed from a scope', () {
+          scope.scm.testFlushTasks();
+
+          // Dispose the supplier scope.
+          // The supplier will not be erased, because it has a customer
+          b.dispose();
+          expect(b.isErased, isFalse);
+          expect(supplier.isErased, isFalse);
+
+          // Dispose the customer scope
+          // Now the supplier will be erased because it has no customers
+          customer.dispose();
+          expect(b.isErased, isTrue);
+          expect(supplier.isErased, isTrue);
+        });
+      });
+
+      group('should not erase the scope', () {
+        test('until the last child scope or node is erased', () {
+          scope.scm.testFlushTasks();
+
+          // Dispose the supplier scope.
+          b.dispose();
+          expect(b.isDisposed, isTrue);
+          expect(supplier.isDisposed, isTrue);
+
+          // The supplier will not be erased, because it has a customer
+          expect(b.isErased, isFalse);
+          expect(supplier.isErased, isFalse);
+
+          // Dispose the customer scope
+          customer.dispose();
+          expect(b.isErased, isTrue);
+          expect(supplier.isErased, isTrue);
+        });
+
+        test('until the last customer is connected to a meta node', () {
+          // Connect the customer to a meta scope node
+          // by connecting it to a scope and not a node
+          customer.addBluePrint(
+            const NodeBluePrint<int>(
+              key: 'customer',
+              suppliers: [
+                'a.b.on.change', // This is a meta scope node
+              ],
+              initialProduct: 5,
+            ),
+          );
+          scope.scm.testFlushTasks();
+
+          // The customer should be connected to the meta scope node
+          final onChange = scope.findNode<Scope>('a.b.on.change')!;
+          expect(onChange.customers, contains(customer));
+          expect(b.isErased, isFalse);
+
+          // Dispose the supplier scope b.
+          b.dispose();
+
+          // The scope is not erased
+          // because a customer is connected to a meta node
+          expect(onChange.isDisposed, isTrue);
+          expect(onChange.isErased, isFalse);
+          expect(b.isDisposed, isTrue);
+          expect(b.isErased, isFalse);
+
+          // Dispose the customer
+          customer.dispose();
+
+          // The supplier shoul be erased now
+          // because it has no customers anymore
+          expect(onChange.customers, isEmpty);
+          expect(b.isErased, isTrue);
+          expect(onChange.isErased, isTrue);
+        });
+      });
+
+      group('should dispose and erase all nodes', () {
+        test('when the nodes have no customers', () {
+          // Before dispose the scope has nodes.
+          // These nodes are part of the scm
+          expect(b.nodes, isNotEmpty);
+          for (final node in b.nodes) {
+            expect(scm.nodes, contains(node));
+          }
+
+          // Dispose the scope
+          scope.dispose();
+
+          // After dispose the scope's nodes are removed
+          // from the scope and also the SCM
+          expect(b.nodes, isEmpty);
+          for (final node in b.nodes) {
+            expect(scm.nodes, isNot(contains(node)));
+            expect(node.isDisposed, isTrue);
+            expect(node.isErased, isTrue);
+          }
+        });
       });
     });
 
