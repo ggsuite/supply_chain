@@ -11,7 +11,9 @@ class ScBuilderScopeAdder {
   /// The constructor
   ScBuilderScopeAdder({
     required this.builder,
-  });
+  }) {
+    _check();
+  }
 
   // ...........................................................................
   /// Removes the added scopes again
@@ -56,6 +58,15 @@ class ScBuilderScopeAdder {
   // ######################
   // Private
   // ######################
+
+  // ...........................................................................
+  void _check() {
+    final scopes = builder.bluePrint.addScopes(hostScope: ScBuilder.testScope);
+    if (scopes.isNotEmpty) {
+      throw Exception('ScScopeBluePrint.addScopes(hostScope) '
+          'must evaluate the hostScope and not add scopes to all scopes.');
+    }
+  }
 
   // ...........................................................................
   void _applyToScope(Scope scope) {
