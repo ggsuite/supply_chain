@@ -6,12 +6,7 @@
 
 library;
 
-export 'src/sc_builder_blue_print.dart';
-export 'src/sc_builder_inserts.dart';
-export 'src/sc_builder_node_adder.dart';
-export 'src/sc_builder_node_replacer.dart';
-export 'src/sc_builder_scope_adder.dart';
-export 'src/sc_builder.dart';
+export 'src/disposed.dart';
 export 'src/doc.dart';
 export 'src/graph.dart';
 export 'src/insert.dart';
@@ -19,6 +14,12 @@ export 'src/keys.dart';
 export 'src/node_blue_print.dart';
 export 'src/node.dart';
 export 'src/priority.dart';
+export 'src/sc_builder_blue_print.dart';
+export 'src/sc_builder_inserts.dart';
+export 'src/sc_builder_node_adder.dart';
+export 'src/sc_builder_node_replacer.dart';
+export 'src/sc_builder_scope_adder.dart';
+export 'src/sc_builder.dart';
 export 'src/scm.dart';
 export 'src/scope_blue_print_factory.dart';
 export 'src/scope_blue_print.dart';

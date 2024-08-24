@@ -66,8 +66,13 @@ class Node<T> {
       addBluePrint(muted);
     }
 
+    // Add the node to disposed.nodes
+    if (customers.isNotEmpty) {
+      scm.disposedItems.addNode(this);
+    }
+
     // Erase the node if it should not have customers relying on it
-    if (customers.isEmpty) {
+    else {
       _erase();
     }
   }
@@ -79,6 +84,7 @@ class Node<T> {
 
     scope.removeNode(this.key);
     scm.removeNode(this);
+    scm.disposedItems.removeNode(this);
 
     _isErased = true;
 

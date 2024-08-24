@@ -488,7 +488,7 @@ void main() {
       });
     });
 
-    group('addChild(child), addChildren(children), dispose()', () {
+    group('addChild(child), addChildren(children)', () {
       test('should instantiate and add the child to the scope', () {
         final scope = Scope.example();
         const c0 = ScopeBluePrint(key: 'child0');
@@ -504,6 +504,105 @@ void main() {
         expect(children.last.isDisposed, isTrue);
         expect(scope.children, isEmpty);
       });
+
+      group('should reactivate a disposed scope and its parents', () {
+        late Scope scope;
+        late Scope s0;
+        late Scope s1;
+        late Node<int> supplier;
+        setUp(
+          () {
+            scope = Scope.example();
+            scope.mockContent({
+              // Define a supplier within scopes a.s0.s1
+              'a': {
+                's0': {
+                  's1': {
+                    'supplier': 0,
+                  },
+                },
+
+                // Define a customer within scopes a.c
+                'c': {
+                  'customer': NodeBluePrint.map(
+                    supplier: 's0.s1.supplier',
+                    toKey: 'customer',
+                    initialProduct: 0,
+                  ),
+                },
+              },
+            });
+
+            scope.scm.testFlushTasks();
+
+            s0 = scope.findScope('a.s0')!;
+            s1 = scope.findScope('a.s0.s1')!;
+            supplier = scope.findNode<int>('a.s0.s1.supplier')!;
+          },
+        );
+
+        test('when a fresh node is added to the disposed scope', () {
+          // Dispose scope s.
+          s0.dispose();
+
+          // s0 and its children are disposed but not erased
+          expect(s0.isDisposed, isTrue);
+          expect(s0.isErased, isFalse);
+          expect(s1.isDisposed, isTrue);
+          expect(s1.isErased, isFalse);
+          expect(supplier.isDisposed, isTrue);
+          expect(supplier.isErased, isFalse);
+
+          // Now add supplier again.
+          final newSupplier =
+              supplier.bluePrint.instantiate(scope: supplier.scope);
+
+          // The previous supplier should be erased now
+          expect(supplier.isErased, isTrue);
+          expect(newSupplier.isDisposed, isFalse);
+
+          // The supplier's scope should be reactivated
+          // and not be disposed
+          expect(s1.isDisposed, isFalse);
+          expect(s1.isErased, isFalse);
+
+          // Also the parents of the supplier's scope should be reactivated
+          // and not be disposed anymore
+          expect(s0.isDisposed, isFalse);
+          expect(s0.isErased, isFalse);
+        });
+
+        test('when a fresh child scope is added to the disposed scope', () {
+          // Dispose scope s.
+          s0.dispose();
+
+          // s0 and its children are disposed but not erased
+          expect(s0.isDisposed, isTrue);
+          expect(s0.isErased, isFalse);
+          expect(s1.isDisposed, isTrue);
+          expect(s1.isErased, isFalse);
+          expect(supplier.isDisposed, isTrue);
+          expect(supplier.isErased, isFalse);
+
+          // Now add a fresh scope
+          final newChildScope =
+              const ScopeBluePrint(key: 'freshScope').instantiate(scope: s1);
+          expect(newChildScope.isDisposed, isFalse);
+          expect(newChildScope.isErased, isFalse);
+
+          // The new child scope's scope should be reactivated
+          // and not be disposed
+          expect(s1.isDisposed, isFalse);
+          expect(s1.isErased, isFalse);
+
+          // Also the parents of the supplier's scope should be reactivated
+          // and not be disposed anymore
+          expect(s0.isDisposed, isFalse);
+          expect(s0.isErased, isFalse);
+        });
+      });
+
+      test('should throw if the scope is erased', () {});
     });
 
     group('findOrCreateChild(key)', () {

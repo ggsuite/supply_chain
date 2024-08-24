@@ -394,6 +394,10 @@ class Scope {
   /// Adds an existing node to the scope
   void addNode<T>(Node<T> node) {
     assert(node.runtimeType != Node<dynamic>);
+    assert(!_isErased);
+
+    // Reactivate the scope if it should be disposed
+    _undispose();
 
     // Take over customers from an existing disposed node
     final existingNode = _nodes[node.key];
@@ -409,6 +413,7 @@ class Scope {
       );
     }
 
+    // Save the node
     _nodes[node.key] = node;
   }
 
@@ -735,6 +740,9 @@ class Scope {
 
     // Add scope to parent scope
     container[key] = this;
+
+    // Reactivate the parent scope if it is disposed
+    parent!._undispose();
   }
 
   void _initPath() {
@@ -786,8 +794,13 @@ class Scope {
       metaScope.dispose();
     }
 
+    // Add the scope to the disposed scopes
+    if (!_isEmpty) {
+      scm.disposedItems.addScope(this);
+    }
+
     // Erase the scope if it has no content anymore
-    if (_isEmpty) {
+    else {
       _erase();
     }
   }
@@ -803,10 +816,24 @@ class Scope {
     // Remove the scope from its parent container
     _parentContainer.remove(key);
 
+    // Remove the scope from the disposed scopes
+    scm.disposedItems.removeScope(this);
+
     // Erase parent container if it is disposed and empty now
     if (parent?.isDisposed == true && parent?._isEmpty == true) {
       parent?._erase();
     }
+  }
+
+  // ...........................................................................
+  void _undispose() {
+    if (!isDisposed) {
+      return;
+    }
+
+    _isDisposed = false;
+    parent?._undispose();
+    scm.disposedItems.removeScope(this);
   }
 
   // ...........................................................................

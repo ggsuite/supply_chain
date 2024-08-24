@@ -144,6 +144,10 @@ class Scm {
   /// Set this property to true, if production timeouts should block
   bool shouldTimeOut = true;
 
+  // ...........................................................................
+  /// Manages disposed nodes and scopes
+  late final Disposed disposedItems;
+
   // ######################
   // Testing
   // ######################
@@ -218,6 +222,7 @@ class Scm {
     _initScheduleProduction();
     _initSchedulePriorityUpdate();
     _initRootScope();
+    _initDisposed();
   }
 
   // ...........................................................................
@@ -272,6 +277,11 @@ class Scm {
   // ...........................................................................
   void _initRootScope() {
     rootScope = Scope.root(key: 'root', scm: this);
+  }
+
+  // ...........................................................................
+  void _initDisposed() {
+    disposedItems = Disposed(scm: this);
   }
 
   // ...........................................................................

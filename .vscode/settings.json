@@ -3,5 +3,60 @@
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit"
+  },
+
+  "psi-header.lang-config": [
+    {
+      "language": "xml",
+      "begin": "<!--",
+      "prefix": "  ",
+      "suffix": "",
+      "lineLength": 80,
+      "end": " -->",
+      "forceToTop": true,
+      "blankLinesAfter": 1,
+      "beforeHeader": [],
+      "afterHeader": []
+    },
+
+    {
+      "language": "*",
+      "prefix": " * ",
+      "begin": "/**",
+      "end": " */",
+      "blankLinesAfter": 1
+    },
+    {
+      "language": "html",
+      "begin": "<!--",
+      "end": "-->"
+    },
+    {
+      "language": "scss",
+      "prefix": "// ",
+      "begin": "",
+      "end": ""
+    },
+    {
+      "language": "markdown",
+      "prefix": "",
+      "begin": "<!--",
+      "end": "-->"
+    },
+    {
+      "language": "dart",
+      "prefix": "// ",
+      "begin": "",
+      "end": ""
+    }
+  ],
+
+  "psi-header.changes-tracking": {
+    "isActive": false,
+    "autoHeader": "autoSave",
+    "enforceHeader": false
+  },
+  "psi-header.config": {
+    "forceToTop": true
   }
 }
