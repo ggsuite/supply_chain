@@ -150,6 +150,7 @@ Modifications can only be done via builders.
 - Fix an error
 - Fix an error with forwarding dpi
 - Fix an issue with hidden scopes in graph print outs
+- Fix aliases did not work accross multiple search scenarios
 
 ### Removed
 

@@ -151,7 +151,14 @@ class Scope {
   }
 
   /// Returns the child scope with the given key
-  Scope? child(String key) => _children[key];
+  Scope? child(String key) {
+    for (final child in children) {
+      if (child.matchesKey(key)) {
+        return child;
+      }
+    }
+    return null;
+  }
 
   /// The parent supply scope
   Scope? parent;
@@ -888,7 +895,7 @@ class Scope {
     // If path matches own scope and path segment is the last one
     // Return this scope.
     if (findScopes && scopePath.length == 1) {
-      final result = _children[scopePath.first] ?? _metaScopes[scopePath.first];
+      final result = child(scopePath.first) ?? _metaScopes[scopePath.first];
       return result;
     }
 
@@ -898,8 +905,7 @@ class Scope {
 
     // If the scope path is not empty, find the child scope
     if (scopePath.isNotEmpty && !pathMatchesOwnScope) {
-      final childScope =
-          _children[scopePath.first] ?? _metaScopes[scopePath.first];
+      final childScope = child(scopePath.first) ?? _metaScopes[scopePath.first];
       if (childScope == null) {
         return null;
       } else {
@@ -1113,12 +1119,12 @@ class Scope {
       }
     }
 
-    if (path.first == key) {
+    if (path.first == key || bluePrint.matchesKey(path.first)) {
       return _findChildScope(path.sublist(1), didFindFirstScope: true);
     }
 
     if (didFindFirstScope) {
-      final directChild = _children[path.first];
+      final directChild = child(path.first);
       if (directChild == null) {
         return null;
       } else {

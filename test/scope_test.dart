@@ -1940,5 +1940,272 @@ void main() {
         });
       });
     });
+
+    group('aliases', () {
+      group('with aliases at beginning', () {
+        late Scope scope;
+        late Scm scm;
+
+        setUp(
+          () {
+            scope = Scope.example();
+            scm = scope.scm;
+
+            scope.mockContent({
+              'a|b|c': {
+                'd': {
+                  'e': {
+                    'f': 0,
+                  },
+                },
+              },
+            });
+          },
+        );
+
+        test('with child', () {
+          expect(scope.child('a')?.key, 'a');
+          expect(scope.child('b')?.key, 'a');
+          expect(scope.child('c')?.key, 'a');
+        });
+
+        test('with findNode', () {
+          expect(scope.findNode<int>('a.d.e.f')?.key, 'f');
+          expect(scope.findNode<int>('b.d.e.f')?.key, 'f');
+          expect(scope.findNode<int>('c.d.e.f')?.key, 'f');
+        });
+
+        test('with findScope', () {
+          expect(scope.findScope('a')?.key, 'a');
+          expect(scope.findScope('b')?.key, 'a');
+          expect(scope.findScope('c')?.key, 'a');
+          expect(scope.findScope('a.d')?.key, 'd');
+          expect(scope.findScope('b.d')?.key, 'd');
+          expect(scope.findScope('c.d')?.key, 'd');
+          expect(scope.findScope('a.d.e')?.key, 'e');
+          expect(scope.findScope('b.d.e')?.key, 'e');
+          expect(scope.findScope('c.d.e')?.key, 'e');
+        });
+
+        test('with findChildScope()', () {
+          expect(scope.findChildScope('a')?.key, 'a');
+          expect(scope.findChildScope('b')?.key, 'a');
+          expect(scope.findChildScope('c')?.key, 'a');
+          expect(scope.findChildScope('a.d')?.key, 'd');
+          expect(scope.findChildScope('b.d')?.key, 'd');
+          expect(scope.findChildScope('c.d')?.key, 'd');
+          expect(scope.findChildScope('a.d.e')?.key, 'e');
+          expect(scope.findChildScope('b.d.e')?.key, 'e');
+          expect(scope.findChildScope('c.d.e')?.key, 'e');
+        });
+
+        test('with suppliers', () {
+          // Use original key "a" in supplier address
+          final g0 = NodeBluePrint.map(
+            supplier: 'a.d.e.f',
+            toKey: 'g0',
+            initialProduct: 0,
+          ).instantiate(scope: scope);
+          scm.testFlushTasks();
+          expect(g0.suppliers.first.key, 'f');
+
+          // Use alias "b" in supplier address
+          final g1 = NodeBluePrint.map(
+            supplier: 'b.d.e.f',
+            toKey: 'g0',
+            initialProduct: 0,
+          ).instantiate(scope: scope);
+          scm.testFlushTasks();
+          expect(g1.suppliers.first.key, 'f');
+
+          // Use alias "c" in supplier address
+          final g2 = NodeBluePrint.map(
+            supplier: 'c.d.e.f',
+            toKey: 'g0',
+            initialProduct: 0,
+          ).instantiate(scope: scope);
+          scm.testFlushTasks();
+          expect(g2.suppliers.first.key, 'f');
+        });
+      });
+
+      group('with aliases in the middle', () {
+        late Scope scope;
+        late Scm scm;
+
+        setUp(
+          () {
+            scope = Scope.example();
+            scm = scope.scm;
+
+            scope.mockContent({
+              'a': {
+                'b|c|d': {
+                  'e': {
+                    'f': 0,
+                  },
+                },
+              },
+            });
+          },
+        );
+
+        test('with findNode', () {
+          expect(scope.findNode<int>('a.b.e.f')?.key, 'f');
+          expect(scope.findNode<int>('a.c.e.f')?.key, 'f');
+          expect(scope.findNode<int>('a.d.e.f')?.key, 'f');
+        });
+
+        test('with findScope', () {
+          expect(scope.findScope('b')?.key, 'b');
+          expect(scope.findScope('c')?.key, 'b');
+          expect(scope.findScope('d')?.key, 'b');
+          expect(scope.findScope('b.e')?.key, 'e');
+          expect(scope.findScope('c.e')?.key, 'e');
+          expect(scope.findScope('d.e')?.key, 'e');
+          expect(scope.findScope('a.b.e')?.key, 'e');
+          expect(scope.findScope('a.c.e')?.key, 'e');
+          expect(scope.findScope('a.d.e')?.key, 'e');
+
+          final e = scope.findScope('a.b.e')!;
+          expect(e.findScope('b')?.key, 'b');
+          expect(e.findScope('c')?.key, 'b');
+          expect(e.findScope('d')?.key, 'b');
+        });
+
+        test('with findChildScope()', () {
+          expect(scope.findChildScope('b')?.key, 'b');
+          expect(scope.findChildScope('c')?.key, 'b');
+          expect(scope.findChildScope('d')?.key, 'b');
+          expect(scope.findChildScope('b.e')?.key, 'e');
+          expect(scope.findChildScope('c.e')?.key, 'e');
+          expect(scope.findChildScope('d.e')?.key, 'e');
+          expect(scope.findChildScope('a.b.e')?.key, 'e');
+          expect(scope.findChildScope('a.c.e')?.key, 'e');
+          expect(scope.findChildScope('a.d.e')?.key, 'e');
+        });
+
+        test('with suppliers', () {
+          // Use original key "a" in supplier address
+          final g0 = NodeBluePrint.map(
+            supplier: 'a.b.e.f',
+            toKey: 'g0',
+            initialProduct: 0,
+          ).instantiate(scope: scope);
+          scm.testFlushTasks();
+          expect(g0.suppliers.first.key, 'f');
+
+          // Use alias "b" in supplier address
+          final g1 = NodeBluePrint.map(
+            supplier: 'a.c.e.f',
+            toKey: 'g0',
+            initialProduct: 0,
+          ).instantiate(scope: scope);
+          scm.testFlushTasks();
+          expect(g1.suppliers.first.key, 'f');
+
+          // Use alias "c" in supplier address
+          final g2 = NodeBluePrint.map(
+            supplier: 'a.d.e.f',
+            toKey: 'g0',
+            initialProduct: 0,
+          ).instantiate(scope: scope);
+          scm.testFlushTasks();
+          expect(g2.suppliers.first.key, 'f');
+        });
+      });
+
+      group('with multiple aliases', () {
+        late Scope scope;
+        late Scm scm;
+
+        setUp(
+          () {
+            scope = Scope.example();
+            scm = scope.scm;
+
+            scope.mockContent({
+              'a': {
+                'b|c|d': {
+                  'e|e1|e2': {
+                    'f': 0,
+                  },
+                },
+              },
+            });
+          },
+        );
+
+        test('with findNode', () {
+          expect(scope.findNode<int>('a.b.e.f')?.key, 'f');
+          expect(scope.findNode<int>('a.c.e1.f')?.key, 'f');
+          expect(scope.findNode<int>('a.d.e2.f')?.key, 'f');
+        });
+
+        test('with findScope', () {
+          expect(scope.findScope('b')?.key, 'b');
+          expect(scope.findScope('c')?.key, 'b');
+          expect(scope.findScope('d')?.key, 'b');
+          expect(scope.findScope('e')?.key, 'e');
+          expect(scope.findScope('e1')?.key, 'e');
+          expect(scope.findScope('e2')?.key, 'e');
+          expect(scope.findScope('b.e')?.key, 'e');
+          expect(scope.findScope('c.e1')?.key, 'e');
+          expect(scope.findScope('d.e')?.key, 'e');
+          expect(scope.findScope('a.b.e')?.key, 'e');
+          expect(scope.findScope('a.c.e1')?.key, 'e');
+          expect(scope.findScope('a.d.e2')?.key, 'e');
+
+          final e = scope.findScope('a.b.e')!;
+          expect(e.findScope('b.e')?.key, 'e');
+          expect(e.findScope('c.e1')?.key, 'e');
+          expect(e.findScope('d.e2')?.key, 'e');
+        });
+
+        test('with findChildScope()', () {
+          expect(scope.findChildScope('b')?.key, 'b');
+          expect(scope.findChildScope('c')?.key, 'b');
+          expect(scope.findChildScope('d')?.key, 'b');
+          expect(scope.findChildScope('e')?.key, 'e');
+          expect(scope.findChildScope('e1')?.key, 'e');
+          expect(scope.findChildScope('e2')?.key, 'e');
+          expect(scope.findChildScope('b.e')?.key, 'e');
+          expect(scope.findChildScope('c.e1')?.key, 'e');
+          expect(scope.findChildScope('d.e')?.key, 'e');
+          expect(scope.findChildScope('a.b.e')?.key, 'e');
+          expect(scope.findChildScope('a.c.e1')?.key, 'e');
+          expect(scope.findChildScope('a.d.e2')?.key, 'e');
+        });
+
+        test('with suppliers', () {
+          // Use original key "a" in supplier address
+          final g0 = NodeBluePrint.map(
+            supplier: 'a.b.e1.f',
+            toKey: 'g0',
+            initialProduct: 0,
+          ).instantiate(scope: scope);
+          scm.testFlushTasks();
+          expect(g0.suppliers.first.key, 'f');
+
+          // Use alias "b" in supplier address
+          final g1 = NodeBluePrint.map(
+            supplier: 'a.c.e2.f',
+            toKey: 'g0',
+            initialProduct: 0,
+          ).instantiate(scope: scope);
+          scm.testFlushTasks();
+          expect(g1.suppliers.first.key, 'f');
+
+          // Use alias "c" in supplier address
+          final g2 = NodeBluePrint.map(
+            supplier: 'a.d.e.f',
+            toKey: 'g0',
+            initialProduct: 0,
+          ).instantiate(scope: scope);
+          scm.testFlushTasks();
+          expect(g2.suppliers.first.key, 'f');
+        });
+      });
+    });
   });
 }
