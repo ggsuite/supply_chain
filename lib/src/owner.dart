@@ -13,6 +13,8 @@ class Owner<T> {
     this.didDispose,
     this.willErase,
     this.didErase,
+    this.willUndispose,
+    this.didUndispose,
   });
 
   /// This function will be called when the item will be disposed.
@@ -20,6 +22,12 @@ class Owner<T> {
 
   /// This function will be called when the item is disposed.
   final void Function(T)? didDispose;
+
+  /// This function will be called when the item will be undisposed.
+  final void Function(T)? willUndispose;
+
+  /// This function will be called when the item is undisposed.
+  final void Function(T)? didUndispose;
 
   /// This function will be called when the item will be erased.
   final void Function(T)? willErase;

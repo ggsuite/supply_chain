@@ -2207,5 +2207,75 @@ void main() {
         });
       });
     });
+
+    group('owner', () {
+      test('should be informed when a scope is disposed or erased', () {
+        final willDisposeCalls = <Scope>[];
+        final didDisposeCalls = <Scope>[];
+        final willEraseCalls = <Scope>[];
+        final didEraseCalls = <Scope>[];
+        final willUndisposeCalls = <Scope>[];
+        final didUndisposeCalls = <Scope>[];
+
+        final owner = Owner<Scope>(
+          willDispose: (p0) => willDisposeCalls.add(p0),
+          didDispose: (p0) => didDisposeCalls.add(p0),
+          willErase: (p0) => willEraseCalls.add(p0),
+          didErase: (p0) => didEraseCalls.add(p0),
+          willUndispose: (p0) => willUndisposeCalls.add(p0),
+          didUndispose: (p0) => didUndisposeCalls.add(p0),
+        );
+
+        // Create a customer and a supplier scope with an owner
+        final scope = Scope.example();
+        final s = const ScopeBluePrint(key: 's')
+            .instantiate(scope: scope, owner: owner);
+        final c = const ScopeBluePrint(key: 'c')
+            .instantiate(scope: scope, owner: owner);
+
+        // Instantiate a customer and a supplier node
+        const NodeBluePrint<int>(
+          key: 'supplier',
+          initialProduct: 0,
+        ).instantiate(scope: s);
+        const NodeBluePrint<int>(
+          key: 'customer',
+          initialProduct: 0,
+          suppliers: ['supplier'],
+        ).instantiate(scope: c);
+        scope.scm.testFlushTasks();
+
+        // Dispose the supplierScope s
+        s.dispose();
+        expect(willDisposeCalls, [s]);
+        expect(didDisposeCalls, [s]);
+
+        // Nothing is erased because supplier has still customers
+        expect(willEraseCalls, isEmpty);
+        expect(didEraseCalls, isEmpty);
+
+        // Recreate the supplier
+        const NodeBluePrint<int>(key: 's', initialProduct: 0)
+            .instantiate(scope: s);
+
+        // The disposed scope s should be recreated
+        expect(willUndisposeCalls, [s]);
+        expect(didUndisposeCalls, [s]);
+
+        // Dispose the supplier scope again
+        s.dispose();
+        expect(willDisposeCalls, [s, s]);
+        expect(didDisposeCalls, [s, s]);
+
+        // Dispose the customer scope c
+        c.dispose();
+        expect(willDisposeCalls, [s, s, c]);
+        expect(didDisposeCalls, [s, s, c]);
+
+        // Also all nodes should be erased
+        expect(willEraseCalls, [s, c]);
+        expect(didEraseCalls, [s, c]);
+      });
+    });
   });
 }

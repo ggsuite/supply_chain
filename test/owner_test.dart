@@ -15,6 +15,8 @@ void main() {
         expect(Owner.example.didDispose, isNull);
         expect(Owner.example.willErase, isNull);
         expect(Owner.example.didErase, isNull);
+        expect(Owner.example.willUndispose, isNull);
+        expect(Owner.example.didUndispose, isNull);
       });
     });
   });

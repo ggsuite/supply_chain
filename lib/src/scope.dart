@@ -14,7 +14,9 @@ class Scope {
   Scope({
     required this.bluePrint,
     required this.parent,
+    Owner<Scope>? owner,
   })  : scm = parent!.scm,
+        _owner = owner,
         assert(
           bluePrint.key.isCamelCase,
           // coverage:ignore-start
@@ -661,6 +663,7 @@ class Scope {
   late final List<String> _pathArray;
   bool _isDisposed = false;
   bool _isErased = false;
+  Owner<Scope>? _owner;
 
   // ...........................................................................
   final Map<String, Scope> _children = {};
@@ -727,6 +730,8 @@ class Scope {
       return;
     }
 
+    _owner?.willDispose?.call(this);
+
     _isDisposed = true;
 
     // Dispose the scope's nodes
@@ -753,6 +758,8 @@ class Scope {
     else {
       _erase();
     }
+
+    _owner?.didDispose?.call(this);
   }
 
   // ...........................................................................
@@ -760,6 +767,8 @@ class Scope {
     if (_isErased) {
       return;
     }
+
+    _owner?.willErase?.call(this);
 
     _isErased = true;
 
@@ -773,6 +782,8 @@ class Scope {
     if (parent?.isDisposed == true && parent?._isEmpty == true) {
       parent?._erase();
     }
+
+    _owner?.didErase?.call(this);
   }
 
   // ...........................................................................
@@ -781,9 +792,13 @@ class Scope {
       return;
     }
 
+    _owner?.willUndispose?.call(this);
+
     _isDisposed = false;
     parent?._undispose();
     scm.disposedItems.removeScope(this);
+
+    _owner?.didUndispose?.call(this);
   }
 
   // ...........................................................................

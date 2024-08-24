@@ -312,6 +312,7 @@ class ScopeBluePrint {
     required Scope scope,
     Map<String, String> connect = const {},
     bool initScBuilders = true,
+    Owner<Scope>? owner,
   }) {
     willInstantiate();
     final connections = {..._connections, ...connect};
@@ -321,7 +322,7 @@ class ScopeBluePrint {
     final self = _applyConnections(this, {...connections});
 
     // Create an inner scope
-    final innerScope = Scope(parent: scope, bluePrint: self);
+    final innerScope = Scope(parent: scope, bluePrint: self, owner: owner);
 
     // Make sure there are no duplicate keys
     _checkForDuplicateKeys(self.nodes);
