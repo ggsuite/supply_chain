@@ -160,6 +160,7 @@ Modifications can only be done via builders.
 - Fix no error was thrown when scopes were added to every scope without checking
 - Fix an issue with aliases
 - Fix potential bug in relation with connections
+- Fix a small issue with connections
 
 ### Removed
 

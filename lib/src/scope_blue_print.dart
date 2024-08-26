@@ -641,7 +641,7 @@ class ScopeBluePrint {
         missingConnections.remove(path);
         final nodePathes = _allNodePathes(item);
         for (final nodePath in nodePathes) {
-          processedConnections[nodePath] = '$supplier.$nodePath';
+          processedConnections['${item.key}.$nodePath'] = '$supplier.$nodePath';
         }
       }
     }
