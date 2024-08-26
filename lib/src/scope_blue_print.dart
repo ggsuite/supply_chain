@@ -663,7 +663,6 @@ class ScopeBluePrint {
         _convertScopePathToNodePathes(scope, connections);
 
     // Remaining connections
-    final modifiedNodes = <NodeBluePrint<dynamic>>[];
     var modifiedSelf = this;
 
     // .............
@@ -692,9 +691,7 @@ class ScopeBluePrint {
       );
     }
 
-    return modifiedSelf.copyWith(
-      modifiedNodes: modifiedNodes,
-    );
+    return modifiedSelf;
   }
 
   // ...........................................................................
