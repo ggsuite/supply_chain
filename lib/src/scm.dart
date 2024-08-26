@@ -440,7 +440,7 @@ class Scm {
         .toList();
 
     // Make sure inserts are processed first
-    nodesReadyToProduce.sort((a, b) => a is Insert ? -1 : 1);
+    nodesReadyToProduce.sort((a, b) => a is Insert ? -1 : 0);
 
     // Start timeout timer
     if (nodesReadyToProduce.isNotEmpty && shouldTimeOut) {
