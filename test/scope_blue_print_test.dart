@@ -870,9 +870,12 @@ void main() {
 
     group('aliases', () {
       test('should return the aliases of the scope', () {
-        const bluePrint = ScopeBluePrint(key: 'test', aliases: ['hello']);
-        expect(bluePrint.aliases, ['hello']);
-        expect(bluePrint.buildAliases(), ['hello']);
+        const bluePrint =
+            _ScopeBluePrintWithBuildAliases(key: 'test', aliases: ['hello']);
+        expect(bluePrint.aliases, ['extraAlias', 'hello']);
+        expect(bluePrint.buildAliases(), ['extraAlias', 'hello']);
+        expect(bluePrint.matchesKey('extraAlias'), isTrue);
+        expect(bluePrint.matchesKey('hello'), isTrue);
       });
     });
 
@@ -998,4 +1001,17 @@ void main() {
       });
     });
   });
+}
+
+// #############################################################################
+class _ScopeBluePrintWithBuildAliases extends ScopeBluePrint {
+  const _ScopeBluePrintWithBuildAliases({
+    required super.key,
+    super.aliases,
+  });
+
+  @override
+  List<String> buildAliases() {
+    return ['extraAlias', ...super.buildAliases()];
+  }
 }

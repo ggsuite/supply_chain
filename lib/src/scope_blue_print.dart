@@ -248,7 +248,7 @@ class ScopeBluePrint {
   List<String> get aliases => buildAliases();
 
   /// Returns true if the key matches the given key or one of the aliases
-  bool matchesKey(String key) => key == this.key || _aliases.contains(key);
+  bool matchesKey(String key) => key == this.key || aliases.contains(key);
 
   /// The nodes of the scope
   List<NodeBluePrint<dynamic>> get nodes => buildNodes();

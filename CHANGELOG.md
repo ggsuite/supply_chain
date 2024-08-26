@@ -157,6 +157,7 @@ Modifications can only be done via builders.
 - Fix aliases did not work accross multiple search scenarios
 - Fix no error was thrown when nodes were added to every scope without checking
 - Fix no error was thrown when scopes were added to every scope without checking
+- Fix an issue with aliases
 
 ### Removed
 
