@@ -211,7 +211,7 @@ class Graph {
         // ..............
         // Write 2x image
         if (write2x && ['png', 'webp', 'jpg', 'jpeg'].contains(format)) {
-          final path2x = path.replaceAll(RegExp('\\.$format\$'), '@2x.$format');
+          final path2x = path.replaceAll(RegExp('\\.$format\$'), '_2x.$format');
 
           final process = await Process.run(
             'dot',

@@ -146,6 +146,7 @@ Modifications can only be done via builders.
 - Prevent that a builder is applied to scopes created by this builder before
 - Make sure produce does not change the order
 - ScBuilderBluePrint can be instantiated without constructor
+- Use \_2x instead of @2x for highres files
 
 ### Fixed
 
