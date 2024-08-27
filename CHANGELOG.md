@@ -145,6 +145,7 @@ Modifications can only be done via builders.
 - ScBuilderNodeAdder is informed when one of the created nodes is erased
 - Prevent that a builder is applied to scopes created by this builder before
 - Make sure produce does not change the order
+- ScBuilderBluePrint can be instantiated without constructor
 
 ### Fixed
 

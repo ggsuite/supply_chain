@@ -40,6 +40,66 @@ void main() {
         );
         expect(scope.builders, contains(builder));
       });
+
+      test('should apply all methods handed via constructor correctly ', () {
+        bool didCallNeedsUpdate = false;
+        final resultScope = ScopeBluePrint.example();
+        final resultNode = NodeBluePrint.example();
+
+        final builder = ScBuilderBluePrint(
+          key: 'test',
+          addScopes: ({required Scope hostScope}) => [resultScope],
+          replaceScope: ({required hostScope, required scopeToBeReplaced}) {
+            return resultScope;
+          },
+          addNodes: ({required Scope hostScope}) => [resultNode],
+          replaceNode: ({required hostScope, required nodeToBeReplaced}) =>
+              resultNode,
+          inserts: ({required Node<dynamic> hostNode}) => [
+            resultNode,
+          ],
+          needsUpdate: ({
+            required Scope hostScope,
+            required List<dynamic> components,
+          }) {
+            didCallNeedsUpdate = true;
+          },
+        );
+
+        expect(builder.addScopes(hostScope: Scope.example()), [resultScope]);
+
+        expect(
+          builder.replaceScope(
+            hostScope: hostScope,
+            scopeToBeReplaced: resultScope,
+          ),
+          resultScope,
+        );
+
+        expect(
+          builder.addNodes(hostScope: hostScope),
+          [resultNode],
+        );
+
+        expect(
+          builder.replaceNode(
+            hostScope: hostScope,
+            nodeToBeReplaced: Node.example(scope: hostScope),
+          ),
+          resultNode,
+        );
+
+        expect(
+          builder.inserts(hostNode: Node.example(scope: hostScope)),
+          [resultNode],
+        );
+
+        builder.needsUpdate(
+          hostScope: hostScope,
+          components: [1, 2, 3],
+        );
+        expect(didCallNeedsUpdate, isTrue);
+      });
     });
 
     group('base class methods', () {

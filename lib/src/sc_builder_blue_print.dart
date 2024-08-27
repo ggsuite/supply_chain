@@ -8,11 +8,38 @@ import 'package:supply_chain/supply_chain.dart';
 
 /// A builder changes various aspects of a scope and its children
 class ScBuilderBluePrint {
-  ///  Constructor
+  // ...........................................................................
+  ///  Creates a builder purely from constructor
   const ScBuilderBluePrint({
     required this.key,
     this.needsUpdateSuppliers = const [],
-  });
+    List<ScopeBluePrint> Function({
+      required Scope hostScope,
+    })? addScopes,
+    ScopeBluePrint Function({
+      required Scope hostScope,
+      required ScopeBluePrint scopeToBeReplaced,
+    })? replaceScope,
+    List<NodeBluePrint<dynamic>>? Function({
+      required Scope hostScope,
+    })? addNodes,
+    NodeBluePrint<dynamic>? Function({
+      required Scope hostScope,
+      required Node<dynamic> nodeToBeReplaced,
+    })? replaceNode,
+    List<NodeBluePrint<dynamic>> Function({
+      required Node<dynamic> hostNode,
+    })? inserts,
+    void Function({
+      required Scope hostScope,
+      required List<dynamic> components,
+    })? needsUpdate,
+  })  : _addScopes = addScopes,
+        _replaceScope = replaceScope,
+        _addNodes = addNodes,
+        _replaceNode = replaceNode,
+        _inserts = inserts,
+        _needsUpdate = needsUpdate;
 
   /// Instantiates this builder and it's children within the given hostScope
   ///
@@ -33,7 +60,7 @@ class ScBuilderBluePrint {
   List<ScopeBluePrint> addScopes({
     required Scope hostScope,
   }) {
-    return [];
+    return _addScopes?.call(hostScope: hostScope) ?? [];
   }
 
   /// Override this method to replace scopes in the given host scope
@@ -45,7 +72,11 @@ class ScBuilderBluePrint {
     required Scope hostScope,
     required ScopeBluePrint scopeToBeReplaced,
   }) {
-    return scopeToBeReplaced;
+    return _replaceScope?.call(
+          hostScope: hostScope,
+          scopeToBeReplaced: scopeToBeReplaced,
+        ) ??
+        scopeToBeReplaced;
   }
 
   // ...........................................................................
@@ -58,7 +89,7 @@ class ScBuilderBluePrint {
   List<NodeBluePrint<dynamic>> addNodes({
     required Scope hostScope,
   }) {
-    return [];
+    return _addNodes?.call(hostScope: hostScope) ?? [];
   }
 
   /// Override this method to replace a scope in a given host scope
@@ -70,7 +101,11 @@ class ScBuilderBluePrint {
     required Scope hostScope,
     required Node<dynamic> nodeToBeReplaced,
   }) {
-    return nodeToBeReplaced.bluePrint;
+    return _replaceNode?.call(
+          hostScope: hostScope,
+          nodeToBeReplaced: nodeToBeReplaced,
+        ) ??
+        nodeToBeReplaced.bluePrint;
   }
 
   // ...........................................................................
@@ -82,7 +117,7 @@ class ScBuilderBluePrint {
   List<NodeBluePrint<dynamic>> inserts({
     required Node<dynamic> hostNode,
   }) {
-    return [];
+    return _inserts?.call(hostNode: hostNode) ?? [];
   }
 
   // ...........................................................................
@@ -120,7 +155,44 @@ class ScBuilderBluePrint {
   void needsUpdate({
     required Scope hostScope,
     required List<dynamic> components,
-  }) {}
+  }) {
+    _needsUpdate?.call(hostScope: hostScope, components: components);
+  }
+
+  // ######################
+  // Private
+  // ######################
+
+  // ######################
+  // Private
+  // ######################
+
+  final List<ScopeBluePrint> Function({
+    required Scope hostScope,
+  })? _addScopes;
+
+  final ScopeBluePrint Function({
+    required Scope hostScope,
+    required ScopeBluePrint scopeToBeReplaced,
+  })? _replaceScope;
+
+  final List<NodeBluePrint<dynamic>>? Function({
+    required Scope hostScope,
+  })? _addNodes;
+
+  final NodeBluePrint<dynamic>? Function({
+    required Scope hostScope,
+    required Node<dynamic> nodeToBeReplaced,
+  })? _replaceNode;
+
+  final List<NodeBluePrint<dynamic>> Function({
+    required Node<dynamic> hostNode,
+  })? _inserts;
+
+  final void Function({
+    required Scope hostScope,
+    required List<dynamic> components,
+  })? _needsUpdate;
 }
 
 // #############################################################################
