@@ -787,7 +787,9 @@ class Scope {
     _isErased = true;
 
     // Remove the scope from its parent container
-    _parentContainer.remove(key);
+    if (_parentContainer[key] == this) {
+      _parentContainer.remove(key);
+    }
 
     // Remove the scope from the disposed scopes
     scm.disposedItems.removeScope(this);

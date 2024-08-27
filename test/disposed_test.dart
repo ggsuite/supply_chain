@@ -399,6 +399,102 @@ void main() {
           });
         });
       });
+
+      group('deletion of scopes that are referenced in scope blue prints', () {
+        late Scope panel;
+        late Node<int> cornerCount;
+
+        setUp(
+          () {
+            // Create a panels scope
+            // The scope contains a number of corners node
+            panel = Scope.example(key: 'panel');
+            cornerCount =
+                const NodeBluePrint<int>(key: 'cornerCount', initialProduct: 2)
+                    .instantiate(scope: panel);
+
+            // Create a first builder that adds a corners scope to the panel
+            // scope containing one corner scope and node for each corner.
+            final cornersBuilder = ScBuilderBluePrint(
+              key: 'corners',
+              needsUpdateSuppliers: ['cornerCount'],
+              needsUpdate: ({required components, required hostScope}) {
+                // Remove old corners scope
+                hostScope.child('corners')?.dispose();
+
+                // Add a new corners scope
+                final cornersScope = const ScopeBluePrint(key: 'corners')
+                    .instantiate(scope: hostScope);
+
+                // Add a subscope and a node for each corner
+                final [int cornerCount] = components;
+                for (int i = 0; i < cornerCount; i++) {
+                  final cornerScope =
+                      ScopeBluePrint(key: 'corner$i').instantiate(
+                    scope: cornersScope,
+                  );
+                  NodeBluePrint<int>(key: 'cValue', initialProduct: i)
+                      .instantiate(scope: cornerScope);
+                }
+              },
+            )..instantiate(scope: panel);
+
+            // Create a second builder that adds a faces scope to the panel
+            // scope containing one face for each corner.
+            // Each face has a node referencing to the corner node.
+            final panelBuilder = ScBuilderBluePrint(
+              key: 'panel',
+              needsUpdateSuppliers: ['cornerCount'],
+              needsUpdate: ({required components, required hostScope}) {
+                // Remove old faces scope
+                hostScope.child('faces')?.dispose();
+
+                // Add a new faces scope
+                final facesScope = const ScopeBluePrint(key: 'faces')
+                    .instantiate(scope: hostScope);
+
+                // Add a subscope and a node for each face
+                final [int cornerCount] = components;
+                for (int i = 0; i < cornerCount; i++) {
+                  final faceScope = ScopeBluePrint(key: 'face$i').instantiate(
+                    scope: facesScope,
+                  );
+                  NodeBluePrint<int>.map(
+                    supplier: 'corners.corner$i.cValue',
+                    toKey: 'fValue',
+                    initialProduct: 0,
+                  ).instantiate(scope: faceScope);
+                }
+              },
+            )..instantiate(scope: panel);
+
+            panel.scm.testFlushTasks();
+          },
+        );
+
+        test('should work', () {
+          // Check the initial configuration
+          expect(
+            panel.findNode<int>('panel.corners.corner0.cValue')!.product,
+            0,
+          );
+          expect(
+            panel.findNode<int>('panel.corners.corner1.cValue')!.product,
+            1,
+          );
+
+          expect(panel.findNode<int>('panel.faces.face0.fValue')!.product, 0);
+          expect(panel.findNode<int>('panel.faces.face1.fValue')!.product, 1);
+
+          // Decrease the number of corners.
+          cornerCount.product = 1;
+          panel.scm.testFlushTasks();
+          expect(
+            panel.findNode<int>('panel.corners.corner0.cValue'),
+            isNotNull,
+          );
+        });
+      });
     });
   });
 }

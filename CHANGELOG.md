@@ -162,6 +162,7 @@ Modifications can only be done via builders.
 - Fix an issue with aliases
 - Fix potential bug in relation with connections
 - Fix a small issue with connections
+- Fix an issue while disposing scopes
 
 ### Removed
 

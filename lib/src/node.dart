@@ -90,6 +90,7 @@ class Node<T> {
     assert(customers.isEmpty);
     assert(isDisposed);
 
+    assert(scope.node<T>(key) == this || scope.node<T>(key) == null);
     scope.removeNode(this.key);
     scm.removeNode(this);
     scm.disposedItems.removeNode(this);
@@ -624,6 +625,7 @@ class Node<T> {
     }
 
     _suppliers.remove(supplier);
+    assert(supplier.customers.contains(this));
     supplier._removeCustomer(this);
   }
 
