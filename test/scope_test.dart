@@ -6,6 +6,7 @@
 
 import 'dart:io';
 
+import 'package:gg_is_github/gg_is_github.dart';
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
@@ -1052,6 +1053,11 @@ void main() {
 
       group('with write2x == true', () {
         test('should wrid also a 2x version of the file', () async {
+          if (isGitHub) {
+            return;
+          }
+
+          // coveralls: ignore-start
           final tmpDir = Directory.systemTemp.createTempSync();
           final imagePath = '${tmpDir.path}/test.png';
           final image2xPath = '${tmpDir.path}/test_2x.png';
@@ -1060,6 +1066,7 @@ void main() {
           expect(await File(imagePath).exists(), isTrue);
           expect(await File(image2xPath).exists(), isTrue);
           await tmpDir.delete(recursive: true);
+          // coveralls: ignore-end
         });
       });
     });

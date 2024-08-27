@@ -164,6 +164,7 @@ Modifications can only be done via builders.
 - Fix potential bug in relation with connections
 - Fix a small issue with connections
 - Fix an issue while disposing scopes
+- Fix an github issue
 
 ### Removed
 
