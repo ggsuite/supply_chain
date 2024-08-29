@@ -147,6 +147,7 @@ Modifications can only be done via builders.
 - Make sure produce does not change the order
 - ScBuilderBluePrint can be instantiated without constructor
 - Use \_2x instead of @2x for highres files
+- Scope.children must not return disposed nodes
 
 ### Fixed
 

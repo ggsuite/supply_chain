@@ -109,7 +109,7 @@ class Scope {
 
   // ...........................................................................
   /// Returns the child scopes
-  Iterable<Scope> get children => _children.values;
+  Iterable<Scope> get children => _children.values.where((e) => !e.isDisposed);
 
   /// Returns
   /// - empty array when depth = 0
