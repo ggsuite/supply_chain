@@ -745,21 +745,6 @@ void main() {
 
     group('addBluePrint(bluePrint)', () {
       group('should throw', () {
-        test('when bluePrint is already added', () {
-          expect(
-            () => node.addBluePrint(node.bluePrint),
-            throwsA(
-              isA<ArgumentError>().having(
-                (e) => e.message,
-                'message',
-                contains(
-                  'The blue print "${node.key}" is already added',
-                ),
-              ),
-            ),
-          );
-        });
-
         group('an assertion error', () {
           test('when key is different', () {
             const otherBluePrint = NodeBluePrint<int>(

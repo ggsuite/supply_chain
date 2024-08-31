@@ -178,6 +178,7 @@ Modifications can only be done via builders.
 - Remove scaling of images again
 - Remove remove method
 - Remove replaceScopes - Is done by builders now
+- Removed an exception when the same blueprint was added multiple times to a node
 
 ## [1.0.13] - 2024-05-17
 

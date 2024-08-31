@@ -119,12 +119,6 @@ class Node<T> {
   // ...........................................................................
   /// ScBuilders use this method to replace the present blue print
   void addBluePrint(NodeBluePrint<T> bluePrint) {
-    if (_bluePrints.contains(bluePrint)) {
-      throw ArgumentError(
-        'The blue print "${bluePrint.key}" is already added.',
-      );
-    }
-
     final oldBluePrint = this.bluePrint;
 
     if (bluePrint == oldBluePrint) {
