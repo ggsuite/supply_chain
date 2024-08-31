@@ -148,6 +148,7 @@ Modifications can only be done via builders.
 - ScBuilderBluePrint can be instantiated without constructor
 - Use \_2x instead of @2x for highres files
 - Scope.children must not return disposed nodes
+- Generate graph new with GraphViz 12.0.0. Set font to Arial.
 
 ### Fixed
 

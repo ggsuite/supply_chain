@@ -1,9 +1,9 @@
 digraph unix {
   graph [ dpi = 72 ]; 
   graph [nodesep = 0.25; ranksep=0.25];
-  fontname="Helvetica,Arial,sans-serif"
-  node [fontname="Helvetica,Arial,sans-serif"]
-  edge [fontname="Helvetica,Arial,sans-serif"]
+  fontname="Arial"
+  node [fontname="Arial"]
+  edge [fontname="Arial"]
   subgraph cluster_example_4 {
     label = "example"; // scope
     node_6 [

@@ -158,9 +158,9 @@ class Graph {
     result += 'digraph unix {\n';
     result += 'graph [ dpi = $dpi ]; \n';
     result += 'graph [nodesep = $nodeSeparation; ranksep=$rankSeparation];\n';
-    result += 'fontname="Helvetica,Arial,sans-serif"\n';
-    result += 'node [fontname="Helvetica,Arial,sans-serif"]\n';
-    result += 'edge [fontname="Helvetica,Arial,sans-serif"]\n';
+    result += 'fontname="Arial"\n';
+    result += 'node [fontname="Arial"]\n';
+    result += 'edge [fontname="Arial"]\n';
     result += _dotNodes(tree);
     result += _dotEdges(tree);
     result += '}\n';
