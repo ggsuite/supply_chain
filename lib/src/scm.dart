@@ -479,7 +479,9 @@ class Scm {
         node.productionStartTime = _stopwatch.elapsed;
 
         // Produce
-        node.produce();
+        if (!node.isDisposed) {
+          node.produce();
+        }
       }
 
       // We process only nodes of one priority level in a cycle.
