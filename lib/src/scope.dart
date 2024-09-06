@@ -11,7 +11,72 @@ import 'package:supply_chain/supply_chain.dart';
 class Scope {
   // ...........................................................................
   /// Creates a scope with a key. Key must be lower camel case.
-  Scope({
+  factory Scope({
+    required ScopeBluePrint bluePrint,
+    required Scope parent,
+    Owner<Scope>? owner,
+  }) {
+    // ..................................
+    // There might be an existing scope that was disposed before
+    // Let's remove this scope.
+    final disposedScope = parent._children[bluePrint.key];
+    if (disposedScope != null) {
+      assert(disposedScope.isDisposed);
+      parent._children.remove(bluePrint.key);
+    }
+
+    // ....................
+    // Create the new scope
+    final result = Scope._private(
+      bluePrint: bluePrint,
+      parent: parent,
+      owner: owner,
+    );
+
+    // ....................................................................
+    // Move all children and nodes from the existing scope to the new scope
+    // Thus new nodes can take over the customers of their corresponding
+    // disposed nodes. See "moveCustomersTo" in Node.
+    assert(result._children.isEmpty);
+    assert(result._nodes.isEmpty);
+    if (disposedScope == null) {
+      return result;
+    }
+
+    // Move disposed child scopes to the new scope
+    for (final child in disposedScope._children.values) {
+      result._children[child.key] = child;
+      child.parent = result;
+    }
+
+    // Move disposed meta scopes to the new scope
+    for (final metaScope in [...disposedScope._metaScopes.values]) {
+      final existingMetaScope = result._metaScopes[metaScope.key];
+      if (existingMetaScope == null) {
+        result._metaScopes[metaScope.key] = metaScope;
+        continue;
+      }
+      for (final node in [...metaScope._nodes.values]) {
+        final existingNode = existingMetaScope._nodes[node.key];
+        if (existingNode == null) {
+          continue;
+        }
+        node.moveCustomersTo(existingNode);
+      }
+    }
+
+    // Move disposed nodes to the new scope
+    for (final disposedNode in [...disposedScope._nodes.values]) {
+      result._nodes[disposedNode.key] = disposedNode;
+    }
+
+    // ..................
+    // Return the result
+    return result;
+  }
+
+  // ...........................................................................
+  Scope._private({
     required this.bluePrint,
     required this.parent,
     Owner<Scope>? owner,
@@ -706,6 +771,7 @@ class Scope {
     final container = isMetaScope ? parent!._metaScopes : parent!._children;
 
     // Add scope to parent scope
+    assert(container[key] == null);
     container[key] = this;
 
     // Reactivate the parent scope if it is disposed
@@ -1238,7 +1304,7 @@ class ExampleChildScope extends Scope {
   ExampleChildScope({
     required String key,
     required super.parent,
-  }) : super(bluePrint: ScopeBluePrint(key: key)) {
+  }) : super._private(bluePrint: ScopeBluePrint(key: key)) {
     /// Create a node
     findOrCreateNode(
       NodeBluePrint<int>(
@@ -1274,7 +1340,7 @@ class ExampleGrandChildScope extends Scope {
   ExampleGrandChildScope({
     required String key,
     required super.parent,
-  }) : super(bluePrint: ScopeBluePrint(key: key)) {
+  }) : super._private(bluePrint: ScopeBluePrint(key: key)) {
     findOrCreateNode(
       NodeBluePrint(
         initialProduct: 0,

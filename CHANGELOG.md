@@ -168,6 +168,7 @@ Modifications can only be done via builders.
 - Fix a small issue with connections
 - Fix an issue while disposing scopes
 - Fix an github issue
+- Fix issues with healing disposed scopes
 
 ### Removed
 

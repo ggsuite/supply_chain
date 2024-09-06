@@ -432,6 +432,9 @@ class Scm {
   void _produce() {
     _assertNoNodeIsErased(nodes: _preparedNodes);
 
+    // Remove disposed nodes
+    _preparedNodes.removeWhere((n) => n.isDisposed);
+
     // For all nodes that are ready to produce
     final nodesReadyToProduce = preparedNodes
         .where(
@@ -463,12 +466,6 @@ class Scm {
       if (nodesOfPriority.isEmpty) {
         continue;
       }
-
-      assert(
-        !nodesOfPriority.any(
-          (element) => element.isDisposed,
-        ),
-      );
 
       for (final node in nodesOfPriority) {
         // Remove node from preparedNodes

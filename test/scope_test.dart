@@ -444,6 +444,165 @@ void main() {
           }
         });
       });
+
+      group('should allow to undispose scopes later', () {
+        group('and take over customers from disposed nodes', () {
+          test('from normal scopes', () {
+            // Create a root scope
+            final root = Scope.example(key: 'root');
+            final testFlushTasks = root.scm.testFlushTasks;
+
+            // Create two blueprints a0 and a1 with the same key but
+            // different produce methods
+            const node5 = NodeBluePrint<int>(key: 'node', initialProduct: 5);
+            const node6 = NodeBluePrint<int>(key: 'node', initialProduct: 6);
+
+            // .................
+            // Create blueprints
+
+            // Crate a child scope and a node with customers
+            const scope5 = ScopeBluePrint(
+              key: 'scope',
+              children: [
+                ScopeBluePrint(
+                  key: 'child',
+                  nodes: [node5],
+                ),
+              ],
+            );
+
+            // Crate a child scope and a node with customers
+            const scope6 = ScopeBluePrint(
+              key: 'scope',
+              children: [
+                ScopeBluePrint(
+                  key: 'child',
+                  nodes: [node6],
+                ),
+              ],
+            );
+
+            // Create another node observing chil.a
+            final observer = NodeBluePrint<int>(
+              key: 'observer',
+              suppliers: ['scope.child.node'],
+              initialProduct: 5,
+              produce: (components, previousProduct) => components.first as int,
+            );
+
+            // ...........
+            // Instantiate
+            var scopeInstance = scope5.instantiate(scope: root);
+            final observerInstance = observer.instantiate(scope: root);
+
+            testFlushTasks();
+
+            // observer should have the value of node5
+            expect(observerInstance.product, 5);
+
+            // ..............
+            // Dispose scope5
+            scopeInstance.dispose();
+            testFlushTasks();
+
+            // observer should still have the value of node5
+            expect(observerInstance.product, 5);
+
+            // ..................
+            // Instantiate scope6
+            scopeInstance = scope6.instantiate(scope: root);
+            testFlushTasks();
+
+            // scope6.node should take over the customers of scope5.node
+            // Thus observer should have the value of node6
+            expect(observerInstance.product, 6);
+          });
+
+          test('from meta scopes', () {
+            // Create a root scope
+            final root = Scope.example(key: 'root');
+            final testFlushTasks = root.scm.testFlushTasks;
+
+            // .................
+            // Create blueprints
+
+            // Crate a child scope and a node with customers
+            const scope5 = ScopeBluePrint(
+              key: 'scope',
+              children: [
+                ScopeBluePrint(
+                  key: 'child',
+                ),
+              ],
+            );
+
+            // Crate a child scope and a node with customers
+            const scope6 = ScopeBluePrint(
+              key: 'scope',
+              children: [
+                ScopeBluePrint(
+                  key: 'child',
+                ),
+              ],
+            );
+
+            // Create two meta scope observers
+            final onChangeObserver = NodeBluePrint<Scope?>(
+              key: 'onChangeObserver',
+              suppliers: ['scope.on.change'],
+              initialProduct: null,
+              produce: (components, previousProduct) =>
+                  components.first as Scope?,
+            );
+
+            final helloMetaScopeObserver = NodeBluePrint<int>(
+              key: 'helloMetaScopeObserver',
+              suppliers: ['scope.hello.node'],
+              initialProduct: 8,
+              produce: (components, previousProduct) => components.first as int,
+            );
+
+            // ...........
+            // Instantiate
+            var scopeInstance = scope5.instantiate(scope: root);
+            final onChangeObserverInstance =
+                onChangeObserver.instantiate(scope: root);
+            final helloMetaScopeObserverInstance =
+                helloMetaScopeObserver.instantiate(scope: root);
+
+            final helloMetaScope = scopeInstance.metaScopeFindOrCreate('hello');
+            final helloMetaScopeNodeInstance = const NodeBluePrint<int>(
+              key: 'node',
+              initialProduct: 9,
+            ).instantiate(scope: helloMetaScope);
+
+            testFlushTasks();
+
+            // observer should have the value of node5
+            expect(onChangeObserverInstance.product, scopeInstance);
+            expect(helloMetaScopeObserverInstance.product, 9);
+
+            // ..............
+            // Dispose scope5
+            scopeInstance.dispose();
+            testFlushTasks();
+
+            // ..................
+            // Instantiate scope6
+            scopeInstance = scope6.instantiate(scope: root);
+            expect(scopeInstance.metaScope('hello')!.key, 'hello');
+            testFlushTasks();
+
+            // Also the metaScopes should have been taken over
+            expect(onChangeObserverInstance.product, scopeInstance);
+
+            // Change the helloMetaScopeNodeInstance
+            helloMetaScopeNodeInstance.product = 10;
+            testFlushTasks();
+            expect(helloMetaScopeNodeInstance.product, 10);
+          });
+        });
+      });
     });
 
     group('path, pathArray, pathDepth', () {
@@ -1160,27 +1319,41 @@ void main() {
                 final root = Scope.example();
 
                 // Create two child scopes
-                Scope(
-                  bluePrint: const ScopeBluePrint(key: 'childScopeA'),
-                  parent: root,
-                );
+                final a = const ScopeBluePrint(
+                  key: 'a',
+                  children: [ScopeBluePrint(key: 'childScope')],
+                ).instantiate(scope: root);
 
-                final b = Scope(
-                  bluePrint: const ScopeBluePrint(key: 'childScopeA'),
-                  parent: root,
-                );
+                final b = const ScopeBluePrint(
+                  key: 'b',
+                  children: [ScopeBluePrint(key: 'childScope')],
+                ).instantiate(scope: root);
 
                 // Add a NodeA to ChildScopeA
-                final nodeA = root.child('childScopeA')!.findOrCreateNode<int>(
-                      NodeBluePrint(
-                        key: 'nodeA',
-                        initialProduct: 0,
-                        produce: (components, previous) => previous,
-                      ),
-                    );
+                final nodeA =
+                    root.findChildScope('a.childScope')!.findOrCreateNode<int>(
+                          NodeBluePrint(
+                            key: 'node',
+                            initialProduct: 0,
+                            produce: (components, previous) => previous,
+                          ),
+                        );
+
+                // Add a NodeA to ChildScopeA
+                final nodeB =
+                    root.findChildScope('b.childScope')!.findOrCreateNode<int>(
+                          NodeBluePrint(
+                            key: 'node',
+                            initialProduct: 0,
+                            produce: (components, previous) => previous,
+                          ),
+                        );
 
                 // ChildScopeB should find the node in ChildScopeA
-                final Node<int>? foundNodeA = b.findNode<int>('nodeA');
+                final Node<int>? foundNodeB = b.findNode<int>('node');
+                expect(foundNodeB, nodeB);
+
+                final Node<int>? foundNodeA = a.findNode<int>('node');
                 expect(foundNodeA, nodeA);
               });
 

@@ -691,6 +691,7 @@ class Node<T> {
       final supplierIndex = customer._suppliers.indexOf(this);
 
       customer._suppliers[supplierIndex] = targetNode;
+      scm.nominate(customer);
     }
 
     if (isDisposed) {
