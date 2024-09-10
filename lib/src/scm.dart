@@ -313,6 +313,13 @@ class Scm {
     for (final node in _nodesNeedingSupplierUpdate) {
       _addSuppliers(
         node,
+        throwIfNotThere: false,
+      );
+    }
+
+    for (final node in _nodesWithMissedSuppliers) {
+      _addSuppliers(
+        node,
         throwIfNotThere: true,
       );
     }
@@ -336,7 +343,7 @@ class Scm {
             'Supplier with key "$supplierName" not found.',
           );
         } else {
-          _nodesWithMissedSuppliers.add(node); // coverage:ignore-line
+          _nodesWithMissedSuppliers.add(node);
           break;
         }
       }
