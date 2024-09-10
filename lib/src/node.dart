@@ -244,6 +244,10 @@ class Node<T> {
 
   /// Is ready to produce when all suppliers are ready
   bool get isReadyToProduce {
+    if (!_suppliersAreInitialized) {
+      return false;
+    }
+
     for (final supplier in suppliers) {
       if (!supplier.isReady) {
         return false;
@@ -478,6 +482,7 @@ class Node<T> {
 
   // ...........................................................................
   final Owner<Node<dynamic>>? _owner;
+  late bool _suppliersAreInitialized;
 
   // ...........................................................................
   /// Reset Id counter for tests
@@ -488,6 +493,7 @@ class Node<T> {
   // ...........................................................................
   // Init & Dispose
   void _init() {
+    _suppliersAreInitialized = bluePrint.suppliers.isEmpty;
     _initScope();
     _initScm();
   }
@@ -597,6 +603,8 @@ class Node<T> {
 
   // ...........................................................................
   void _addSupplier(Supplier<dynamic> supplier) {
+    _suppliersAreInitialized = true;
+
     // Supplier<T> already added? Do nothing.
     if (_suppliers.contains(supplier)) {
       return;

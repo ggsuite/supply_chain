@@ -809,16 +809,50 @@ void main() {
 
     group('special cases', () {
       test('should be able to survive a shortly missed supplier', () {
-        // Create a chain where a customer has one supplier
-        // that is not yet existing.
-        //
-        // Create a builder that installs the missed supplier
-        // after a short delay.
+        // ......................................................
+        // Create a customer with a supplier not already existing
+        final scope = Scope.example();
+        final scm = scope.scm;
 
-        // Solution idea:
-        // Missing suppliers are put to a list.
-        // When production is called the next time.
-        // The supplier is expected to be there.
+        final customer = NodeBluePrint<int>(
+          key: 'customer',
+          initialProduct: 0,
+          suppliers: ['supplier'],
+          produce: (components, previousProduct) {
+            return (components[0] as int) + 1;
+          },
+        ).instantiate(scope: scope);
+
+        // .....................................
+        // Create a node that installs a builder
+        // that adds the missed supplier
+        NodeBluePrint(
+          key: 'builderInstaller',
+          initialProduct: 0,
+          produce: (components, previousProduct) {
+            ScBuilderBluePrint(
+              key: 'builder',
+              addNodes: ({required hostScope}) {
+                if (hostScope == scope) {
+                  return [
+                    const NodeBluePrint<int>(
+                      key: 'supplier',
+                      initialProduct: 5,
+                    ),
+                  ];
+                }
+                return [];
+              },
+            ).instantiate(scope: scope);
+
+            return 1;
+          },
+        ).instantiate(scope: scope);
+
+        // The missed supplier should be found
+        // also if it is created later
+        scm.testFlushTasks();
+        expect(customer.product, 6);
       });
     });
   });

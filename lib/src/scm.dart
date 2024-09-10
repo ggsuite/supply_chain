@@ -310,20 +310,30 @@ class Scm {
 
   // ...........................................................................
   void _initSuppliers() {
+    // Init suppliers of new nodes
     for (final node in _nodesNeedingSupplierUpdate) {
       _addSuppliers(
         node,
         throwIfNotThere: false,
       );
     }
+    _nodesNeedingSupplierUpdate.clear();
+  }
+
+  // ...........................................................................
+  void _initMissedSuppliers() {
+    // If all previously prepared nodes have been processed
+    // try again to prepare nodes that head missed suppliers before
 
     for (final node in _nodesWithMissedSuppliers) {
       _addSuppliers(
         node,
         throwIfNotThere: true,
       );
+      _preparedNodes.add(node);
     }
-    _nodesNeedingSupplierUpdate.clear();
+
+    _nodesWithMissedSuppliers.clear();
   }
 
   // ...........................................................................
@@ -344,6 +354,8 @@ class Scm {
           );
         } else {
           _nodesWithMissedSuppliers.add(node);
+          _preparedNodes.remove(node);
+          _nominatedNodes.remove(node);
           break;
         }
       }
@@ -363,7 +375,8 @@ class Scm {
   /// Prepares all nodes
   void _prepare() {
     // Init suppliers
-    if (_nodesNeedingSupplierUpdate.isNotEmpty) {
+    if (_nodesNeedingSupplierUpdate.isNotEmpty ||
+        _nodesWithMissedSuppliers.isNotEmpty) {
       _initSuppliers();
     }
 
@@ -537,6 +550,10 @@ class Scm {
 
     // Schedule production
     _scheduleProduction();
+
+    if (_preparedNodes.isEmpty) {
+      _initMissedSuppliers();
+    }
 
     // Everything is done?
     if (_preparedNodes.isEmpty) {
