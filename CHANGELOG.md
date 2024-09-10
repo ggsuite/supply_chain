@@ -153,6 +153,7 @@ Modifications can only be done via builders.
 - Don't let disposed nodes produce
 - More detailed error message when supplier is not found
 - Throw an error when suppliers with the same key are provided
+- Prepare not throwing if a supplier is not available for a short time
 
 ### Fixed
 

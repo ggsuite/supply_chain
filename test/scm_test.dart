@@ -806,6 +806,21 @@ void main() {
         insert1.dispose();
       });
     });
+
+    group('special cases', () {
+      test('should be able to survive a shortly missed supplier', () {
+        // Create a chain where a customer has one supplier
+        // that is not yet existing.
+        //
+        // Create a builder that installs the missed supplier
+        // after a short delay.
+
+        // Solution idea:
+        // Missing suppliers are put to a list.
+        // When production is called the next time.
+        // The supplier is expected to be there.
+      });
+    });
   });
 
   group('test helpers', () {

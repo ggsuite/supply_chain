@@ -240,6 +240,7 @@ class Scm {
   // ...........................................................................
   // Nodes that need supplier update
   final Set<Node<dynamic>> _nodesNeedingSupplierUpdate = {};
+  final Set<Node<dynamic>> _nodesWithMissedSuppliers = {};
 
   // ...........................................................................
   // Processing stages
@@ -310,22 +311,41 @@ class Scm {
   // ...........................................................................
   void _initSuppliers() {
     for (final node in _nodesNeedingSupplierUpdate) {
-      _addSuppliers(node);
+      _addSuppliers(
+        node,
+        throwIfNotThere: true,
+      );
     }
     _nodesNeedingSupplierUpdate.clear();
   }
 
   // ...........................................................................
-  void _addSuppliers(Node<dynamic> node) {
+  void _addSuppliers(
+    Node<dynamic> node, {
+    required bool throwIfNotThere,
+  }) {
+    // Collect all suppliers
+    final suppliers = <Node<dynamic>>[];
     for (final supplierName in node.bluePrint.suppliers) {
       final supplier = node.scope.findNode<dynamic>(supplierName);
+
       if (supplier == null) {
-        throw ArgumentError(
-          'Node "${node.path}": '
-          'Supplier with key "$supplierName" not found.',
-        );
+        if (throwIfNotThere) {
+          throw ArgumentError(
+            'Node "${node.path}": '
+            'Supplier with key "$supplierName" not found.',
+          );
+        } else {
+          _nodesWithMissedSuppliers.add(node); // coverage:ignore-line
+          break;
+        }
       }
 
+      suppliers.add(supplier);
+    }
+
+    // If all suppliers are found, add them to node
+    for (final supplier in suppliers) {
       node.addSupplier(supplier);
     }
   }
