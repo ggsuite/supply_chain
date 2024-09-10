@@ -79,22 +79,23 @@ void main() {
         );
       });
 
-      test('asserts that produce is provided if suppliers are not empty', () {
+      test('throws, when multiple suppliers have the same path', () {
+        final bluePrint = NodeBluePrint<int>(
+          key: 'node',
+          initialProduct: 0,
+          suppliers: ['supplier', 'supplier'],
+          produce: (components, previousProduct) {
+            return 0;
+          },
+        );
+
         expect(
-          () => const NodeBluePrint<int>(
-            key: 'node',
-            initialProduct: 0,
-            suppliers: ['supplier'],
-            produce: null,
-          ).check(),
+          () => bluePrint.check(),
           throwsA(
-            isA<AssertionError>().having(
+            isA<ArgumentError>().having(
               (e) => e.message,
               'message',
-              contains(
-                'If suppliers are not empty, '
-                'a produce function must be provided',
-              ),
+              'The suppliers must be unique.',
             ),
           ),
         );

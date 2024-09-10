@@ -152,6 +152,7 @@ Modifications can only be done via builders.
 - Experiment using Image Magick to convert svgs to pngs
 - Don't let disposed nodes produce
 - More detailed error message when supplier is not found
+- Throw an error when suppliers with the same key are provided
 
 ### Fixed
 

@@ -40,11 +40,10 @@ class NodeBluePrint<T> {
   void check() {
     assert(key.isNotEmpty, 'The key must not be empty');
     assert(key.isCamelCase, 'The key must be in CamelCase');
-    produce([], initialProduct);
-    assert(
-      !(suppliers.isNotEmpty && produce == doNothing<T>),
-      'If suppliers are not empty, a produce function must be provided',
-    );
+
+    if (suppliers.toSet().toList().length != suppliers.length) {
+      throw ArgumentError('The suppliers must be unique.');
+    }
   }
 
   /// The initial product of the node
@@ -84,6 +83,7 @@ class NodeBluePrint<T> {
     bool applyScBuilders = true,
     Owner<Node<dynamic>>? owner,
   }) {
+    check();
     final node = scope.nodes.firstWhereOrNull((n) => n.key == key);
 
     if (node != null && !node.isDisposed) {
