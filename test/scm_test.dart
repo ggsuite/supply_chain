@@ -241,7 +241,7 @@ void main() {
             isA<ArgumentError>().having(
               (e) => e.message,
               'message',
-              'Node "example.a": Supplier with key "unknown" not found.',
+              'Node "root.example.a": Supplier with key "unknown" not found.',
             ),
           ),
         );

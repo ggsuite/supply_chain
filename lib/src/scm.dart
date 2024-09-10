@@ -321,7 +321,7 @@ class Scm {
       final supplier = node.scope.findNode<dynamic>(supplierName);
       if (supplier == null) {
         throw ArgumentError(
-          'Node "${node.scope.key}.${node.key}": '
+          'Node "${node.path}": '
           'Supplier with key "$supplierName" not found.',
         );
       }

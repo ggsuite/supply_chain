@@ -151,6 +151,7 @@ Modifications can only be done via builders.
 - Generate graph new with GraphViz 12.0.0. Set font to Arial.
 - Experiment using Image Magick to convert svgs to pngs
 - Don't let disposed nodes produce
+- More detailed error message when supplier is not found
 
 ### Fixed
 
