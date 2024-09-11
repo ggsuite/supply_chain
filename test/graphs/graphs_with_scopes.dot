@@ -4,33 +4,16 @@ digraph unix {
   fontname="Arial"
   node [fontname="Arial"]
   edge [fontname="Arial"]
-  subgraph cluster_exampleRoot_6 {
+  subgraph cluster_exampleRoot_10 {
     label = "exampleRoot"; // scope
-    rootA_9 [
+    rootA_16 [
       label = "rootA"; // node
     ];
-    rootB_10 [
+    rootB_17 [
       label = "rootB"; // node
     ];
-    subgraph cluster_childScopeA_8 {
+    subgraph cluster_childScopeA_12 {
       label = "childScopeA"; // scope
-      childNodeA_13 [
-        label = "childNodeA"; // node
-      ];
-      childNodeB_14 [
-        label = "childNodeB"; // node
-      ];
-      subgraph cluster_grandChildScope_10 {
-        label = "grandChildScope"; // scope
-        grandChildNodeA_17 [
-          label = "grandChildNodeA"; // node
-        ];
-        
-      }
-      
-    }
-    subgraph cluster_childScopeB_12 {
-      label = "childScopeB"; // scope
       childNodeA_20 [
         label = "childNodeA"; // node
       ];
@@ -40,6 +23,23 @@ digraph unix {
       subgraph cluster_grandChildScope_14 {
         label = "grandChildScope"; // scope
         grandChildNodeA_24 [
+          label = "grandChildNodeA"; // node
+        ];
+        
+      }
+      
+    }
+    subgraph cluster_childScopeB_16 {
+      label = "childScopeB"; // scope
+      childNodeA_27 [
+        label = "childNodeA"; // node
+      ];
+      childNodeB_28 [
+        label = "childNodeB"; // node
+      ];
+      subgraph cluster_grandChildScope_18 {
+        label = "grandChildScope"; // scope
+        grandChildNodeA_31 [
           label = "grandChildNodeA"; // node
         ];
         

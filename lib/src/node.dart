@@ -70,6 +70,9 @@ class Node<T> {
       addBluePrint(muted);
     }
 
+    // Tell Scm to update placeholders
+    scm.updatePlaceholders(this);
+
     // Add the node to disposed.nodes
     if (customers.isNotEmpty) {
       scm.disposedItems.addNode(this);
@@ -105,6 +108,9 @@ class Node<T> {
   /// Returns true if the node is disposed
   bool get isDisposed => _isDisposed;
 
+  /// Returns true if node is a placeholder
+  bool get isPlaceholder => _bluePrints.first.isPlaceholder;
+
   // ...........................................................................
   /// Set back to initial state
   void reset() {
@@ -119,21 +125,9 @@ class Node<T> {
   // ...........................................................................
   /// ScBuilders use this method to replace the present blue print
   void addBluePrint(NodeBluePrint<T> bluePrint) {
-    final oldBluePrint = this.bluePrint;
-
-    if (bluePrint == oldBluePrint) {
-      return;
-    }
-
-    assert(bluePrint.key == this.bluePrint.key);
-
-    // Update the bluePrint
-    this._bluePrints.add(bluePrint);
-
-    // If the produce function has changed, we need to produce again
-    if (bluePrint.produce != oldBluePrint.produce) {
-      scm.nominate(this);
-    }
+    // Replacing blueprints is not allowed for placeholder blueprints
+    assert(!isPlaceholder);
+    _addBluePrint(bluePrint);
   }
 
   /// ScBuilders use this method to remove a formerly added blue print
@@ -152,8 +146,30 @@ class Node<T> {
   }
 
   // ...........................................................................
+  /// Called by SCM to update placeholders
+  void addPlaceholderReplacement(NodeBluePrint<T> replacement) {
+    assert(isPlaceholder);
+    assert(allBluePrints.length == 1);
+    _addBluePrint(replacement);
+  }
+
+  // ...........................................................................
+  /// Called by SCM to update placeholders
+  void resetPlaceholderReplacements() {
+    assert(isPlaceholder);
+    assert(allBluePrints.length <= 2);
+    if (allBluePrints.length == 2) {
+      removeBluePrint(allBluePrints.last);
+    }
+  }
+
+  // ...........................................................................
   /// The configuration of this node
   NodeBluePrint<T> get bluePrint => _bluePrint;
+
+  // ...........................................................................
+  /// Returns all stacked blue prints
+  List<NodeBluePrint<T>> get allBluePrints => _bluePrints;
 
   // ...........................................................................
   // Identification
@@ -326,9 +342,6 @@ class Node<T> {
   /// The suppliers of the node
   Iterable<Node<dynamic>> get suppliers => _suppliers;
 
-  /// Add a supplier to the node
-  void addSupplier(Supplier<dynamic> supplier) => _addSupplier(supplier);
-
   /// Get suppliers of the node of a given depth
   Iterable<Node<dynamic>> deepSuppliers({int depth = 1}) {
     if (depth < 0) depth = 100000;
@@ -345,14 +358,38 @@ class Node<T> {
     return result;
   }
 
+  /// Call this method to update the suppliers again
+  void needsInitSuppliers() {
+    _clearSuppliers();
+  }
+
+  /// Is called by SCM to initialize the suppliers
+  void initSuppliers(Map<String, Node<dynamic>> newSuppliers) {
+    _detectCircularDependencies(this, newSuppliers.values, [this]);
+
+    // Make sure the keys match the blue prin'ts suppliers
+    for (final supplierKey in newSuppliers.keys) {
+      assert(bluePrint.suppliers.contains(supplierKey));
+    }
+
+    // Reset old suppliers
+    for (final supplier in [...suppliers]) {
+      _removeSupplier(supplier); // coverage:ignore-line
+    }
+
+    // Reset old suppliers
+    for (final supplier in newSuppliers.values) {
+      _addOrReplaceSupplier(supplier);
+    }
+
+    _suppliersAreInitialized = true;
+  }
+
   // ...........................................................................
   // Customers
 
   /// The customers of the node
   Iterable<Node<dynamic>> get customers => _customers;
-
-  /// Add a customer to the node
-  void addCustomer(Customer<dynamic> customer) => _addCustomer(customer);
 
   /// Get suppliers of the node of a given depth
   Iterable<Node<dynamic>> deepCustomers({int depth = 1}) {
@@ -501,7 +538,8 @@ class Node<T> {
   // ...........................................................................
   void _initScm() {
     scm.addNode(this);
-    scm.needsInitSuppliers(this);
+    needsInitSuppliers();
+    scm.updatePlaceholders(this);
   }
 
   // ...........................................................................
@@ -602,19 +640,26 @@ class Node<T> {
   final List<Customer<dynamic>> _customers = [];
 
   // ...........................................................................
-  void _addSupplier(Supplier<dynamic> supplier) {
-    _suppliersAreInitialized = true;
+  void _addOrReplaceSupplier(Supplier<dynamic> supplier) {
+    assert(supplier != this);
 
     // Supplier<T> already added? Do nothing.
     if (_suppliers.contains(supplier)) {
       return;
     }
 
+    // Remove existing supplier
+    final path = _supplierPath(supplier);
+    final existingSupplier = _supplierForPath(path);
+    if (existingSupplier != null) {
+      _removeSupplier(existingSupplier); // coverage:ignore-line
+    }
+
     // Add supplier to list of suppliers
     _suppliers.add(supplier);
 
     // This producer becomes a customer of its supplier
-    supplier.addCustomer(this);
+    supplier._addCustomer(this);
 
     // Because we have new dependencies, a rebuild is needed
     scm.nominate(this);
@@ -638,7 +683,7 @@ class Node<T> {
     }
 
     _customers.add(customer);
-    customer.addSupplier(this);
+    customer._addOrReplaceSupplier(this);
   }
 
   // ...........................................................................
@@ -706,7 +751,95 @@ class Node<T> {
       _erase();
     }
   }
+
+  // ...........................................................................
+  void _addBluePrint(NodeBluePrint<T> bluePrint) {
+    final oldBluePrint = this.bluePrint;
+
+    if (bluePrint == oldBluePrint) {
+      return;
+    }
+
+    assert(bluePrint.key == this.bluePrint.key);
+
+    // Update the bluePrint
+    this._bluePrints.add(bluePrint);
+
+    // Trigger a re-initialization of suppliers
+    needsInitSuppliers();
+
+    // If the produce function has changed, we need to produce again
+    if (bluePrint.produce != oldBluePrint.produce) {
+      scm.nominate(this);
+    }
+  }
+
+  // ...........................................................................
+  String _supplierPath(Node<dynamic> node) {
+    final result = <String>[];
+
+    for (final supplierPath in bluePrint.suppliers) {
+      if (node.matchesPath(supplierPath)) {
+        result.add(supplierPath);
+      }
+    }
+
+    assert(result.length == 1);
+
+    return result.first;
+  }
+
+  // ...........................................................................
+  Node<dynamic>? _supplierForPath(String path) {
+    for (final supplier in suppliers) {
+      if (supplier.matchesPath(path)) {
+        return supplier;
+      }
+    }
+    return null;
+  }
+
+  // ...........................................................................
+  void _clearSuppliers() {
+    _suppliersAreInitialized = bluePrint.suppliers.isEmpty;
+
+    for (final supplier in [...suppliers]) {
+      _removeSupplier(supplier);
+    }
+
+    if (!_suppliersAreInitialized) {
+      scm.needsInitSuppliers(this);
+    }
+  }
+
+  // ...........................................................................
+  void _detectCircularDependencies(
+    Node<dynamic> node,
+    Iterable<Node<dynamic>> suppliers,
+    List<Node<dynamic>> visited,
+  ) {
+    if (suppliers.contains(node)) {
+      visited.add(node);
+      final path = visited.reversed.map((n) => n.key).join(' -> ');
+      throw Exception('Circular dependency detected: $path');
+    }
+
+    for (final supplier in suppliers) {
+      _detectCircularDependencies(
+        node,
+        supplier.suppliers,
+        [
+          ...visited,
+          supplier,
+        ],
+      );
+    }
+  }
 }
+
+// ######################
+// Examples
+// ######################
 
 /// Provides a deeply configured node sructure
 class ButterFlyExample {
@@ -714,49 +847,64 @@ class ButterFlyExample {
   ButterFlyExample({bool withScopes = false}) {
     final scope = Scope.example(scm: Scm.example(), key: 'butterFly');
 
+    final s11Bp = nbp(from: ['s111'], to: 's11', init: 's11');
+    final s1Bp = nbp(from: ['s11', 's10'], to: 's1', init: 's1');
+    final s0Bp = nbp(from: ['s01', 's00'], to: 's0', init: 's0');
+    final xBp = nbp(from: ['s1', 's0'], to: 'x', init: 'x');
+    final c00Bp = nbp(from: ['c0'], to: 'c00', init: '0');
+    final c01Bp = nbp(from: ['c0'], to: 'c01', init: '0');
+
+    final c0Bp = nbp(from: ['x'], to: 'c0', init: '0');
+    final c1Bp = nbp(from: ['x'], to: 'c1', init: '1');
+
+    final c10Bp = nbp(from: ['c1'], to: 'c10', init: '0');
+    final c11Bp = nbp(from: ['c1'], to: 'c11', init: '0');
+
+    final c111Bp = nbp(from: ['c11'], to: 'c111', init: 'c111');
+
     if (withScopes) {
       scope.mockContent({
         'level3': {
           's111': 's111',
           'level2': {
-            's11': 's11',
+            's11': s11Bp,
             's10': 's10',
             's01': 's01',
             's00': 's00',
             'level1': {
-              's1': 's1',
-              's0': 's0',
+              's1': s1Bp,
+              's0': s0Bp,
               'level0': {
-                'x': 'x',
+                'x': xBp,
               },
-              'c0': 'c0',
-              'c1': '1',
+              'c0': c0Bp,
+              'c1': c1Bp,
             },
-            'c00': 'c00',
-            'c01': 'c01',
-            'c10': 'c10',
-            'c11': 'c11',
+            'c00': c00Bp,
+            'c01': c01Bp,
+            'c10': c10Bp,
+            'c11': c11Bp,
           },
-          'c111': 'c111',
+          'c111': c111Bp,
         },
       });
     } else {
       scope.mockContent({
         's111': 's111',
-        's11': 's11',
+        's11': s11Bp,
         's10': 's10',
         's01': 's01',
         's00': 's00',
-        's1': 's1',
-        's0': 's0',
-        'x': 'x',
-        'c0': 'c0',
-        'c1': '1',
-        'c00': 'c00',
-        'c01': 'c01',
-        'c10': 'c10',
-        'c11': 'c11',
-        'c111': 'c111',
+        's1': s1Bp,
+        's0': s0Bp,
+        'x': xBp,
+        'c0': c0Bp,
+        'c1': c1Bp,
+        'c00': c00Bp,
+        'c01': c01Bp,
+        'c10': c10Bp,
+        'c11': c11Bp,
+        'c111': c111Bp,
       });
     }
 
@@ -794,21 +942,6 @@ class ButterFlyExample {
       c111,
     ];
 
-    s11.addSupplier(s111);
-    s1.addSupplier(s11);
-    s1.addSupplier(s10);
-    s0.addSupplier(s01);
-    s0.addSupplier(s00);
-    x.addSupplier(s1);
-    x.addSupplier(s0);
-    x.addCustomer(c0);
-    x.addCustomer(c1);
-    c0.addCustomer(c00);
-    c0.addCustomer(c01);
-    c1.addCustomer(c10);
-    c1.addCustomer(c11);
-    c11.addCustomer(c111);
-
     if (withScopes) {
       level0 = scope.findChildScope('level0')!;
       level1 = scope.findChildScope('level1')!;
@@ -819,6 +952,8 @@ class ButterFlyExample {
     } else {
       allScopes = [];
     }
+
+    scope.scm.testFlushTasks();
   }
 
   // ...........................................................................
@@ -898,10 +1033,10 @@ class TriangleExample {
     triangle.mockContent({
       'top': 0,
       'left': {
-        'left': 0,
+        'left': nbp(from: ['top'], to: 'left', init: 0),
       },
       'right': {
-        'right': 0,
+        'right': nbp(from: ['top', 'left'], to: 'right', init: 0),
       },
     });
 
@@ -913,12 +1048,10 @@ class TriangleExample {
     leftScope = triangle.findChildScope('left')!;
     rightScope = triangle.findChildScope('right')!;
 
-    topNode.addCustomer(leftNode);
-    topNode.addCustomer(rightNode);
-    leftNode.addCustomer(rightNode);
-
     allNodes = [topNode, leftNode, rightNode];
     allScopes = [topScope, leftScope, rightScope];
+
+    triangle.scm.testFlushTasks();
   }
 
   /// The house scope

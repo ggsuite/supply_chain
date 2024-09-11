@@ -9,6 +9,16 @@ import 'package:test/test.dart';
 
 void main() {
   group('NodeBluePrint', () {
+    group('nbp', () {
+      test('should create a node blue print', () {
+        int produce(List<dynamic> components, int previous) => 0;
+        final bp = nbp<int>(from: ['a'], to: 'b', init: 0, produce: produce);
+        expect(bp.key, 'b');
+        expect(bp.initialProduct, 0);
+        expect(bp.suppliers, ['a']);
+        expect(bp.produce, produce);
+      });
+    });
     group('example', () {
       test('with key', () {
         final bluePrint = NodeBluePrint.example(key: 'node');
@@ -333,6 +343,42 @@ void main() {
         scm.testFlushTasks();
         expect(n1.product, 123);
       });
+    });
+
+    test('initSuppliers', () {
+      final scope = Scope.example();
+      final scm = scope.scm;
+      scope.mockContent({
+        'a': {
+          'b': {
+            'n0': const NodeBluePrint<int>(key: 'n0', initialProduct: 618),
+            'n2': const NodeBluePrint<int>(key: 'n2', initialProduct: 618),
+          },
+          'c': {
+            'n1': nbp<int>(
+              from: ['b.n0', 'b.n2'],
+              to: 'n1',
+              init: 0,
+              produce: (c, p) {
+                return 0;
+              },
+            ),
+          },
+        },
+      });
+      scm.testFlushTasks();
+
+      final n1 = scope.findNode<int>('n1')!;
+      final suppliers = n1.suppliers;
+      expect(suppliers, hasLength(2));
+
+      final supplierMap = <String, Node<dynamic>>{};
+      for (int i = 0; i < suppliers.length; i++) {
+        final key = n1.bluePrint.suppliers.elementAt(i);
+        supplierMap[key] = suppliers.elementAt(i);
+      }
+
+      n1.initSuppliers(supplierMap);
     });
   });
 

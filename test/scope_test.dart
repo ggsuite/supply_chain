@@ -10,8 +10,6 @@ import 'package:gg_is_github/gg_is_github.dart';
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
-import 'sample_nodes.dart';
-
 enum TestEnum {
   a,
   b,
@@ -20,6 +18,8 @@ enum TestEnum {
 
 void main() {
   late Node<int> node;
+  late Scm scm;
+  late Scope scope;
 
   int produce(List<dynamic> components, int previousProduct) => previousProduct;
 
@@ -1163,6 +1163,45 @@ void main() {
     });
 
     group('graph, saveGraphToFile', () {
+      late Scope scope;
+
+      setUp(
+        () {
+          scope = Scope.example(createNode: false);
+
+          Supplier<int>(
+            bluePrint: NodeBluePrint<int>(
+              initialProduct: 0,
+              key: 'supplier',
+              produce: (components, previousProduct) => previousProduct + 1,
+            ),
+            scope: scope,
+          );
+
+          Node<int>(
+            bluePrint: NodeBluePrint<int>(
+              initialProduct: 0,
+              key: 'producer',
+              produce: (List<dynamic> components, int previousProduct) {
+                return (components.first as int) * 10;
+              },
+            ),
+            scope: scope,
+          );
+
+          Node<int>(
+            bluePrint: NodeBluePrint<int>(
+              initialProduct: 0,
+              key: 'customer',
+              produce: (List<dynamic> components, int previousProduct) {
+                return (components.first as int) + 1;
+              },
+            ),
+            scope: scope,
+          );
+        },
+      );
+
       // .......................................................................
       Future<void> updateGraphFile(Scope chain, String fileName) async {
         final cwd = Directory.current.path;
@@ -1181,29 +1220,76 @@ void main() {
       }
 
       // .......................................................................
-      test('should print a simple graph correctly', () async {
-        initSupplierProducerCustomer();
-        createSimpleChain();
-        await updateGraphFile(scope, 'simple_graph.dot');
-      });
+      test(
+        'should print a simple graph correctly',
+        () async {
+          await updateGraphFile(scope, 'simple_graph.dot');
+        },
+      );
 
-      test('should print a more advanced graph correctly', () async {
-        initMusicExampleNodes();
+      test(
+        'should print a more advanced graph correctly',
+        () async {
+          final scope = Scope.example(createNode: false);
 
-        // .................................
-        // Create the following supply chain
-        //  key
-        //   |-synth
-        //   |  |-audio (realtime)
-        //   |
-        //   |-screen
-        //   |  |-grid
-        key.addCustomer(synth);
-        key.addCustomer(screen);
-        synth.addCustomer(audio);
-        screen.addCustomer(grid);
-        await updateGraphFile(scope, 'advanced_graph.dot');
-      });
+          // .................................
+          // Create the following supply chain
+          //  key
+          //   |-synth
+          //   |  |-audio (realtime)
+          //   |
+          //   |-screen
+          //   |  |-grid
+          scope.mockContent(
+            {
+              'key': nbp(
+                from: [],
+                to: 'key',
+                init: 0,
+                produce: (c, p) {
+                  return (p) + 1;
+                },
+              ),
+              'synth': nbp(
+                from: ['key'],
+                to: 'synth',
+                init: 0,
+                produce: (c, p) {
+                  return (c.first as int) * 10;
+                },
+              ),
+              'audio': nbp(
+                from: ['synth'],
+                to: 'audio',
+                init: 0,
+                produce: (c, p) {
+                  return (c.first as int) + 1;
+                },
+              ),
+              'screen': nbp(
+                from: ['key'],
+                to: 'screen',
+                init: 0,
+                produce: (c, p) {
+                  return (c.first as int) * 100;
+                },
+              ),
+              'grid': nbp(
+                from: ['screen'],
+                to: 'grid',
+                init: 0,
+                produce: (c, p) {
+                  return (c.first as int) + 2;
+                },
+              ),
+            },
+          );
+
+          scope.scm.testFlushTasks();
+
+          await updateGraphFile(scope, 'advanced_graph.dot');
+        },
+      );
 
       test('should print scopes correctly', () async {
         final root = ExampleScopeRoot(scm: Scm.testInstance);
@@ -1617,6 +1703,40 @@ void main() {
           expect(
             scope.findNode<int>('hostBInserts.p0Add111', skipInserts: true),
             isNull,
+          );
+        });
+      });
+
+      group('with excludeNodes', () {
+        test('should not return the excluded nodes', () {
+          final scope = Scope.example();
+          scope.mockContent({
+            'a': {
+              'b': {
+                'c': 0,
+                'd': 1,
+              },
+            },
+          });
+
+          final c = scope.findNode<int>('a.b.c')!;
+          final d = scope.findNode<int>('a.b.d')!;
+
+          // Search without excludeNodes
+          expect(
+            scope.findNode<int>('a.b.c', excludedNodes: []),
+            c,
+          );
+
+          // Search with excludeNodes
+          expect(
+            scope.findNode<int>('a.b.c', excludedNodes: [c]),
+            isNull,
+          );
+
+          expect(
+            scope.findNode<int>('a.b.d', excludedNodes: [c]),
+            d,
           );
         });
       });

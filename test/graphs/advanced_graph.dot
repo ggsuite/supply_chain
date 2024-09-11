@@ -4,30 +4,27 @@ digraph unix {
   fontname="Arial"
   node [fontname="Arial"]
   edge [fontname="Arial"]
-  subgraph cluster_example_4 {
-    label = "example"; // scope
-    node_6 [
-      label = "node"; // node
-    ];
-    key_7 [
+  subgraph cluster_root_12 {
+    label = "root"; // scope
+    key_18 [
       label = "key"; // node
     ];
-    synth_8 [
+    synth_19 [
       label = "synth"; // node
     ];
-    audio_9 [
+    audio_20 [
       label = "audio"; // node
     ];
-    screen_10 [
+    screen_21 [
       label = "screen"; // node
     ];
-    grid_11 [
+    grid_22 [
       label = "grid"; // node
     ];
     
   }
-  "key_7" -> "synth_8";
-  "key_7" -> "screen_10";
-  "synth_8" -> "audio_9";
-  "screen_10" -> "grid_11";
+  "key_18" -> "synth_19";
+  "key_18" -> "screen_21";
+  "synth_19" -> "audio_20";
+  "screen_21" -> "grid_22";
 }

@@ -10,6 +10,22 @@ import 'package:supply_chain/supply_chain.dart';
 /// Produce delegate that does nothing
 T doNothing<T>(List<dynamic> components, T previousProduct) => previousProduct;
 
+// .............................................................................
+/// Forwards the node from
+NodeBluePrint<T> nbp<T>({
+  required List<String> from,
+  required String to,
+  required T init,
+  Produce<T>? produce,
+}) =>
+    NodeBluePrint(
+      key: to,
+      initialProduct: init,
+      suppliers: from,
+      produce: produce ?? doNothing,
+    );
+
+// .............................................................................
 /// The configuration of a node
 class NodeBluePrint<T> {
   /// Constructor of the node
@@ -63,6 +79,9 @@ class NodeBluePrint<T> {
 
   /// The produce function
   final Produce<T> produce;
+
+  /// A place holder node is only used if no other node is available
+  bool get isPlaceholder => this is PlaceholderNodeBluePrint<T>;
 
   /// An example instance for test purposes
   static NodeBluePrint<int> example({

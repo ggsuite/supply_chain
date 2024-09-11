@@ -8,39 +8,73 @@ import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final butterFly = ButterFlyExample(withScopes: true);
+  late ButterFlyExample butterFly;
+  late List<String> allScopeKeys;
 
-  final allScopeKeys = butterFly.x.scope.pathArray;
-  final ButterFlyExample(
-    :s111,
-    :s11,
-    :s10,
-    :s01,
-    :s00,
-    :s1,
-    :s0,
-    :x,
-    :c0,
-    :c1,
-    :c00,
-    :c01,
-    :c10,
-    :c11,
-    :c111,
-    :level0,
-    :level1,
-    :level2,
-    :level3,
-  ) = butterFly;
+  late List<Node<dynamic>> allNodes;
+  late List<Scope> allScopes;
+  late List<String> allNodeKeys;
 
-  final allNodes =
-      x.scope.scm.nodes.where((n) => !n.scope.isMetaScope).toList();
-  final allScopes = butterFly.allScopes;
-  final allNodeKeys = allNodes.map((n) => n.key).toList();
-  assert(level2.key == 'level2');
-  assert(level3.key == 'level3');
+  late Graph graph;
 
-  const graph = Graph();
+  late Node<String> s111;
+  late Node<String> s11;
+  late Node<String> s10;
+  late Node<String> s01;
+  late Node<String> s00;
+  late Node<String> s1;
+  late Node<String> s0;
+  late Node<String> x;
+  late Node<String> c0;
+  late Node<String> c1;
+  late Node<String> c00;
+  late Node<String> c01;
+  late Node<String> c10;
+  late Node<String> c11;
+  late Node<String> c111;
+  late Scope level0;
+  late Scope level1;
+  late Scope level2;
+  late Scope level3;
+
+  setUp(
+    () {
+      butterFly = ButterFlyExample(withScopes: true);
+
+      allScopeKeys = butterFly.x.scope.pathArray;
+      ButterFlyExample(
+        :s111,
+        :s11,
+        :s10,
+        :s01,
+        :s00,
+        :s1,
+        :s0,
+        :x,
+        :c0,
+        :c1,
+        :c00,
+        :c01,
+        :c10,
+        :c11,
+        :c111,
+        :level0,
+        :level1,
+        :level2,
+        :level3,
+      ) = butterFly;
+
+      allNodes = x.scope.scm.nodes.where((n) => !n.scope.isMetaScope).toList();
+      allScopes = butterFly.allScopes;
+      allNodeKeys = allNodes.map((n) => n.key).toList();
+      assert(level2.key == 'level2');
+      assert(level3.key == 'level3');
+
+      graph = const Graph();
+
+      x.scm.testFlushTasks();
+    },
+  );
 
   void expectNodes(String result, List<Node<dynamic>> nodes) {
     for (final k in allNodeKeys) {
@@ -798,6 +832,8 @@ void main() {
           ) = triangle;
 
           test('complete', () {
+            triangle.triangle.scm.testFlushTasks();
+
             final tree = graph.treeForScope(
               scope: triangle.triangle,
               childScopeDepth: -1,

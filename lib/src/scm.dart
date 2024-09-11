@@ -63,7 +63,8 @@ class Scm {
     _nominatedNodes.remove(node);
     _preparedNodes.remove(node);
     _producingNodes.remove(node);
-
+    _placeholderNodes.remove(node);
+    _nodesWithMissedSuppliers.remove(node);
     _assertNoNodeIsErased(nodes: _nominatedNodes);
   }
 
@@ -147,6 +148,12 @@ class Scm {
   // ...........................................................................
   /// Manages disposed nodes and scopes
   late final Disposed disposedItems;
+
+  // ...........................................................................
+  // Placeholders
+
+  /// Update placeholders
+  void updatePlaceholders(Node<dynamic> node) => _updatePlaceholders(node);
 
   // ######################
   // Testing
@@ -241,6 +248,9 @@ class Scm {
   // Nodes that need supplier update
   final Set<Node<dynamic>> _nodesNeedingSupplierUpdate = {};
   final Set<Node<dynamic>> _nodesWithMissedSuppliers = {};
+
+  // ...........................................................................
+  final Set<Node<dynamic>> _placeholderNodes = {};
 
   // ...........................................................................
   // Processing stages
@@ -342,15 +352,18 @@ class Scm {
     required bool throwIfNotThere,
   }) {
     // Collect all suppliers
-    final suppliers = <Node<dynamic>>[];
-    for (final supplierName in node.bluePrint.suppliers) {
-      final supplier = node.scope.findNode<dynamic>(supplierName);
+    final suppliers = <String, Node<dynamic>>{};
+    for (final supplierPath in node.bluePrint.suppliers) {
+      final supplier = node.scope.findNode<dynamic>(
+        supplierPath,
+        excludedNodes: [node],
+      );
 
       if (supplier == null) {
         if (throwIfNotThere) {
           throw ArgumentError(
             'Node "${node.path}": '
-            'Supplier with key "$supplierName" not found.',
+            'Supplier with key "$supplierPath" not found.',
           );
         } else {
           _nodesWithMissedSuppliers.add(node);
@@ -360,13 +373,11 @@ class Scm {
         }
       }
 
-      suppliers.add(supplier);
+      suppliers[supplierPath] = supplier;
     }
 
     // If all suppliers are found, add them to node
-    for (final supplier in suppliers) {
-      node.addSupplier(supplier);
-    }
+    node.initSuppliers(suppliers);
   }
 
   // ...........................................................................
@@ -741,6 +752,53 @@ class Scm {
   }) {
     for (final node in nodes) {
       _assertNodeIsNotErased(node);
+    }
+  }
+
+  // ...........................................................................
+  void _updatePlaceholders(Node<dynamic> node) {
+    // Node is a placeholder? Add the node to list of placeholders.
+    if (node.bluePrint.isPlaceholder) {
+      _placeholderNodes.add(node);
+      return;
+    }
+
+    // Node is a real node? Update placeholders
+    for (final placeholder in _placeholderNodes) {
+      final placeholderBluePrint =
+          placeholder.allBluePrints.first as PlaceholderNodeBluePrint;
+
+      // If placeholder does not match the real node path, continue
+      if (!node.matchesPath(placeholderBluePrint.realNodePath)) {
+        continue;
+      }
+
+      // Reset placeholder replacements
+      placeholder.resetPlaceholderReplacements();
+
+      // If node is disposed
+      // check, if there is another real node available
+      var replacementAvailable = true;
+      if (node.isDisposed && placeholder.suppliers.contains(node)) {
+        final replacementNode = node.scope.findNode<dynamic>(
+          placeholderBluePrint.realNodePath,
+          excludedNodes: [node],
+        );
+
+        replacementAvailable = replacementNode != null;
+      }
+
+      // If a replacement is available,
+      // link placeholder to replacement
+      if (replacementAvailable) {
+        placeholder.addPlaceholderReplacement(
+          placeholder.bluePrint.connectSupplier(
+            placeholderBluePrint.realNodePath,
+          ),
+        );
+      }
+
+      placeholder.needsInitSuppliers();
     }
   }
 }

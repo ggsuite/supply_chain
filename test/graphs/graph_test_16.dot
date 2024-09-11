@@ -4,24 +4,24 @@ digraph unix {
   fontname="Arial"
   node [fontname="Arial"]
   edge [fontname="Arial"]
-  subgraph cluster_triangle_18 {
+  subgraph cluster_triangle_4 {
     label = "triangle"; // scope
     invisible12 [label = "", shape = point, style=invis]; // triangle
-    subgraph cluster_left_20 {
+    subgraph cluster_left_6 {
       label = "left"; // scope
-      left_38 [
+      left_9 [
         label = "left"; // node
       ];
       
     }
-    subgraph cluster_right_22 {
+    subgraph cluster_right_8 {
       label = "right"; // scope
-      right_41 [
+      right_12 [
         label = "right"; // node
       ];
       
     }
     
   }
-  "left_38" -> "right_41";
+  "left_9" -> "right_12";
 }

@@ -4,22 +4,17 @@ digraph unix {
   fontname="Arial"
   node [fontname="Arial"]
   edge [fontname="Arial"]
-  subgraph cluster_example_4 {
-    label = "example"; // scope
-    node_6 [
-      label = "node"; // node
-    ];
-    supplier_7 [
+  subgraph cluster_root_8 {
+    label = "root"; // scope
+    supplier_11 [
       label = "supplier"; // node
     ];
-    producer_8 [
+    producer_12 [
       label = "producer"; // node
     ];
-    customer_9 [
+    customer_13 [
       label = "customer"; // node
     ];
     
   }
-  "supplier_7" -> "producer_8";
-  "producer_8" -> "customer_9";
 }

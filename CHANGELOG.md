@@ -156,6 +156,7 @@ Modifications can only be done via builders.
 - Prepare not throwing if a supplier is not available for a short time
 - Try again later to add suppliers not available immediately
 - Suppliers must not be available from the beginning
+- Rework initialization of suppliers
 
 ### Fixed
 

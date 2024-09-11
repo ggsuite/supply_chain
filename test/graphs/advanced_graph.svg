@@ -10,67 +10,61 @@
 <title>unix</title>
 <polygon fill="white" stroke="none" points="-4,4 -4,-203.75 194,-203.75 194,4 -4,4"/>
 <g id="clust1" class="cluster">
-<title>cluster_example_4</title>
+<title>cluster_root_12</title>
 <polygon fill="none" stroke="black" points="8,-8 8,-191.75 182,-191.75 182,-8 8,-8"/>
-<text text-anchor="middle" x="95" y="-174.45" font-family="Arial" font-size="14.00">example</text>
+<text text-anchor="middle" x="95" y="-174.45" font-family="Arial" font-size="14.00">root</text>
 </g>
-<!-- node_6 -->
+<!-- key_18 -->
 <g id="node1" class="node">
-<title>node_6</title>
-<ellipse fill="none" stroke="black" cx="53" cy="-142" rx="30.61" ry="18"/>
-<text text-anchor="middle" x="53" y="-136.57" font-family="Arial" font-size="14.00">node</text>
+<title>key_18</title>
+<ellipse fill="none" stroke="black" cx="92" cy="-142" rx="27" ry="18"/>
+<text text-anchor="middle" x="92" y="-136.57" font-family="Arial" font-size="14.00">key</text>
 </g>
-<!-- key_7 -->
+<!-- synth_19 -->
 <g id="node2" class="node">
-<title>key_7</title>
-<ellipse fill="none" stroke="black" cx="132" cy="-142" rx="27" ry="18"/>
-<text text-anchor="middle" x="132" y="-136.57" font-family="Arial" font-size="14.00">key</text>
-</g>
-<!-- synth_8 -->
-<g id="node3" class="node">
-<title>synth_8</title>
+<title>synth_19</title>
 <ellipse fill="none" stroke="black" cx="48" cy="-88" rx="32.1" ry="18"/>
 <text text-anchor="middle" x="48" y="-82.58" font-family="Arial" font-size="14.00">synth</text>
 </g>
-<!-- key_7&#45;&gt;synth_8 -->
+<!-- key_18&#45;&gt;synth_19 -->
 <g id="edge1" class="edge">
-<title>key_7&#45;&gt;synth_8</title>
-<path fill="none" stroke="black" d="M112.94,-129.2C102.83,-122.94 90.17,-115.1 78.71,-108.01"/>
-<polygon fill="black" stroke="black" points="80.68,-105.11 70.34,-102.83 77,-111.07 80.68,-105.11"/>
+<title>key_18&#45;&gt;synth_19</title>
+<path fill="none" stroke="black" d="M79.27,-125.96C75.9,-121.97 72.17,-117.56 68.49,-113.22"/>
+<polygon fill="black" stroke="black" points="71.27,-111.08 62.13,-105.7 65.92,-115.6 71.27,-111.08"/>
 </g>
-<!-- screen_10 -->
-<g id="node5" class="node">
-<title>screen_10</title>
+<!-- screen_21 -->
+<g id="node4" class="node">
+<title>screen_21</title>
 <ellipse fill="none" stroke="black" cx="136" cy="-88" rx="37.59" ry="18"/>
 <text text-anchor="middle" x="136" y="-82.58" font-family="Arial" font-size="14.00">screen</text>
 </g>
-<!-- key_7&#45;&gt;screen_10 -->
+<!-- key_18&#45;&gt;screen_21 -->
 <g id="edge2" class="edge">
-<title>key_7&#45;&gt;screen_10</title>
-<path fill="none" stroke="black" d="M133.33,-123.68C133.48,-121.78 133.63,-119.8 133.79,-117.79"/>
-<polygon fill="black" stroke="black" points="137.27,-118.17 134.54,-107.93 130.29,-117.63 137.27,-118.17"/>
+<title>key_18&#45;&gt;screen_21</title>
+<path fill="none" stroke="black" d="M104.73,-125.96C108.04,-122.04 111.7,-117.72 115.31,-113.45"/>
+<polygon fill="black" stroke="black" points="117.77,-115.96 121.56,-106.07 112.43,-111.44 117.77,-115.96"/>
 </g>
-<!-- audio_9 -->
-<g id="node4" class="node">
-<title>audio_9</title>
+<!-- audio_20 -->
+<g id="node3" class="node">
+<title>audio_20</title>
 <ellipse fill="none" stroke="black" cx="49" cy="-34" rx="32.6" ry="18"/>
 <text text-anchor="middle" x="49" y="-28.57" font-family="Arial" font-size="14.00">audio</text>
 </g>
-<!-- synth_8&#45;&gt;audio_9 -->
+<!-- synth_19&#45;&gt;audio_20 -->
 <g id="edge3" class="edge">
-<title>synth_8&#45;&gt;audio_9</title>
+<title>synth_19&#45;&gt;audio_20</title>
 <path fill="none" stroke="black" d="M48.33,-69.68C48.37,-67.78 48.41,-65.8 48.45,-63.79"/>
 <polygon fill="black" stroke="black" points="51.94,-64 48.64,-53.93 44.94,-63.86 51.94,-64"/>
 </g>
-<!-- grid_11 -->
-<g id="node6" class="node">
-<title>grid_11</title>
+<!-- grid_22 -->
+<g id="node5" class="node">
+<title>grid_22</title>
 <ellipse fill="none" stroke="black" cx="136" cy="-34" rx="27" ry="18"/>
 <text text-anchor="middle" x="136" y="-28.57" font-family="Arial" font-size="14.00">grid</text>
 </g>
-<!-- screen_10&#45;&gt;grid_11 -->
+<!-- screen_21&#45;&gt;grid_22 -->
 <g id="edge4" class="edge">
-<title>screen_10&#45;&gt;grid_11</title>
+<title>screen_21&#45;&gt;grid_22</title>
 <path fill="none" stroke="black" d="M136,-69.68C136,-67.78 136,-65.8 136,-63.79"/>
 <polygon fill="black" stroke="black" points="139.5,-63.93 136,-53.93 132.5,-63.93 139.5,-63.93"/>
 </g>

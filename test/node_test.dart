@@ -9,6 +9,8 @@ import 'dart:io';
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
+import 'shared_tests.dart';
+
 void main() {
   late Scm scm;
   late Scope chain;
@@ -135,108 +137,6 @@ void main() {
         node.mockedProduct = null;
         expect(node.product, 2);
       });
-    });
-
-    test('suppliers, addSupplier()', () {
-      final supplier0 = Node.example(scope: chain);
-      final supplier1 = Node.example(scope: chain);
-
-      // Add supplier the first time
-      expect(scm.nominatedNodes, contains(node));
-      expect(scm.nominatedNodes, contains(supplier0));
-      expect(scm.nominatedNodes, contains(supplier1));
-
-      node.addSupplier(supplier0);
-
-      // Was supplier added?
-      expect(node.suppliers, [supplier0]);
-
-      // Do all initial processing
-      scm.testFlushTasks();
-
-      // Is node customer of supplier?
-      expect(supplier0.customers, [node]);
-
-      // Add same supplier a second time.
-      node.addSupplier(supplier0);
-
-      // Nothing should change
-      expect(node.suppliers, [supplier0]);
-      expect(supplier0.customers, [node]);
-
-      // Does it add a second supplier?
-      node.addSupplier(supplier1);
-      expect(node.suppliers, [supplier0, supplier1]);
-
-      // Is node now also customer of supplier1?
-      expect(supplier1.customers, [node]);
-
-      // Dispose first supplier
-      // Supplier will not be removed because it has customers
-      scm.clear();
-      expect(scm.nominatedNodes, isEmpty);
-      supplier0.dispose();
-      expect(node.suppliers, [supplier0, supplier1]);
-      expect(supplier0.customers, <Node<dynamic>>[node]);
-
-      // Node was not nominated because nothing effectively changed
-      expect(scm.nominatedNodes, <Node<dynamic>>[]);
-
-      // Dispose second supplier
-      scm.clear();
-      supplier1.dispose();
-      expect(node.suppliers, <Node<dynamic>>[supplier0, supplier1]);
-      expect(supplier1.customers, <Node<dynamic>>[node]);
-
-      // Node was not nominated because nothing effectively changed
-      expect(scm.nominatedNodes, <Node<dynamic>>[]);
-
-      // Dispose the node
-      node.dispose();
-
-      // Both suppliers should have no customers and be erased therefore
-      expect(supplier0.customers, <Node<dynamic>>[]);
-      expect(supplier0.isErased, true);
-      expect(supplier1.customers, <Node<dynamic>>[]);
-      expect(supplier1.isErased, true);
-    });
-
-    test('customers, addSupplier(), removeSupplier()', () {
-      final customer0 = Node.example(scope: chain);
-      final customer1 = Node.example(scope: chain);
-
-      // Add customer the first time
-      node.addCustomer(customer0);
-
-      // Was customer added?
-      expect(node.customers, [customer0]);
-
-      // Is node supplier of customer?
-      expect(customer0.suppliers, [node]);
-
-      // Add same customer a second time.
-      node.addCustomer(customer0);
-
-      // Nothing should change
-      expect(node.customers, [customer0]);
-      expect(customer0.suppliers, [node]);
-
-      // Add a second customer
-      node.addCustomer(customer1);
-      expect(node.customers, [customer0, customer1]);
-
-      // Is node now also supplier of customer1?
-      expect(customer1.suppliers, [node]);
-
-      // Remove first customer
-      customer0.dispose();
-      expect(node.customers, [customer1]);
-      expect(customer0.suppliers, <Node<dynamic>>[]);
-
-      // Remove second customer
-      customer1.dispose();
-      expect(node.customers, <Node<dynamic>>[]);
-      expect(customer1.suppliers, <Node<dynamic>>[]);
     });
 
     group('deepSuppliers, deepCustomers', () {
@@ -761,9 +661,14 @@ void main() {
       });
 
       test('should replace the previous blue print and nominate the node', () {
+        const NodeBluePrint(key: 'supplier', initialProduct: 12).instantiate(
+          scope: chain,
+        );
+
         final otherBluePrint = node.bluePrint.copyWith(
           initialProduct: 6,
-          produce: (components, previousProduct) => 7,
+          suppliers: ['supplier'],
+          produce: (components, previousProduct) => (components.first as int),
         );
 
         node.addBluePrint(otherBluePrint);
@@ -773,7 +678,9 @@ void main() {
           otherBluePrint,
         );
 
-        expect(scm.nominatedNodes.where((n) => !n.isMetaNode), [node]);
+        node.scm.testFlushTasks();
+
+        expect(node.product, 12);
       });
     });
 
@@ -927,6 +834,93 @@ void main() {
               ),
             );
           });
+        });
+
+        group('when circular dependencies are created', () {
+          test('with a simple connection', () {
+            final scope = Scope.example();
+            scope.mockContent({
+              'a': {
+                'b': {
+                  'c': {
+                    'a': nbp(from: ['d.b'], to: 'a', init: 0),
+                  },
+                  'd': {
+                    'b': nbp(from: ['c.a'], to: 'b', init: 1),
+                  },
+                },
+              },
+            });
+
+            expect(
+              () => scope.scm.testFlushTasks(),
+              throwsA(
+                isA<Exception>().having(
+                  (e) => e.toString(),
+                  'toString()',
+                  contains(
+                    'Circular dependency detected: b -> a -> b',
+                  ),
+                ),
+              ),
+            );
+          });
+
+          test('with a complicated connection', () {
+            final scope = Scope.example();
+            scope.mockContent({
+              'a': {
+                'v0': nbp(from: ['v2'], to: 'v0', init: 0),
+                'b': {
+                  'c': {
+                    'v1': nbp(from: ['v0'], to: 'v1', init: 0),
+                  },
+                  'd': {
+                    'v2': nbp(from: ['v1'], to: 'v2', init: 1),
+                  },
+                },
+              },
+            });
+
+            expect(
+              () => scope.scm.testFlushTasks(),
+              throwsA(
+                isA<Exception>().having(
+                  (e) => e.toString(),
+                  'toString()',
+                  contains(
+                    'Circular dependency detected: v2 -> v0 -> v1 -> v2',
+                  ),
+                ),
+              ),
+            );
+          });
+        });
+      });
+    });
+
+    group('placeholderNodes', () {
+      placeholderTest();
+    });
+
+    group('initSuppliers', () {
+      group('should throw', () {
+        test('when suppliers are ambigous', () {
+          final scope = Scope.example();
+          scope.mockContent({
+            's': {
+              'a': {'x': 0},
+              'b': {'x': 0},
+              'c': {'x': 0},
+            },
+            'n': nbp(from: ['a.x', 'b.x', 'c.x'], to: 'n', init: 0),
+          });
+
+          scope.scm.testFlushTasks();
+          final n = scope.findNode<int>('n')!;
+          expect(n.suppliers, hasLength(3));
+
+          // Init suppliers with ambigous suppliers
         });
       });
     });

@@ -2,25 +2,12 @@ import 'package:fake_async/fake_async.dart';
 import 'package:supply_chain/src/schedule_task.dart';
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
-import './sample_nodes.dart';
+
+import 'shared_tests.dart';
 
 void main() {
-  // ...........................................................................
-  void produceInitially() {
-    scm.tick();
-
-    // Flush all micro tasks
-    scm.testFlushTasks();
-
-    // All products should be ready and have produced
-    expect(supplier.isReady, isTrue);
-    expect(producer.isReady, isTrue);
-    expect(customer.isReady, isTrue);
-
-    expect(supplier.product, 1);
-    expect(producer.product, 10);
-    expect(customer.product, 11);
-  }
+  late Scm scm;
+  late Scope scope;
 
   // ...........................................................................
   setUp(
@@ -69,151 +56,183 @@ void main() {
   }
 
   group('Scm', () {
-    test('should initialize correctly', () {
-      // ..............
-      // Initialization
-      scm.testFlushTasks();
+    test(
+      'should initialize correctly',
+      () {
+        // ..............
+        // Initialization
+        final scope = Scope.example();
+        final scm = scope.scm;
 
-      // Add one supplier, producer and customer
-      initSupplierProducerCustomer();
-      createSimpleChain();
+        // Add one supplier, producer and customer
+        scope.mockContent({
+          'supplier': nbp(
+            from: [],
+            to: 'supplier',
+            init: 1,
+            produce: (components, previousProduct) => ++previousProduct,
+          ),
+          'producer': nbp(
+            from: ['supplier'],
+            to: 'producer',
+            init: 2,
+            produce: (components, previousProduct) =>
+                (components.first as int) * 5,
+          ),
+          'customer': nbp(
+            from: ['producer'],
+            to: 'customer',
+            init: 3,
+            produce: (components, previousProduct) =>
+                (components.first as int) + 1,
+          ),
+        });
 
-      // ....................
-      // Check pre-conditions
+        final supplier = scope.findNode<int>('supplier')!;
+        final producer = scope.findNode<int>('producer')!;
+        final customer = scope.findNode<int>('customer')!;
 
-      // Did connect scm with nodes?
-      expect(scm, supplier.scm);
-      expect(scm, producer.scm);
-      expect(scm, customer.scm);
+        // ....................
+        // Check pre-conditions
 
-      // ..................
-      // Initial nomination
+        // Did connect scm with nodes?
+        expect(scm, supplier.scm);
+        expect(scm, producer.scm);
+        expect(scm, customer.scm);
 
-      // Freshly added nodes are immediately nominated
-      expect(scm.nominatedNodes, [supplier, producer, customer]);
+        // ..................
+        // Initial nomination
 
-      // No node is staged for production
-      expect(supplier.isStaged, isFalse);
-      expect(producer.isStaged, isFalse);
-      expect(customer.isStaged, isFalse);
+        // Freshly added nodes are immediately nominated
+        expect(scm.nominatedNodes, contains(supplier));
+        expect(scm.nominatedNodes, contains(producer));
+        expect(scm.nominatedNodes, contains(customer));
 
-      // Products should be inital products
-      expect(supplier.product, 0);
-      expect(producer.product, 0);
-      expect(customer.product, 0);
+        // No node is staged for production
+        expect(supplier.isStaged, isFalse);
+        expect(producer.isStaged, isFalse);
+        expect(customer.isStaged, isFalse);
 
-      // ...................
-      // Initial preparation
+        // Products should be inital products
+        expect(supplier.product, 1);
+        expect(producer.product, 2);
+        expect(customer.product, 3);
 
-      // Realtime tasks are scheduled that will start the preparation
-      expect(scm.testFastTasks, isNotEmpty);
-      expect(scm.testNormalTasks, isEmpty);
+        // ...................
+        // Initial preparation
 
-      // Run realtime tasks to execute prepration
-      scm.testRunFastTasks();
+        // Realtime tasks are scheduled that will start the preparation
+        expect(scm.testFastTasks, isNotEmpty);
+        expect(scm.testNormalTasks, isEmpty);
 
-      // Now all nodes should be prepared,
-      // i.e. all nodes are staged
-      expect(supplier.isStaged, isTrue);
-      expect(producer.isStaged, isTrue);
-      expect(customer.isStaged, isTrue);
+        // Run realtime tasks to execute prepration
+        scm.testRunFastTasks();
 
-      // Nodes should not be nominated anymore
-      expect(scm.nominatedNodes, isEmpty);
+        // Now all nodes should be prepared,
+        // i.e. all nodes are staged
+        expect(supplier.isStaged, isTrue);
+        expect(producer.isStaged, isTrue);
+        expect(customer.isStaged, isTrue);
 
-      // Nodes should appear within prepared nodes
-      expect(scm.preparedNodes, [supplier, producer, customer]);
+        // Nodes should not be nominated anymore
+        expect(scm.nominatedNodes, isEmpty);
 
-      // .................
-      // Initial execution
+        // Nodes should appear within prepared nodes
+        expect(scm.preparedNodes, contains(supplier));
+        expect(scm.preparedNodes, contains(producer));
+        expect(scm.preparedNodes, contains(customer));
 
-      // Initally no node has yet produced
-      expect(supplier.product, 0);
-      expect(producer.product, 0);
-      expect(customer.product, 0);
+        // .................
+        // Initial execution
 
-      // None of the nodes should be ready
-      expect(supplier.isReady, isFalse);
-      expect(producer.isReady, isFalse);
-      expect(customer.isReady, isFalse);
+        // Initally no node has yet produced
+        expect(supplier.product, 1);
+        expect(producer.product, 2);
+        expect(customer.product, 3);
 
-      // Only the supplier should be ready to produce,
-      // because it has no suppliers.
-      expect(supplier.isReadyToProduce, isTrue);
-      expect(producer.isReadyToProduce, isFalse);
-      expect(customer.isReadyToProduce, isFalse);
+        // None of the nodes should be ready
+        expect(supplier.isReady, isFalse);
+        expect(producer.isReady, isFalse);
+        expect(customer.isReady, isFalse);
 
-      // A production task should be added
-      expect(scm.testNormalTasks, isNotEmpty);
-      expect(scm.testFastTasks, isEmpty);
+        // Only the supplier should be ready to produce,
+        // because it has no suppliers.
+        expect(supplier.isReadyToProduce, isTrue);
+        expect(producer.isReadyToProduce, isFalse);
+        expect(customer.isReadyToProduce, isFalse);
 
-      // Product should still be initial
-      final productBefore = supplier.product;
-      expect(productBefore, 0);
+        // A production task should be added
+        expect(scm.testNormalTasks, isNotEmpty);
+        expect(scm.testFastTasks, isNotEmpty);
 
-      // ...........
+        // Product should still be initial
+        final productBefore = supplier.product;
+        expect(productBefore, 1);
 
-      // Execute tasks
-      scm.testRunNormalTasks();
+        // ...........
 
-      // Production should not start because our nodes have frame priority.
-      // Outside tick() only realtime nodes are processed.
-      expect(scm.minProductionPriority, Priority.realtime);
-      expect(supplier.isReady, isFalse);
-      expect(producer.isReady, isFalse);
-      expect(customer.isReady, isFalse);
+        // Execute tasks
+        scm.testRunNormalTasks();
 
-      // Let's trigger a frame.
-      // minProductionPriority goes down to frame
-      scm.tick();
-      expect(scm.minProductionPriority, Priority.frame);
+        // Production should not start because our nodes have frame priority.
+        // Outside tick() only realtime nodes are processed.
+        expect(scm.minProductionPriority, Priority.realtime);
+        expect(supplier.isReady, isFalse);
+        expect(producer.isReady, isFalse);
+        expect(customer.isReady, isFalse);
 
-      // Let's execute tasks again
-      scm.testRunNormalTasks();
+        // Let's trigger a frame.
+        // minProductionPriority goes down to frame
+        scm.tick();
+        expect(scm.minProductionPriority, Priority.frame);
 
-      // Now supplier has been produced
-      expect(supplier.isReady, isTrue);
-      expect(supplier.product, productBefore + 1);
+        // Let's execute tasks again
+        scm.testRunNormalTasks();
 
-      // Producer and customer have not yet produced
-      expect(producer.isReady, isFalse);
-      expect(customer.isReady, isFalse);
+        // Now supplier has been produced
+        expect(supplier.isReady, isTrue);
+        expect(supplier.product, productBefore + 1);
 
-      // Producer is now ready to produce
-      // because it's supplier isReady
-      expect(producer.isReadyToProduce, isTrue);
+        // Producer and customer have not yet produced
+        expect(producer.isReady, isFalse);
+        expect(customer.isReady, isFalse);
 
-      // Customer is not ready to produce
-      // because it's supplier is not ready.
-      expect(customer.isReadyToProduce, isFalse);
+        // Producer is now ready to produce
+        // because it's supplier isReady
+        expect(producer.isReadyToProduce, isTrue);
 
-      // ...........
+        // Customer is not ready to produce
+        // because it's supplier is not ready.
+        expect(customer.isReadyToProduce, isFalse);
 
-      // Execute tasks -> Production should start again
-      scm.testRunNormalTasks();
+        // ...........
 
-      // Now also producer should be ready
-      expect(producer.isReady, isTrue);
-      expect(producer.product, 10);
+        // Execute tasks -> Production should start again
+        scm.testRunNormalTasks();
 
-      // Customer is not yet ready.
-      // But it is ready to produce,
-      // because it's supplier (producer) has been updated.
-      expect(customer.isReady, isFalse);
-      expect(customer.isReadyToProduce, isTrue);
+        // Now also producer should be ready
+        expect(producer.isReady, isTrue);
+        expect(producer.product, 10);
 
-      // ...........
+        // Customer is not yet ready.
+        // But it is ready to produce,
+        // because it's supplier (producer) has been updated.
+        expect(customer.isReady, isFalse);
+        expect(customer.isReadyToProduce, isTrue);
 
-      // Execute tasks -> Production should start again
-      scm.testRunNormalTasks();
+        // ...........
 
-      // Finally also last item in the chain (customer) should be ready
-      expect(customer.isReady, isTrue);
-      expect(customer.product, 11);
+        // Execute tasks -> Production should start again
+        scm.testRunNormalTasks();
 
-      // The production mode should be set back
-      expect(scm.minProductionPriority, Priority.realtime);
-    });
+        // Finally also last item in the chain (customer) should be ready
+        expect(customer.isReady, isTrue);
+        expect(customer.product, 11);
+
+        // The production mode should be set back
+        expect(scm.minProductionPriority, Priority.realtime);
+      },
+    );
 
     group('should throw', () {
       test('if nodes with non existing suppliers exist', () {
@@ -248,179 +267,254 @@ void main() {
       });
     });
 
-    test('should animate correctly', () {
-      // Create a chain, containing a supplier, a producer and a customer
-      initSupplierProducerCustomer();
-      createSimpleChain();
-      produceInitially();
+    test(
+      'should animate correctly',
+      () {
+        // Create a chain, containing a supplier, a producer and a customer
+        final scope = Scope.example();
+        final scm = scope.scm;
+        scope.mockContent({
+          'supplier': nbp(
+            from: [],
+            to: 'supplier',
+            init: 0,
+            produce: (c, p) {
+              return (p) + 1;
+            },
+          ),
+          'producer': nbp(
+            from: ['supplier'],
+            to: 'producer',
+            init: 0,
+            produce: (c, p) {
+              return (c.first as int) + 10;
+            },
+          ),
+        });
 
-      // Initially supplier is not animated
-      expect(supplier.isAnimated, isFalse);
-      expect(scm.animatedNodes, isNot(contains(supplier)));
+        final supplier = scope.findNode<int>('supplier')!;
+        final producer = scope.findNode<int>('producer')!;
+        scm.testFlushTasks();
+        expect(supplier.product, 1);
+        expect(producer.product, 11);
 
-      // Animate supplier
-      // Supplier should be part of animated nodes
-      supplier.isAnimated = true;
-      expect(scm.animatedNodes, contains(supplier));
+        // Initially supplier is not animated
+        expect(supplier.isAnimated, isFalse);
+        expect(scm.animatedNodes, isNot(contains(supplier)));
 
-      // Deanimate supplier
-      // Supplier is not part of animated nodes anymore
-      supplier.isAnimated = false;
-      expect(scm.animatedNodes, isNot(contains(supplier)));
+        // Animate supplier
+        // Supplier should be part of animated nodes
+        supplier.isAnimated = true;
+        expect(scm.animatedNodes, contains(supplier));
 
-      // Animate supplier again
-      // Supplier should be part of animated nodes
-      supplier.isAnimated = true;
-      expect(scm.animatedNodes, contains(supplier));
+        // Deanimate supplier
+        // Supplier is not part of animated nodes anymore
+        supplier.isAnimated = false;
+        expect(scm.animatedNodes, isNot(contains(supplier)));
 
-      // ..........
-      // Emit a tick
-      scm.tick();
+        // Animate supplier again
+        // Supplier should be part of animated nodes
+        supplier.isAnimated = true;
+        expect(scm.animatedNodes, contains(supplier));
 
-      // Supplier should be nominated because it is animated.
-      // The other two are not nominated, because they are not animated.
-      expect(scm.nominatedNodes, [supplier]);
+        // ..........
+        // Emit a tick
+        scm.tick();
 
-      // Finish production by flushing all tasks
-      scm.testFlushTasks();
-      expect(supplier.product, 2);
-      expect(producer.product, 20);
-      expect(customer.product, 21);
+        // Supplier should be nominated because it is animated.
+        // The other two are not nominated, because they are not animated.
+        expect(scm.nominatedNodes, [supplier]);
 
-      // Each time tick() is called, the production starts again
-      scm.testFlushTasks();
-      expect(supplier.product, 3);
-      expect(producer.product, 30);
-      expect(customer.product, 31);
+        // Finish production by flushing all tasks
+        scm.testFlushTasks();
+        expect(supplier.product, 2);
+        expect(producer.product, 12);
 
-      // Don't animate supplier anymore
-      // Tick will not have an effect anymore.
-      supplier.isAnimated = false;
-      scm.testFlushTasks();
-      expect(supplier.product, 3);
-      expect(producer.product, 30);
-      expect(customer.product, 31);
-    });
+        // Each time tick() is called, the production starts again
+        scm.testFlushTasks();
+        expect(supplier.product, 3);
+        expect(producer.product, 13);
 
-    test('should prefer realtime nodes', () {
-      initMusicExampleNodes();
+        // Don't animate supplier anymore
+        // Tick will not have an effect anymore.
+        supplier.isAnimated = false;
+        scm.testFlushTasks();
+        expect(supplier.product, 3);
+        expect(producer.product, 13);
+      },
+    );
 
-      // .................................
-      // Create the following supply chain
-      //  key
-      //   |-synth
-      //   |  |-audio (realtime)
-      //   |
-      //   |-screen
-      //   |  |-grid
-      key.addCustomer(synth);
-      key.addCustomer(screen);
-      synth.addCustomer(audio);
-      screen.addCustomer(grid);
+    test(
+      'should prefer realtime nodes',
+      () {
+        // .................................
+        // Create the following supply chain
+        //  key
+        //   |-synth
+        //   |  |-audio (realtime)
+        //   |
+        //   |-screen
+        //   |  |-grid
 
-      // .........................
-      // Initially all nodes have initial values
-      scm.testFlushTasks(tick: false);
-      expect(key.product, 0);
-      expect(synth.product, 0);
-      expect(audio.product, 0);
-      expect(screen.product, 0);
-      expect(grid.product, 0);
+        final scope = Scope.example();
+        final scm = scope.scm;
+        scope.mockContent(
+          {
+            'key': nbp(
+              from: [],
+              to: 'key',
+              init: 0,
+              produce: (c, p) {
+                return (p) + 1;
+              },
+            ),
+            'synth': nbp(
+              from: ['key'],
+              to: 'synth',
+              init: 0,
+              produce: (c, p) {
+                return (c.first as int) * 10;
+              },
+            ),
+            'audio': nbp(
+              from: ['synth'],
+              to: 'audio',
+              init: 0,
+              produce: (c, p) {
+                return (c.first as int) + 1;
+              },
+            ),
+            'screen': nbp(
+              from: ['key'],
+              to: 'screen',
+              init: 0,
+              produce: (c, p) {
+                return (c.first as int) * 100;
+              },
+            ),
+            'grid': nbp(
+              from: ['screen'],
+              to: 'grid',
+              init: 0,
+              produce: (c, p) {
+                return (c.first as int) + 2;
+              },
+            ),
+          },
+        );
 
-      // Trigger the first frame to let all nodes produce
-      scm.tick();
-      scm.testFlushTasks(tick: false);
-      expect(key.product, 1);
-      expect(synth.product, 10);
-      expect(audio.product, 11);
-      expect(screen.product, 100);
-      expect(grid.product, 102);
+        // .............................
+        scm.testFlushTasks(tick: false);
 
-      final allNodes = [key, synth, audio, screen, grid];
-      final realtimeNodes = [key, synth, audio];
-      final normalNodes = [screen, grid];
+        final key = scope.findNode<int>('key')!;
+        final synth = scope.findNode<int>('synth')!;
+        final audio = scope.findNode<int>('audio')!;
+        final screen = scope.findNode<int>('screen')!;
+        final grid = scope.findNode<int>('grid')!;
 
-      expectPriority(allNodes, Priority.frame);
-      expect(scm.minProductionPriority, Priority.realtime);
+        // .........................
+        // Initially all nodes have initial values
+        expect(key.product, 0);
+        expect(synth.product, 0);
+        expect(audio.product, 0);
+        expect(screen.product, 0);
+        expect(grid.product, 0);
 
-      // .....................
-      // Test priority changes
+        // Trigger the first frame to let all nodes produce
+        scm.tick();
+        scm.testFlushTasks(tick: false);
+        expect(key.product, 1);
+        expect(synth.product, 10);
+        expect(audio.product, 11);
+        expect(screen.product, 100);
+        expect(grid.product, 102);
 
-      // Let audio be a realtime node
-      audio.ownPriority = Priority.realtime;
+        final allNodes = [key, synth, audio, screen, grid];
+        final realtimeNodes = [key, synth, audio];
+        final normalNodes = [screen, grid];
 
-      // After flusing micro tasks ...
-      scm.testRunFastTasks();
-      expectPriority(realtimeNodes, Priority.realtime);
-      expectPriority(normalNodes, Priority.frame);
+        expectPriority(allNodes, Priority.frame);
+        expect(scm.minProductionPriority, Priority.realtime);
 
-      // Set back audio node to normal priority.
-      // All nodes should have normal priority again.
-      audio.ownPriority = Priority.frame;
-      scm.testRunFastTasks();
-      expectPriority(allNodes, Priority.frame);
+        // .....................
+        // Test priority changes
 
-      // ..........................
-      // Test prioritzed processing
+        // Let audio be a realtime node
+        audio.ownPriority = Priority.realtime;
 
-      // Set audio node to realtime priority again
-      audio.ownPriority = Priority.realtime;
-      scm.testRunFastTasks();
-      expectPriority(realtimeNodes, Priority.realtime);
-      expectPriority(normalNodes, Priority.frame);
+        // After flusing micro tasks ...
+        scm.testRunFastTasks();
+        expectPriority(realtimeNodes, Priority.realtime);
+        expectPriority(normalNodes, Priority.frame);
 
-      // Before nothing is stage
-      expectIsStaged(allNodes, false);
+        // Set back audio node to normal priority.
+        // All nodes should have normal priority again.
+        audio.ownPriority = Priority.frame;
+        scm.testRunFastTasks();
+        expectPriority(allNodes, Priority.frame);
 
-      // Let's change the key
-      scm.nominate(key);
+        // ..........................
+        // Test prioritzed processing
 
-      // All nodes should be staged. But no node is ready.
-      scm.testRunFastTasks();
-      expectIsStaged(allNodes, true);
-      expectIsReady(allNodes, false);
+        // Set audio node to realtime priority again
+        audio.ownPriority = Priority.realtime;
+        scm.testRunFastTasks();
+        expectPriority(realtimeNodes, Priority.realtime);
+        expectPriority(normalNodes, Priority.frame);
 
-      // First the realtime nodes key, synth, audio should be processed
-      scm.testRunFastTasks(); // Realtime nodes are processed using fast tasks
-      expectIsReady(allNodes, false, except: [key]);
+        // Before nothing is stage
+        expectIsStaged(allNodes, false);
 
-      scm.testRunFastTasks();
-      expectIsReady(allNodes, false, except: [key, synth]);
+        // Let's change the key
+        scm.nominate(key);
 
-      scm.testRunFastTasks();
-      expectIsReady(allNodes, false, except: [key, synth, audio]);
+        // All nodes should be staged. But no node is ready.
+        scm.testRunFastTasks();
+        expectIsStaged(allNodes, true);
+        expectIsReady(allNodes, false);
 
-      // .....................................
-      // After having processed all realtime nodes, visual nodes follow.
-      expectIsReady(allNodes, true, except: [screen, grid]);
-      expect(
-        scm.preparedNodes.where(
-          (element) => !element.isMetaNode,
-        ),
-        [screen],
-      );
+        // First the realtime nodes key, synth, audio should be processed
+        scm.testRunFastTasks(); // Realtime nodes are processed using fast tasks
+        expectIsReady(allNodes, false, except: [key]);
 
-      // Lets flush all tasks
-      scm.testFlushTasks(tick: false);
+        scm.testRunFastTasks();
+        expectIsReady(allNodes, false, except: [key, synth]);
 
-      // screen and grid are not still ready
-      // because minimum production priority is set to realtime
-      expectIsReady([screen, grid], false);
+        scm.testRunFastTasks();
+        expectIsReady(allNodes, false, except: [key, synth, audio]);
 
-      // Let's trigger a frame. Minimum production priority will be lowered.
-      expect(scm.minProductionPriority, Priority.realtime);
-      scm.tick();
-      expect(scm.minProductionPriority, Priority.frame);
+        // .....................................
+        // After having processed all realtime nodes, visual nodes follow.
+        expectIsReady(allNodes, true, except: [screen, grid]);
+        expect(
+          scm.preparedNodes.where(
+            (element) => !element.isMetaNode,
+          ),
+          [screen],
+        );
 
-      // Screen should be processed. But not grid.
-      scm.testRunNormalTasks();
-      expect(screen.isReady, isTrue);
-      expect(grid.isReady, isFalse);
+        // Lets flush all tasks
+        scm.testFlushTasks(tick: false);
 
-      // In the last event loop cycle, also grid should be processed
-      scm.testRunNormalTasks();
-      expectIsReady([screen, grid], true);
-    });
+        // screen and grid are not still ready
+        // because minimum production priority is set to realtime
+        expectIsReady([screen, grid], false);
+
+        // Let's trigger a frame. Minimum production priority will be lowered.
+        expect(scm.minProductionPriority, Priority.realtime);
+        scm.tick();
+        expect(scm.minProductionPriority, Priority.frame);
+
+        // Screen should be processed. But not grid.
+        scm.testRunNormalTasks();
+        expect(screen.isReady, isTrue);
+        expect(grid.isReady, isFalse);
+
+        // In the last event loop cycle, also grid should be processed
+        scm.testRunNormalTasks();
+        expectIsReady([screen, grid], true);
+      },
+    );
 
     test('should throw if hasNewProduct(node) is called without nomination',
         () {
@@ -446,110 +540,140 @@ void main() {
     });
 
     group('should handle timeouts', () {
-      test('with shouldTimeOut false', () {
-        initTimeoutExampleNodes();
+      late Scope scope;
+      late Scm scm;
+      late Node<int> supplierA;
+      late Node<int> supplierB;
+      late Node<int> producer;
 
-        // Create a chain containing
-        // - a supplierA, timing out
-        // - a supplierB, not timing out
-        // - and a producer
-        producer.addSupplier(supplierA);
-        producer.addSupplier(supplierB);
+      setUp(
+        () {
+          scope = Scope.example();
+          scm = scope.scm;
 
-        // Disable timeouts
-        scm.shouldTimeOut = true;
+          // Create a chain containing
+          // - a supplierA, not timing out
+          // - a supplierB, timing out
+          // - and a producer
 
-        // Make producer a realtime node for fast processing
-        producer.ownPriority = Priority.realtime;
+          supplierB = _NodeThatTimesOut(
+            scope: scope,
+            bluePrint: nbp(
+              from: [],
+              to: 'b',
+              init: 0,
+              produce: (c, p) => p++,
+            ),
+          );
 
-        // Flush all micro tasks -> Nodes should produce
-        scm.testFlushTasks(tick: false);
+          supplierA = nbp(
+            from: [],
+            to: 'a',
+            init: 0,
+            produce: (c, p) => p++,
+          ).instantiate(scope: scope);
 
-        // SupplierA is ready
-        expect(supplierA.isReady, isTrue);
+          producer = nbp(
+            from: ['a', 'b'],
+            to: 'produce',
+            init: 0,
+            produce: (c, p) => (c.first as int) + (c.last as int),
+          ).instantiate(scope: scope);
+        },
+      );
 
-        // SupplierB is not announced update. It is not ready.
-        expect(supplierB.isReady, isFalse);
+      test(
+        'with shouldTimeOut false',
+        () {
+          // Disable timeouts
+          scm.shouldTimeOut = true;
 
-        // Producer is not ready, because one of its suppliers is not ready.
-        expect(producer.isReady, isFalse);
+          // Make producer a realtime node for fast processing
+          producer.ownPriority = Priority.realtime;
 
-        // Producer could not produce because supplerB is timing out
-        expect(producer.product, 0);
+          // Flush all micro tasks -> Nodes should produce
+          scm.testFlushTasks(tick: false);
 
-        // Now assume producer b is ready
-        scm.hasNewProduct(supplierB);
-        scm.testFlushTasks(tick: false);
+          // SupplierA is not ready
+          expect(supplierA.isReady, isTrue);
 
-        // Now everybody is ready
-        expect(supplierA.isReady, isTrue);
-        expect(supplierB.isReady, isTrue);
-        expect(supplierB.isReady, isTrue);
-      });
+          // SupplierB is not announced update. It is not ready.
+          expect(supplierB.isReady, isFalse);
 
-      test('with shouldTimeOut true', () {
-        initTimeoutExampleNodes();
+          // Producer is not ready, because one of its suppliers is not ready.
+          expect(producer.isReady, isFalse);
 
-        // Create a chain containing
-        // - a supplierA, timing out
-        // - a supplierB, not timing out
-        // - and a producer
-        producer.addSupplier(supplierA);
-        producer.addSupplier(supplierB);
+          // Producer could not produce because supplerB is timing out
+          expect(producer.product, 0);
 
-        // Disable timeouts
-        scm.shouldTimeOut = true;
+          // Now assume producer b is ready
+          scm.hasNewProduct(supplierB);
+          scm.testFlushTasks(tick: false);
 
-        // Make producer a realtime node for fast processing
-        producer.ownPriority = Priority.realtime;
+          // Now everybody is ready
+          expect(supplierA.isReady, isTrue);
+          expect(supplierB.isReady, isTrue);
+          expect(supplierB.isReady, isTrue);
+        },
+      );
 
-        // Set clock
-        const elapsedTime = Duration(milliseconds: 123);
-        scm.testStopwatch.elapse(elapsedTime);
+      test(
+        'with shouldTimeOut true',
+        () {
+          // Disable timeouts
+          scm.shouldTimeOut = true;
 
-        // Flush all micro tasks -> Nodes should produce
-        scm.testFlushTasks();
+          // Make producer a realtime node for fast processing
+          producer.ownPriority = Priority.realtime;
 
-        // SupplierA is ready
-        expect(supplierA.isReady, isTrue);
-        expect(supplierA.productionStartTime, elapsedTime);
+          // Set clock
+          const elapsedTime = Duration(milliseconds: 123);
+          scm.testStopwatch.elapse(elapsedTime);
 
-        // SupplierB is not announced update. It is not ready.
-        expect(supplierB.isReady, isFalse);
-        expect(supplierB.productionStartTime, elapsedTime);
+          // Flush all micro tasks -> Nodes should produce
+          scm.testFlushTasks();
 
-        // Producer is not ready, because one of its suppliers is not ready.
-        expect(producer.isReady, isFalse);
-        expect(producer.productionStartTime, Duration.zero);
+          // SupplierA is ready
+          expect(supplierA.isReady, isTrue);
+          expect(supplierA.productionStartTime, elapsedTime);
 
-        // Producer could not produce because supplerB is timing out
-        expect(producer.product, 0);
+          // SupplierB is not announced update. It is not ready.
+          expect(supplierB.isReady, isFalse);
+          expect(supplierB.productionStartTime, elapsedTime);
 
-        // Exceed time over timeout duration
-        scm.testStopwatch.elapse(scm.timeout);
+          // Producer is not ready, because one of its suppliers is not ready.
+          expect(producer.isReady, isFalse);
+          expect(producer.productionStartTime, Duration.zero);
 
-        // Let check timer fire
-        expect(scm.testTimer, isNotNull);
-        expect(scm.testTimer?.isCancelled, isFalse);
-        scm.testTimer?.fire();
+          // Producer could not produce because supplerB is timing out
+          expect(producer.product, 0);
 
-        // Run fast tasks
-        scm.testRunFastTasks();
+          // Exceed time over timeout duration
+          scm.testStopwatch.elapse(scm.timeout);
 
-        // SupplerB should be marked as isTimedOut
-        expect(supplierB.isTimedOut, isTrue);
+          // Let check timer fire
+          expect(scm.testTimer, isNotNull);
+          expect(scm.testTimer?.isCancelled, isFalse);
+          scm.testTimer?.fire();
 
-        // Timing out means that supplierB is marked as ready.
-        expect(supplierB.isReady, isTrue);
+          // Run fast tasks
+          scm.testRunFastTasks();
 
-        // Timer should be cancelled
-        expect(scm.testTimer, isNull);
+          // SupplerB should be marked as isTimedOut
+          expect(supplierB.isTimedOut, isTrue);
 
-        // Producer will now produce with the existing product
-        // of supplierB.
-        expect(producer.isReady, isTrue);
-        expect(producer.product, supplierA.product + supplierB.product);
-      });
+          // Timing out means that supplierB is marked as ready.
+          expect(supplierB.isReady, isTrue);
+
+          // Timer should be cancelled
+          expect(scm.testTimer, isNull);
+
+          // Producer will now produce with the existing product
+          // of supplierB.
+          expect(producer.isReady, isTrue);
+          expect(producer.product, supplierA.product + supplierB.product);
+        },
+      );
     });
 
     group('nodesWithKey<T>(key)', () {
@@ -855,6 +979,10 @@ void main() {
         expect(customer.product, 6);
       });
     });
+
+    group('placeholderNodes', () {
+      placeholderTest();
+    });
   });
 
   group('test helpers', () {
@@ -985,4 +1113,16 @@ void main() {
       expect(node.product, 1);
     });
   });
+}
+
+class _NodeThatTimesOut<T> extends Node<T> {
+  _NodeThatTimesOut({
+    required super.bluePrint,
+    required super.scope,
+  });
+
+  @override
+  void produce({bool announce = true}) {
+    // Do nothing. This node will time out.
+  }
 }

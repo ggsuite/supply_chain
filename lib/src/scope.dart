@@ -381,6 +381,7 @@ class Scope {
         true,
         true,
         false,
+        const [],
       ) as Node<T>?;
 
   /// Returns the node with key. If not available in scope the node is created.
@@ -497,6 +498,7 @@ class Scope {
     String path, {
     bool throwIfNotFound = false,
     bool skipInserts = false,
+    List<Node<T>> excludedNodes = const [],
   }) {
     return _findItem<T>(
       path,
@@ -504,6 +506,7 @@ class Scope {
       skipInserts: skipInserts,
       findNodes: true,
       findScopes: false,
+      excludedNodes: excludedNodes,
     ) as Node<T>?;
   }
 
@@ -609,17 +612,22 @@ class Scope {
     List<String> aliases = const [],
     List<ScBuilderBluePrint> builders = const [],
     List<ScopeBluePrint> children = const [],
+    bool createNode = true,
   }) {
     scm ??= Scm.example();
     final root = Scope.root(key: 'root', scm: scm);
-    final bluePrint = ScopeBluePrint(
-      key: key,
-      aliases: aliases,
-      builders: builders,
-      children: children,
-    );
-    final result = bluePrint.instantiate(scope: root);
-    return result;
+    if (createNode) {
+      final bluePrint = ScopeBluePrint(
+        key: key,
+        aliases: aliases,
+        builders: builders,
+        children: children,
+      );
+      final result = bluePrint.instantiate(scope: root);
+      return result;
+    } else {
+      return root;
+    }
   }
 
   // ...........................................................................
@@ -921,6 +929,7 @@ class Scope {
     bool skipInserts = false,
     required bool findNodes,
     required bool findScopes,
+    List<Node<T>> excludedNodes = const [],
   }) {
     // coverage:ignore-start
     if (findNodes == false && findScopes == false) {
@@ -943,6 +952,7 @@ class Scope {
           skipInserts,
           findNodes,
           findScopes,
+          excludedNodes,
         ) ??
         _findItemNodeInParentScopes<T>(
           nodeKey,
@@ -950,6 +960,7 @@ class Scope {
           skipInserts,
           findNodes,
           findScopes,
+          excludedNodes,
         ) ??
         _findOneItemInChildScopes<T>(
           nodeKey,
@@ -957,6 +968,7 @@ class Scope {
           skipInserts,
           findNodes,
           findScopes,
+          excludedNodes,
         ) ??
         _findItemInDirectSiblingScopes<T>(
           nodeKey,
@@ -964,6 +976,7 @@ class Scope {
           skipInserts,
           findNodes,
           findScopes,
+          excludedNodes,
         ) ??
         _findItemInParentsChildScopes<T>(
           nodeKey,
@@ -971,6 +984,7 @@ class Scope {
           skipInserts,
           findNodes,
           findScopes,
+          excludedNodes,
         );
 
     if (node == null && throwIfNotFound) {
@@ -988,6 +1002,7 @@ class Scope {
     bool skipInserts,
     bool findNodes,
     bool findScopes,
+    List<Node<T>> excludedNodes,
   ) {
     // If path matches own scope and path segment is the last one
     // Return this scope.
@@ -1012,6 +1027,7 @@ class Scope {
           skipInserts,
           findNodes,
           findScopes,
+          excludedNodes,
         );
       }
     }
@@ -1024,6 +1040,10 @@ class Scope {
     // Find the node in the current scope
     final node = _nodes[nodeKey];
     if (node == null) {
+      return null;
+    }
+
+    if (excludedNodes.contains(node)) {
       return null;
     }
 
@@ -1052,6 +1072,7 @@ class Scope {
     bool skipInserts,
     bool findNodes,
     bool findScopes,
+    List<Node<T>> excludedNodes,
   ) {
     return parent?._findItemInOwnScope<T>(
           key,
@@ -1059,6 +1080,7 @@ class Scope {
           skipInserts,
           findNodes,
           findScopes,
+          excludedNodes,
         ) ??
         parent?._findItemNodeInParentScopes<T>(
           key,
@@ -1066,6 +1088,7 @@ class Scope {
           skipInserts,
           findNodes,
           findScopes,
+          excludedNodes,
         );
   }
 
@@ -1076,6 +1099,7 @@ class Scope {
     bool skipInserts,
     bool findNodes,
     bool findScopes,
+    List<Node<T>> excludedNodes,
   ) {
     if (parent == null) {
       return null;
@@ -1088,6 +1112,7 @@ class Scope {
         skipInserts,
         findNodes,
         findScopes,
+        excludedNodes,
       );
       if (node != null) {
         return node;
@@ -1104,6 +1129,7 @@ class Scope {
     bool skipInserts,
     bool findNodes,
     bool findScopes,
+    List<Node<T>> excludedNodes,
   ) {
     List<dynamic> result = _findMultipleNodesInChildScopes<dynamic>(
       key,
@@ -1111,6 +1137,7 @@ class Scope {
       skipInserts,
       findNodes,
       findScopes,
+      excludedNodes,
     );
 
     if (result.isEmpty) {
@@ -1133,6 +1160,7 @@ class Scope {
     bool skipInserts,
     bool findNodes,
     bool findScopes,
+    List<Node<T>> excludedNodes,
   ) {
     final result = <Object>[];
 
@@ -1143,6 +1171,7 @@ class Scope {
         skipInserts,
         findNodes,
         findScopes,
+        excludedNodes,
       );
       if (node != null) {
         result.add(node);
@@ -1160,6 +1189,7 @@ class Scope {
         skipInserts,
         findNodes,
         findScopes,
+        excludedNodes,
       );
       result.addAll(nodes);
     }
@@ -1174,6 +1204,7 @@ class Scope {
     bool skipInserts,
     bool findNodes,
     bool findScopes,
+    List<Node<T>> excludedNodes,
   ) {
     if (parent == null) {
       return null;
@@ -1185,6 +1216,7 @@ class Scope {
       skipInserts,
       findNodes,
       findScopes,
+      excludedNodes,
     );
 
     if (result != null) {
@@ -1196,6 +1228,7 @@ class Scope {
         skipInserts,
         findNodes,
         findScopes,
+        excludedNodes,
       );
     }
   }
