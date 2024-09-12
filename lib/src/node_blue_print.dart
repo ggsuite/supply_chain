@@ -81,7 +81,7 @@ class NodeBluePrint<T> {
   final Produce<T> produce;
 
   /// A place holder node is only used if no other node is available
-  bool get isPlaceholder => this is SmartNodeBluePrint<T>;
+  bool get isSmartNode => this is SmartNodeBluePrint<T>;
 
   /// An example instance for test purposes
   static NodeBluePrint<int> example({

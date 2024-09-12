@@ -71,7 +71,7 @@ class Node<T> {
     }
 
     // Tell Scm to update smartNodes
-    scm.updatePlaceholders(this);
+    scm.updateSmartNodes(this);
 
     // Add the node to disposed.nodes
     if (customers.isNotEmpty) {
@@ -109,7 +109,7 @@ class Node<T> {
   bool get isDisposed => _isDisposed;
 
   /// Returns true if node is a smartNode
-  bool get isPlaceholder => _bluePrints.first.isPlaceholder;
+  bool get isSmartNode => _bluePrints.first.isSmartNode;
 
   // ...........................................................................
   /// Set back to initial state
@@ -126,7 +126,7 @@ class Node<T> {
   /// ScBuilders use this method to replace the present blue print
   void addBluePrint(NodeBluePrint<T> bluePrint) {
     // Replacing blueprints is not allowed for smartNode blueprints
-    assert(!isPlaceholder);
+    assert(!isSmartNode);
     _addBluePrint(bluePrint);
   }
 
@@ -147,16 +147,16 @@ class Node<T> {
 
   // ...........................................................................
   /// Called by SCM to update smartNodes
-  void addPlaceholderReplacement(NodeBluePrint<T> replacement) {
-    assert(isPlaceholder);
+  void addSmartNodeReplacement(NodeBluePrint<T> replacement) {
+    assert(isSmartNode);
     assert(allBluePrints.length == 1);
     _addBluePrint(replacement);
   }
 
   // ...........................................................................
   /// Called by SCM to update smartNodes
-  void resetPlaceholderReplacements() {
-    assert(isPlaceholder);
+  void resetSmartNodeReplacements() {
+    assert(isSmartNode);
     assert(allBluePrints.length <= 2);
     if (allBluePrints.length == 2) {
       removeBluePrint(allBluePrints.last);
@@ -539,7 +539,7 @@ class Node<T> {
   void _initScm() {
     scm.addNode(this);
     needsInitSuppliers();
-    scm.updatePlaceholders(this);
+    scm.updateSmartNodes(this);
   }
 
   // ...........................................................................

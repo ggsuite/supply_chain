@@ -43,6 +43,7 @@
 - Add some tests
 - Add class Disposed to manage disposed nodes and test disposal and recreation of nodes cleanly
 - Add additional unit tests for removal and recreation of nodes and scopes
+- Add additional tests. Fix an issue with smart nodes.
 
 ### Changed
 
@@ -159,7 +160,7 @@ Modifications can only be done via builders.
 - Rework initialization of suppliers
 - Rename replaceNode into addBluePrintOverlay. Add Scope.addOrReplaceNode.
 - Throw if a node is replaced with one with invalid suppliers
-- Rename PlaceholderNode into SmartNode
+- Rename SmartNodeNode into SmartNode
 - Use master as term for the node delivering data to a smart node.
 
 ### Fixed

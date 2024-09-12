@@ -38,7 +38,7 @@ void smartNodeTest() {
     });
 
     final smartNode = scope.findNode<int>('c.height')!;
-    expect(smartNode.bluePrint.isPlaceholder, true);
+    expect(smartNode.bluePrint.isSmartNode, true);
     final a = scope.findScope('a')!;
     final b = scope.findScope('b')!;
     final customer = scope.findNode<int>('d.customer')!;
@@ -47,7 +47,7 @@ void smartNodeTest() {
     // ..............................................
     // Use smartNode when no replacement is available
 
-    // Placeholder delivers it's own initial value
+    // SmartNode delivers it's own initial value
     // because no other master height node can be found
     expect(smartNode.product, smartNodeValue);
 
@@ -72,7 +72,7 @@ void smartNodeTest() {
     expect(customer.product, replacement0Value);
 
     // Change the replacement
-    // Placeholder value should be updated
+    // SmartNode value should be updated
     replacement0Value *= 10;
     replacement0.product = replacement0Value;
     scm.testFlushTasks();
@@ -109,7 +109,7 @@ void smartNodeTest() {
 
     // .......................
     // Remove the replacement0.
-    // Placeholder should take over again
+    // SmartNode should take over again
     replacement0.dispose();
     scm.testFlushTasks();
 

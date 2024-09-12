@@ -150,10 +150,10 @@ class Scm {
   late final Disposed disposedItems;
 
   // ...........................................................................
-  // Placeholders
+  // SmartNodes
 
   /// Update smartNodes
-  void updatePlaceholders(Node<dynamic> node) => _updatePlaceholders(node);
+  void updateSmartNodes(Node<dynamic> node) => _updateSmartNodes(node);
 
   // ######################
   // Testing
@@ -758,49 +758,68 @@ class Scm {
   }
 
   // ...........................................................................
-  void _updatePlaceholders(Node<dynamic> node) {
+  void _connectSmartNodeToMasterNode(
+    Node<dynamic> smartNode,
+    Node<dynamic> node,
+  ) {
+    assert(smartNode.isSmartNode);
+
+    final smartNodeBluePrint =
+        smartNode.allBluePrints.first as SmartNodeBluePrint;
+
+    // If smartNode does not match the master node path, continue
+    if (!node.matchesPath(smartNodeBluePrint.master)) {
+      return;
+    }
+
+    // Reset smartNode replacements
+    smartNode.resetSmartNodeReplacements();
+
+    // If node is disposed
+    // check, if there is another master node available
+    var replacementAvailable = true;
+    if (node.isDisposed && smartNode.suppliers.contains(node)) {
+      final replacementNode = node.scope.findNode<dynamic>(
+        smartNodeBluePrint.master,
+        excludedNodes: [node],
+      );
+
+      replacementAvailable = replacementNode != null;
+    }
+
+    // If a replacement is available,
+    // link smartNode to replacement
+    if (replacementAvailable) {
+      smartNode.addSmartNodeReplacement(
+        smartNode.bluePrint.connectSupplier(
+          smartNodeBluePrint.master,
+        ),
+      );
+    }
+
+    smartNode.needsInitSuppliers();
+
+    return;
+  }
+
+  // ...........................................................................
+  void _updateSmartNodes(
+    Node<dynamic> node,
+  ) {
     // Node is a smartNode? Add the node to list of smartNodes.
-    if (node.bluePrint.isPlaceholder) {
+    if (node.bluePrint.isSmartNode) {
       _smartNodes.add(node);
+
+      for (final otherNode in _nodes) {
+        _connectSmartNodeToMasterNode(node, otherNode);
+      }
+
       return;
     }
 
     // Node is a master node? Update smartNodes
     for (final smartNode in _smartNodes) {
-      final smartNodeBluePrint =
-          smartNode.allBluePrints.first as SmartNodeBluePrint;
-
-      // If smartNode does not match the master node path, continue
-      if (!node.matchesPath(smartNodeBluePrint.master)) {
-        continue;
-      }
-
-      // Reset smartNode replacements
-      smartNode.resetPlaceholderReplacements();
-
-      // If node is disposed
-      // check, if there is another master node available
-      var replacementAvailable = true;
-      if (node.isDisposed && smartNode.suppliers.contains(node)) {
-        final replacementNode = node.scope.findNode<dynamic>(
-          smartNodeBluePrint.master,
-          excludedNodes: [node],
-        );
-
-        replacementAvailable = replacementNode != null;
-      }
-
-      // If a replacement is available,
-      // link smartNode to replacement
-      if (replacementAvailable) {
-        smartNode.addPlaceholderReplacement(
-          smartNode.bluePrint.connectSupplier(
-            smartNodeBluePrint.master,
-          ),
-        );
-      }
-
-      smartNode.needsInitSuppliers();
+      _connectSmartNodeToMasterNode(smartNode, node);
     }
   }
 }
