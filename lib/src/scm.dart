@@ -810,9 +810,14 @@ class Scm {
     if (node.bluePrint.isSmartNode) {
       _smartNodes.add(node);
 
-      for (final otherNode in _nodes) {
-        _connectSmartNodeToMasterNode(node, otherNode);
+      final masterNode = node.findMasterNode();
+
+      // Find master in own scope
+      if (masterNode != null && masterNode != node) {
+        _connectSmartNodeToMasterNode(node, masterNode);
       }
+
+      // Find master node in parent scopes
 
       return;
     }

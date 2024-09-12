@@ -924,6 +924,107 @@ void main() {
         });
       });
     });
+
+    group('findMasterNode(smartNode)', () {
+      test('returns null when no master node is found or the master node', () {
+        final scope = Scope.example();
+        scope.mockContent({
+          'a': {
+            'node': 0,
+            'b': {
+              'node': 1,
+              'c': {
+                'node': const SmartNodeBluePrint(
+                  initialProduct: 2,
+                  key: 'node',
+                  master: 'node',
+                ),
+              },
+              'd': {
+                'node': const SmartNodeBluePrint(
+                  initialProduct: 3,
+                  key: 'node',
+                  master: 'node',
+                ),
+              },
+              'e': {
+                'node': const SmartNodeBluePrint(
+                  initialProduct: 4,
+                  key: 'node',
+                  master: 'node',
+                ),
+              },
+            },
+            'f': {
+              'node': 6,
+            },
+          },
+        });
+        scope.scm.testFlushTasks();
+
+        // Find the first master node in the hierarchy
+        final nodeB = scope.findNode<int>('a.b.node')!;
+        final nodeC = scope.findNode<int>('c.node')!;
+        final masterOfNodeC = nodeC.findMasterNode();
+        expect(masterOfNodeC, nodeB);
+
+        // Dispose the master node
+        nodeB.dispose();
+        scope.scm.testFlushTasks();
+
+        // The next master node should be found
+        final nodeA = scope.findNode<int>('a.node')!;
+        final masterOfNodeA = nodeC.findMasterNode();
+        expect(masterOfNodeA, nodeA);
+
+        // Dispose the master node
+        nodeA.dispose();
+        scope.scm.testFlushTasks();
+
+        // No master node is found
+        final masterOfNodeX = nodeC.findMasterNode();
+        expect(masterOfNodeX, isNull);
+      });
+
+      test('should not find sibling nodes', () {
+        final scope = Scope.example();
+        scope.mockContent({
+          'a': {
+            'node': 0,
+            'b': const {
+              'node': SmartNodeBluePrint(
+                initialProduct: 0,
+                key: 'node',
+                master: 'node',
+              ),
+            },
+            'c': const {
+              'node': SmartNodeBluePrint(
+                initialProduct: 0,
+                key: 'node',
+                master: 'node',
+              ),
+            },
+          },
+        });
+
+        final masterNode = scope.findNode<int>('a.node')!;
+
+        scope.scm.testFlushTasks();
+        final nodeB = scope.findNode<int>('b.node')!;
+        final masterNodeB = nodeB.findMasterNode();
+        expect(masterNodeB, masterNode);
+
+        final nodeC = scope.findNode<int>('c.node')!;
+        final masterNodeOfC = nodeC.findMasterNode();
+        expect(masterNodeOfC, masterNode);
+
+        masterNode.dispose();
+        scope.scm.testFlushTasks();
+        expect(nodeB.findMasterNode(), isNull);
+        expect(nodeC.findMasterNode(), isNull);
+      });
+    });
   });
 
   group('Examples', () {

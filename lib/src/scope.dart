@@ -533,6 +533,19 @@ class Scope {
     ) as Node<T>?;
   }
 
+  /// Returns the child node but only when it is a direct child
+  Node<T>? findDirectChildNode<T>(String path) {
+    final keyParts = path.split('.');
+    final nodeKey = keyParts.last;
+    var scopePath = keyParts.sublist(0, keyParts.length - 1);
+
+    final childScope = scopePath.isEmpty
+        ? this
+        : _findChildScope(didFindFirstScope: true, scopePath);
+
+    return childScope?.node<T>(nodeKey);
+  }
+
   /// Returns the first scope with the given path.
   /// Throws if multiple scopes with the same path exist.
   Scope? findChildScope(String path) {
@@ -708,7 +721,7 @@ class Scope {
       }
 
       // If value is a NodeBluePrint, create a child node
-      else if (value is NodeBluePrint) {
+      else if (value is NodeBluePrint || value is SmartNodeBluePrint) {
         assert(value.key == key);
         value.instantiate(scope: this);
       }

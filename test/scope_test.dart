@@ -1840,6 +1840,45 @@ void main() {
       });
     });
 
+    group('findDirectChildNode()', () {
+      test('should only return a node if it is a direct child', () {
+        final scope = Scope.example();
+        scope.mockContent({
+          'a': {
+            'n': 3,
+            'b': {
+              'n': 4,
+              'c': {
+                'n': 5,
+              },
+            },
+            'd': {
+              'n': 6,
+            },
+          },
+          'e': {
+            'n': 6,
+          },
+        });
+
+        scope.scm.testFlushTasks();
+
+        // Find direct child
+        final d = scope.findScope('a.d')!;
+        expect(d.findDirectChildNode<int>('n')!.product, 6);
+
+        final a = scope.findScope('a')!;
+        expect(a.findDirectChildNode<int>('n')!.product, 3);
+        expect(a.findDirectChildNode<int>('a.n')!.product, 3);
+
+        expect(a.findDirectChildNode<int>('b.n')!.product, 4);
+        expect(a.findDirectChildNode<int>('a.b.n')!.product, 4);
+
+        expect(a.findDirectChildNode<int>('a.b.c.n')!.product, 5);
+        expect(a.findDirectChildNode<int>('c.n'), isNull);
+      });
+    });
+
     group('findScope(path)', () {
       final scope = Scope.example();
       scope.mockContent({

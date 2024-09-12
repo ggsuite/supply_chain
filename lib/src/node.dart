@@ -147,10 +147,10 @@ class Node<T> {
 
   // ...........................................................................
   /// Called by SCM to update smartNodes
-  void addSmartNodeReplacement(NodeBluePrint<T> replacement) {
+  void addSmartNodeReplacement(NodeBluePrint<T> smartNode) {
     assert(isSmartNode);
     assert(allBluePrints.length == 1);
-    _addBluePrint(replacement);
+    _addBluePrint(smartNode);
   }
 
   // ...........................................................................
@@ -403,6 +403,22 @@ class Node<T> {
       result.addAll(customer.deepCustomers(depth: depth - 1));
     }
     return result;
+  }
+
+  // ...........................................................................
+  /// Returns the master node for the smart node
+  Node<T>? findMasterNode() {
+    assert(isSmartNode);
+    final masterPath = (this.allBluePrints.first as SmartNodeBluePrint).master;
+    Scope? parent = scope.parent;
+    while (parent != null) {
+      final foundNode = parent.findDirectChildNode<T>(masterPath);
+      if (foundNode != null) {
+        return foundNode;
+      }
+      parent = parent.parent;
+    }
+    return null;
   }
 
   // ...........................................................................

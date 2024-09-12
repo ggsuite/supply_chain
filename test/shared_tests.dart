@@ -11,8 +11,8 @@ import 'package:test/test.dart';
 void smartNodeTest() {
   test('should work', () {
     var smartNodeValue = 2;
-    var replacement0Value = 3;
-    var replacement1Value = 4;
+    var smartNode0Value = 3;
+    var smartNode1Value = 4;
 
     final scope = Scope.example();
     final scm = scope.scm;
@@ -45,7 +45,7 @@ void smartNodeTest() {
     scm.testFlushTasks();
 
     // ..............................................
-    // Use smartNode when no replacement is available
+    // Use smartNode when no smartNode is available
 
     // SmartNode delivers it's own initial value
     // because no other master height node can be found
@@ -55,62 +55,62 @@ void smartNodeTest() {
     expect(customer.product, smartNodeValue);
 
     // .........................................
-    // Add replacement0 replacing the smartNode
+    // Add smartNode0 replacing the smartNode
 
     // Add x.height to the scope a
     a.mockContent({
       'x': {
-        'height': replacement0Value,
+        'height': smartNode0Value,
       },
     });
-    final replacement0 = scope.findNode<int>('x.height')!;
+    final smartNode0 = scope.findNode<int>('x.height')!;
     scm.testFlushTasks();
 
-    // Now smartNode should deliver the value of the replacement
-    expect(replacement0.product, replacement0Value);
-    expect(smartNode.product, replacement0Value);
-    expect(customer.product, replacement0Value);
+    // Now smartNode should deliver the value of the smartNode
+    expect(smartNode0.product, smartNode0Value);
+    expect(smartNode.product, smartNode0Value);
+    expect(customer.product, smartNode0Value);
 
-    // Change the replacement
+    // Change the smartNode
     // SmartNode value should be updated
-    replacement0Value *= 10;
-    replacement0.product = replacement0Value;
+    smartNode0Value *= 10;
+    smartNode0.product = smartNode0Value;
     scm.testFlushTasks();
 
-    expect(replacement0.product, replacement0Value);
-    expect(smartNode.product, replacement0Value);
-    expect(customer.product, replacement0Value);
+    expect(smartNode0.product, smartNode0Value);
+    expect(smartNode.product, smartNode0Value);
+    expect(customer.product, smartNode0Value);
 
     // ..........................................................
-    // Insert another replacement1 between smartNode and replacement
+    // Insert another smartNode1 between smartNode and smartNode
     b.mockContent({
       'x': {
-        'height': replacement1Value,
+        'height': smartNode1Value,
       },
     });
-    final replacement1 = scope.findNode<int>('b.x.height')!;
+    final smartNode1 = scope.findNode<int>('b.x.height')!;
     scm.testFlushTasks();
 
-    // Now the smartNode should deliver the value of the new replacement
-    expect(replacement0.product, replacement0Value);
-    expect(replacement1.product, replacement1Value);
-    expect(smartNode.product, replacement1Value);
-    expect(customer.product, replacement1Value);
+    // Now the smartNode should deliver the value of the new smartNode
+    expect(smartNode0.product, smartNode0Value);
+    expect(smartNode1.product, smartNode1Value);
+    expect(smartNode.product, smartNode1Value);
+    expect(customer.product, smartNode1Value);
 
     // .........................................................
-    // Remove the replacement1 between  replacement0 and smartNode
-    replacement1.dispose();
+    // Remove the smartNode1 between  smartNode0 and smartNode
+    smartNode1.dispose();
     scm.testFlushTasks();
 
-    // Now replacement 0 should take over again
-    expect(replacement0.product, replacement0Value);
-    expect(smartNode.product, replacement0Value);
-    expect(customer.product, replacement0Value);
+    // Now smartNode 0 should take over again
+    expect(smartNode0.product, smartNode0Value);
+    expect(smartNode.product, smartNode0Value);
+    expect(customer.product, smartNode0Value);
 
     // .......................
-    // Remove the replacement0.
+    // Remove the smartNode0.
     // SmartNode should take over again
-    replacement0.dispose();
+    smartNode0.dispose();
     scm.testFlushTasks();
 
     expect(smartNode.suppliers, isEmpty);

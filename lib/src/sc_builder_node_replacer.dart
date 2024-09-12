@@ -72,7 +72,7 @@ class ScBuilderNodeReplacer {
 
   // ...........................................................................
   void _applyToNode(Node<dynamic> node) {
-    // Get the replacement for the node from the builder
+    // Get the smartNode for the node from the builder
     final newBluePrint = builder.bluePrint.replaceNode(
       hostScope: node.scope,
       nodeToBeReplaced: node,
@@ -86,7 +86,7 @@ class ScBuilderNodeReplacer {
     // Replace the blue print
     node.addBluePrint(newBluePrint);
 
-    // On dispose we will revert the replacement
+    // On dispose we will revert the smartNode
     _dispose.add(() {
       node.removeBluePrint(newBluePrint);
     });

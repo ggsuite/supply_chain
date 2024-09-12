@@ -44,6 +44,32 @@ void main() {
           expect(smartValue.product, masterValue.product);
         },
       );
+
+      test('should not select master nodes that define a circular dependency',
+          () {
+        final scope = Scope.example();
+        final scm = scope.scm;
+
+        // Create two sibling nodes that might reference each other.
+        scope.mockContent({
+          'scope0': {
+            'a': const SmartNodeBluePrint(
+              key: 'a',
+              master: 'a',
+              initialProduct: 0,
+            ),
+          },
+          'scope1': {
+            'a': const SmartNodeBluePrint(
+              key: 'a',
+              master: 'a',
+              initialProduct: 0,
+            ),
+          },
+        });
+
+        scm.testFlushTasks();
+      });
     });
   });
 }
