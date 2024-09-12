@@ -193,6 +193,8 @@ class Scm {
         _tick();
       }
     }
+
+    _initMissedSuppliers();
   }
 
   /// Clears all scheduled tasks

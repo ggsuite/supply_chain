@@ -978,6 +978,29 @@ void main() {
         scm.testFlushTasks();
         expect(customer.product, 6);
       });
+
+      test('should throw when an replaced node has invalid suppliers', () {
+        // Create a node with valid suppliers
+        final scope = Scope.example();
+        final scm = scope.scm;
+        nbp(from: [], to: 'a', init: 0).instantiate(scope: scope);
+        scm.testFlushTasks();
+
+        // Replace the node with a node that has invalid suppliers
+        final invalidNode = nbp(from: ['unknown'], to: 'a', init: 0);
+        scope.addOrReplaceNode(invalidNode);
+
+        expect(
+          () => scm.testFlushTasks(),
+          throwsA(
+            isA<ArgumentError>().having(
+              (e) => e.message,
+              'message',
+              'Node "root.example.a": Supplier with key "unknown" not found.',
+            ),
+          ),
+        );
+      });
     });
 
     group('placeholderNodes', () {
