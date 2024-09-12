@@ -65,6 +65,7 @@ class Scm {
     _producingNodes.remove(node);
     _smartNodes.remove(node);
     _nodesWithMissedSuppliers.remove(node);
+    _nodesNeedingSupplierUpdate.remove(node);
     _assertNoNodeIsErased(nodes: _nominatedNodes);
   }
 
