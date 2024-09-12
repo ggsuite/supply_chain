@@ -157,6 +157,7 @@ Modifications can only be done via builders.
 - Try again later to add suppliers not available immediately
 - Suppliers must not be available from the beginning
 - Rework initialization of suppliers
+- Rename replaceNode into addBluePrintOverlay. Add Scope.addOrReplaceNode.
 
 ### Fixed
 

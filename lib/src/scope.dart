@@ -471,8 +471,8 @@ class Scope {
     }
   }
 
-  /// Replace an existing node with the same key
-  void replaceNode(NodeBluePrint<dynamic> bluePrint) {
+  /// Add a blue print overlay on the top of an existing node
+  void addOBluePrintverlay(NodeBluePrint<dynamic> bluePrint) {
     final existingNode = _nodes[bluePrint.key];
     if (existingNode == null) {
       throw ArgumentError(
@@ -481,6 +481,29 @@ class Scope {
     }
 
     existingNode.addBluePrint(bluePrint);
+  }
+
+  /// Remove an overlay added before
+  void removeBluePrintverlay(NodeBluePrint<dynamic> bluePrint) {
+    final existingNode = _nodes[bluePrint.key];
+    if (existingNode == null) {
+      throw ArgumentError(
+        'Node with key "${bluePrint.key}" does not exist in scope "$key"',
+      );
+    }
+
+    existingNode.removeBluePrint(bluePrint);
+  }
+
+  /// Add or replace a node with the new blue print
+  Node<T> addOrReplaceNode<T>(NodeBluePrint<T> bluePrint) {
+    final existingNode = _nodes[bluePrint.key];
+    if (existingNode != null) {
+      existingNode.dispose();
+    }
+
+    final result = bluePrint.instantiate(scope: this);
+    return result;
   }
 
   /// Returns true if a node with the given key exists in this or a

@@ -965,6 +965,43 @@ void main() {
         expect(nodes[1].key, 'customer');
       });
     });
+
+    group('addOrReplaceNode()', () {
+      test('should add the node if does not already exist', () {
+        final node = NodeBluePrint<int>(
+          initialProduct: 0,
+          produce: produce,
+          key: 'newNode',
+        );
+        final newNode = scope.addOrReplaceNode(node);
+        expect(newNode, isNotNull);
+        expect(newNode.key, 'newNode');
+      });
+
+      test('should replace the node if it already exist', () {
+        final node0 = NodeBluePrint<int>(
+          initialProduct: 0,
+          produce: produce,
+          key: 'newNode',
+        );
+        final newNode = scope.addOrReplaceNode(node0);
+        expect(newNode, isNotNull);
+        expect(newNode.bluePrint.initialProduct, 0);
+        expect(newNode.key, 'newNode');
+
+        final node1 = NodeBluePrint<int>(
+          initialProduct: 1,
+          produce: produce,
+          key: 'newNode',
+        );
+        final newNode1 = scope.addOrReplaceNode(node1);
+        expect(newNode1.key, 'newNode');
+        expect(newNode1.bluePrint.initialProduct, 1);
+
+        expect(scope.findNode<int>('newNode'), newNode1);
+      });
+    });
+
     group('addNode()', () {
       test('should create a node and set the scope and SCM correctly', () {
         expect(node.scope, scope);
@@ -1015,16 +1052,21 @@ void main() {
       });
     });
 
-    group('replaceNode()', () {
-      test('should replace the node with the given key', () {
-        final newNode = NodeBluePrint<int>(
+    group('addOBluePrintverlay(), removeBluePrintOverlay()', () {
+      test('should overlay another blueprint on the top of the existing one',
+          () {
+        final newBluePrint = NodeBluePrint<int>(
           initialProduct: 0,
           produce: (components, previousProduct) => previousProduct,
           key: 'node',
         );
 
-        scope.replaceNode(newNode);
-        expect(scope.node<int>('node')?.bluePrint, newNode);
+        final node = scope.node<int>('node')!;
+        final bluePrintBefore = node.bluePrint;
+        scope.addOBluePrintverlay(newBluePrint);
+        expect(node.bluePrint, newBluePrint);
+        scope.removeBluePrintverlay(newBluePrint);
+        expect(node.bluePrint, bluePrintBefore);
       });
 
       test('should throw if the node does not exist', () {
@@ -1035,7 +1077,18 @@ void main() {
         );
 
         expect(
-          () => scope.replaceNode(newNode),
+          () => scope.addOBluePrintverlay(newNode),
+          throwsA(
+            predicate<ArgumentError>(
+              (e) => e.toString().contains(
+                    'Node with key "unknown" does not exist in scope "example"',
+                  ),
+            ),
+          ),
+        );
+
+        expect(
+          () => scope.removeBluePrintverlay(newNode),
           throwsA(
             predicate<ArgumentError>(
               (e) => e.toString().contains(
