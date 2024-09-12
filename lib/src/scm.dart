@@ -765,13 +765,13 @@ class Scm {
       return;
     }
 
-    // Node is a real node? Update smartNodes
+    // Node is a master node? Update smartNodes
     for (final smartNode in _smartNodes) {
       final smartNodeBluePrint =
           smartNode.allBluePrints.first as SmartNodeBluePrint;
 
-      // If smartNode does not match the real node path, continue
-      if (!node.matchesPath(smartNodeBluePrint.realNodePath)) {
+      // If smartNode does not match the master node path, continue
+      if (!node.matchesPath(smartNodeBluePrint.master)) {
         continue;
       }
 
@@ -779,11 +779,11 @@ class Scm {
       smartNode.resetPlaceholderReplacements();
 
       // If node is disposed
-      // check, if there is another real node available
+      // check, if there is another master node available
       var replacementAvailable = true;
       if (node.isDisposed && smartNode.suppliers.contains(node)) {
         final replacementNode = node.scope.findNode<dynamic>(
-          smartNodeBluePrint.realNodePath,
+          smartNodeBluePrint.master,
           excludedNodes: [node],
         );
 
@@ -795,7 +795,7 @@ class Scm {
       if (replacementAvailable) {
         smartNode.addPlaceholderReplacement(
           smartNode.bluePrint.connectSupplier(
-            smartNodeBluePrint.realNodePath,
+            smartNodeBluePrint.master,
           ),
         );
       }

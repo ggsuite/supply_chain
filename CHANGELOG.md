@@ -160,6 +160,7 @@ Modifications can only be done via builders.
 - Rename replaceNode into addBluePrintOverlay. Add Scope.addOrReplaceNode.
 - Throw if a node is replaced with one with invalid suppliers
 - Rename PlaceholderNode into SmartNode
+- Use master as term for the node delivering data to a smart node.
 
 ### Fixed
 

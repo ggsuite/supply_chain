@@ -23,7 +23,7 @@ void smartNodeTest() {
             'height': SmartNodeBluePrint<int>(
               key: 'height',
               initialProduct: smartNodeValue,
-              realNodePath: 'x.height',
+              master: 'x.height',
             ),
             'd': {
               'customer': NodeBluePrint<int>.map(
@@ -48,7 +48,7 @@ void smartNodeTest() {
     // Use smartNode when no replacement is available
 
     // Placeholder delivers it's own initial value
-    // because no other real height node can be found
+    // because no other master height node can be found
     expect(smartNode.product, smartNodeValue);
 
     // The customer uses the place holder

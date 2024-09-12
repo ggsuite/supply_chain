@@ -7,16 +7,15 @@
 import 'package:supply_chain/supply_chain.dart';
 
 /// A smartNode node that delivers a smartNode value until
-/// a real node is provided
+/// a master node is available.
 class SmartNodeBluePrint<T> extends NodeBluePrint<T> {
   /// Constructor of the node
   const SmartNodeBluePrint({
     required super.key,
     required super.initialProduct,
-    required this.realNodePath,
+    required this.master,
   });
 
-  /// The path of the real node that will be used
-  /// when the real node is found
-  final String realNodePath;
+  /// The master that will be used once available.
+  final String master;
 }
