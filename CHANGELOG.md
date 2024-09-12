@@ -182,6 +182,7 @@ Modifications can only be done via builders.
 - Fix an issue while disposing scopes
 - Fix an github issue
 - Fix issues with healing disposed scopes
+- Fix an issue when smart nodes were disposed
 
 ### Removed
 

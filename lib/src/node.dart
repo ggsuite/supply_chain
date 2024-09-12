@@ -64,14 +64,14 @@ class Node<T> {
       _removeSupplier(supplier);
     }
 
+    // Tell Scm to update smartNodes
+    scm.updateSmartNodes(this);
+
     // Mute suppliers in the bluePrint
-    if (bluePrint.suppliers.isNotEmpty) {
+    if (bluePrint.suppliers.isNotEmpty && !isSmartNode) {
       final muted = bluePrint.copyWith(produce: doNothing, suppliers: []);
       addBluePrint(muted);
     }
-
-    // Tell Scm to update smartNodes
-    scm.updateSmartNodes(this);
 
     // Add the node to disposed.nodes
     if (customers.isNotEmpty) {

@@ -129,4 +129,37 @@ void smartNodeTest() {
     scm.testFlushTasks();
     expect(scope.findNode<int>('b')!.product, 5);
   });
+
+  test('should remove suppliers from disposed smart nodes', () {
+    final scope = Scope.example();
+    final scm = scope.scm;
+
+    // Create two sibling nodes that might reference each other.
+    scope.mockContent(
+      {
+        'scope0': {
+          'master': 0,
+          'a': {
+            'smartNode': const SmartNodeBluePrint(
+              key: 'smartNode',
+              master: 'master',
+              initialProduct: 1,
+            ),
+          },
+        },
+      },
+    );
+
+    scm.testFlushTasks();
+
+    final master = scope.findNode<int>('master')!;
+    final smartNode = scope.findNode<int>('smartNode')!;
+    expect(smartNode.suppliers, [master]);
+
+    // Dispose smart node
+    smartNode.dispose();
+
+    // The smart node should not have any suppliers anymore.
+    expect(smartNode.suppliers, isEmpty);
+  });
 }

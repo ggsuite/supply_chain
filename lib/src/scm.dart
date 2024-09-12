@@ -798,8 +798,13 @@ class Scm {
     Node<dynamic> node,
   ) {
     // Node is a smartNode? Add the node to list of smartNodes.
-    if (node.bluePrint.isSmartNode) {
-      _smartNodes.add(node);
+    if (node.isSmartNode) {
+      if (node.isDisposed) {
+        _smartNodes.remove(node);
+        return;
+      } else {
+        _smartNodes.add(node);
+      }
 
       final masterNode = node.findMasterNode();
 
