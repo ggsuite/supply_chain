@@ -11,8 +11,8 @@ import 'package:test/test.dart';
 void smartNodeTest() {
   test('should work', () {
     var smartNodeValue = 2;
-    var smartNode0Value = 3;
-    var smartNode1Value = 4;
+    var master0Value = 3;
+    var master1Value = 4;
 
     final scope = Scope.example();
     final scm = scope.scm;
@@ -45,7 +45,7 @@ void smartNodeTest() {
     scm.testFlushTasks();
 
     // ..............................................
-    // Use smartNode when no smartNode is available
+    // Use smartNode itself when no smartNode is available
 
     // SmartNode delivers it's own initial value
     // because no other master height node can be found
@@ -55,67 +55,78 @@ void smartNodeTest() {
     expect(customer.product, smartNodeValue);
 
     // .........................................
-    // Add smartNode0 replacing the smartNode
+    // Add master0 replacing the smartNode
 
     // Add x.height to the scope a
     a.mockContent({
       'x': {
-        'height': smartNode0Value,
+        'height': master0Value,
       },
     });
-    final smartNode0 = scope.findNode<int>('x.height')!;
+    final master0 = scope.findNode<int>('x.height')!;
     scm.testFlushTasks();
 
-    // Now smartNode should deliver the value of the smartNode
-    expect(smartNode0.product, smartNode0Value);
-    expect(smartNode.product, smartNode0Value);
-    expect(customer.product, smartNode0Value);
+    // Now master0 should deliver the value of the smartNode
+    expect(master0.product, master0Value);
+    expect(smartNode.product, master0Value);
+    expect(customer.product, master0Value);
 
-    // Change the smartNode
+    // Change the master0
     // SmartNode value should be updated
-    smartNode0Value *= 10;
-    smartNode0.product = smartNode0Value;
+    master0Value *= 10;
+    master0.product = master0Value;
     scm.testFlushTasks();
 
-    expect(smartNode0.product, smartNode0Value);
-    expect(smartNode.product, smartNode0Value);
-    expect(customer.product, smartNode0Value);
+    expect(master0.product, master0Value);
+    expect(smartNode.product, master0Value);
+    expect(customer.product, master0Value);
 
     // ..........................................................
-    // Insert another smartNode1 between smartNode and smartNode
+    // Insert another master1 between smartNode and master0
     b.mockContent({
       'x': {
-        'height': smartNode1Value,
+        'height': master1Value,
       },
     });
-    final smartNode1 = scope.findNode<int>('b.x.height')!;
+    final master1 = scope.findNode<int>('b.x.height')!;
     scm.testFlushTasks();
 
     // Now the smartNode should deliver the value of the new smartNode
-    expect(smartNode0.product, smartNode0Value);
-    expect(smartNode1.product, smartNode1Value);
-    expect(smartNode.product, smartNode1Value);
-    expect(customer.product, smartNode1Value);
+    expect(master0.product, master0Value);
+    expect(master1.product, master1Value);
+    expect(smartNode.product, master1Value);
+    expect(customer.product, master1Value);
 
     // .........................................................
-    // Remove the smartNode1 between  smartNode0 and smartNode
-    smartNode1.dispose();
+    // Remove the master1 between  smartNode and master0
+    master1.dispose();
     scm.testFlushTasks();
 
-    // Now smartNode 0 should take over again
-    expect(smartNode0.product, smartNode0Value);
-    expect(smartNode.product, smartNode0Value);
-    expect(customer.product, smartNode0Value);
+    // Now master0 should take over again
+    expect(master0.product, master0Value);
+    expect(smartNode.product, master0Value);
+    expect(customer.product, master0Value);
 
     // .......................
-    // Remove the smartNode0.
+    // Remove the master0.
     // SmartNode should take over again
-    smartNode0.dispose();
+    master0.dispose();
     scm.testFlushTasks();
 
     expect(smartNode.suppliers, isEmpty);
     smartNode.product = smartNodeValue;
     expect(smartNode.product, smartNodeValue);
     expect(customer.product, smartNodeValue);
+  });
+
+  test('should be able to connect to a master in own scope', () {
+    final scope = Scope.example();
+    final scm = scope.scm;
+    scope.mockContent({
+      'a': 5,
+      'b': const SmartNodeBluePrint(key: 'b', initialProduct: 1, master: 'a'),
+    });
+    scm.testFlushTasks();
+    expect(scope.findNode<int>('b')!.product, 5);
   });
 }

@@ -162,6 +162,7 @@ Modifications can only be done via builders.
 - Throw if a node is replaced with one with invalid suppliers
 - Rename SmartNodeNode into SmartNode
 - Use master as term for the node delivering data to a smart node.
+- Make smart node more stable
 
 ### Fixed
 

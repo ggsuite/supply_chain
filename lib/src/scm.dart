@@ -767,7 +767,7 @@ class Scm {
     final smartNodeBluePrint =
         smartNode.allBluePrints.first as SmartNodeBluePrint;
 
-    // If smartNode does not match the master node path, continue
+    // If master node does not match the smart node's master, continue
     if (!node.matchesPath(smartNodeBluePrint.master)) {
       return;
     }
@@ -775,24 +775,15 @@ class Scm {
     // Reset smartNode replacements
     smartNode.resetSmartNodeReplacements();
 
-    // If node is disposed
-    // check, if there is another master node available
-    var replacementAvailable = true;
-    if (node.isDisposed && smartNode.suppliers.contains(node)) {
-      final replacementNode = node.scope.findNode<dynamic>(
-        smartNodeBluePrint.master,
-        excludedNodes: [node],
-      );
-
-      replacementAvailable = replacementNode != null;
-    }
+    // Get master node
+    final masterNode = smartNode.findMasterNode();
 
     // If a replacement is available,
     // link smartNode to replacement
-    if (replacementAvailable) {
+    if (masterNode != null) {
       smartNode.addSmartNodeReplacement(
         smartNode.bluePrint.connectSupplier(
-          smartNodeBluePrint.master,
+          masterNode.path,
         ),
       );
     }

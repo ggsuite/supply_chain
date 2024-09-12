@@ -410,10 +410,10 @@ class Node<T> {
   Node<T>? findMasterNode() {
     assert(isSmartNode);
     final masterPath = (this.allBluePrints.first as SmartNodeBluePrint).master;
-    Scope? parent = scope.parent;
+    Scope? parent = scope;
     while (parent != null) {
       final foundNode = parent.findDirectChildNode<T>(masterPath);
-      if (foundNode != null) {
+      if (foundNode != null && !foundNode.isDisposed && foundNode != this) {
         return foundNode;
       }
       parent = parent.parent;
