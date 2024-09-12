@@ -1003,8 +1003,8 @@ void main() {
       });
     });
 
-    group('placeholderNodes', () {
-      placeholderTest();
+    group('smartNodes', () {
+      smartNodeTest();
     });
   });
 

@@ -63,7 +63,7 @@ class Scm {
     _nominatedNodes.remove(node);
     _preparedNodes.remove(node);
     _producingNodes.remove(node);
-    _placeholderNodes.remove(node);
+    _smartNodes.remove(node);
     _nodesWithMissedSuppliers.remove(node);
     _assertNoNodeIsErased(nodes: _nominatedNodes);
   }
@@ -152,7 +152,7 @@ class Scm {
   // ...........................................................................
   // Placeholders
 
-  /// Update placeholders
+  /// Update smartNodes
   void updatePlaceholders(Node<dynamic> node) => _updatePlaceholders(node);
 
   // ######################
@@ -252,7 +252,7 @@ class Scm {
   final Set<Node<dynamic>> _nodesWithMissedSuppliers = {};
 
   // ...........................................................................
-  final Set<Node<dynamic>> _placeholderNodes = {};
+  final Set<Node<dynamic>> _smartNodes = {};
 
   // ...........................................................................
   // Processing stages
@@ -759,31 +759,31 @@ class Scm {
 
   // ...........................................................................
   void _updatePlaceholders(Node<dynamic> node) {
-    // Node is a placeholder? Add the node to list of placeholders.
+    // Node is a smartNode? Add the node to list of smartNodes.
     if (node.bluePrint.isPlaceholder) {
-      _placeholderNodes.add(node);
+      _smartNodes.add(node);
       return;
     }
 
-    // Node is a real node? Update placeholders
-    for (final placeholder in _placeholderNodes) {
-      final placeholderBluePrint =
-          placeholder.allBluePrints.first as PlaceholderNodeBluePrint;
+    // Node is a real node? Update smartNodes
+    for (final smartNode in _smartNodes) {
+      final smartNodeBluePrint =
+          smartNode.allBluePrints.first as SmartNodeBluePrint;
 
-      // If placeholder does not match the real node path, continue
-      if (!node.matchesPath(placeholderBluePrint.realNodePath)) {
+      // If smartNode does not match the real node path, continue
+      if (!node.matchesPath(smartNodeBluePrint.realNodePath)) {
         continue;
       }
 
-      // Reset placeholder replacements
-      placeholder.resetPlaceholderReplacements();
+      // Reset smartNode replacements
+      smartNode.resetPlaceholderReplacements();
 
       // If node is disposed
       // check, if there is another real node available
       var replacementAvailable = true;
-      if (node.isDisposed && placeholder.suppliers.contains(node)) {
+      if (node.isDisposed && smartNode.suppliers.contains(node)) {
         final replacementNode = node.scope.findNode<dynamic>(
-          placeholderBluePrint.realNodePath,
+          smartNodeBluePrint.realNodePath,
           excludedNodes: [node],
         );
 
@@ -791,16 +791,16 @@ class Scm {
       }
 
       // If a replacement is available,
-      // link placeholder to replacement
+      // link smartNode to replacement
       if (replacementAvailable) {
-        placeholder.addPlaceholderReplacement(
-          placeholder.bluePrint.connectSupplier(
-            placeholderBluePrint.realNodePath,
+        smartNode.addPlaceholderReplacement(
+          smartNode.bluePrint.connectSupplier(
+            smartNodeBluePrint.realNodePath,
           ),
         );
       }
 
-      placeholder.needsInitSuppliers();
+      smartNode.needsInitSuppliers();
     }
   }
 }

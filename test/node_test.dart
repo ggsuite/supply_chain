@@ -899,8 +899,8 @@ void main() {
       });
     });
 
-    group('placeholderNodes', () {
-      placeholderTest();
+    group('smartNodes', () {
+      smartNodeTest();
     });
 
     group('initSuppliers', () {

@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'shared_tests.dart';
 
 void main() {
-  group('PlaceholderNodeBluePrint', () {
-    placeholderTest();
+  group('SmartNodeBluePrint', () {
+    smartNodeTest();
   });
 }

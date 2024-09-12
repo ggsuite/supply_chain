@@ -70,7 +70,7 @@ class Node<T> {
       addBluePrint(muted);
     }
 
-    // Tell Scm to update placeholders
+    // Tell Scm to update smartNodes
     scm.updatePlaceholders(this);
 
     // Add the node to disposed.nodes
@@ -108,7 +108,7 @@ class Node<T> {
   /// Returns true if the node is disposed
   bool get isDisposed => _isDisposed;
 
-  /// Returns true if node is a placeholder
+  /// Returns true if node is a smartNode
   bool get isPlaceholder => _bluePrints.first.isPlaceholder;
 
   // ...........................................................................
@@ -125,7 +125,7 @@ class Node<T> {
   // ...........................................................................
   /// ScBuilders use this method to replace the present blue print
   void addBluePrint(NodeBluePrint<T> bluePrint) {
-    // Replacing blueprints is not allowed for placeholder blueprints
+    // Replacing blueprints is not allowed for smartNode blueprints
     assert(!isPlaceholder);
     _addBluePrint(bluePrint);
   }
@@ -146,7 +146,7 @@ class Node<T> {
   }
 
   // ...........................................................................
-  /// Called by SCM to update placeholders
+  /// Called by SCM to update smartNodes
   void addPlaceholderReplacement(NodeBluePrint<T> replacement) {
     assert(isPlaceholder);
     assert(allBluePrints.length == 1);
@@ -154,7 +154,7 @@ class Node<T> {
   }
 
   // ...........................................................................
-  /// Called by SCM to update placeholders
+  /// Called by SCM to update smartNodes
   void resetPlaceholderReplacements() {
     assert(isPlaceholder);
     assert(allBluePrints.length <= 2);
@@ -735,12 +735,12 @@ class Node<T> {
   /// Moves the customers of this node to the target node
   void moveCustomersTo(Node<T> targetNode) {
     for (final customer in [...customers]) {
-      // Move the customer to the placeholder
+      // Move the customer to the smartNode
 
       targetNode._customers.add(customer);
       _customers.remove(customer);
 
-      // Replace the old suppliers by the placeholder
+      // Replace the old suppliers by the smartNode
       final supplierIndex = customer._suppliers.indexOf(this);
 
       customer._suppliers[supplierIndex] = targetNode;

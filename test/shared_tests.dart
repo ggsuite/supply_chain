@@ -8,9 +8,9 @@ import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 // .............................................................................
-void placeholderTest() {
+void smartNodeTest() {
   test('should work', () {
-    var placeholderValue = 2;
+    var smartNodeValue = 2;
     var replacement0Value = 3;
     var replacement1Value = 4;
 
@@ -20,9 +20,9 @@ void placeholderTest() {
       'a': {
         'b': {
           'c': {
-            'height': PlaceholderNodeBluePrint<int>(
+            'height': SmartNodeBluePrint<int>(
               key: 'height',
-              initialProduct: placeholderValue,
+              initialProduct: smartNodeValue,
               realNodePath: 'x.height',
             ),
             'd': {
@@ -37,25 +37,25 @@ void placeholderTest() {
       },
     });
 
-    final placeholder = scope.findNode<int>('c.height')!;
-    expect(placeholder.bluePrint.isPlaceholder, true);
+    final smartNode = scope.findNode<int>('c.height')!;
+    expect(smartNode.bluePrint.isPlaceholder, true);
     final a = scope.findScope('a')!;
     final b = scope.findScope('b')!;
     final customer = scope.findNode<int>('d.customer')!;
     scm.testFlushTasks();
 
     // ..............................................
-    // Use placeholder when no replacement is available
+    // Use smartNode when no replacement is available
 
     // Placeholder delivers it's own initial value
     // because no other real height node can be found
-    expect(placeholder.product, placeholderValue);
+    expect(smartNode.product, smartNodeValue);
 
     // The customer uses the place holder
-    expect(customer.product, placeholderValue);
+    expect(customer.product, smartNodeValue);
 
     // .........................................
-    // Add replacement0 replacing the placeholder
+    // Add replacement0 replacing the smartNode
 
     // Add x.height to the scope a
     a.mockContent({
@@ -66,9 +66,9 @@ void placeholderTest() {
     final replacement0 = scope.findNode<int>('x.height')!;
     scm.testFlushTasks();
 
-    // Now placeholder should deliver the value of the replacement
+    // Now smartNode should deliver the value of the replacement
     expect(replacement0.product, replacement0Value);
-    expect(placeholder.product, replacement0Value);
+    expect(smartNode.product, replacement0Value);
     expect(customer.product, replacement0Value);
 
     // Change the replacement
@@ -78,11 +78,11 @@ void placeholderTest() {
     scm.testFlushTasks();
 
     expect(replacement0.product, replacement0Value);
-    expect(placeholder.product, replacement0Value);
+    expect(smartNode.product, replacement0Value);
     expect(customer.product, replacement0Value);
 
     // ..........................................................
-    // Insert another replacement1 between placeholder and replacement
+    // Insert another replacement1 between smartNode and replacement
     b.mockContent({
       'x': {
         'height': replacement1Value,
@@ -91,20 +91,20 @@ void placeholderTest() {
     final replacement1 = scope.findNode<int>('b.x.height')!;
     scm.testFlushTasks();
 
-    // Now the placeholder should deliver the value of the new replacement
+    // Now the smartNode should deliver the value of the new replacement
     expect(replacement0.product, replacement0Value);
     expect(replacement1.product, replacement1Value);
-    expect(placeholder.product, replacement1Value);
+    expect(smartNode.product, replacement1Value);
     expect(customer.product, replacement1Value);
 
     // .........................................................
-    // Remove the replacement1 between  replacement0 and placeholder
+    // Remove the replacement1 between  replacement0 and smartNode
     replacement1.dispose();
     scm.testFlushTasks();
 
     // Now replacement 0 should take over again
     expect(replacement0.product, replacement0Value);
-    expect(placeholder.product, replacement0Value);
+    expect(smartNode.product, replacement0Value);
     expect(customer.product, replacement0Value);
 
     // .......................
@@ -113,9 +113,9 @@ void placeholderTest() {
     replacement0.dispose();
     scm.testFlushTasks();
 
-    expect(placeholder.suppliers, isEmpty);
-    placeholder.product = placeholderValue;
-    expect(placeholder.product, placeholderValue);
-    expect(customer.product, placeholderValue);
+    expect(smartNode.suppliers, isEmpty);
+    smartNode.product = smartNodeValue;
+    expect(smartNode.product, smartNodeValue);
+    expect(customer.product, smartNodeValue);
   });
 }

@@ -159,6 +159,7 @@ Modifications can only be done via builders.
 - Rework initialization of suppliers
 - Rename replaceNode into addBluePrintOverlay. Add Scope.addOrReplaceNode.
 - Throw if a node is replaced with one with invalid suppliers
+- Rename PlaceholderNode into SmartNode
 
 ### Fixed
 

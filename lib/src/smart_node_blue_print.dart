@@ -6,11 +6,11 @@
 
 import 'package:supply_chain/supply_chain.dart';
 
-/// A placeholder node that delivers a placeholder value until
+/// A smartNode node that delivers a smartNode value until
 /// a real node is provided
-class PlaceholderNodeBluePrint<T> extends NodeBluePrint<T> {
+class SmartNodeBluePrint<T> extends NodeBluePrint<T> {
   /// Constructor of the node
-  const PlaceholderNodeBluePrint({
+  const SmartNodeBluePrint({
     required super.key,
     required super.initialProduct,
     required this.realNodePath,

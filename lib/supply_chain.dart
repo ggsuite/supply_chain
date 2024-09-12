@@ -14,7 +14,7 @@ export 'src/keys.dart';
 export 'src/node_blue_print.dart';
 export 'src/node.dart';
 export 'src/owner.dart';
-export 'src/placeholder_node_blue_print.dart';
+export 'src/smart_node_blue_print.dart';
 export 'src/priority.dart';
 export 'src/sc_builder_blue_print.dart';
 export 'src/sc_builder_inserts.dart';
