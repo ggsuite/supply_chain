@@ -184,6 +184,7 @@ Modifications can only be done via builders.
 - Fix issues with healing disposed scopes
 - Fix an issue when smart nodes were disposed
 - Fix an issue when erasing suppliers
+- Fix an small issue with not detecting missing suppliers
 
 ### Removed
 

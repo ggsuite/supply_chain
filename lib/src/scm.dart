@@ -372,7 +372,7 @@ class Scm {
           _nodesWithMissedSuppliers.add(node);
           _preparedNodes.remove(node);
           _nominatedNodes.remove(node);
-          break;
+          return;
         }
       }
 
