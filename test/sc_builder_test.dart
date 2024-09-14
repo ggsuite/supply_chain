@@ -119,69 +119,162 @@ void main() {
         scopeBluePrint.instantiate(scope: scope);
       });
 
-      test('should apply builders to scopes created by builders', () {
-        // Create a first builder marking all panel nodes
-        final panelMarker = ScBuilderBluePrint(
-          key: 'panelMarker',
-          addNodes: ({required hostScope}) {
-            if (hostScope.key == 'panel') {
-              return [
-                const NodeBluePrint<int>(key: 'mark', initialProduct: 0),
-              ];
-            }
-            return null;
-          },
-        );
+      group('should apply builders to scopes created by builders', () {
+        test('using needsUpdate', () {
+          // Create a first builder marking all panel nodes
+          final panelMarker = ScBuilderBluePrint(
+            key: 'panelMarker',
+            addNodes: ({required hostScope}) {
+              if (hostScope.key == 'panel') {
+                return [
+                  const NodeBluePrint<int>(key: 'mark', initialProduct: 0),
+                ];
+              }
+              return null;
+            },
+          );
 
-        // Create a scond builder that creates panel nodes
-        final panelCreator = ScBuilderBluePrint(
-          key: 'panelCreator',
-          addScopes: ({required hostScope}) {
-            if (hostScope.key == 'container') {
-              return [
-                const ScopeBluePrint(key: 'panel'),
-              ];
-            }
+          // Create a scond builder that creates panel nodes
+          final panelCreator = ScBuilderBluePrint(
+            key: 'panelCreator',
 
-            return [];
-          },
-        );
+            // Add a node that triggers creating a panel
+            addNodes: ({required hostScope}) {
+              if (hostScope.key == 'example') {
+                return [
+                  const NodeBluePrint<bool>(
+                    key: 'addOrRemovePanel',
+                    initialProduct: false,
+                  ),
+                ];
+              }
+              return null;
+            },
 
-        // Create a scope
-        final scope = Scope.example();
+            // Add a panel when the trigger triggers true
+            // and remove it when it triggers false
+            needsUpdateSuppliers: ['addOrRemovePanel'],
+            needsUpdate: ({required components, required hostScope}) {
+              final add = components.first as bool;
+              final container = hostScope.findScope('container')!;
+              if (add) {
+                const ScopeBluePrint(key: 'panel')
+                    .instantiate(scope: container);
+              } else {
+                container.child('panel')?.dispose();
+              }
+            },
+          );
 
-        // Apply panelMarker to the scope
-        panelMarker.instantiate(scope: scope);
-        scope.scm.testFlushTasks();
+          // Create a scope
+          final scope = Scope.example();
 
-        // Add a panel to the scope
-        ScopeBluePrint.fromJson({
-          'panel': {
-            'height': 100,
-          },
-        }).instantiate(scope: scope);
+          // Apply panelMarker to the scope
+          panelMarker.instantiate(scope: scope);
+          scope.scm.testFlushTasks();
 
-        scope.scm.testFlushTasks();
+          // Add a panel to the scope
+          ScopeBluePrint.fromJson({
+            'panel': {
+              'height': 100,
+            },
+          }).instantiate(scope: scope);
 
-        // The panelMarker should have marked the panel node
-        final panel = scope.findScope('panel')!;
-        expect(panel.node<int>('mark'), isNotNull);
+          scope.scm.testFlushTasks();
 
-        // Now add a container scope
-        const ScopeBluePrint(key: 'container').instantiate(scope: scope);
+          // The panelMarker should have marked the panel node
+          final panel = scope.findScope('panel')!;
+          expect(panel.node<int>('mark'), isNotNull);
 
-        // Instantiate the panelCreateor which adds a panel to the container
-        panelCreator.instantiate(scope: scope);
-        scope.scm.testFlushTasks();
+          // Now add a container scope
+          const ScopeBluePrint(key: 'container').instantiate(scope: scope);
 
-        // A panel should be added to the container
-        final container = scope.findScope('container')!;
-        expect(container.child('panel'), isNotNull);
+          // Instantiate the panelCreateor which adds a panel to the container
+          panelCreator.instantiate(scope: scope);
+          scope.scm.testFlushTasks();
 
-        // The marker builder should have recognized the new panel
-        // and have marked it
-        final addedPanel = container.findScope('panel')!;
-        expect(addedPanel.node<int>('mark'), isNotNull);
+          // No panel is created yet
+          expect(scope.findScope('container.panel'), isNull);
+
+          // Trigger the panel creation
+          final createPanelTrigger = scope.findNode<bool>('addOrRemovePanel')!;
+          createPanelTrigger.product = true;
+          scope.scm.testFlushTasks();
+
+          // A panel should be added to the container
+          final container = scope.findScope('container')!;
+          expect(container.child('panel'), isNotNull);
+
+          // The marker builder should have recognized the new panel
+          // and have marked it
+          final addedPanel = container.findScope('panel')!;
+          expect(addedPanel.node<int>('mark'), isNotNull);
+        });
+
+        test('using addScopes', () {
+          // Create a first builder marking all panel nodes
+          final panelMarker = ScBuilderBluePrint(
+            key: 'panelMarker',
+            addNodes: ({required hostScope}) {
+              if (hostScope.key == 'panel') {
+                return [
+                  const NodeBluePrint<int>(key: 'mark', initialProduct: 0),
+                ];
+              }
+              return null;
+            },
+          );
+
+          // Create a scond builder that creates panel nodes
+          final panelCreator = ScBuilderBluePrint(
+            key: 'panelCreator',
+            addScopes: ({required hostScope}) {
+              if (hostScope.key == 'container') {
+                return [
+                  const ScopeBluePrint(key: 'panel'),
+                ];
+              }
+
+              return [];
+            },
+          );
+
+          // Create a scope
+          final scope = Scope.example();
+
+          // Apply panelMarker to the scope
+          panelMarker.instantiate(scope: scope);
+          scope.scm.testFlushTasks();
+
+          // Add a panel to the scope
+          ScopeBluePrint.fromJson({
+            'panel': {
+              'height': 100,
+            },
+          }).instantiate(scope: scope);
+
+          scope.scm.testFlushTasks();
+
+          // The panelMarker should have marked the panel node
+          final panel = scope.findScope('panel')!;
+          expect(panel.node<int>('mark'), isNotNull);
+
+          // Now add a container scope
+          const ScopeBluePrint(key: 'container').instantiate(scope: scope);
+
+          // Instantiate the panelCreateor which adds a panel to the container
+          panelCreator.instantiate(scope: scope);
+          scope.scm.testFlushTasks();
+
+          // A panel should be added to the container
+          final container = scope.findScope('container')!;
+          expect(container.child('panel'), isNotNull);
+
+          // The marker builder should have recognized the new panel
+          // and have marked it
+          final addedPanel = container.findScope('panel')!;
+          expect(addedPanel.node<int>('mark'), isNotNull);
+        });
       });
     });
   });
