@@ -45,6 +45,7 @@
 - Add additional unit tests for removal and recreation of nodes and scopes
 - Add additional tests. Fix an issue with smart nodes.
 - Add additional checks for supplier consistency
+- Add tests for applying builders to nodes created by builders
 
 ### Changed
 

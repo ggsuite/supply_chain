@@ -118,6 +118,71 @@ void main() {
         // Before fixing the bug, the child builder was applied twice
         scopeBluePrint.instantiate(scope: scope);
       });
+
+      test('should apply builders to scopes created by builders', () {
+        // Create a first builder marking all panel nodes
+        final panelMarker = ScBuilderBluePrint(
+          key: 'panelMarker',
+          addNodes: ({required hostScope}) {
+            if (hostScope.key == 'panel') {
+              return [
+                const NodeBluePrint<int>(key: 'mark', initialProduct: 0),
+              ];
+            }
+            return null;
+          },
+        );
+
+        // Create a scond builder that creates panel nodes
+        final panelCreator = ScBuilderBluePrint(
+          key: 'panelCreator',
+          addScopes: ({required hostScope}) {
+            if (hostScope.key == 'container') {
+              return [
+                const ScopeBluePrint(key: 'panel'),
+              ];
+            }
+
+            return [];
+          },
+        );
+
+        // Create a scope
+        final scope = Scope.example();
+
+        // Apply panelMarker to the scope
+        panelMarker.instantiate(scope: scope);
+        scope.scm.testFlushTasks();
+
+        // Add a panel to the scope
+        ScopeBluePrint.fromJson({
+          'panel': {
+            'height': 100,
+          },
+        }).instantiate(scope: scope);
+
+        scope.scm.testFlushTasks();
+
+        // The panelMarker should have marked the panel node
+        final panel = scope.findScope('panel')!;
+        expect(panel.node<int>('mark'), isNotNull);
+
+        // Now add a container scope
+        const ScopeBluePrint(key: 'container').instantiate(scope: scope);
+
+        // Instantiate the panelCreateor which adds a panel to the container
+        panelCreator.instantiate(scope: scope);
+        scope.scm.testFlushTasks();
+
+        // A panel should be added to the container
+        final container = scope.findScope('container')!;
+        expect(container.child('panel'), isNotNull);
+
+        // The marker builder should have recognized the new panel
+        // and have marked it
+        final addedPanel = container.findScope('panel')!;
+        expect(addedPanel.node<int>('mark'), isNotNull);
+      });
     });
   });
 }
