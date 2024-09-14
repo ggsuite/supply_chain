@@ -70,6 +70,39 @@ void main() {
 
         scm.testFlushTasks();
       });
+
+      test('should not autoconnect to own node when matching', () {
+        final scope = Scope.example();
+        final scm = scope.scm;
+
+        // Create a slot blue print where slot.height is a smart node
+        // inheriting from parent slot.height.
+        final slot = ScopeBluePrint.fromJson({
+          'slot': {
+            'height': const SmartNodeBluePrint(
+              key: 'height',
+              master: 'slot.height',
+              initialProduct: 0,
+            ),
+          },
+        });
+
+        // Instantiate a first outer slot
+        final outerSlot = slot.instantiate(scope: scope);
+
+        // Instantiate a second inner slot
+        final innerSlot = slot.instantiate(scope: outerSlot);
+        scm.testFlushTasks();
+
+        // The inner slot should take over the value from the outer slot
+        final outerHeight = outerSlot.findNode<int>('slot.height')!;
+        final innerHeight = innerSlot.findNode<int>('slot.height')!;
+
+        expect(outerHeight, isNot(innerHeight));
+        outerHeight.product = 25;
+        scm.testFlushTasks();
+        expect(innerHeight.product, 25);
+      });
     });
   });
 }

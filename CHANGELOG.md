@@ -44,6 +44,7 @@
 - Add class Disposed to manage disposed nodes and test disposal and recreation of nodes cleanly
 - Add additional unit tests for removal and recreation of nodes and scopes
 - Add additional tests. Fix an issue with smart nodes.
+- Add additional checks for supplier consistency
 
 ### Changed
 
