@@ -532,6 +532,8 @@ class Scm {
         node.isTimedOut = false;
         node.productionStartTime = _stopwatch.elapsed;
 
+        assert(node.isReadyToProduce);
+
         // Produce
         if (!node.isDisposed) {
           node.produce();
@@ -759,69 +761,66 @@ class Scm {
   }
 
   // ...........................................................................
-  void _connectSmartNodeToMasterNode(
+  void _connectNewSmartNodeToPotentialMasters(
     Node<dynamic> smartNode,
-    Node<dynamic> node,
   ) {
-    assert(smartNode.isSmartNode);
+    // Find the master node
+    final masterNode = smartNode.findMasterNode();
 
-    final smartNodeBluePrint =
-        smartNode.allBluePrints.first as SmartNodeBluePrint;
+    // No master node found? Reset and return.
+    if (masterNode == null || masterNode.isDisposed) {
+      smartNode.needsInitSuppliers();
+      smartNode.resetSmartNodeReplacements();
+      return;
+    }
 
-    // If master node does not match the smart node's master, continue
-    if (!node.matchesPath(smartNodeBluePrint.master)) {
+    // Already connected? Do nothing.
+    if (smartNode.suppliers.contains(masterNode)) {
       return;
     }
 
     // Reset smartNode replacements
     smartNode.resetSmartNodeReplacements();
 
-    // Get master node
-    final masterNode = smartNode.findMasterNode();
-
     // If a replacement is available,
     // link smartNode to replacement
-    if (masterNode != null) {
-      smartNode.addSmartNodeReplacement(
-        smartNode.bluePrint.connectSupplier(
-          masterNode.path,
-        ),
-      );
-    }
+    smartNode.addSmartNodeReplacement(
+      smartNode.bluePrint.connectSupplier(
+        masterNode.path,
+      ),
+    );
 
+    // Init suppliers
     smartNode.needsInitSuppliers();
+  }
 
-    return;
+  // ...........................................................................
+  void _connectNewMasterNodeToPotentialSmartNodes() {
+    // Connect each smart node to the new master
+    for (final smartNode in _smartNodes) {
+      _connectNewSmartNodeToPotentialMasters(smartNode);
+    }
   }
 
   // ...........................................................................
   void _updateSmartNodes(
     Node<dynamic> node,
   ) {
-    // Node is a smartNode? Add the node to list of smartNodes.
+    // Node is a smartNode?
     if (node.isSmartNode) {
+      // Add the node to list of smartNodes.
       if (node.isDisposed) {
         _smartNodes.remove(node);
         return;
-      } else {
-        _smartNodes.add(node);
       }
 
-      final masterNode = node.findMasterNode();
-
-      // Find master in own scope
-      if (masterNode != null && masterNode != node) {
-        _connectSmartNodeToMasterNode(node, masterNode);
-      }
-
-      // Find master node in parent scopes
+      _smartNodes.add(node);
+      _connectNewSmartNodeToPotentialMasters(node);
 
       return;
     }
 
     // Node is a master node? Update smartNodes
-    for (final smartNode in _smartNodes) {
-      _connectSmartNodeToMasterNode(smartNode, node);
-    }
+    _connectNewMasterNodeToPotentialSmartNodes();
   }
 }

@@ -302,7 +302,6 @@ class Node<T> {
   /// Produces the product.
   void produce({bool announce = true}) {
     assert(!isDisposed);
-    assert(suppliers.length == bluePrint.suppliers.length);
 
     final newProduct = bluePrint.produce(
       suppliers.map((s) => s.product).toList(),

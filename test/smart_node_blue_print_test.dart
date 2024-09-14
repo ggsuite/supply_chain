@@ -103,6 +103,145 @@ void main() {
         scm.testFlushTasks();
         expect(innerHeight.product, 25);
       });
+
+      test('should handle structure changes during production', () {
+        final scope = Scope.example();
+        final scm = scope.scm;
+
+        // Create a slot hierarchy where every slot provides a height
+        scope.mockContent({
+          'height': 100,
+          'slot': {
+            'height': const SmartNodeBluePrint<int>(
+              key: 'height',
+              master: 'height',
+              initialProduct: 0,
+            ),
+          },
+          'corpus': {
+            'slot': {
+              'height': const SmartNodeBluePrint<int>(
+                key: 'height',
+                master: 'slot.height',
+                initialProduct: 0,
+              ),
+            },
+            'panels': {
+              'slot': {
+                'height': const SmartNodeBluePrint<int>(
+                  key: 'height',
+                  master: 'slot.height',
+                  initialProduct: 0,
+                ),
+              },
+              'back': {
+                'slot': {
+                  'height': const SmartNodeBluePrint<int>(
+                    key: 'height',
+                    master: 'slot.height',
+                    initialProduct: 0,
+                  ),
+                },
+              },
+            },
+          },
+        });
+        scm.testFlushTasks();
+
+        // Create a builder adding more smart nodes while production
+        final builder = ScBuilderBluePrint(
+          key: 'interiorBuilder',
+
+          // Prive a container count node
+          addNodes: ({required hostScope}) {
+            if (hostScope.key == 'corpus') {
+              return [
+                const NodeBluePrint<int>(
+                  key: 'containerCount',
+                  initialProduct: 1,
+                ),
+              ];
+            }
+            return null;
+          },
+
+          // Build a container when container count changes
+          needsUpdateSuppliers: ['containerCount'],
+          needsUpdate: ({required components, required hostScope}) {
+            final corpus = hostScope.child('corpus')!;
+            final interior = corpus.findOrCreateChild('interior');
+
+            final count = components.first as int;
+            for (int i = 0; i < count; i++) {
+              final existing = interior.child('container$i');
+              existing?.dispose();
+
+              ScopeBluePrint(
+                key: 'container$i',
+                children: [
+                  ScopeBluePrint.fromJson({
+                    'slot': {
+                      'height': const SmartNodeBluePrint<int>(
+                        key: 'height',
+                        master: 'slot.height',
+                        initialProduct: 0,
+                      ),
+                    },
+                  }),
+                  ScopeBluePrint.fromJson({
+                    'panel': {
+                      'height': const SmartNodeBluePrint<int>(
+                        key: 'height',
+                        master: 'panels.slot.height',
+                        initialProduct: 0,
+                      ),
+                    },
+                  }),
+                ],
+              ).instantiate(scope: interior);
+            }
+          },
+        );
+
+        builder.instantiate(scope: scope);
+        scm.testFlushTasks();
+
+        // Initially we 0 containers
+        final height = scope.findNode<int>('root.example.height')!;
+        expect(height.path, 'root.example.height');
+        final corpusHeight = scope.findNode<int>('corpus.slot.height')!;
+        final panelsHeight = scope.findNode<int>('corpus.panels.slot.height')!;
+        final backHeight =
+            scope.findNode<int>('corpus.panels.back.slot.height')!;
+
+        Node<int> container0Height() =>
+            scope.findNode<int>('interior.container0.slot.height')!;
+
+        Node<int> panel0Height() =>
+            scope.findNode<int>('interior.container0.panel.height')!;
+
+        // Increase the number of containers
+        final count = scope.findNode<int>('corpus.containerCount')!;
+        count.product = 2;
+        scm.testFlushTasks();
+
+        final container1Height =
+            scope.findNode<int>('interior.container1.slot.height')!;
+
+        Node<int> panel1Height() =>
+            scope.findNode<int>('interior.container1.panel.height')!;
+
+        // height should be forwarded to the connected smart nodes
+        height.product = 200;
+        scm.testFlushTasks();
+        expect(corpusHeight.product, 200);
+        expect(panelsHeight.product, 200);
+        expect(backHeight.product, 200);
+        expect(container0Height().product, 200);
+        expect(panel0Height().product, 200);
+        expect(container1Height.product, 200);
+        expect(panel1Height().product, 200);
+      });
     });
   });
 }
