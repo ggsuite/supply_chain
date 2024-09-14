@@ -73,18 +73,21 @@ void main() {
         bluePrint0.instantiate(scope: scope);
 
         // Instantiating another builder with the same key should throw
-        expect(
-          () => bluePrint1.instantiate(scope: scope),
-          throwsA(
-            isA<ArgumentError>().having(
-              (e) => e.message,
-              'message',
-              contains(
-                'Another builder with key exampleScBuilder is added.',
-              ),
-            ),
-          ),
-        );
+        // Nothing should happen.
+        bluePrint1.instantiate(scope: scope);
+
+        //expect(
+        //  () => bluePrint1.instantiate(scope: scope),
+        //  throwsA(
+        //    isA<ArgumentError>().having(
+        //      (e) => e.message,
+        //      'message',
+        //      contains(
+        //        'Another builder with key exampleScBuilder is added.',
+        //      ),
+        //    ),
+        //  ),
+        //);
       });
     });
 

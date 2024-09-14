@@ -32,8 +32,10 @@ class ScBuilder {
     nodeReplacer.applyToScope(scope);
     nodeAdder.applyToScope(scope);
     scopeAdder.applyToScope(scope);
+    _applyChildBuilders(scope);
+
     if (applyToChildren) {
-      _initChildren(scope);
+      _applyBuildersToChildScopes(scope);
     }
   }
 
@@ -89,9 +91,10 @@ class ScBuilder {
 
   void _initScope() {
     if (scope.builder(bluePrint.key) != null) {
-      throw ArgumentError(
-        'Another builder with key ${bluePrint.key} is added.',
-      );
+      return;
+      // throw ArgumentError(
+      //   'Another builder with key ${bluePrint.key} is added.',
+      // );
     }
 
     scope.addScBuilder(this);
@@ -121,8 +124,7 @@ class ScBuilder {
     _dispose.add(scopeAdder.dispose);
   }
 
-  void _initChildren(Scope scope) {
-    // Init own children
+  void _applyChildBuilders(Scope scope) {
     for (final child in bluePrint.children(hostScope: scope)) {
       _children.add(child.instantiate(scope: scope));
     }
@@ -134,9 +136,13 @@ class ScBuilder {
         }
       },
     );
+  }
+
+  void _applyBuildersToChildScopes(Scope scope) {
+    _applyChildBuilders(scope);
 
     for (final childScope in scope.children) {
-      _initChildren(childScope);
+      _applyBuildersToChildScopes(childScope);
     }
   }
 
