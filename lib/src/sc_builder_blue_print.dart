@@ -34,12 +34,16 @@ class ScBuilderBluePrint {
       required Scope hostScope,
       required List<dynamic> components,
     })? needsUpdate,
+    List<ScBuilderBluePrint> Function({
+      required Scope hostScope,
+    })? children,
   })  : _addScopes = addScopes,
         _replaceScope = replaceScope,
         _addNodes = addNodes,
         _replaceNode = replaceNode,
         _inserts = inserts,
-        _needsUpdate = needsUpdate;
+        _needsUpdate = needsUpdate,
+        _children = children;
 
   /// Instantiates this builder and it's children within the given hostScope
   ///
@@ -131,7 +135,7 @@ class ScBuilderBluePrint {
   ///
   /// - Returns: A list of child builders
   List<ScBuilderBluePrint> children({required Scope hostScope}) {
-    return [];
+    return _children?.call(hostScope: hostScope) ?? [];
   }
 
   // ...........................................................................
@@ -188,6 +192,10 @@ class ScBuilderBluePrint {
   final List<NodeBluePrint<dynamic>> Function({
     required Node<dynamic> hostNode,
   })? _inserts;
+
+  final List<ScBuilderBluePrint> Function({
+    required Scope hostScope,
+  })? _children;
 
   final void Function({
     required Scope hostScope,

@@ -87,5 +87,37 @@ void main() {
         );
       });
     });
+
+    group('special cases', () {
+      test('should not multiply apply builders to the same node', () {
+        final scope = Scope.example();
+
+        // Create a parent builder
+        ScBuilderBluePrint(
+          key: 'parent',
+
+          // Create one child builder
+          children: ({required hostScope}) {
+            return [
+              const ScBuilderBluePrint(
+                key: 'child',
+              ),
+            ];
+          },
+        ).instantiate(scope: scope);
+
+        // Create a scope with one child scope
+        final scopeBluePrint = ScopeBluePrint.fromJson({
+          'parent': {
+            'child': {
+              'node': 0,
+            },
+          },
+        });
+
+        // Before fixing the bug, the child builder was applied twice
+        scopeBluePrint.instantiate(scope: scope);
+      });
+    });
   });
 }

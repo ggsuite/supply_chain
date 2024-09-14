@@ -27,12 +27,14 @@ class ScBuilder {
   }
 
   /// Applies the builder to this scope and all its children
-  void applyToScope(Scope scope) {
+  void applyToScope(Scope scope, {bool applyToChildren = true}) {
     inserts.applyToScope(scope);
     nodeReplacer.applyToScope(scope);
     nodeAdder.applyToScope(scope);
     scopeAdder.applyToScope(scope);
-    _initChildren(scope);
+    if (applyToChildren) {
+      _initChildren(scope);
+    }
   }
 
   /// Applies the builder to this node

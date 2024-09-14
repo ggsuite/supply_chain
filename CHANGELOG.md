@@ -185,6 +185,7 @@ Modifications can only be done via builders.
 - Fix an issue when smart nodes were disposed
 - Fix an issue when erasing suppliers
 - Fix an small issue with not detecting missing suppliers
+- Fix a bug where builders were instantiated twice
 
 ### Removed
 
