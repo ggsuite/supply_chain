@@ -170,6 +170,7 @@ Modifications can only be done via builders.
 - Optimize handling of realtime nodes
 - Optimize Scope.matchesKey
 - Optimize master path of smart nodes
+- Optimize smart node handling
 
 ### Fixed
 

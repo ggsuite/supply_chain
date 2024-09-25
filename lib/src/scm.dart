@@ -779,8 +779,24 @@ class Scm {
 
   // ...........................................................................
   void _connectNewSmartNodeToPotentialMasters(
-    Node<dynamic> smartNode,
-  ) {
+    Node<dynamic> smartNode, {
+    Node<dynamic>? newPotentialMaster,
+  }) {
+    // Evaluate the new potential master
+    if (newPotentialMaster != null) {
+      // New master could not be master? Return.
+      final couldBeMaster = newPotentialMaster.couldBeMasterOf(smartNode);
+      if (!couldBeMaster) {
+        return;
+      }
+
+      // New potential master is already master? Return.
+      if (!newPotentialMaster.isDisposed &&
+          smartNode.suppliers.contains(newPotentialMaster)) {
+        return;
+      }
+    }
+
     // Find the master node
     final masterNode = smartNode.findMasterNode();
 
@@ -812,10 +828,14 @@ class Scm {
   }
 
   // ...........................................................................
-  void _connectNewMasterNodeToPotentialSmartNodes() {
+  void _connectNewMasterNodeToPotentialSmartNodes(Node<dynamic> newMaster) {
     // Connect each smart node to the new master
+
     for (final smartNode in _smartNodes) {
-      _connectNewSmartNodeToPotentialMasters(smartNode);
+      _connectNewSmartNodeToPotentialMasters(
+        smartNode,
+        newPotentialMaster: newMaster,
+      );
     }
   }
 
@@ -838,6 +858,6 @@ class Scm {
     }
 
     // Node is a master node? Update smartNodes
-    _connectNewMasterNodeToPotentialSmartNodes();
+    _connectNewMasterNodeToPotentialSmartNodes(node);
   }
 }

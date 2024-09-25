@@ -180,7 +180,7 @@ class Node<T> {
   String get path => '${scope.path}.$key';
 
   /// Returns true, if this path matches the given path
-  bool matchesPath(String path) => _matchesPath(path);
+  bool matchesPath(String path) => _matchesPath(path.split('.'));
 
   /// The unique id of the node
   final int id = _idCounter++;
@@ -419,6 +419,28 @@ class Node<T> {
       parent = parent.parent;
     }
     return null;
+  }
+
+  // ...........................................................................
+  /// Returns true if this node could be the master of the other node
+  bool couldBeMasterOf(Node<dynamic> smartNode) {
+    if (smartNode.isSmartNode == false) {
+      return false;
+    }
+
+    // Meta nodes cannot be master nodes currently
+    if (isMetaNode) {
+      return false;
+    }
+
+    final masterPath =
+        (smartNode.allBluePrints.first as SmartNodeBluePrint).master;
+
+    if (!_matchesPath(masterPath)) {
+      return false;
+    }
+
+    return true;
   }
 
   // ...........................................................................
@@ -720,19 +742,15 @@ class Node<T> {
   bool _isAnimated = false;
 
   // ...........................................................................
-  bool _matchesPath(String path) {
-    if (this.path == path) {
-      return true;
-    }
-
-    final parts = path.split('.');
-    final key = parts.last;
+  bool _matchesPath(List<String> path) {
+    path = [...path];
+    final key = path.last;
     if (key != this.key) {
       return false;
     }
 
-    parts.removeLast();
-    return scope.matchesPathArray(parts);
+    path.removeLast();
+    return scope.matchesPathArray(path);
   }
 
   // ...........................................................................
