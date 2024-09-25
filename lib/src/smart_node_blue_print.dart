@@ -17,5 +17,5 @@ class SmartNodeBluePrint<T> extends NodeBluePrint<T> {
   });
 
   /// The master that will be used once available.
-  final String master;
+  final List<String> master;
 }

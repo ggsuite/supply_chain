@@ -536,10 +536,9 @@ class Scope {
   }
 
   /// Returns the child node but only when it is a direct child
-  Node<T>? findDirectChildNode<T>(String path) {
-    final keyParts = path.split('.');
-    final nodeKey = keyParts.last;
-    var scopePath = keyParts.sublist(0, keyParts.length - 1);
+  Node<T>? findDirectChildNode<T>(List<String> path) {
+    final nodeKey = path.last;
+    var scopePath = path.sublist(0, path.length - 1);
 
     final childScope = scopePath.isEmpty
         ? this

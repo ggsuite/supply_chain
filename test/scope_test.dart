@@ -1865,17 +1865,17 @@ void main() {
 
         // Find direct child
         final d = scope.findScope('a.d')!;
-        expect(d.findDirectChildNode<int>('n')!.product, 6);
+        expect(d.findDirectChildNode<int>(['n'])!.product, 6);
 
         final a = scope.findScope('a')!;
-        expect(a.findDirectChildNode<int>('n')!.product, 3);
-        expect(a.findDirectChildNode<int>('a.n')!.product, 3);
+        expect(a.findDirectChildNode<int>(['n'])!.product, 3);
+        expect(a.findDirectChildNode<int>(['a', 'n'])!.product, 3);
 
-        expect(a.findDirectChildNode<int>('b.n')!.product, 4);
-        expect(a.findDirectChildNode<int>('a.b.n')!.product, 4);
+        expect(a.findDirectChildNode<int>(['b', 'n'])!.product, 4);
+        expect(a.findDirectChildNode<int>(['a', 'b', 'n'])!.product, 4);
 
-        expect(a.findDirectChildNode<int>('a.b.c.n')!.product, 5);
-        expect(a.findDirectChildNode<int>('c.n'), isNull);
+        expect(a.findDirectChildNode<int>(['a', 'b', 'c', 'n'])!.product, 5);
+        expect(a.findDirectChildNode<int>(['c', 'n']), isNull);
       });
     });
 

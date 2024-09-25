@@ -937,21 +937,21 @@ void main() {
                 'node': const SmartNodeBluePrint(
                   initialProduct: 2,
                   key: 'node',
-                  master: 'node',
+                  master: ['node'],
                 ),
               },
               'd': {
                 'node': const SmartNodeBluePrint(
                   initialProduct: 3,
                   key: 'node',
-                  master: 'node',
+                  master: ['node'],
                 ),
               },
               'e': {
                 'node': const SmartNodeBluePrint(
                   initialProduct: 4,
                   key: 'node',
-                  master: 'node',
+                  master: ['node'],
                 ),
               },
             },
@@ -995,14 +995,14 @@ void main() {
               'node': SmartNodeBluePrint(
                 initialProduct: 0,
                 key: 'node',
-                master: 'node',
+                master: ['node'],
               ),
             },
             'c': const {
               'node': SmartNodeBluePrint(
                 initialProduct: 0,
                 key: 'node',
-                master: 'node',
+                master: ['node'],
               ),
             },
           },

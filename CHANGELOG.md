@@ -169,6 +169,7 @@ Modifications can only be done via builders.
 - Optimize NodeBluePrint operator==
 - Optimize handling of realtime nodes
 - Optimize Scope.matchesKey
+- Optimize master path of smart nodes
 
 ### Fixed
 

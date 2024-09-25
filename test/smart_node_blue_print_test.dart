@@ -31,7 +31,7 @@ void main() {
               'hello': const SmartNodeBluePrint(
                 initialProduct: 123,
                 key: 'hello',
-                master: 'hello',
+                master: ['hello'],
               ),
             },
           });
@@ -55,14 +55,14 @@ void main() {
           'scope0': {
             'a': const SmartNodeBluePrint(
               key: 'a',
-              master: 'a',
+              master: ['a'],
               initialProduct: 0,
             ),
           },
           'scope1': {
             'a': const SmartNodeBluePrint(
               key: 'a',
-              master: 'a',
+              master: ['a'],
               initialProduct: 0,
             ),
           },
@@ -81,7 +81,7 @@ void main() {
           'slot': {
             'height': const SmartNodeBluePrint(
               key: 'height',
-              master: 'slot.height',
+              master: ['slot', 'height'],
               initialProduct: 0,
             ),
           },
@@ -114,7 +114,7 @@ void main() {
           'slot': {
             'height': const SmartNodeBluePrint<int>(
               key: 'height',
-              master: 'height',
+              master: ['height'],
               initialProduct: 0,
             ),
           },
@@ -122,7 +122,7 @@ void main() {
             'slot': {
               'height': const SmartNodeBluePrint<int>(
                 key: 'height',
-                master: 'slot.height',
+                master: ['slot', 'height'],
                 initialProduct: 0,
               ),
             },
@@ -130,7 +130,7 @@ void main() {
               'slot': {
                 'height': const SmartNodeBluePrint<int>(
                   key: 'height',
-                  master: 'slot.height',
+                  master: ['slot', 'height'],
                   initialProduct: 0,
                 ),
               },
@@ -138,7 +138,7 @@ void main() {
                 'slot': {
                   'height': const SmartNodeBluePrint<int>(
                     key: 'height',
-                    master: 'slot.height',
+                    master: ['slot', 'height'],
                     initialProduct: 0,
                   ),
                 },
@@ -183,7 +183,7 @@ void main() {
                     'slot': {
                       'height': const SmartNodeBluePrint<int>(
                         key: 'height',
-                        master: 'slot.height',
+                        master: ['slot', 'height'],
                         initialProduct: 0,
                       ),
                     },
@@ -192,7 +192,7 @@ void main() {
                     'panel': {
                       'height': const SmartNodeBluePrint<int>(
                         key: 'height',
-                        master: 'panels.slot.height',
+                        master: ['panels', 'slot', 'height'],
                         initialProduct: 0,
                       ),
                     },
