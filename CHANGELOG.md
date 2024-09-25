@@ -166,6 +166,7 @@ Modifications can only be done via builders.
 - Use master as term for the node delivering data to a smart node.
 - Make smart node more stable
 - Don't throw if builder is applied two times to the same scope
+- Optimize NodeBluePrint operator==
 
 ### Fixed
 

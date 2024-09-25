@@ -169,11 +169,19 @@ class NodeBluePrint<T> {
   /// Provites an operator =
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-
     if (other is NodeBluePrint<T>) {
+      if (key != other.key) {
+        return false;
+      }
+
+      if (initialProduct != other.initialProduct) {
+        return false;
+      }
+
+      if (produce != other.produce) {
+        return false;
+      }
+
       if (suppliers.length != other.suppliers.length) {
         return false;
       }
@@ -184,11 +192,10 @@ class NodeBluePrint<T> {
         }
       }
 
-      return key == other.key &&
-          initialProduct == other.initialProduct &&
-          other.produce == produce;
+      return true;
+    } else {
+      return false;
     }
-    return false;
   }
 
   @override
