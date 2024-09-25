@@ -139,7 +139,9 @@ class Scope {
   String toString() => key;
 
   /// Returns true if the key matches the given key or an alias
-  bool matchesKey(String key) => bluePrint.matchesKey(key);
+  bool matchesKey(String key) {
+    return key == this.key || _aliases.contains(key);
+  }
 
   // ...........................................................................
   /// The supply chain manager
@@ -784,6 +786,7 @@ class Scope {
   // ...........................................................................
   late final String _path;
   late final List<String> _pathArray;
+  late final List<String> _aliases;
   bool _isDisposed = false;
   bool _isErased = false;
   Owner<Scope>? _owner;
@@ -803,6 +806,7 @@ class Scope {
   }) {
     _initParent(isMetaScope);
     _initPath();
+    _initAliases();
     _initMetaScopesAndNodes();
   }
 
@@ -825,6 +829,10 @@ class Scope {
   void _initPath() {
     _pathArray = parent == null ? [key] : [...parent!._pathArray, key];
     _path = parent == null ? key : '${parent!.path}.$key';
+  }
+
+  void _initAliases() {
+    _aliases = bluePrint.aliases;
   }
 
   // ...........................................................................
@@ -1276,7 +1284,7 @@ class Scope {
     }
 
     if (path.length == 1) {
-      if (bluePrint.matchesKey(path.first)) {
+      if (matchesKey(path.first)) {
         return this;
       }
       final metaScope = _metaScopes[path.first];
@@ -1285,7 +1293,7 @@ class Scope {
       }
     }
 
-    if (path.first == key || bluePrint.matchesKey(path.first)) {
+    if (path.first == key || matchesKey(path.first)) {
       return _findChildScope(path.sublist(1), didFindFirstScope: true);
     }
 

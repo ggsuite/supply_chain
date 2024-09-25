@@ -168,6 +168,7 @@ Modifications can only be done via builders.
 - Don't throw if builder is applied two times to the same scope
 - Optimize NodeBluePrint operator==
 - Optimize handling of realtime nodes
+- Optimize Scope.matchesKey
 
 ### Fixed
 

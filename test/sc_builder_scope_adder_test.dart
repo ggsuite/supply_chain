@@ -19,7 +19,7 @@ class _AddExistingScopeScBuilder extends ScBuilderBluePrint {
   }) {
     // Try to add the already existing scope "existing" to the host scope
     // Will throw.
-    if (hostScope.bluePrint.matchesKey('example')) {
+    if (hostScope.matchesKey('example')) {
       return const [
         ScopeBluePrint(
           key: 'existing',
