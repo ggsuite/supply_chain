@@ -61,7 +61,7 @@ class Scm {
     _nodes.remove(node);
     _animatedNodes.remove(node);
     _nominatedNodes.remove(node);
-    _preparedNodes.remove(node);
+    _removePreparedNode(node);
     _producingNodes.remove(node);
     _smartNodes.remove(node);
     _nodesWithMissedSuppliers.remove(node);
@@ -259,6 +259,7 @@ class Scm {
   // Processing stages
   final Set<Node<dynamic>> _nominatedNodes = {};
   final Set<Node<dynamic>> _preparedNodes = {};
+  final Set<Node<dynamic>> _preparedRealtimeNodes = {};
   final Set<Node<dynamic>> _producingNodes = {};
 
   // ...........................................................................
@@ -343,8 +344,9 @@ class Scm {
         node,
         throwIfNotThere: true,
       );
-      _preparedNodes.add(node);
     }
+
+    _addPreparedNodes(_nodesWithMissedSuppliers);
 
     _nodesWithMissedSuppliers.clear();
   }
@@ -370,7 +372,7 @@ class Scm {
           );
         } else {
           _nodesWithMissedSuppliers.add(node);
-          _preparedNodes.remove(node);
+          _removePreparedNode(node);
           _nominatedNodes.remove(node);
           return;
         }
@@ -403,7 +405,7 @@ class Scm {
     // All nominated nodes have been prepared.
     // Add it to prepared nodes
     _assertNoNodeIsErased(nodes: _nominatedNodes);
-    _preparedNodes.addAll(_nominatedNodes);
+    _addPreparedNodes(_nominatedNodes);
 
     // Clear nominated nodes
     _nominatedNodes.clear();
@@ -467,15 +469,14 @@ class Scm {
   // ...........................................................................
   // Have realtime nodes?
   /// Returns true if real time nodes are currently prepared
-  bool get realtimeNodesArePrepared => _preparedNodes.any(
-        (element) => element.priority.value >= Priority.realtime.value,
-      );
+  bool get _preparedRealtimeNodesExist => _preparedRealtimeNodes.isNotEmpty;
 
   // ...........................................................................
   // Process fast, when realtime nodes are prepared
 
   void _scheduleProduction() {
-    final schedule = realtimeNodesArePrepared ? _scheduleFast : _scheduleNormal;
+    final schedule =
+        _preparedRealtimeNodesExist ? _scheduleFast : _scheduleNormal;
     _scheduleProductionDebouncer.trigger(scheduleTask: schedule);
   }
 
@@ -488,6 +489,7 @@ class Scm {
 
     // Remove disposed nodes
     _preparedNodes.removeWhere((n) => n.isDisposed);
+    _preparedRealtimeNodes.removeWhere((n) => n.isDisposed);
 
     // For all nodes that are ready to produce
     final nodesReadyToProduce = preparedNodes
@@ -523,7 +525,7 @@ class Scm {
 
       for (final node in nodesOfPriority) {
         // Remove node from preparedNodes
-        _preparedNodes.remove(node);
+        _removePreparedNode(node);
 
         // Add node to producing nodes
         _producingNodes.add(node);
@@ -548,6 +550,21 @@ class Scm {
   }
 
   // ...........................................................................
+  void _addPreparedNodes(Iterable<Node<dynamic>> nodes) {
+    _preparedNodes.addAll(nodes);
+    _preparedRealtimeNodes.addAll(
+      nodes.where((n) => n.priority == Priority.realtime),
+    );
+  }
+
+  void _removePreparedNode(Node<dynamic> node) {
+    _preparedNodes.remove(node);
+    if (node.priority == Priority.realtime) {
+      _preparedRealtimeNodes.remove(node);
+    }
+  }
+
+  // ...........................................................................
   void _finalizeProduction(Node<dynamic> node) {
     // Remove node from producing nodes
     _producingNodes.remove(node);
@@ -556,10 +573,10 @@ class Scm {
     node.finalizeProduction();
 
     // Inserts now need to produce
-    _preparedNodes.addAll(node.inserts);
+    _addPreparedNodes(node.inserts);
 
     // Customers now need to produce
-    _preparedNodes.addAll(node.customers);
+    _addPreparedNodes(node.customers);
 
     // If node is a insert
     _finalizeInsert(node);
@@ -583,11 +600,11 @@ class Scm {
     if (node is Insert) {
       // If node is the last insert, host's customers need to produce
       if (node.isLastInsert) {
-        _preparedNodes.addAll(node.host.customers);
+        _addPreparedNodes(node.host.customers);
       }
       // Otherwise the output node needs to produce
       else {
-        _preparedNodes.add(node.output);
+        _addPreparedNodes([node.output]);
       }
     }
   }
