@@ -50,7 +50,7 @@ class ScBuilderNodeAdder {
   void applyToScope(Scope scope) {
     _applyToScope(scope);
 
-    if (!builder.bluePrint.shouldProcessChildrenOf(scope)) {
+    if (builder.bluePrint.shouldStopProcessingAfter(scope)) {
       return;
     }
 
@@ -120,8 +120,8 @@ class ExampleScBuilderAddingNodes extends ScBuilderBluePrint {
   ExampleScBuilderAddingNodes() : super(key: 'example');
 
   @override
-  bool shouldProcessChildrenOf(Scope scope) {
-    return true;
+  bool shouldStopProcessingAfter(Scope scope) {
+    return false;
   }
 
   @override

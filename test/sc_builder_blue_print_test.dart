@@ -277,15 +277,10 @@ void main() {
       });
     });
 
-    group('shouldProcessChildrenOf(scope)', () {
-      group('should throw', () {
-        test(
-          'when not derived or specified by constructor / derived class',
-          () {
-            const builder = ScBuilderBluePrint(key: 'test');
-            expect(builder.shouldProcessChildrenOf(hostScope), isTrue);
-          },
-        );
+    group('shouldStopProcessingAfter(scope)', () {
+      test('should return false by default', () {
+        const builder = ScBuilderBluePrint(key: 'test');
+        expect(builder.shouldStopProcessingAfter(hostScope), isFalse);
       });
     });
   });

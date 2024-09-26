@@ -152,10 +152,7 @@ void main() {
         final builder = ScBuilderBluePrint(
           key: 'interiorBuilder',
 
-          shouldProcessChildrenOf: (scope) => const [
-            'example',
-            'corpus',
-          ].contains(scope.key),
+          shouldStopProcessingAfter: (scope) => scope.key == 'corpus',
 
           // Prive a container count node
           addNodes: ({required hostScope}) {

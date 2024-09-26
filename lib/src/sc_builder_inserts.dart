@@ -41,7 +41,7 @@ class ScBuilderInserts {
   void applyToScope(Scope scope) {
     _applyToScope(scope);
 
-    if (!builder.bluePrint.shouldProcessChildrenOf(scope)) {
+    if (builder.bluePrint.shouldStopProcessingAfter(scope)) {
       return;
     }
 

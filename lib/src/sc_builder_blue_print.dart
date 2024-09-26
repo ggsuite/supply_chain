@@ -16,7 +16,7 @@ class ScBuilderBluePrint {
     List<ScopeBluePrint> Function({
       required Scope hostScope,
     })? addScopes,
-    bool Function(Scope scope)? shouldProcessChildrenOf,
+    bool Function(Scope scope)? shouldStopProcessingAfter,
     ScopeBluePrint Function({
       required Scope hostScope,
       required ScopeBluePrint scopeToBeReplaced,
@@ -45,7 +45,7 @@ class ScBuilderBluePrint {
         _inserts = inserts,
         _needsUpdate = needsUpdate,
         _children = children,
-        _shouldProcessChildrenOf = shouldProcessChildrenOf;
+        _shouldStopProcessingAfter = shouldStopProcessingAfter;
 
   /// Instantiates this builder and it's children within the given hostScope
   ///
@@ -67,15 +67,15 @@ class ScBuilderBluePrint {
   /// processed.
   ///
   /// By default, the method checks a delegate function
-  /// `shouldProcessChildrenOf`
+  /// `shouldStopProcessingAfter`
   /// (if provided), and returns `true` if the function is not defined.
   ///
   /// - Parameter [scope]: The scope for which the decision to process
   ///   children is made.
   /// - Returns: A boolean indicating whether the children of the given scope
   ///   should be processed.
-  bool shouldProcessChildrenOf(Scope scope) {
-    return _shouldProcessChildrenOf?.call(scope) ?? true;
+  bool shouldStopProcessingAfter(Scope scope) {
+    return _shouldStopProcessingAfter?.call(scope) ?? false;
   }
 
   // ...........................................................................
@@ -226,7 +226,7 @@ class ScBuilderBluePrint {
     required List<dynamic> components,
   })? _needsUpdate;
 
-  final bool Function(Scope scope)? _shouldProcessChildrenOf;
+  final bool Function(Scope scope)? _shouldStopProcessingAfter;
 }
 
 // #############################################################################
@@ -240,8 +240,8 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
 
   // ...........................................................................
   @override
-  bool shouldProcessChildrenOf(Scope scope) {
-    return true;
+  bool shouldStopProcessingAfter(Scope scope) {
+    return false;
   }
 
   // ...........................................................................
@@ -343,8 +343,8 @@ class ExampleChildScBuilderBluePrint extends ScBuilderBluePrint {
 
   // ...........................................................................
   @override
-  bool shouldProcessChildrenOf(Scope scope) {
-    return true;
+  bool shouldStopProcessingAfter(Scope scope) {
+    return false;
   }
 
   // ...........................................................................

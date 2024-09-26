@@ -141,7 +141,7 @@ class ScBuilder {
   void _applyBuildersToChildScopes(Scope scope) {
     _applyChildBuilders(scope);
 
-    if (!bluePrint.shouldProcessChildrenOf(scope)) {
+    if (bluePrint.shouldStopProcessingAfter(scope)) {
       return;
     }
 

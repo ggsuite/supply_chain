@@ -98,14 +98,14 @@ void main() {
         // Create a parent builder
         ScBuilderBluePrint(
           key: 'parent',
-          shouldProcessChildrenOf: (s) => s == scope,
+          shouldStopProcessingAfter: (s) => s == scope,
 
           // Create one child builder
           children: ({required hostScope}) {
             return [
               ScBuilderBluePrint(
                 key: 'child',
-                shouldProcessChildrenOf: (scope) => true,
+                shouldStopProcessingAfter: (scope) => false,
               ),
             ];
           },
@@ -132,7 +132,7 @@ void main() {
           // Create a first builder marking all panel nodes
           final panelMarker = ScBuilderBluePrint(
             key: 'panelMarker',
-            shouldProcessChildrenOf: (s) => true,
+            shouldStopProcessingAfter: (s) => false,
             addNodes: ({required hostScope}) {
               if (hostScope.key == 'panel') {
                 return [
@@ -147,7 +147,7 @@ void main() {
           final panelCreator = ScBuilderBluePrint(
             key: 'panelCreator',
 
-            shouldProcessChildrenOf: (scope) => true,
+            shouldStopProcessingAfter: (scope) => false,
 
             // Add a node that triggers creating a panel
             addNodes: ({required hostScope}) {
@@ -223,7 +223,7 @@ void main() {
           // Create a first builder marking all panel nodes
           final panelMarker = ScBuilderBluePrint(
             key: 'panelMarker',
-            shouldProcessChildrenOf: (scope) => true,
+            shouldStopProcessingAfter: (scope) => false,
             addNodes: ({required hostScope}) {
               if (hostScope.key == 'panel') {
                 return [
@@ -237,8 +237,7 @@ void main() {
           // Create a scond builder that creates panel nodes
           final panelCreator = ScBuilderBluePrint(
             key: 'panelCreator',
-            shouldProcessChildrenOf: (scope) =>
-                const ['example', 'panel', 'container'].contains(scope.key),
+            shouldStopProcessingAfter: (scope) => scope.key == 'panel',
             addScopes: ({required hostScope}) {
               if (hostScope.key == 'container') {
                 return [
