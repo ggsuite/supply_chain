@@ -278,9 +278,26 @@ void main() {
     });
 
     group('shouldStopProcessingAfter(scope)', () {
-      test('should return false by default', () {
-        const builder = ScBuilderBluePrint(key: 'test');
-        expect(builder.shouldStopProcessingAfter(hostScope), isFalse);
+      group('should throw', () {
+        test(
+          'when not derived or specified by constructor / derived class',
+          () {
+            const builder = ScBuilderBluePrint(key: 'test');
+            expect(
+              () => builder.shouldStopProcessingAfter(hostScope),
+              throwsA(
+                isA<UnimplementedError>().having(
+                  (e) => e.message,
+                  'message',
+                  contains('Please either specify shouldStopProcessingAfter '
+                      'constructor parameter or override '
+                      'shouldStopProcessingAfter method in your '
+                      'class derived from ScBuilderBluePrint.'),
+                ),
+              ),
+            );
+          },
+        );
       });
     });
   });

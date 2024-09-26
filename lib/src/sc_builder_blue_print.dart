@@ -75,7 +75,13 @@ class ScBuilderBluePrint {
   /// - Returns: A boolean indicating whether the children of the given scope
   ///   should be processed.
   bool shouldStopProcessingAfter(Scope scope) {
-    return _shouldStopProcessingAfter?.call(scope) ?? false;
+    return _shouldStopProcessingAfter?.call(scope) ??
+        (throw UnimplementedError(
+          'Please either specify shouldStopProcessingAfter constructor '
+          'parameter '
+          'or override shouldStopProcessingAfter method in your class derived '
+          'from ScBuilderBluePrint.',
+        ));
   }
 
   // ...........................................................................
