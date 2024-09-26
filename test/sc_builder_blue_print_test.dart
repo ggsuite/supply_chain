@@ -277,13 +277,13 @@ void main() {
       });
     });
 
-    group('shouldDigInto(scope)', () {
+    group('shouldProcessChildrenOf(scope)', () {
       group('should throw', () {
         test(
           'when not derived or specified by constructor / derived class',
           () {
             const builder = ScBuilderBluePrint(key: 'test');
-            expect(builder.shouldDigInto(hostScope), isTrue);
+            expect(builder.shouldProcessChildrenOf(hostScope), isTrue);
           },
         );
       });

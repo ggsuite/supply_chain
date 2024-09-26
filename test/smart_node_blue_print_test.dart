@@ -152,7 +152,7 @@ void main() {
         final builder = ScBuilderBluePrint(
           key: 'interiorBuilder',
 
-          shouldDigInto: (scope) => const [
+          shouldProcessChildrenOf: (scope) => const [
             'example',
             'corpus',
           ].contains(scope.key),

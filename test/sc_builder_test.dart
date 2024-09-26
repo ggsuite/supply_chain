@@ -98,14 +98,14 @@ void main() {
         // Create a parent builder
         ScBuilderBluePrint(
           key: 'parent',
-          shouldDigInto: (s) => s == scope,
+          shouldProcessChildrenOf: (s) => s == scope,
 
           // Create one child builder
           children: ({required hostScope}) {
             return [
               ScBuilderBluePrint(
                 key: 'child',
-                shouldDigInto: (scope) => true,
+                shouldProcessChildrenOf: (scope) => true,
               ),
             ];
           },
@@ -132,7 +132,7 @@ void main() {
           // Create a first builder marking all panel nodes
           final panelMarker = ScBuilderBluePrint(
             key: 'panelMarker',
-            shouldDigInto: (s) => true,
+            shouldProcessChildrenOf: (s) => true,
             addNodes: ({required hostScope}) {
               if (hostScope.key == 'panel') {
                 return [
@@ -147,7 +147,7 @@ void main() {
           final panelCreator = ScBuilderBluePrint(
             key: 'panelCreator',
 
-            shouldDigInto: (scope) => true,
+            shouldProcessChildrenOf: (scope) => true,
 
             // Add a node that triggers creating a panel
             addNodes: ({required hostScope}) {
@@ -223,7 +223,7 @@ void main() {
           // Create a first builder marking all panel nodes
           final panelMarker = ScBuilderBluePrint(
             key: 'panelMarker',
-            shouldDigInto: (scope) => true,
+            shouldProcessChildrenOf: (scope) => true,
             addNodes: ({required hostScope}) {
               if (hostScope.key == 'panel') {
                 return [
@@ -237,7 +237,7 @@ void main() {
           // Create a scond builder that creates panel nodes
           final panelCreator = ScBuilderBluePrint(
             key: 'panelCreator',
-            shouldDigInto: (scope) =>
+            shouldProcessChildrenOf: (scope) =>
                 const ['example', 'panel', 'container'].contains(scope.key),
             addScopes: ({required hostScope}) {
               if (hostScope.key == 'container') {

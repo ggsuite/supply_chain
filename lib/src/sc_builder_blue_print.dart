@@ -16,7 +16,7 @@ class ScBuilderBluePrint {
     List<ScopeBluePrint> Function({
       required Scope hostScope,
     })? addScopes,
-    bool Function(Scope scope)? shouldDigInto,
+    bool Function(Scope scope)? shouldProcessChildrenOf,
     ScopeBluePrint Function({
       required Scope hostScope,
       required ScopeBluePrint scopeToBeReplaced,
@@ -45,7 +45,7 @@ class ScBuilderBluePrint {
         _inserts = inserts,
         _needsUpdate = needsUpdate,
         _children = children,
-        _shouldDigInto = shouldDigInto;
+        _shouldProcessChildrenOf = shouldProcessChildrenOf;
 
   /// Instantiates this builder and it's children within the given hostScope
   ///
@@ -57,14 +57,25 @@ class ScBuilderBluePrint {
   }
 
   // ...........................................................................
-  /// Please override this method to define, which scopes and its children
-  /// should be processed by this builder.
+  /// Determines whether the builder should process a scope's children
   ///
-  /// If this method returns false for a given scope, the scope as well it's
-  /// children will not be processed by the builder. If you do not implement
-  /// this method carefully, performance issues will quickly arise.
-  bool shouldDigInto(Scope scope) {
-    return _shouldDigInto?.call(scope) ?? true;
+  /// This method should be overridden to define which scopes should allow
+  /// their children to be processed by the builder.
+  ///
+  /// If the method returns `false` for a given [scope], the builder will skip
+  /// processing its children. If it returns `true`, the children will be
+  /// processed.
+  ///
+  /// By default, the method checks a delegate function
+  /// `shouldProcessChildrenOf`
+  /// (if provided), and returns `true` if the function is not defined.
+  ///
+  /// - Parameter [scope]: The scope for which the decision to process
+  ///   children is made.
+  /// - Returns: A boolean indicating whether the children of the given scope
+  ///   should be processed.
+  bool shouldProcessChildrenOf(Scope scope) {
+    return _shouldProcessChildrenOf?.call(scope) ?? true;
   }
 
   // ...........................................................................
@@ -215,7 +226,7 @@ class ScBuilderBluePrint {
     required List<dynamic> components,
   })? _needsUpdate;
 
-  final bool Function(Scope scope)? _shouldDigInto;
+  final bool Function(Scope scope)? _shouldProcessChildrenOf;
 }
 
 // #############################################################################
@@ -229,7 +240,7 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
 
   // ...........................................................................
   @override
-  bool shouldDigInto(Scope scope) {
+  bool shouldProcessChildrenOf(Scope scope) {
     return true;
   }
 
@@ -332,7 +343,7 @@ class ExampleChildScBuilderBluePrint extends ScBuilderBluePrint {
 
   // ...........................................................................
   @override
-  bool shouldDigInto(Scope scope) {
+  bool shouldProcessChildrenOf(Scope scope) {
     return true;
   }
 

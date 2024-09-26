@@ -46,7 +46,7 @@
 - Add additional tests. Fix an issue with smart nodes.
 - Add additional checks for supplier consistency
 - Add tests for applying builders to nodes created by builders
-- Add shouldDigInto to optimize application of builders
+- Add shouldProcessChildrenOf to optimize application of builders
 
 ### Changed
 
@@ -172,7 +172,8 @@ Modifications can only be done via builders.
 - Optimize Scope.matchesKey
 - Optimize master path of smart nodes
 - Optimize smart node handling
-- Work on shouldDigInto
+- Work on shouldProcessChildrenOf
+- Rename shouldDigInto into shouldProcessChildrenOf
 
 ### Fixed
 

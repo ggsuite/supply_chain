@@ -39,11 +39,11 @@ class ScBuilderInserts {
   // ...........................................................................
   /// Deeply iterate through all child nodes and init the inserts
   void applyToScope(Scope scope) {
-    if (!builder.bluePrint.shouldDigInto(scope)) {
+    _applyToScope(scope);
+
+    if (!builder.bluePrint.shouldProcessChildrenOf(scope)) {
       return;
     }
-
-    _applyToScope(scope);
 
     for (final childScope in scope.children) {
       applyToScope(childScope);
