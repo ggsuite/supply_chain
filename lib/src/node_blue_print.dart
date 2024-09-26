@@ -167,8 +167,7 @@ class NodeBluePrint<T> {
       );
 
   /// Provites an operator =
-  @override
-  bool operator ==(Object other) {
+  bool equals(Object other) {
     if (other is NodeBluePrint<T>) {
       if (key != other.key) {
         return false;
@@ -178,11 +177,11 @@ class NodeBluePrint<T> {
         return false;
       }
 
-      if (produce != other.produce) {
+      if (suppliers.length != other.suppliers.length) {
         return false;
       }
 
-      if (suppliers.length != other.suppliers.length) {
+      if (!identical(produce, other.produce)) {
         return false;
       }
 
@@ -199,6 +198,7 @@ class NodeBluePrint<T> {
   }
 
   @override
+  // ignore: hash_and_equals
   int get hashCode {
     final suppliersHash = suppliers.fold<int>(
       0,

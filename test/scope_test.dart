@@ -901,11 +901,7 @@ void main() {
       test('should return an existing node when possible', () {
         expect(
           scope.findOrCreateNode(
-            NodeBluePrint(
-              initialProduct: 0,
-              produce: produce,
-              key: 'node',
-            ),
+            node.bluePrint,
           ),
           node,
         );

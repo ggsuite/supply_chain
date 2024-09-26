@@ -111,7 +111,7 @@ void main() {
         );
       });
     });
-    group('operator==, hashCode', () {
+    group('equals, hashCode', () {
       group('should return true', () {
         test('with same suppliers', () {
           int produce(List<dynamic> components, int previousProduct) =>
@@ -129,7 +129,7 @@ void main() {
             suppliers: ['supplier'],
             produce: produce,
           );
-          expect(bluePrint1 == bluePrint2, true);
+          expect(bluePrint1.equals(bluePrint2), true);
           expect(bluePrint1.hashCode == bluePrint2.hashCode, true);
         });
       });
