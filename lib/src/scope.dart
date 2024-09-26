@@ -15,6 +15,7 @@ class Scope {
     required ScopeBluePrint bluePrint,
     required Scope parent,
     Owner<Scope>? owner,
+    bool isMetaScope = false,
   }) {
     // ..................................
     // There might be an existing scope that was disposed before
@@ -31,6 +32,7 @@ class Scope {
       bluePrint: bluePrint,
       parent: parent,
       owner: owner,
+      isMetaScope: isMetaScope,
     );
 
     // ....................................................................
@@ -80,6 +82,7 @@ class Scope {
     required this.bluePrint,
     required this.parent,
     Owner<Scope>? owner,
+    required this.isMetaScope,
   })  : scm = parent!.scm,
         _owner = owner,
         assert(
@@ -97,7 +100,8 @@ class Scope {
     required this.scm,
   })  : parent = null,
         bluePrint = ScopeBluePrint(key: key),
-        assert(key.isCamelCase) {
+        assert(key.isCamelCase),
+        isMetaScope = false {
     _init();
   }
 
@@ -109,7 +113,8 @@ class Scope {
     required String key,
     required this.parent,
   })  : scm = parent!.scm,
-        bluePrint = ScopeBluePrint(key: key) {
+        bluePrint = ScopeBluePrint(key: key),
+        isMetaScope = true {
     _init(isMetaScope: true);
   }
 
@@ -364,7 +369,7 @@ class Scope {
   }
 
   /// Returns true if scope is a meta scope
-  bool get isMetaScope => parent != null && parent!.metaScopes.contains(this);
+  final bool isMetaScope;
 
   /// A node informing about changes in the scope or one of it's children
   late final Node<Scope> onChangeRecursive;
@@ -1380,7 +1385,7 @@ class ExampleChildScope extends Scope {
   ExampleChildScope({
     required String key,
     required super.parent,
-  }) : super._private(bluePrint: ScopeBluePrint(key: key)) {
+  }) : super._private(bluePrint: ScopeBluePrint(key: key), isMetaScope: false) {
     /// Create a node
     findOrCreateNode(
       NodeBluePrint<int>(
@@ -1416,7 +1421,10 @@ class ExampleGrandChildScope extends Scope {
   ExampleGrandChildScope({
     required String key,
     required super.parent,
-  }) : super._private(bluePrint: ScopeBluePrint(key: key)) {
+  }) : super._private(
+          bluePrint: ScopeBluePrint(key: key),
+          isMetaScope: false,
+        ) {
     findOrCreateNode(
       NodeBluePrint(
         initialProduct: 0,

@@ -749,7 +749,7 @@ class Node<T> {
       return false;
     }
 
-    path.removeLast();
+    path.removeLast(); // Todo: Use subarray
     return scope.matchesPathArray(path);
   }
 

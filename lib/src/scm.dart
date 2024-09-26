@@ -161,7 +161,7 @@ class Scm {
   // ######################
 
   /// Is used for testing
-  final bool isTest;
+  bool isTest;
 
   // ...........................................................................
   // Test schedule tasts
@@ -761,7 +761,11 @@ class Scm {
   late GgFakeStopwatch _testStopwatch;
 
   // ...........................................................................
-  static void _assertNodeIsNotErased(Node<dynamic> node) {
+  void _assertNodeIsNotErased(Node<dynamic> node) {
+    if (!isTest) {
+      return;
+    }
+
     assert(
       !node.isErased,
       '${node.scope}/${node.key} with id ${node.id} is disposed.',
@@ -769,9 +773,13 @@ class Scm {
   }
 
   // ...........................................................................
-  static void _assertNoNodeIsErased({
+  void _assertNoNodeIsErased({
     required Iterable<Node<dynamic>> nodes,
   }) {
+    if (!isTest) {
+      return;
+    }
+
     for (final node in nodes) {
       _assertNodeIsNotErased(node);
     }

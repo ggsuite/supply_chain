@@ -16,6 +16,7 @@ class ScBuilderBluePrint {
     List<ScopeBluePrint> Function({
       required Scope hostScope,
     })? addScopes,
+    bool Function(Scope scope)? shouldDigInto,
     ScopeBluePrint Function({
       required Scope hostScope,
       required ScopeBluePrint scopeToBeReplaced,
@@ -43,7 +44,8 @@ class ScBuilderBluePrint {
         _replaceNode = replaceNode,
         _inserts = inserts,
         _needsUpdate = needsUpdate,
-        _children = children;
+        _children = children,
+        _shouldDigInto = shouldDigInto;
 
   /// Instantiates this builder and it's children within the given hostScope
   ///
@@ -52,6 +54,21 @@ class ScBuilderBluePrint {
   ///   children
   ScBuilder instantiate({required Scope scope}) {
     return ScBuilder(bluePrint: this, scope: scope);
+  }
+
+  // ...........................................................................
+  /// Please override this method to define, which scopes and its children
+  /// should be processed by this builder.
+  ///
+  /// If this method returns false for a given scope, the scope as well it's
+  /// children will not be processed by the builder. If you do not implement
+  /// this method carefully, performance issues will quickly arise.
+  bool shouldDigInto(Scope scope) {
+    return _shouldDigInto?.call(scope) ??
+        (throw UnimplementedError(
+          'Please either specify shouldDigInto constructor parameter '
+          'or override shouldDigInto method in your class.',
+        ));
   }
 
   // ...........................................................................
@@ -201,6 +218,8 @@ class ScBuilderBluePrint {
     required Scope hostScope,
     required List<dynamic> components,
   })? _needsUpdate;
+
+  final bool Function(Scope scope)? _shouldDigInto;
 }
 
 // #############################################################################
@@ -211,6 +230,12 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
     super.key = 'exampleScBuilder',
     super.needsUpdateSuppliers,
   });
+
+  // ...........................................................................
+  @override
+  bool shouldDigInto(Scope scope) {
+    return true;
+  }
 
   // ...........................................................................
   /// Inserts
@@ -308,6 +333,12 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
 class ExampleChildScBuilderBluePrint extends ScBuilderBluePrint {
   /// The constructor
   const ExampleChildScBuilderBluePrint({super.key = 'exampleChildScBuilder'});
+
+  // ...........................................................................
+  @override
+  bool shouldDigInto(Scope scope) {
+    return true;
+  }
 
   // ...........................................................................
   /// Inserts

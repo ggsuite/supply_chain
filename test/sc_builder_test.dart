@@ -98,12 +98,14 @@ void main() {
         // Create a parent builder
         ScBuilderBluePrint(
           key: 'parent',
+          shouldDigInto: (scope) => true,
 
           // Create one child builder
           children: ({required hostScope}) {
             return [
-              const ScBuilderBluePrint(
+              ScBuilderBluePrint(
                 key: 'child',
+                shouldDigInto: (scope) => true,
               ),
             ];
           },
@@ -127,6 +129,7 @@ void main() {
           // Create a first builder marking all panel nodes
           final panelMarker = ScBuilderBluePrint(
             key: 'panelMarker',
+            shouldDigInto: (scope) => true,
             addNodes: ({required hostScope}) {
               if (hostScope.key == 'panel') {
                 return [
@@ -140,6 +143,8 @@ void main() {
           // Create a scond builder that creates panel nodes
           final panelCreator = ScBuilderBluePrint(
             key: 'panelCreator',
+
+            shouldDigInto: (scope) => true,
 
             // Add a node that triggers creating a panel
             addNodes: ({required hostScope}) {
@@ -218,6 +223,7 @@ void main() {
           // Create a first builder marking all panel nodes
           final panelMarker = ScBuilderBluePrint(
             key: 'panelMarker',
+            shouldDigInto: (scope) => true,
             addNodes: ({required hostScope}) {
               if (hostScope.key == 'panel') {
                 return [
@@ -231,6 +237,7 @@ void main() {
           // Create a scond builder that creates panel nodes
           final panelCreator = ScBuilderBluePrint(
             key: 'panelCreator',
+            shouldDigInto: (scope) => true,
             addScopes: ({required hostScope}) {
               if (hostScope.key == 'container') {
                 return [

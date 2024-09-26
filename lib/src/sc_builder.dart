@@ -139,6 +139,10 @@ class ScBuilder {
   }
 
   void _applyBuildersToChildScopes(Scope scope) {
+    if (!bluePrint.shouldDigInto(scope)) {
+      return;
+    }
+
     _applyChildBuilders(scope);
 
     for (final childScope in scope.children) {

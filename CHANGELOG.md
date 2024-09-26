@@ -46,6 +46,7 @@
 - Add additional tests. Fix an issue with smart nodes.
 - Add additional checks for supplier consistency
 - Add tests for applying builders to nodes created by builders
+- Add shouldDigInto to optimize application of builders
 
 ### Changed
 

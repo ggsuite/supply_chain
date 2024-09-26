@@ -14,6 +14,11 @@ class _AddExistingNodeScBuilder extends ScBuilderBluePrint {
   _AddExistingNodeScBuilder() : super(key: 'addExistingNodeScBuilder');
 
   @override
+  bool shouldDigInto(Scope scope) {
+    return true;
+  }
+
+  @override
   List<NodeBluePrint<dynamic>> addNodes({
     required Scope hostScope,
   }) {
@@ -36,6 +41,11 @@ class _AddExistingNodeScBuilder extends ScBuilderBluePrint {
 class _AddNodesToEveryScopeBuilder extends ScBuilderBluePrint {
   /// The constructor
   _AddNodesToEveryScopeBuilder() : super(key: 'addNodesToEveryScopeBuilder');
+
+  @override
+  bool shouldDigInto(Scope scope) {
+    return true;
+  }
 
   @override
   List<NodeBluePrint<dynamic>> addNodes({

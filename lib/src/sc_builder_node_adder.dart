@@ -48,6 +48,10 @@ class ScBuilderNodeAdder {
   // ...........................................................................
   /// Deeply iterate through all child nodes and replace nodes
   void applyToScope(Scope scope) {
+    if (!builder.bluePrint.shouldDigInto(scope)) {
+      return;
+    }
+
     _applyToScope(scope);
 
     for (final childScope in scope.children) {
@@ -114,6 +118,11 @@ class ScBuilderNodeAdder {
 class ExampleScBuilderAddingNodes extends ScBuilderBluePrint {
   /// The constructor
   ExampleScBuilderAddingNodes() : super(key: 'example');
+
+  @override
+  bool shouldDigInto(Scope scope) {
+    return true;
+  }
 
   @override
   List<NodeBluePrint<dynamic>> addNodes({

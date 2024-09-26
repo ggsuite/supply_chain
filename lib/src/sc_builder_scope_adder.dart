@@ -49,6 +49,10 @@ class ScBuilderScopeAdder {
   // ...........................................................................
   /// Deeply iterate through all child nodes and replace nodes
   void applyToScope(Scope scope) {
+    if (!builder.bluePrint.shouldDigInto(scope)) {
+      return;
+    }
+
     // We will not apply this builder to scopes created by this builder
     if (scope.owner == _owner) {
       return;
@@ -125,6 +129,11 @@ class ScBuilderScopeAdder {
 class ExampleScBuilderAddingScopes extends ScBuilderBluePrint {
   /// The constructor
   ExampleScBuilderAddingScopes() : super(key: 'example');
+
+  @override
+  bool shouldDigInto(Scope scope) {
+    return true;
+  }
 
   @override
   List<ScopeBluePrint> addScopes({

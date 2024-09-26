@@ -417,6 +417,7 @@ void main() {
             // scope containing one corner scope and node for each corner.
             final cornersBuilder = ScBuilderBluePrint(
               key: 'corners',
+              shouldDigInto: (scope) => true,
               needsUpdateSuppliers: ['cornerCount'],
               needsUpdate: ({required components, required hostScope}) {
                 // Remove old corners scope
@@ -444,6 +445,7 @@ void main() {
             // Each face has a node referencing to the corner node.
             final panelBuilder = ScBuilderBluePrint(
               key: 'panel',
+              shouldDigInto: (scope) => true,
               needsUpdateSuppliers: ['cornerCount'],
               needsUpdate: ({required components, required hostScope}) {
                 // Remove old faces scope

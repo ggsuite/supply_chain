@@ -46,6 +46,10 @@ class ScBuilderNodeReplacer {
   // ...........................................................................
   /// Deeply iterate through all child nodes and replace nodes
   void applyToScope(Scope scope) {
+    if (!builder.bluePrint.shouldDigInto(scope)) {
+      return;
+    }
+
     // TODO: Rename into applyToScope
     _applyToScope(scope);
 
@@ -104,6 +108,11 @@ class ScBuilderNodeReplacer {
 class ExampleScBuilderReplacingIntNodes extends ScBuilderBluePrint {
   /// The constructor
   ExampleScBuilderReplacingIntNodes() : super(key: 'example');
+
+  @override
+  bool shouldDigInto(Scope scope) {
+    return true;
+  }
 
   @override
   NodeBluePrint<dynamic> replaceNode({
