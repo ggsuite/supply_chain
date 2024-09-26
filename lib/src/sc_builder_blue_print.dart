@@ -64,11 +64,7 @@ class ScBuilderBluePrint {
   /// children will not be processed by the builder. If you do not implement
   /// this method carefully, performance issues will quickly arise.
   bool shouldDigInto(Scope scope) {
-    return _shouldDigInto?.call(scope) ??
-        (throw UnimplementedError(
-          'Please either specify shouldDigInto constructor parameter '
-          'or override shouldDigInto method in your class.',
-        ));
+    return _shouldDigInto?.call(scope) ?? true;
   }
 
   // ...........................................................................

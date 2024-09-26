@@ -283,18 +283,7 @@ void main() {
           'when not derived or specified by constructor / derived class',
           () {
             const builder = ScBuilderBluePrint(key: 'test');
-            expect(
-              () => builder.shouldDigInto(hostScope),
-              throwsA(
-                isA<UnimplementedError>().having(
-                  (e) => e.message,
-                  'message',
-                  contains('Please either specify shouldDigInto constructor '
-                      'parameter or override shouldDigInto method in your '
-                      'class.'),
-                ),
-              ),
-            );
+            expect(builder.shouldDigInto(hostScope), isTrue);
           },
         );
       });

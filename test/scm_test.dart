@@ -956,7 +956,9 @@ void main() {
           produce: (components, previousProduct) {
             ScBuilderBluePrint(
               key: 'builder',
-              shouldDigInto: (scope) => true,
+              shouldDigInto: (scope) => const [
+                'example',
+              ].contains(scope.key),
               addNodes: ({required hostScope}) {
                 if (hostScope == scope) {
                   return [

@@ -152,7 +152,10 @@ void main() {
         final builder = ScBuilderBluePrint(
           key: 'interiorBuilder',
 
-          shouldDigInto: (scope) => true,
+          shouldDigInto: (scope) => const [
+            'example',
+            'corpus',
+          ].contains(scope.key),
 
           // Prive a container count node
           addNodes: ({required hostScope}) {

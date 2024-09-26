@@ -172,6 +172,7 @@ Modifications can only be done via builders.
 - Optimize Scope.matchesKey
 - Optimize master path of smart nodes
 - Optimize smart node handling
+- Work on shouldDigInto
 
 ### Fixed
 
