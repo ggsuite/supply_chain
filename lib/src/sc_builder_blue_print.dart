@@ -52,8 +52,8 @@ class ScBuilderBluePrint {
   /// - [hostScope]: The scope this builder will be instantiated in
   /// - The callbacks below will be applied to the hostScope and all its
   ///   children
-  ScBuilder instantiate({required Scope scope}) {
-    return ScBuilder(bluePrint: this, scope: scope);
+  ScBuilder instantiate({required Scope scope, ScBuilder? parent}) {
+    return ScBuilder(bluePrint: this, scope: scope, parent: parent);
   }
 
   // ...........................................................................

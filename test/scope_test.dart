@@ -309,6 +309,7 @@ void main() {
         supplier = scope.findNode<int>('a.b.supplier')!;
         d = scope.findScope('a.d')!;
         customer = scope.findNode<int>('a.d.customer')!;
+        ExampleScBuilderBluePrint().instantiate(scope: a);
       });
 
       test('should deeply dispose all scopes and nodes', () {

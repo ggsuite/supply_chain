@@ -66,7 +66,6 @@ class Scm {
     _smartNodes.remove(node);
     _nodesWithMissedSuppliers.remove(node);
     _nodesNeedingSupplierUpdate.remove(node);
-    _assertNoNodeIsErased(nodes: _nominatedNodes);
   }
 
   /// Adds node for initialization of suppliers
@@ -228,11 +227,11 @@ class Scm {
   // ...........................................................................
   void _init() {
     _initStopWatch();
+    _initDisposed();
     _initSchedulePreparation();
     _initScheduleProduction();
     _initSchedulePriorityUpdate();
     _initRootScope();
-    _initDisposed();
   }
 
   // ...........................................................................
@@ -248,7 +247,6 @@ class Scm {
   final Set<Node<dynamic>> _animatedNodes = {};
 
   // ...........................................................................
-  // Nodes that need supplier update
   final Set<Node<dynamic>> _nodesNeedingSupplierUpdate = {};
   final Set<Node<dynamic>> _nodesWithMissedSuppliers = {};
 
@@ -315,7 +313,6 @@ class Scm {
     }
 
     // Nominate all animated nodes
-    _assertNoNodeIsErased(nodes: _animatedNodes);
     _nominatedNodes.addAll(_animatedNodes);
 
     // Start preparation
@@ -404,7 +401,6 @@ class Scm {
 
     // All nominated nodes have been prepared.
     // Add it to prepared nodes
-    _assertNoNodeIsErased(nodes: _nominatedNodes);
     _addPreparedNodes(_nominatedNodes);
 
     // Clear nominated nodes
@@ -485,7 +481,10 @@ class Scm {
 
   /// Produce all nodes
   void _produce() {
-    _assertNoNodeIsErased(nodes: _preparedNodes);
+    // _assertNoNodeIsErased(nodes: _preparedNodes);
+    if (_preparedNodes.isEmpty) {
+      return;
+    }
 
     // Remove disposed nodes
     _preparedNodes.removeWhere((n) => n.isDisposed);
@@ -527,9 +526,6 @@ class Scm {
         // Remove node from preparedNodes
         _removePreparedNode(node);
 
-        // Add node to producing nodes
-        _producingNodes.add(node);
-
         // Reset timeout state
         node.isTimedOut = false;
         node.productionStartTime = _stopwatch.elapsed;
@@ -538,6 +534,8 @@ class Scm {
 
         // Produce
         if (!node.isDisposed) {
+          // Add node to producing nodes
+          _producingNodes.add(node);
           node.produce();
         }
       }
@@ -770,19 +768,6 @@ class Scm {
       !node.isErased,
       '${node.scope}/${node.key} with id ${node.id} is disposed.',
     );
-  }
-
-  // ...........................................................................
-  void _assertNoNodeIsErased({
-    required Iterable<Node<dynamic>> nodes,
-  }) {
-    if (!isTest) {
-      return;
-    }
-
-    for (final node in nodes) {
-      _assertNodeIsNotErased(node);
-    }
   }
 
   // ...........................................................................

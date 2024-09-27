@@ -72,6 +72,9 @@ class Scope {
       result._nodes[disposedNode.key] = disposedNode;
     }
 
+    // Erase the disposed scope
+    disposedScope._erase();
+
     // ..................
     // Return the result
     return result;
@@ -920,6 +923,12 @@ class Scope {
     if (parent?.isDisposed == true && parent?._isEmpty == true) {
       parent?._erase();
     }
+
+    // Dispose all builders
+    for (final builder in [..._builders]) {
+      builder.dispose();
+    }
+    _builders.clear();
 
     _owner?.didErase?.call(this);
   }

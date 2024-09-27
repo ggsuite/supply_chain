@@ -14,9 +14,11 @@ class ScBuilder {
   ScBuilder({
     required this.bluePrint,
     required this.scope,
+    this.parent,
   }) {
     _init();
     applyToScope(scope);
+    instances.add(this);
   }
 
   /// Disposes the builder
@@ -24,7 +26,17 @@ class ScBuilder {
     for (var dispose in _dispose.reversed) {
       dispose();
     }
+    instances.remove(this);
+    _dispose.clear();
+
+    parent?._children.remove(this);
   }
+
+  /// The parent builder
+  ScBuilder? parent;
+
+  /// All instances of the builder
+  static final instances = <ScBuilder>[];
 
   /// Applies the builder to this scope and all its children
   void applyToScope(Scope scope, {bool applyToChildren = true}) {
@@ -75,7 +87,6 @@ class ScBuilder {
   // ######################
   // Private
   // ######################
-
   final List<ScBuilder> _children = [];
 
   final List<void Function()> _dispose = [];
@@ -126,12 +137,12 @@ class ScBuilder {
 
   void _applyChildBuilders(Scope scope) {
     for (final child in bluePrint.children(hostScope: scope)) {
-      _children.add(child.instantiate(scope: scope));
+      _children.add(child.instantiate(scope: scope, parent: this));
     }
 
     _dispose.add(
       () {
-        for (var child in _children) {
+        for (var child in [..._children]) {
           child.dispose();
         }
       },

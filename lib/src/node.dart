@@ -141,8 +141,11 @@ class Node<T> {
     }
 
     _bluePrints.remove(bp);
-    reset();
-    scm.nominate(this);
+
+    if (!isDisposed) {
+      reset();
+      scm.nominate(this);
+    }
   }
 
   // ...........................................................................
