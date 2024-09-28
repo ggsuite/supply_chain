@@ -596,6 +596,48 @@ class Scope {
   List<ScBuilder> get builders => _builders;
 
   // ...........................................................................
+  /// Prints all pathes of the scope or its parent
+  ///
+  /// If parentDepth < 0, start at the root
+  /// If childDepth < 0, show all children
+  List<String> ls({int parentDepth = 0, int childDepth = -1}) {
+    var start = this;
+
+    // If parentDepth < 0, start at the root
+    if (parentDepth < 0) {
+      parentDepth = 0xFFFF;
+    }
+
+    // Find  parent node that matches the parentDepth
+    var realParentDepth = 0;
+
+    while (parentDepth > 0 && start.parent != null) {
+      start = start.parent!;
+      realParentDepth++;
+      parentDepth--;
+    }
+
+    // If childDepth > 0, we need to add the parent depth to childDepth
+    if (childDepth > 0) {
+      childDepth += realParentDepth;
+    }
+
+    // Define the result array
+    final result = <String>[];
+
+    // Write the tree
+    _ls(
+      scope: start,
+      result: result,
+      depth: childDepth,
+      currentPath: '',
+      infinite: childDepth < 0,
+    );
+
+    return result;
+  }
+
+  // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz
   String dot({
     int childScopeDepth = -1,
@@ -1353,6 +1395,45 @@ class Scope {
   // ...........................................................................
   bool get _isEmpty =>
       _nodes.isEmpty && _children.isEmpty && _metaScopes.isEmpty;
+
+  // ...........................................................................
+  void _ls({
+    required Scope scope,
+    required List<String> result,
+    required String currentPath,
+    required int depth,
+    required bool infinite,
+  }) {
+    if (!infinite && depth < 0) {
+      return;
+    }
+
+    final dot = currentPath.isEmpty ? '' : '.';
+
+    // Write children
+    for (final child in scope.children) {
+      final childPath = '$currentPath$dot${child.key}';
+      result.add(childPath);
+
+      child._ls(
+        scope: child,
+        result: result,
+        depth: depth - 1,
+        currentPath: childPath,
+        infinite: infinite,
+      );
+    }
+
+    // Write nodes
+    for (final node in scope.nodes) {
+      final product = node.product;
+      final value = product is int || product is double || product is String
+          ? ' (${node.product})'
+          : '';
+
+      result.add('$currentPath$dot${node.key}$value');
+    }
+  }
 }
 
 // #############################################################################

@@ -47,6 +47,7 @@
 - Add additional checks for supplier consistency
 - Add tests for applying builders to nodes created by builders
 - Add shouldStopProcessingAfter to optimize application of builders
+- Add Scope.ls to print all children and nodes of a scope
 
 ### Changed
 

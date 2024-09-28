@@ -1212,7 +1212,7 @@ void main() {
       });
     });
 
-    group('graph, saveGraphToFile', () {
+    group('dot, graph, saveGraphToFile', () {
       late Scope scope;
 
       setUp(
@@ -1362,6 +1362,134 @@ void main() {
           expect(await File(image2xPath).exists(), isTrue);
           await tmpDir.delete(recursive: true);
           // coveralls: ignore-end
+        });
+      });
+    });
+
+    group('ls', () {
+      group('returns a list with all pathes of the scope', () {
+        late Scope scope;
+        late Scope b;
+        var needsRebuild = true;
+
+        setUp(() {
+          if (!needsRebuild) {
+            return;
+          }
+          needsRebuild = false;
+
+          scope = Scope.example();
+          scope.mockContent({
+            'a': {
+              'b': {
+                'c': {
+                  'd': 0,
+                  'e': 1,
+                },
+                'f': 2,
+                'g': const NodeBluePrint(key: 'g', initialProduct: Object()),
+              },
+            },
+          });
+          scope.scm.testFlushTasks();
+          b = scope.findChildScope('b')!;
+        });
+
+        test('with default params', () {
+          final ls = scope.ls();
+          expect(ls, [
+            'a',
+            'a.b',
+            'a.b.c',
+            'a.b.c.d (0)',
+            'a.b.c.e (1)',
+            'a.b.f (2)',
+            'a.b.g',
+          ]);
+
+          final lsb = b.ls();
+          expect(lsb, [
+            'c',
+            'c.d (0)',
+            'c.e (1)',
+            'f (2)',
+            'g',
+          ]);
+        });
+
+        group('with parentDepth', () {
+          test(' = -1', () {
+            final ls = b.ls(parentDepth: -1);
+            expect(ls, [
+              'example',
+              'example.a',
+              'example.a.b',
+              'example.a.b.c',
+              'example.a.b.c.d (0)',
+              'example.a.b.c.e (1)',
+              'example.a.b.f (2)',
+              'example.a.b.g',
+            ]);
+          });
+
+          test(' = 1', () {
+            final ls = b.ls(parentDepth: 1);
+            expect(ls, [
+              'b',
+              'b.c',
+              'b.c.d (0)',
+              'b.c.e (1)',
+              'b.f (2)',
+              'b.g',
+            ]);
+          });
+
+          test(' = 1000', () {
+            final ls = b.ls(parentDepth: 1);
+            expect(ls, [
+              'b',
+              'b.c',
+              'b.c.d (0)',
+              'b.c.e (1)',
+              'b.f (2)',
+              'b.g',
+            ]);
+          });
+        });
+
+        group('with childDepth', () {
+          test('-1', () {
+            final ls = b.ls(childDepth: -1);
+            expect(ls, [
+              'c',
+              'c.d (0)',
+              'c.e (1)',
+              'f (2)',
+              'g',
+            ]);
+          });
+
+          test('1', () {
+            final ls = b.ls(childDepth: 1);
+            expect(ls, [
+              'c',
+              'c.d (0)',
+              'c.e (1)',
+              'f (2)',
+              'g',
+            ]);
+          });
+
+          test('1000', () {
+            final ls = b.ls(childDepth: 1000);
+            expect(ls, [
+              'c',
+              'c.d (0)',
+              'c.e (1)',
+              'f (2)',
+              'g',
+            ]);
+          });
         });
       });
     });
