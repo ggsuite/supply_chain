@@ -549,6 +549,10 @@ class Scm {
 
   // ...........................................................................
   void _addPreparedNodes(Iterable<Node<dynamic>> nodes) {
+    if (nodes.isEmpty) {
+      return;
+    }
+
     _preparedNodes.addAll(nodes);
     _preparedRealtimeNodes.addAll(
       nodes.where((n) => n.priority == Priority.realtime),

@@ -180,6 +180,7 @@ Modifications can only be done via builders.
 - Provide a method to stop processing at a certain point
 - Implementers of ScBuilderBluePrint must implement shouldStopProcessingAfter
 - Optimize comparison of ScopeBluePrints
+- Optimizations
 
 ### Fixed
 

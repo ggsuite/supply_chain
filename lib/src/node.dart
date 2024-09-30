@@ -299,6 +299,8 @@ class Node<T> {
   // ...........................................................................
   // Production
 
+  final List<dynamic> _products = [];
+
   /// The product produced by this node
   T _originalProduct;
 
@@ -306,8 +308,14 @@ class Node<T> {
   void produce({bool announce = true}) {
     assert(!isDisposed);
 
+    int i = 0;
+    for (final supplier in suppliers) {
+      _products[i] = supplier.product;
+      i++;
+    }
+
     final newProduct = bluePrint.produce(
-      suppliers.map((s) => s.product).toList(),
+      _products,
       previousProduct,
     );
 
@@ -384,6 +392,9 @@ class Node<T> {
     for (final supplier in newSuppliers.values) {
       _addOrReplaceSupplier(supplier);
     }
+
+    // Enlarge or shrink _products
+    _products.length = suppliers.length;
 
     _suppliersAreInitialized = true;
   }
