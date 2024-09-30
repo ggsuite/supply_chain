@@ -19,6 +19,7 @@ class ScBuilder {
     _init();
     applyToScope(scope);
     instances.add(this);
+    bluePrint.onInstantiate(hostScope: scope);
   }
 
   /// Disposes the builder
@@ -40,7 +41,6 @@ class ScBuilder {
 
   /// Applies the builder to this scope and all its children
   void applyToScope(Scope scope, {bool applyToChildren = true}) {
-    bluePrint.onInstantiate(hostScope: scope);
     inserts.applyToScope(scope);
     nodeReplacer.applyToScope(scope);
     nodeAdder.applyToScope(scope);

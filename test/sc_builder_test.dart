@@ -24,7 +24,7 @@ void main() {
         expect(scope.builders.first, builder);
 
         // onInstantiate should be called
-        expect(builder.scope.node<int>('didCallOnInstantiate'), isNotNull);
+        expect(builder.scope.node<int>('didCallOnInstantiate')?.product, 1);
 
         // The builder applied inserts
         final hostA = scope.findNode<int>('hostA')!;
@@ -288,6 +288,24 @@ void main() {
           final addedPanel = container.findScope('panel')!;
           expect(addedPanel.node<int>('mark'), isNotNull);
         });
+      });
+
+      test('should call onInstantiate not for parent scopes', () {
+        // Create a scope
+        final scope = Scope.example();
+
+        // Instantiate a builder within the scope
+        ExampleScBuilderBluePrint().instantiate(scope: scope);
+
+        // The onInstantiate method should have been called
+        expect(scope.node<int>('didCallOnInstantiate')?.product, 1);
+
+        // Add a child scope
+        final child =
+            const ScopeBluePrint(key: 'child').instantiate(scope: scope);
+
+        // The onInstantiate method should not be called for children
+        expect(child.node<int>('didCallOnInstantiate'), isNull);
       });
     });
   });

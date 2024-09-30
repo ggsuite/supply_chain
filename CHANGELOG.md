@@ -204,6 +204,7 @@ Modifications can only be done via builders.
 - Fix a bug where builders were instantiated twice
 - Fix issues with smart nodes
 - Fixing memory leaks
+- Fix an issue with onInstantiate
 
 ### Removed
 

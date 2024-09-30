@@ -347,13 +347,16 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
   @override
   void onInstantiate({required Scope hostScope}) {
     super.onInstantiate(hostScope: hostScope);
-    NodeBluePrint<int>(
-      key: 'didCallOnInstantiate',
-      initialProduct: 0,
-      produce: (components, previousProduct) {
-        return previousProduct + 111;
-      },
-    ).instantiate(scope: hostScope);
+
+    // Create a node that counts how often onInstantiate was called
+    final didCallOnInstantiate = hostScope.findOrCreateNode<int>(
+      const NodeBluePrint<int>(
+        key: 'didCallOnInstantiate',
+        initialProduct: 0,
+      ),
+    );
+
+    didCallOnInstantiate.product++;
   }
 }
 
