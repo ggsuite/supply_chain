@@ -181,6 +181,7 @@ Modifications can only be done via builders.
 - Implementers of ScBuilderBluePrint must implement shouldStopProcessingAfter
 - Optimize comparison of ScopeBluePrints
 - Optimizations
+- Optimize produce performance
 
 ### Fixed
 

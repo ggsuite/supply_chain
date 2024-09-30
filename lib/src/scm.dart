@@ -136,6 +136,7 @@ class Scm {
   void clear() {
     _nominatedNodes.clear();
     _preparedNodes.clear();
+    _preparedInsertNodes.clear();
     _producingNodes.clear();
   }
 
@@ -189,7 +190,7 @@ class Scm {
       testRunNormalTasks();
       testRunFastTasks();
 
-      if (tick && _preparedNodes.isNotEmpty) {
+      if (tick && !_preparedNodesAreEmpty) {
         _tick();
       }
     }
@@ -257,6 +258,7 @@ class Scm {
   // Processing stages
   final Set<Node<dynamic>> _nominatedNodes = {};
   final Set<Node<dynamic>> _preparedNodes = {};
+  final Set<Node<dynamic>> _preparedInsertNodes = {};
   final Set<Node<dynamic>> _preparedRealtimeNodes = {};
   final Set<Node<dynamic>> _producingNodes = {};
 
@@ -298,12 +300,16 @@ class Scm {
   }
 
   // ...........................................................................
+  bool get _preparedNodesAreEmpty =>
+      _preparedNodes.isEmpty && _preparedInsertNodes.isEmpty;
+
+  // ...........................................................................
   void _tick() {
     // Process also nodes with frame priority
     _minProductionPriority = Priority.frame;
 
     // Don't produce new frames if old items are still producing
-    if (_preparedNodes.isNotEmpty) {
+    if (!_preparedNodesAreEmpty) {
       final isNotProducing = _producingNodes.isEmpty;
       if (isNotProducing) {
         _scheduleProduction();
@@ -482,26 +488,17 @@ class Scm {
   /// Produce all nodes
   void _produce() {
     // _assertNoNodeIsErased(nodes: _preparedNodes);
-    if (_preparedNodes.isEmpty) {
+    if (_preparedNodesAreEmpty) {
       return;
     }
 
     // Remove disposed nodes
     _preparedNodes.removeWhere((n) => n.isDisposed);
+    _preparedInsertNodes.removeWhere((n) => n.isDisposed);
     _preparedRealtimeNodes.removeWhere((n) => n.isDisposed);
 
-    // For all nodes that are ready to produce
-    final nodesReadyToProduce = preparedNodes
-        .where(
-          (n) => n.isReadyToProduce,
-        )
-        .toList();
-
-    // Make sure inserts are processed first
-    nodesReadyToProduce.sort((a, b) => a is Insert ? -1 : 0);
-
     // Start timeout timer
-    if (nodesReadyToProduce.isNotEmpty && shouldTimeOut) {
+    if (!_preparedNodesAreEmpty && shouldTimeOut) {
       _startTimeoutCheck();
     }
 
@@ -513,16 +510,23 @@ class Scm {
       }
 
       // Get nodes that have the desired priority
-      final nodesOfPriority = nodesReadyToProduce.where(
-        (element) => element.priority == priority,
+      // Process inserts first
+      final insertsReadyToProduce = _preparedInsertNodes.where(
+        (n) => n.isReadyToProduce && n.priority == priority,
       );
+
+      final nodesOfPriority = insertsReadyToProduce.isNotEmpty
+          ? insertsReadyToProduce
+          : _preparedNodes.where(
+              (n) => n.isReadyToProduce && n.priority == priority,
+            );
 
       // Continue if no such nodes are available
       if (nodesOfPriority.isEmpty) {
         continue;
       }
 
-      for (final node in nodesOfPriority) {
+      for (final node in [...nodesOfPriority]) {
         // Remove node from preparedNodes
         _removePreparedNode(node);
 
@@ -553,14 +557,26 @@ class Scm {
       return;
     }
 
-    _preparedNodes.addAll(nodes);
+    for (final node in nodes) {
+      if (node.isInsert) {
+        _preparedInsertNodes.add(node);
+      } else {
+        _preparedNodes.add(node);
+      }
+    }
+
     _preparedRealtimeNodes.addAll(
       nodes.where((n) => n.priority == Priority.realtime),
     );
   }
 
   void _removePreparedNode(Node<dynamic> node) {
-    _preparedNodes.remove(node);
+    if (node.isInsert) {
+      _preparedInsertNodes.remove(node);
+    } else {
+      _preparedNodes.remove(node);
+    }
+
     if (node.priority == Priority.realtime) {
       _preparedRealtimeNodes.remove(node);
     }
@@ -586,12 +602,12 @@ class Scm {
     // Schedule production
     _scheduleProduction();
 
-    if (_preparedNodes.isEmpty) {
+    if (_preparedNodesAreEmpty) {
       _initMissedSuppliers();
     }
 
     // Everything is done?
-    if (_preparedNodes.isEmpty) {
+    if (_preparedNodesAreEmpty) {
       _resetMinimumProductionPriority();
       _stopTimeoutCheck();
     }
