@@ -26,27 +26,15 @@ class ScopeBluePrint {
     List<String> aliases = const [],
     Map<String, String> connect = const {},
     List<ScBuilderBluePrint> builders = const [],
+    void Function(Scope)? onInstantiate,
+    void Function(Scope)? onDispose,
   })  : _aliases = aliases,
         _builders = builders,
         _connections = connect,
         _nodes = nodes,
-        _children = children;
-
-  // ...........................................................................
-  /// Constructor of the scope
-  const ScopeBluePrint.fat({
-    required this.key,
-    List<NodeBluePrint<dynamic>> nodes = const [],
-    List<ScopeBluePrint> children = const [],
-    List<String> aliases = const [],
-    Map<String, String> connections = const {},
-    List<ScBuilderBluePrint> builders = const [],
-  })  : _connections = connections,
-        _aliases = aliases,
-        _builders = builders,
-        _nodes = nodes,
-        _children = children;
-
+        _children = children,
+        _onInstantiate = onInstantiate,
+        _onDispose = onDispose;
   // coverage:ignore-end
 
   // ...........................................................................
@@ -59,11 +47,15 @@ class ScopeBluePrint {
     List<String> aliases = const [],
     Map<String, String> connections = const {},
     List<ScBuilderBluePrint> builders = const [],
+    void Function(Scope)? onInstantiate,
+    void Function(Scope)? onDispose,
   })  : _connections = connections,
         _aliases = aliases,
         _builders = builders,
         _nodes = nodes,
-        _children = children;
+        _children = children,
+        _onInstantiate = onInstantiate,
+        _onDispose = onDispose;
   // coverage:ignore-end
 
   // ...........................................................................
@@ -157,6 +149,18 @@ class ScopeBluePrint {
   // ...........................................................................
   /// Override this method to perform actions or checks before instantiation
   void willInstantiate() {}
+
+  /// Override this method if you want to perform actions after the
+  /// scope blue print was instantiated.
+  void onInstantiate({required Scope scope}) {
+    _onInstantiate?.call(scope);
+  }
+
+  /// Override this method if you want to perform actions before the scope
+  /// is disposed
+  void onDispose({required Scope scope}) {
+    _onDispose?.call(scope);
+  }
 
   // ...........................................................................
   /// Creates a copy of the scope with the given changes
@@ -353,6 +357,9 @@ class ScopeBluePrint {
     // Apply parent builders
     _applyParentScBuilders(scope: innerScope);
 
+    // Call onInstantiate
+    onInstantiate(scope: innerScope);
+
     /// Returns the created exampleScope
     return innerScope;
   }
@@ -420,13 +427,19 @@ class ScopeBluePrint {
     required List<ScopeBluePrint> children,
     required List<ScBuilderBluePrint> builders,
     required Map<String, String> connections,
+    void Function(Scope)? onInstantiate,
+    void Function(Scope)? onDispose,
   })  : _connections = connections,
         _aliases = aliases,
         _nodes = nodes,
         _children = children,
-        _builders = builders;
+        _builders = builders,
+        _onInstantiate = onInstantiate,
+        _onDispose = onDispose;
 
   // ...........................................................................
+  final void Function(Scope)? _onInstantiate;
+  final void Function(Scope)? _onDispose;
   final List<NodeBluePrint<dynamic>> _nodes;
   final List<ScopeBluePrint> _children;
   final List<ScBuilderBluePrint> _builders;
@@ -826,7 +839,7 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
     super.key = 'parentScope',
     List<NodeBluePrint<dynamic>> nodes = const [],
     List<ScopeBluePrint> children = const [],
-  }) : super.fat(
+  }) : super(
           nodes: [
             const NodeBluePrint<int>(
               key: 'nodeConstructedByParent',

@@ -1000,6 +1000,30 @@ void main() {
         expect(result, [a0, b0, c]);
       });
     });
+
+    group('onInstantiate, onDispose', () {
+      test('is called when scope is instantiated and disposed', () {
+        var onInstantiateCalled = false;
+        var onDisposeCalled = false;
+
+        final bluePrint = ScopeBluePrint(
+          key: 'test',
+          onInstantiate: (scope) {
+            onInstantiateCalled = true;
+          },
+          onDispose: (scope) {
+            onDisposeCalled = true;
+          },
+        );
+
+        final rootScope = Scope.root(key: 'root', scm: Scm.example());
+        final scope = bluePrint.instantiate(scope: rootScope);
+        expect(onInstantiateCalled, isTrue);
+
+        scope.dispose();
+        expect(onDisposeCalled, isTrue);
+      });
+    });
   });
 }
 

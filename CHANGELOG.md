@@ -49,6 +49,7 @@
 - Add shouldStopProcessingAfter to optimize application of builders
 - Add Scope.ls to print all children and nodes of a scope
 - Add onInstantiate bluePrint
+- Add ScopeBluePrint.onInstantiate, onDispose
 
 ### Changed
 
