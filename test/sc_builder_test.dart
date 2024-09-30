@@ -23,6 +23,9 @@ void main() {
         final scope = builder.scope;
         expect(scope.builders.first, builder);
 
+        // onInstantiate should be called
+        expect(builder.scope.node<int>('didCallOnInstantiate'), isNotNull);
+
         // The builder applied inserts
         final hostA = scope.findNode<int>('hostA')!;
         final hostB = scope.findNode<int>('hostB')!;

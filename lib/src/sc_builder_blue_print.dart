@@ -57,6 +57,10 @@ class ScBuilderBluePrint {
   }
 
   // ...........................................................................
+  /// Override this method to react to the instantiation of the builder
+  void onInstantiate({required Scope hostScope}) {}
+
+  // ...........................................................................
   /// Determines whether the builder should process a scope's children
   ///
   /// This method should be overridden to define which scopes should allow
@@ -338,6 +342,18 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
   }) {
     super.needsUpdate(hostScope: hostScope, components: components);
     _needsUpdateCalls.add((hostScope, components));
+  }
+
+  @override
+  void onInstantiate({required Scope hostScope}) {
+    super.onInstantiate(hostScope: hostScope);
+    NodeBluePrint<int>(
+      key: 'didCallOnInstantiate',
+      initialProduct: 0,
+      produce: (components, previousProduct) {
+        return previousProduct + 111;
+      },
+    ).instantiate(scope: hostScope);
   }
 }
 
