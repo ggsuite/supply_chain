@@ -1003,25 +1003,25 @@ void main() {
 
     group('onInstantiate, onDispose', () {
       test('is called when scope is instantiated and disposed', () {
-        var onInstantiateCalled = false;
-        var onDisposeCalled = false;
+        Scope? onInstantiateCalled;
+        Scope? onDisposeCalled;
 
         final bluePrint = ScopeBluePrint(
           key: 'test',
           onInstantiate: (scope) {
-            onInstantiateCalled = true;
+            onInstantiateCalled = scope;
           },
           onDispose: (scope) {
-            onDisposeCalled = true;
+            onDisposeCalled = scope;
           },
         );
 
         final rootScope = Scope.root(key: 'root', scm: Scm.example());
         final scope = bluePrint.instantiate(scope: rootScope);
-        expect(onInstantiateCalled, isTrue);
+        expect(onInstantiateCalled, scope);
 
         scope.dispose();
-        expect(onDisposeCalled, isTrue);
+        expect(onDisposeCalled, scope);
       });
     });
   });

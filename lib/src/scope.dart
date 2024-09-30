@@ -916,7 +916,7 @@ class Scope {
     _isDisposed = true;
 
     // Call the blue print's onDispose method
-    bluePrint.onDispose(scope: this);
+    bluePrint.onDispose(this);
 
     // Dispose the scope's nodes
     for (final node in [..._nodes.values]) {

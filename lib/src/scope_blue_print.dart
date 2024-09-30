@@ -152,13 +152,13 @@ class ScopeBluePrint {
 
   /// Override this method if you want to perform actions after the
   /// scope blue print was instantiated.
-  void onInstantiate({required Scope scope}) {
+  void onInstantiate(Scope scope) {
     _onInstantiate?.call(scope);
   }
 
   /// Override this method if you want to perform actions before the scope
   /// is disposed
-  void onDispose({required Scope scope}) {
+  void onDispose(Scope scope) {
     _onDispose?.call(scope);
   }
 
@@ -358,7 +358,7 @@ class ScopeBluePrint {
     _applyParentScBuilders(scope: innerScope);
 
     // Call onInstantiate
-    onInstantiate(scope: innerScope);
+    onInstantiate(innerScope);
 
     /// Returns the created exampleScope
     return innerScope;
