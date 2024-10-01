@@ -102,6 +102,9 @@ class Node<T> {
     _owner?.didErase?.call(this);
   }
 
+  /// Returns true if node is initialized
+  bool get isInitialized => _isInitialized;
+
   /// Returns true if node is erased
   bool get isErased => _isErased;
 
@@ -305,8 +308,12 @@ class Node<T> {
   T _originalProduct;
 
   /// Produces the product.
-  void produce({bool announce = true}) {
+  void produce({bool announce = true, bool triggerOnChange = true}) {
     assert(!isDisposed);
+    assert(_suppliersAreInitialized);
+    if (_mockedProduct != null) {
+      return;
+    }
 
     int i = 0;
     for (final supplier in suppliers) {
@@ -335,6 +342,9 @@ class Node<T> {
     // Announce
     if (announce) {
       scm.hasNewProduct(this);
+    }
+
+    if (triggerOnChange) {
       _triggerOnChange();
     }
   }
@@ -572,6 +582,7 @@ class Node<T> {
   // ...........................................................................
   final Owner<Node<dynamic>>? _owner;
   late bool _suppliersAreInitialized;
+  bool _isInitialized = false;
 
   // ...........................................................................
   /// Reset Id counter for tests
@@ -585,6 +596,7 @@ class Node<T> {
     _suppliersAreInitialized = bluePrint.suppliers.isEmpty;
     _initScope();
     _initScm();
+    _isInitialized = true;
   }
 
   // ...........................................................................

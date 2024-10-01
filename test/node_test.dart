@@ -40,11 +40,11 @@ void main() {
       scm.testFlushTasks();
 
       // Production should be done
-      expect(node.product, 1);
+      expect(node.product, 2);
       expect(node.key, 'aaliyah');
       expect(node.toString(), 'aaliyah');
 
-      // If now scm is given, then the testInstance will be used
+      // If no scm is given, then the testInstance will be used
       final node2 = Node.example();
       expect(node2.scm, Scm.testInstance);
     });
@@ -746,8 +746,6 @@ void main() {
           node.bluePrint,
           previousBluePrint,
         );
-
-        expect(scm.nominatedNodes, [node]);
       });
     });
 

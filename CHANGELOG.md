@@ -183,6 +183,7 @@ Modifications can only be done via builders.
 - Optimizations
 - Optimize produce performance
 - Allow to disable extra checks
+- Optimize nomination - Certain nodes should produce directly and should not run through the nomination and production process
 
 ### Fixed
 

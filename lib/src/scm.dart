@@ -53,6 +53,7 @@ class Scm {
   void addNode(Node<dynamic> node) {
     _assertNodeIsNotErased(node);
     _nodes.add(node);
+
     nominate(node);
   }
 
@@ -75,16 +76,30 @@ class Scm {
 
   /// Nominate node for production
   void nominate(Node<dynamic> node) {
+    // If the node has no customers, it is more efficient to produce it directly
+    if (node.isReadyToProduce &&
+        node.suppliers.isEmpty &&
+        node.customers.isEmpty &&
+        node.inserts.isEmpty &&
+        node.isInitialized &&
+        !node.isInsert &&
+        !node.isDisposed) {
+      node.produce(announce: false, triggerOnChange: true);
+      node.finalizeProduction();
+      return;
+    }
+
     _assertNodeIsNotErased(node);
     _nominatedNodes.add(node);
     _schedulePreparation.trigger();
   }
 
   /// Inform scm about an update
-  void hasNewProduct(Node<dynamic> node) {
+  void hasNewProduct(Node<dynamic> node, {bool? extraChecks}) {
     // Node is not in producing nodes?
     // Throw an exception. Only producing nodes should call hasNewProduct()
-    if (!_producingNodes.contains(node)) {
+    final check = extraChecks ?? Scm.extraChecks;
+    if (check && !_producingNodes.contains(node)) {
       throw StateError('Node "$node" did call "hasNewProduct()" '
           'without being nominated before.');
     }

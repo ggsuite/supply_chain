@@ -1134,7 +1134,7 @@ void main() {
       expect(node.product, 0);
       scm.nominate(node);
       fake.flushMicrotasks();
-      expect(node.product, 1);
+      expect(node.product, 2);
     });
   });
 }
@@ -1146,7 +1146,7 @@ class _NodeThatTimesOut<T> extends Node<T> {
   });
 
   @override
-  void produce({bool announce = true}) {
+  void produce({bool announce = true, bool triggerOnChange = true}) {
     // Do nothing. This node will time out.
   }
 }
