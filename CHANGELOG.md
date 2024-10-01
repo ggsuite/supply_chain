@@ -182,6 +182,7 @@ Modifications can only be done via builders.
 - Optimize comparison of ScopeBluePrints
 - Optimizations
 - Optimize produce performance
+- Allow to disable extra checks
 
 ### Fixed
 

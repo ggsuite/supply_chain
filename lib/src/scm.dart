@@ -163,6 +163,9 @@ class Scm {
   /// Is used for testing
   bool isTest;
 
+  /// Disable additional checks
+  static bool extraChecks = true;
+
   // ...........................................................................
   // Test schedule tasts
 
@@ -780,7 +783,7 @@ class Scm {
 
   // ...........................................................................
   void _assertNodeIsNotErased(Node<dynamic> node) {
-    if (!isTest) {
+    if (!extraChecks) {
       return;
     }
 
