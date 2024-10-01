@@ -18,6 +18,8 @@ void main() {
 
   setUp(
     () {
+      Node.onChangeEnabled = true;
+      Node.onRecursiveChangeEnabled = true;
       testSetNextKeyCounter(0);
       Node.testResetIdCounter();
       scm = Scm(isTest: true);
@@ -1021,6 +1023,24 @@ void main() {
         scope.scm.testFlushTasks();
         expect(nodeB.findMasterNode(), isNull);
         expect(nodeC.findMasterNode(), isNull);
+      });
+    });
+
+    group('onChangeEnabled, onRecursiveChangeEnabled', () {
+      test('true', () {
+        Node.onChangeEnabled = true;
+        Node.onRecursiveChangeEnabled = true;
+        final scope = Scope.example();
+        expect(scope.findNode<Scope>('on.change'), isNotNull);
+        expect(scope.findNode<Scope>('on.changeRecursive'), isNotNull);
+      });
+
+      test('false', () {
+        Node.onChangeEnabled = false;
+        Node.onRecursiveChangeEnabled = false;
+        final scope = Scope.example();
+        expect(scope.findNode<Scope>('on.change'), isNull);
+        expect(scope.findNode<Scope>('on.changeRecursive'), isNull);
       });
     });
   });

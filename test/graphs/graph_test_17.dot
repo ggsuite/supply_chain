@@ -6,26 +6,26 @@ digraph unix {
   edge [fontname="Arial"]
   subgraph cluster_triangle_4 {
     label = "triangle"; // scope
-    top_6 [
+    top_0 [
       label = "top"; // node
     ];
     subgraph cluster_left_6 {
       label = "left"; // scope
-      left_9 [
+      left_1 [
         label = "left"; // node
       ];
       
     }
     subgraph cluster_right_8 {
       label = "right"; // scope
-      right_12 [
+      right_2 [
         label = "right"; // node
       ];
       
     }
     
   }
-  "top_6" -> "left_9";
-  "top_6" -> "right_12";
-  "left_9" -> "right_12";
+  "top_0" -> "left_1";
+  "top_0" -> "right_2";
+  "left_1" -> "right_2";
 }

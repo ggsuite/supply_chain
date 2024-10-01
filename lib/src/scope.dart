@@ -375,10 +375,12 @@ class Scope {
   final bool isMetaScope;
 
   /// A node informing about changes in the scope or one of it's children
-  late final Node<Scope> onChangeRecursive;
+  /// Is null, wenn Node.onRecursiveChangeEnabled is false
+  late final Node<Scope>? onChangeRecursive;
 
   /// A node informing about changes in the scope
-  late final Node<Scope> onChange;
+  /// Is null, wenn Node.onChangeEnabled is false
+  late final Node<Scope>? onChange;
 
   // ...........................................................................
   /// The nodes of this scope
@@ -999,6 +1001,11 @@ class Scope {
 
   // ...........................................................................
   void _initOnChangeNode() {
+    if (!Node.onChangeEnabled) {
+      onChange = null;
+      return;
+    }
+
     final onScope = metaScope('on')!;
 
     final bluePrint = NodeBluePrint<Scope>(
@@ -1012,6 +1019,11 @@ class Scope {
 
   // ...........................................................................
   void _initOnChangeRecursiveNode() {
+    if (!Node.onRecursiveChangeEnabled) {
+      onChangeRecursive = null;
+      return;
+    }
+
     final onScope = metaScope('on')!;
 
     final bluePrint = NodeBluePrint<Scope>(

@@ -14,21 +14,21 @@
 <polygon fill="none" stroke="black" points="8,-8 8,-83.75 332,-83.75 332,-8 8,-8"/>
 <text text-anchor="middle" x="170" y="-66.45" font-family="Arial" font-size="14.00">root</text>
 </g>
-<!-- supplier_11 -->
+<!-- supplier_1 -->
 <g id="node1" class="node">
-<title>supplier_11</title>
+<title>supplier_1</title>
 <ellipse fill="none" stroke="black" cx="58" cy="-34" rx="42.08" ry="18"/>
 <text text-anchor="middle" x="58" y="-28.57" font-family="Arial" font-size="14.00">supplier</text>
 </g>
-<!-- producer_12 -->
+<!-- producer_2 -->
 <g id="node2" class="node">
-<title>producer_12</title>
+<title>producer_2</title>
 <ellipse fill="none" stroke="black" cx="164" cy="-34" rx="46.07" ry="18"/>
 <text text-anchor="middle" x="164" y="-28.57" font-family="Arial" font-size="14.00">producer</text>
 </g>
-<!-- customer_13 -->
+<!-- customer_3 -->
 <g id="node3" class="node">
-<title>customer_13</title>
+<title>customer_3</title>
 <ellipse fill="none" stroke="black" cx="276" cy="-34" rx="48.07" ry="18"/>
 <text text-anchor="middle" x="276" y="-28.57" font-family="Arial" font-size="14.00">customer</text>
 </g>

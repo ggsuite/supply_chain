@@ -48,6 +48,12 @@ class Node<T> {
     _init();
   }
 
+  /// Allows to listen to 'on.change'
+  static bool onChangeEnabled = false;
+
+  /// Allows to listen to 'on.recursiveChange'
+  static bool onRecursiveChangeEnabled = false;
+
   // ...........................................................................
   /// Disposes the node
   /// - All suppliers are removed: node will not update anymore
@@ -556,13 +562,17 @@ class Node<T> {
     final result = <Node<dynamic>>[];
 
     // Add the onChange node of the own scope
-    result.add(scope.onChange);
+    if (onChangeEnabled) {
+      result.add(scope.onChange!);
+    }
 
     // Add onChangeRecursive of this node and it's parents
-    Scope? parent = this.scope;
-    while (parent != null) {
-      result.add(parent.onChangeRecursive);
-      parent = parent.parent;
+    if (onRecursiveChangeEnabled) {
+      Scope? parent = this.scope;
+      while (parent != null) {
+        result.add(parent.onChangeRecursive!);
+        parent = parent.parent;
+      }
     }
 
     return result;
@@ -570,6 +580,10 @@ class Node<T> {
 
   // ...........................................................................
   void _triggerOnChange() {
+    if (!onChangeEnabled && !onRecursiveChangeEnabled) {
+      return;
+    }
+
     for (final node in _onChangeNodes) {
       scm.nominate(node);
     }

@@ -23,10 +23,13 @@ void main() {
 
   int produce(List<dynamic> components, int previousProduct) => previousProduct;
 
-  setUp(() {
+  void init({bool enableOnChange = false}) {
+    Node.onChangeEnabled = enableOnChange;
+    Node.onRecursiveChangeEnabled = enableOnChange;
+
     Node.testResetIdCounter();
     Scope.testRestIdCounter();
-    scm = Scm.example();
+    scm = Scm(isTest: true);
     scope = Scope.example(scm: scm);
 
     node = scope.findOrCreateNode(
@@ -36,6 +39,12 @@ void main() {
         key: 'node',
       ),
     );
+
+    scm.testFlushTasks();
+  }
+
+  setUp(() {
+    init();
   });
 
   group('Scope', () {
@@ -284,7 +293,7 @@ void main() {
       late Scope d;
       late Node<int> customer;
 
-      setUp(() {
+      void init2() {
         scope = Scope.example();
         scm = scope.scm;
 
@@ -310,6 +319,10 @@ void main() {
         d = scope.findScope('a.d')!;
         customer = scope.findNode<int>('a.d.customer')!;
         ExampleScBuilderBluePrint().instantiate(scope: a);
+      }
+
+      setUp(() {
+        init2();
       });
 
       test('should deeply dispose all scopes and nodes', () {
@@ -384,6 +397,9 @@ void main() {
         });
 
         test('until the last customer is connected to a meta node', () {
+          init(enableOnChange: true);
+          init2();
+
           // Connect the customer to a meta scope node
           // by connecting it to a scope and not a node
           customer.addBluePrint(
@@ -520,6 +536,8 @@ void main() {
           });
 
           test('from meta scopes', () {
+            init(enableOnChange: true);
+
             // Create a root scope
             final root = Scope.example(key: 'root');
             final testFlushTasks = root.scm.testFlushTasks;
@@ -2181,14 +2199,20 @@ void main() {
     });
 
     group('metaScopes', () {
-      final scope = Scope.example();
-      scope.mockContent({
-        'a': {
-          'b': {
-            'c': 0,
+      late Scope scope;
+
+      void init2() {
+        scope = Scope.example();
+        scope.mockContent({
+          'a': {
+            'b': {
+              'c': 0,
+            },
           },
-        },
-      });
+        });
+      }
+
+      setUp(init2);
 
       group('general', () {
         test('should return the scope providing event suppliers', () {
@@ -2203,6 +2227,9 @@ void main() {
         });
         group('should be findable', () {
           test('via findNode()', () {
+            init(enableOnChange: true);
+            init2();
+
             // Try to find the node
             final onScopeA = scope.metaScope('on')!;
             final onChange = onScopeA.findNode<void>('on.change');
@@ -2244,32 +2271,49 @@ void main() {
     });
 
     group('on', () {
-      final scope = Scope.example();
-      scope.mockContent({
-        'a': {
-          'a0': 0,
-          'b': {
-            'b0': 1,
-            'b1': 2,
-            'c': {
-              'c0': 0,
-              'c1': 1,
+      late Scope scope;
+
+      late Scm scm;
+      late Scope a;
+      late Node<int> a0;
+      late Scope b;
+      late Node<int> b0;
+      late Node<int> b1;
+      late Scope c;
+      late Node<int> c0;
+      late Node<int> c1;
+
+      void init2() {
+        scope = Scope.example();
+        scope.mockContent({
+          'a': {
+            'a0': 0,
+            'b': {
+              'b0': 1,
+              'b1': 2,
+              'c': {
+                'c0': 0,
+                'c1': 1,
+              },
             },
           },
-        },
-      });
-      final scm = scope.scm;
+        });
 
-      final a = scope.findScope('a')!;
-      final a0 = scope.findNode<int>('a.a0')!;
-      final b = scope.findScope('b')!;
-      final b0 = scope.findNode<int>('b0')!;
-      final b1 = scope.findNode<int>('b1')!;
-      final c = scope.findScope('c')!;
-      final c0 = scope.findNode<int>('c0')!;
-      final c1 = scope.findNode<int>('c1')!;
+        scm = scope.scm;
+
+        a = scope.findScope('a')!;
+        a0 = scope.findNode<int>('a.a0')!;
+        b = scope.findScope('b')!;
+        b0 = scope.findNode<int>('b0')!;
+        b1 = scope.findNode<int>('b1')!;
+        c = scope.findScope('c')!;
+        c0 = scope.findNode<int>('c0')!;
+        c1 = scope.findNode<int>('c1')!;
+      }
 
       setUp(() {
+        init(enableOnChange: true);
+        init2();
         scope.reset();
       });
 

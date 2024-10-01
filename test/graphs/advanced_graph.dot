@@ -6,25 +6,25 @@ digraph unix {
   edge [fontname="Arial"]
   subgraph cluster_root_12 {
     label = "root"; // scope
-    key_18 [
+    key_4 [
       label = "key"; // node
     ];
-    synth_19 [
+    synth_5 [
       label = "synth"; // node
     ];
-    audio_20 [
+    audio_6 [
       label = "audio"; // node
     ];
-    screen_21 [
+    screen_7 [
       label = "screen"; // node
     ];
-    grid_22 [
+    grid_8 [
       label = "grid"; // node
     ];
     
   }
-  "key_18" -> "synth_19";
-  "key_18" -> "screen_21";
-  "synth_19" -> "audio_20";
-  "screen_21" -> "grid_22";
+  "key_4" -> "synth_5";
+  "key_4" -> "screen_7";
+  "synth_5" -> "audio_6";
+  "screen_7" -> "grid_8";
 }

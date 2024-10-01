@@ -6,13 +6,13 @@ digraph unix {
   edge [fontname="Arial"]
   subgraph cluster_root_8 {
     label = "root"; // scope
-    supplier_11 [
+    supplier_1 [
       label = "supplier"; // node
     ];
-    producer_12 [
+    producer_2 [
       label = "producer"; // node
     ];
-    customer_13 [
+    customer_3 [
       label = "customer"; // node
     ];
     
