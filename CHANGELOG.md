@@ -50,6 +50,7 @@
 - Add Scope.ls to print all children and nodes of a scope
 - Add onInstantiate bluePrint
 - Add ScopeBluePrint.onInstantiate, onDispose
+- Add Scope.smartMaster and Scope.isSmartScope
 
 ### Changed
 

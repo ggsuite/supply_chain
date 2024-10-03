@@ -865,6 +865,12 @@ void main() {
           final copy = bluePrint.copyWith(modifiedNodes: [overriddenNode]);
           expect(copy.node<int>('node'), overriddenNode);
         });
+
+        test('with given smartMaster', () {
+          final bluePrint = ScopeBluePrint.example();
+          final copy = bluePrint.copyWith(smartMaster: ['a', 'b', 'c']);
+          expect(copy.smartMaster, ['a', 'b', 'c']);
+        });
       });
     });
 
@@ -1022,6 +1028,23 @@ void main() {
 
         scope.dispose();
         expect(onDisposeCalled, scope);
+      });
+    });
+
+    group('isSmartScope', () {
+      test('returns true if a smartMaster is set', () {
+        final bluePrint = ScopeBluePrint.example().copyWith(
+          smartMaster: ['a', 'b'],
+        );
+        expect(bluePrint.isSmartScope, isTrue);
+        expect(bluePrint.smartMaster, ['a', 'b']);
+      });
+
+      test('returns false if node is not a smart scope', () {
+        final bluePrint = ScopeBluePrint.example().copyWith(
+          smartMaster: [],
+        );
+        expect(bluePrint.isSmartScope, isFalse);
       });
     });
   });

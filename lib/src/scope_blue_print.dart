@@ -28,30 +28,10 @@ class ScopeBluePrint {
     List<ScBuilderBluePrint> builders = const [],
     void Function(Scope)? onInstantiate,
     void Function(Scope)? onDispose,
+    this.smartMaster = const [],
   })  : _aliases = aliases,
         _builders = builders,
         _connections = connect,
-        _nodes = nodes,
-        _children = children,
-        _onInstantiate = onInstantiate,
-        _onDispose = onDispose;
-  // coverage:ignore-end
-
-  // ...........................................................................
-  // coverage:ignore-start
-  /// Constructor of the scope
-  const ScopeBluePrint.old({
-    required this.key,
-    List<NodeBluePrint<dynamic>> nodes = const [],
-    List<ScopeBluePrint> children = const [],
-    List<String> aliases = const [],
-    Map<String, String> connections = const {},
-    List<ScBuilderBluePrint> builders = const [],
-    void Function(Scope)? onInstantiate,
-    void Function(Scope)? onDispose,
-  })  : _connections = connections,
-        _aliases = aliases,
-        _builders = builders,
         _nodes = nodes,
         _children = children,
         _onInstantiate = onInstantiate,
@@ -171,6 +151,7 @@ class ScopeBluePrint {
     List<ScBuilderBluePrint>? builders,
     List<String>? aliases,
     Map<String, String>? connections,
+    List<String>? smartMaster,
   }) {
     // Merge the node overrides
     final mergedNodes = _mergeNodes(
@@ -192,8 +173,17 @@ class ScopeBluePrint {
       children: mergedScopes,
       connections: mergedConnections,
       builders: builders ?? this.builders,
+      smartMaster: smartMaster ?? this.smartMaster,
     );
   }
+
+  // ...........................................................................
+  /// If a smartMaster is set, all nodes of the scope will be connected to
+  /// the corresponding nodes of the smart master.
+  final List<String> smartMaster;
+
+  /// Returns true if this scope is a smart scope, i.e. it has a smartMaster
+  bool get isSmartScope => smartMaster.isNotEmpty;
 
   // ...........................................................................
   @override
@@ -429,6 +419,7 @@ class ScopeBluePrint {
     required Map<String, String> connections,
     void Function(Scope)? onInstantiate,
     void Function(Scope)? onDispose,
+    this.smartMaster = const [],
   })  : _connections = connections,
         _aliases = aliases,
         _nodes = nodes,
