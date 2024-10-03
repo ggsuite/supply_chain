@@ -425,14 +425,14 @@ void main() {
 
                 // Add a new corners scope
                 final cornersScope = const ScopeBluePrint(key: 'corners')
-                    .instantiate(scope: hostScope);
+                    .instantiate(hostScope: hostScope);
 
                 // Add a subscope and a node for each corner
                 final [int cornerCount] = components;
                 for (int i = 0; i < cornerCount; i++) {
                   final cornerScope =
                       ScopeBluePrint(key: 'corner$i').instantiate(
-                    scope: cornersScope,
+                    hostScope: cornersScope,
                   );
                   NodeBluePrint<int>(key: 'cValue', initialProduct: i)
                       .instantiate(scope: cornerScope);
@@ -453,13 +453,13 @@ void main() {
 
                 // Add a new faces scope
                 final facesScope = const ScopeBluePrint(key: 'faces')
-                    .instantiate(scope: hostScope);
+                    .instantiate(hostScope: hostScope);
 
                 // Add a subscope and a node for each face
                 final [int cornerCount] = components;
                 for (int i = 0; i < cornerCount; i++) {
                   final faceScope = ScopeBluePrint(key: 'face$i').instantiate(
-                    scope: facesScope,
+                    hostScope: facesScope,
                   );
                   NodeBluePrint<int>.map(
                     supplier: 'corners.corner$i.cValue',

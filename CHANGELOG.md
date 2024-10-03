@@ -188,6 +188,7 @@ Modifications can only be done via builders.
 - Optimize nomination - Certain nodes should produce directly and should not run through the nomination and production process
 - Allow to disable on.change and on.changeRecursive
 - Refactor SmartNodes
+- Throw if a smart scope is instantiated within a smart scope
 
 ### Fixed
 

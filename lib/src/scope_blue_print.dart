@@ -304,11 +304,18 @@ class ScopeBluePrint {
   // ...........................................................................
   /// Turns the blue print into a scope and adds it to the parent scope.
   Scope instantiate({
-    required Scope scope,
+    required Scope hostScope,
     Map<String, String> connect = const {},
     bool initScBuilders = true,
     Owner<Scope>? owner,
   }) {
+    // Smart scopes must not be instantiated in smart scopes
+    if (isSmartScope && hostScope.isSmartScope) {
+      throw ArgumentError(
+        'Smart scopes must not be instantiated in smart scopes.',
+      );
+    }
+
     willInstantiate();
     final connections = {..._connections, ...connect};
 
@@ -317,7 +324,7 @@ class ScopeBluePrint {
     final self = _applyConnections(this, {...connections});
 
     // Create an inner scope
-    final innerScope = Scope(parent: scope, bluePrint: self, owner: owner);
+    final innerScope = Scope(parent: hostScope, bluePrint: self, owner: owner);
 
     // Make sure there are no duplicate keys
     _checkForDuplicateKeys(self.nodes);
@@ -333,7 +340,7 @@ class ScopeBluePrint {
     // Init sub scopes
     for (final child in self.children) {
       child.instantiate(
-        scope: innerScope,
+        hostScope: innerScope,
 
         /// ScBuilders are initialized after all nodes are created
         initScBuilders: false,

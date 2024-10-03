@@ -288,7 +288,7 @@ class Scope {
     Owner<Scope>? owner,
   }) {
     return bluePrint.instantiate(
-      scope: this,
+      hostScope: this,
       owner: owner,
     );
   }
@@ -313,7 +313,7 @@ class Scope {
       return existingChild;
     }
 
-    return ScopeBluePrint(key: key).instantiate(scope: this);
+    return ScopeBluePrint(key: key).instantiate(hostScope: this);
   }
 
   /// Returns true if this scope is an ancestor of the given scope
@@ -714,7 +714,7 @@ class Scope {
         children: children,
         smartMaster: smartMaster,
       );
-      final result = bluePrint.instantiate(scope: root);
+      final result = bluePrint.instantiate(hostScope: root);
       return result;
     } else {
       return root;
@@ -768,7 +768,7 @@ class Scope {
           aliases: a,
         );
         final child = bluePrint.instantiate(
-          scope: this,
+          hostScope: this,
         );
 
         // Forward child content to child
@@ -784,16 +784,16 @@ class Scope {
       // If value is a ScopeBluePrint, instantiate the scope
       else if (value is ScopeBluePrint) {
         assert(value.key == key);
-        value.instantiate(scope: this);
+        value.instantiate(hostScope: this);
       }
 
       // If value is a ScopeBluePrint, instantiate the scope
       else if (value is List) {
-        final scope = ScopeBluePrint(key: key).instantiate(scope: this);
+        final scope = ScopeBluePrint(key: key).instantiate(hostScope: this);
 
         for (final item in value) {
           if (item is ScopeBluePrint) {
-            item.instantiate(scope: scope);
+            item.instantiate(hostScope: scope);
           } else {
             throw ArgumentError(
               'Lists must only contain ScopeBluePrints.',
