@@ -439,7 +439,7 @@ class Node<T> {
   /// Returns the master node for the smart node
   Node<T>? findMasterNode() {
     assert(isSmartNode);
-    final masterPath = (this.allBluePrints.first as SmartNodeBluePrint).master;
+    final masterPath = this.allBluePrints.first.smartMaster;
     Scope? parent = scope;
     while (parent != null) {
       final foundNode = parent.findDirectChildNode<T>(masterPath);
@@ -463,8 +463,7 @@ class Node<T> {
       return false;
     }
 
-    final masterPath =
-        (smartNode.allBluePrints.first as SmartNodeBluePrint).master;
+    final masterPath = smartNode.allBluePrints.first.smartMaster;
 
     if (!_matchesPath(masterPath)) {
       return false;

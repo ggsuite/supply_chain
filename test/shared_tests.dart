@@ -20,10 +20,10 @@ void smartNodeTest() {
       'a': {
         'b': {
           'c': {
-            'height': SmartNodeBluePrint<int>(
+            'height': NodeBluePrint<int>(
               key: 'height',
               initialProduct: smartNodeValue,
-              master: ['x', 'height'],
+              smartMaster: ['x', 'height'],
             ),
             'd': {
               'customer': NodeBluePrint<int>.map(
@@ -124,7 +124,7 @@ void smartNodeTest() {
     final scm = scope.scm;
     scope.mockContent({
       'a': 5,
-      'b': const SmartNodeBluePrint(key: 'b', initialProduct: 1, master: ['a']),
+      'b': const NodeBluePrint(key: 'b', initialProduct: 1, smartMaster: ['a']),
     });
     scm.testFlushTasks();
     expect(scope.findNode<int>('b')!.product, 5);
@@ -140,9 +140,9 @@ void smartNodeTest() {
         'scope0': {
           'master': 0,
           'a': {
-            'smartNode': const SmartNodeBluePrint(
+            'smartNode': const NodeBluePrint(
               key: 'smartNode',
-              master: ['master'],
+              smartMaster: ['master'],
               initialProduct: 1,
             ),
           },

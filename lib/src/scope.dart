@@ -774,7 +774,7 @@ class Scope {
       }
 
       // If value is a NodeBluePrint, create a child node
-      else if (value is NodeBluePrint || value is SmartNodeBluePrint) {
+      else if (value is NodeBluePrint) {
         assert(value.key == key);
         value.instantiate(scope: this);
       }

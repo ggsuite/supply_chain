@@ -185,6 +185,7 @@ Modifications can only be done via builders.
 - Allow to disable extra checks
 - Optimize nomination - Certain nodes should produce directly and should not run through the nomination and production process
 - Allow to disable on.change and on.changeRecursive
+- Refactor SmartNodes
 
 ### Fixed
 

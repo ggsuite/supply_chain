@@ -26,7 +26,15 @@ NodeBluePrint<T> nbp<T>({
     );
 
 // .............................................................................
-/// The configuration of a node
+/// The blue print of a node
+///
+/// - [key] The key of the node
+/// - [initialProduct] The initial product of the node
+/// - [documentation] The documentation of the node
+/// - [suppliers] A list of supplier pathes
+/// - [allowedProducts] A list of allowed products
+/// - [produce] The produce function
+/// - [smartMaster] The smart master of this node
 class NodeBluePrint<T> {
   /// Constructor of the node
   const NodeBluePrint({
@@ -36,6 +44,7 @@ class NodeBluePrint<T> {
     this.suppliers = const <String>[],
     this.allowedProducts = const [],
     Produce<T>? produce,
+    this.smartMaster = const [],
   }) : produce = produce ?? doNothing<T>;
 
   /// Maps a supplier to a different key
@@ -52,6 +61,7 @@ class NodeBluePrint<T> {
     );
   }
 
+  // ...........................................................................
   /// Checks if the configuration is valid
   void check() {
     assert(key.isNotEmpty, 'The key must not be empty');
@@ -80,9 +90,15 @@ class NodeBluePrint<T> {
   /// The produce function
   final Produce<T> produce;
 
-  /// A place holder node is only used if no other node is available
-  bool get isSmartNode => this is SmartNodeBluePrint<T>;
+  // ...........................................................................
+  /// Returns true if this node is a smart node, i.e. it has a smartMaster
+  bool get isSmartNode => smartMaster.isNotEmpty;
 
+  /// If set this node will automatically connect to the smartMaster and
+  /// take over it's values once it is available.
+  final List<String> smartMaster;
+
+  // ...........................................................................
   /// An example instance for test purposes
   static NodeBluePrint<int> example({
     String? key,
@@ -96,6 +112,7 @@ class NodeBluePrint<T> {
             produce ?? (components, previousProduct) => previousProduct + 1,
       );
 
+  // ...........................................................................
   /// Instantiates the blue print in the given scope
   Node<T> instantiate({
     required Scope scope,
@@ -123,6 +140,7 @@ class NodeBluePrint<T> {
     return result;
   }
 
+  // ...........................................................................
   /// Instantiates the blue print as insert in the given scope
   Insert<T> instantiateAsInsert({
     required Node<T> host,
@@ -137,6 +155,7 @@ class NodeBluePrint<T> {
     );
   }
 
+  // ...........................................................................
   /// Create a modified copy of the blue print
   NodeBluePrint<T> copyWith({
     T? initialProduct,
