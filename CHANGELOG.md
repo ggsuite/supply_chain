@@ -190,6 +190,7 @@ Modifications can only be done via builders.
 - Refactor SmartNodes
 - Throw if a smart scope is instantiated within a smart scope
 - Finalize smart scope concept
+- Rename hostScope back into scope
 
 ### Fixed
 

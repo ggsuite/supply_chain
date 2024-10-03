@@ -124,7 +124,7 @@ void main() {
         });
 
         // Before fixing the bug, the child builder was applied twice
-        scopeBluePrint.instantiate(hostScope: scope);
+        scopeBluePrint.instantiate(scope: scope);
       });
 
       group('should apply builders to scopes created by builders', () {
@@ -173,7 +173,7 @@ void main() {
               final container = hostScope.findScope('container')!;
               if (add) {
                 const ScopeBluePrint(key: 'panel')
-                    .instantiate(hostScope: container);
+                    .instantiate(scope: container);
               } else {
                 container.child('panel')?.dispose();
               }
@@ -189,7 +189,7 @@ void main() {
             'panel': {
               'height': 100,
             },
-          }).instantiate(hostScope: scope);
+          }).instantiate(scope: scope);
 
           scope.scm.testFlushTasks();
 
@@ -198,7 +198,7 @@ void main() {
           expect(panel.node<int>('mark'), isNotNull);
 
           // Now add a container scope
-          const ScopeBluePrint(key: 'container').instantiate(hostScope: scope);
+          const ScopeBluePrint(key: 'container').instantiate(scope: scope);
 
           // Instantiate the panelCreateor which adds a panel to the container
           panelCreator.instantiate(scope: scope);
@@ -264,7 +264,7 @@ void main() {
             'panel': {
               'height': 100,
             },
-          }).instantiate(hostScope: scope);
+          }).instantiate(scope: scope);
 
           scope.scm.testFlushTasks();
 
@@ -273,7 +273,7 @@ void main() {
           expect(panel.node<int>('mark'), isNotNull);
 
           // Now add a container scope
-          const ScopeBluePrint(key: 'container').instantiate(hostScope: scope);
+          const ScopeBluePrint(key: 'container').instantiate(scope: scope);
 
           // Instantiate the panelCreateor which adds a panel to the container
           panelCreator.instantiate(scope: scope);
@@ -302,7 +302,7 @@ void main() {
 
         // Add a child scope
         final child =
-            const ScopeBluePrint(key: 'child').instantiate(hostScope: scope);
+            const ScopeBluePrint(key: 'child').instantiate(scope: scope);
 
         // The onInstantiate method should not be called for children
         expect(child.node<int>('didCallOnInstantiate'), isNull);

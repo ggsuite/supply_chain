@@ -509,7 +509,7 @@ void main() {
 
             // ...........
             // Instantiate
-            var scopeInstance = scope5.instantiate(hostScope: root);
+            var scopeInstance = scope5.instantiate(scope: root);
             final observerInstance = observer.instantiate(scope: root);
 
             testFlushTasks();
@@ -527,7 +527,7 @@ void main() {
 
             // ..................
             // Instantiate scope6
-            scopeInstance = scope6.instantiate(hostScope: root);
+            scopeInstance = scope6.instantiate(scope: root);
             testFlushTasks();
 
             // scope6.node should take over the customers of scope5.node
@@ -583,7 +583,7 @@ void main() {
 
             // ...........
             // Instantiate
-            var scopeInstance = scope5.instantiate(hostScope: root);
+            var scopeInstance = scope5.instantiate(scope: root);
             final onChangeObserverInstance =
                 onChangeObserver.instantiate(scope: root);
             final helloMetaScopeObserverInstance =
@@ -608,7 +608,7 @@ void main() {
 
             // ..................
             // Instantiate scope6
-            scopeInstance = scope6.instantiate(hostScope: root);
+            scopeInstance = scope6.instantiate(scope: root);
             expect(scopeInstance.metaScope('hello')!.key, 'hello');
             testFlushTasks();
 
@@ -764,8 +764,8 @@ void main() {
           expect(supplier.isErased, isFalse);
 
           // Now add a fresh scope
-          final newChildScope = const ScopeBluePrint(key: 'freshScope')
-              .instantiate(hostScope: s1);
+          final newChildScope =
+              const ScopeBluePrint(key: 'freshScope').instantiate(scope: s1);
           expect(newChildScope.isDisposed, isFalse);
           expect(newChildScope.isErased, isFalse);
 
@@ -1604,12 +1604,12 @@ void main() {
                 final a = const ScopeBluePrint(
                   key: 'a',
                   children: [ScopeBluePrint(key: 'childScope')],
-                ).instantiate(hostScope: root);
+                ).instantiate(scope: root);
 
                 final b = const ScopeBluePrint(
                   key: 'b',
                   children: [ScopeBluePrint(key: 'childScope')],
-                ).instantiate(hostScope: root);
+                ).instantiate(scope: root);
 
                 // Add a NodeA to ChildScopeA
                 final nodeA =
@@ -2790,9 +2790,9 @@ void main() {
         // Create a customer and a supplier scope with an owner
         final scope = Scope.example();
         final s = const ScopeBluePrint(key: 's')
-            .instantiate(hostScope: scope, owner: owner);
+            .instantiate(scope: scope, owner: owner);
         final c = const ScopeBluePrint(key: 'c')
-            .instantiate(hostScope: scope, owner: owner);
+            .instantiate(scope: scope, owner: owner);
 
         // Instantiate a customer and a supplier node
         const NodeBluePrint<int>(

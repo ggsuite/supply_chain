@@ -922,7 +922,7 @@ void main() {
           final followerScope = const ScopeBluePrint(
             key: 'follower',
             smartMaster: ['master'],
-          ).instantiate(hostScope: scope);
+          ).instantiate(scope: scope);
 
           // The follower scope is a smart scope
           expect(followerScope.isSmartScope, isTrue);

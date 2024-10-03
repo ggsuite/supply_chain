@@ -175,7 +175,7 @@ void main() {
 
           // Instantiate the scope blue print
           final rootScope = Scope.root(key: 'root', scm: Scm.example());
-          final scope = bluePrint.instantiate(hostScope: rootScope);
+          final scope = bluePrint.instantiate(scope: rootScope);
 
           // Check if all nodes were instantiated
           expect(
@@ -225,7 +225,7 @@ void main() {
           final scope = ExampleScopeBluePrint(
             nodes: [replacedBluePrint],
           ).instantiate(
-            hostScope: rootScope,
+            scope: rootScope,
           );
 
           expect(
@@ -249,7 +249,7 @@ void main() {
 
           final rootScope = Scope.root(key: 'root', scm: Scm.example());
           expect(
-            () => bluePrint.instantiate(hostScope: rootScope),
+            () => bluePrint.instantiate(scope: rootScope),
             throwsA(
               isA<ArgumentError>().having(
                 (e) => e.toString(),
@@ -286,9 +286,9 @@ void main() {
             // Instantiate the second scope and connect the width2 and height2
             // to the width and height of the first scope.
             final root = Scope.example();
-            final wh0 = wh0Bp.instantiate(hostScope: root);
+            final wh0 = wh0Bp.instantiate(scope: root);
             final wh1 = wh1Bp.instantiate(
-              hostScope: root,
+              scope: root,
               connect: {
                 'w': 'wh0.w',
                 'h': 'wh0.h',
@@ -353,9 +353,9 @@ void main() {
             // Instantiate the second scope and connect the width2 and height2
             // to the width and height of the first scope.
             final root = Scope.example();
-            final wh0 = wh0Bp.instantiate(hostScope: root);
+            final wh0 = wh0Bp.instantiate(scope: root);
             final wh1 = wh1Bp.instantiate(
-              hostScope: root,
+              scope: root,
               connect: {
                 'w': 'wh0.child.w',
                 'h': 'wh0.child.h',
@@ -420,10 +420,10 @@ void main() {
           // Instantiate the second scope and connect the width2 and height2
           // to the width and height of the first scope.
           final root = Scope.example();
-          final parent = parentBp.instantiate(hostScope: root);
+          final parent = parentBp.instantiate(scope: root);
 
           final wh1 = wh1Bp.instantiate(
-            hostScope: root,
+            scope: root,
             connect: {
               'wh1': 'parent.wh0', // The complete scope is connected
             },
@@ -478,10 +478,10 @@ void main() {
           // Instantiate the second scope and connect the width2 and height2
           // to the width and height of the first scope.
           final root = Scope.example();
-          final wh0 = wh0Bp.instantiate(hostScope: root);
+          final wh0 = wh0Bp.instantiate(scope: root);
 
           final wh1 = wh1Bp.instantiate(
-            hostScope: root,
+            scope: root,
             connect: {
               'child': 'wh0.child',
             },
@@ -539,9 +539,9 @@ void main() {
           // Instantiate the second scope and connect the width2 and height2
           // to the width and height of the first scope.
           final root = Scope.example();
-          final wh0 = wh0Bp.instantiate(hostScope: root);
+          final wh0 = wh0Bp.instantiate(scope: root);
           final wh1 = wh1Bp.instantiate(
-            hostScope: root,
+            scope: root,
             connect: {
               'child.w': 'wh0.child.w',
               'child.h': 'wh0.child.h',
@@ -586,7 +586,7 @@ void main() {
 
           expect(
             () => wh0Bp.instantiate(
-              hostScope: Scope.example(),
+              scope: Scope.example(),
               connect: {'x': 'y'},
             ),
             throwsA(
@@ -620,7 +620,7 @@ void main() {
               smartMaster: ['x', 'y'],
             );
             expect(
-              () => smartScope.instantiate(hostScope: host),
+              () => smartScope.instantiate(scope: host),
               throwsA(
                 isA<ArgumentError>().having(
                   (e) => e.message,
@@ -641,7 +641,7 @@ void main() {
         final bluePrint = ScopeBluePrint.example();
         final parentScope = Scope.root(key: 'outer', scm: Scm.example());
         bluePrint.instantiate(
-          hostScope: parentScope,
+          scope: parentScope,
         );
 
         await parentScope.writeImageFile('test/graphs/scope_blue_print.dot');
@@ -1114,7 +1114,7 @@ void main() {
         );
 
         final rootScope = Scope.root(key: 'root', scm: Scm.example());
-        final scope = bluePrint.instantiate(hostScope: rootScope);
+        final scope = bluePrint.instantiate(scope: rootScope);
         expect(onInstantiateCalled, scope);
 
         scope.dispose();
