@@ -28,8 +28,9 @@ class ScopeBluePrint {
     List<ScBuilderBluePrint> builders = const [],
     void Function(Scope)? onInstantiate,
     void Function(Scope)? onDispose,
-    this.smartMaster = const [],
+    List<String> smartMaster = const [],
   })  : _aliases = aliases,
+        _smartMaster = smartMaster,
         _builders = builders,
         _connections = connect,
         _nodes = nodes,
@@ -180,10 +181,10 @@ class ScopeBluePrint {
   // ...........................................................................
   /// If a smartMaster is set, all nodes of the scope will be connected to
   /// the corresponding nodes of the smart master.
-  final List<String> smartMaster;
+  List<String> get smartMaster => _smartMaster;
 
   /// Returns true if this scope is a smart scope, i.e. it has a smartMaster
-  bool get isSmartScope => smartMaster.isNotEmpty;
+  bool get isSmartScope => _smartMaster.isNotEmpty;
 
   // ...........................................................................
   @override
@@ -419,8 +420,9 @@ class ScopeBluePrint {
     required Map<String, String> connections,
     void Function(Scope)? onInstantiate,
     void Function(Scope)? onDispose,
-    this.smartMaster = const [],
-  })  : _connections = connections,
+    List<String> smartMaster = const [],
+  })  : _smartMaster = smartMaster,
+        _connections = connections,
         _aliases = aliases,
         _nodes = nodes,
         _children = children,
@@ -429,6 +431,7 @@ class ScopeBluePrint {
         _onDispose = onDispose;
 
   // ...........................................................................
+  final List<String> _smartMaster;
   final void Function(Scope)? _onInstantiate;
   final void Function(Scope)? _onDispose;
   final List<NodeBluePrint<dynamic>> _nodes;
