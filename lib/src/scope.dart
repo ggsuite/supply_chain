@@ -1463,6 +1463,11 @@ class Scope {
 
   // ...........................................................................
   List<String> get _smartMaster {
+    // Meta scopes are currently no smart scopes
+    if (isMetaScope) {
+      return const [];
+    }
+
     // If this scope's blue print is a smart scope return the blue print's
     // smart master path
     if (bluePrint.isSmartScope) {

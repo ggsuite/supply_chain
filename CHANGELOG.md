@@ -189,6 +189,7 @@ Modifications can only be done via builders.
 - Allow to disable on.change and on.changeRecursive
 - Refactor SmartNodes
 - Throw if a smart scope is instantiated within a smart scope
+- Finalize smart scope concept
 
 ### Fixed
 

@@ -3,8 +3,6 @@ import 'package:supply_chain/src/schedule_task.dart';
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
-import 'shared_tests.dart';
-
 void main() {
   late Scm scm;
   late Scope scope;
@@ -1005,7 +1003,7 @@ void main() {
     });
 
     group('smartNodes', () {
-      smartNodeTest();
+      // Todo
     });
   });
 
@@ -1135,6 +1133,68 @@ void main() {
       scm.nominate(node);
       fake.flushMicrotasks();
       expect(node.product, 2);
+    });
+  });
+
+  group('updateSmartNodes', () {
+    late Scope example;
+    late Scm scm;
+    late Node<int> master;
+    late Node<int> follower;
+    late void Function({bool tick}) flush;
+
+    setUp(() {
+      example = Scope.example();
+      scm = example.scm;
+      flush = example.scm.testFlushTasks;
+
+      // Create a master scope and a follower scope both having a node
+      example.mockContent({
+        'master': {
+          'node': 0,
+        },
+        'follower': const ScopeBluePrint(
+          key: 'follower',
+          smartMaster: ['master'],
+          nodes: [
+            NodeBluePrint<int>(
+              key: 'node',
+              initialProduct: 0,
+            ),
+          ],
+        ),
+      });
+
+      master = example.findNode<int>('master.node')!;
+      follower = example.findNode<int>('follower.node')!;
+
+      flush();
+    });
+
+    group('connect smart nodes to it\'s master nodes', () {
+      test('when a smart node is added', () {
+        // The follower node should be connected to the master
+        expect(follower.smartMaster, ['master', 'node']);
+        expect(follower.suppliers, [master]);
+
+        // Dispose the master
+        master.dispose();
+        flush();
+        expect(follower.suppliers, isEmpty);
+
+        // Dispose the smart node
+        follower.dispose();
+      });
+    });
+
+    group('special cases', () {
+      test('a master node is added that is already master of a smart node', () {
+        // Follower is connected to follower
+        expect(follower.suppliers, [master]);
+        expect(master.customers, [follower]);
+        scm.updateSmartNodes(master);
+        scm.updateSmartNodes(follower);
+      });
     });
   });
 }

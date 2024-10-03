@@ -829,7 +829,7 @@ class Scm {
     }
 
     // Find the master node
-    final masterNode = smartNode.findMasterNode();
+    final masterNode = smartNode.findSmartMaster();
 
     // No master node found? Reset and return.
     if (masterNode == null || masterNode.isDisposed) {

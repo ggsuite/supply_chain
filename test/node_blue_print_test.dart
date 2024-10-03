@@ -258,27 +258,55 @@ void main() {
     });
 
     group('copyWith()', () {
-      test('returns a new instance with the given values', () {
-        final bluePrint = NodeBluePrint.example();
-        final newBluePrint = bluePrint.copyWith(
-          initialProduct: 1,
-          key: 'node2',
-          suppliers: ['supplier2'],
-          produce: (components, previousProduct) => 2,
-        );
-        expect(newBluePrint.initialProduct, 1);
-        expect(newBluePrint.key, 'node2');
-        expect(newBluePrint.suppliers, ['supplier2']);
-        expect(newBluePrint.produce([], 0), 2);
+      group('returns the same instance', () {
+        test('when all parameters a null', () {
+          final bluePrint = NodeBluePrint.example();
+          final newBluePrint = bluePrint.copyWith();
+          expect(newBluePrint, same(bluePrint));
+        });
+
+        test('when no parameter has changed', () {
+          final bluePrint = NodeBluePrint.example();
+          final newBluePrint = bluePrint.copyWith(
+            initialProduct: bluePrint.initialProduct,
+            key: bluePrint.key,
+            suppliers: bluePrint.suppliers,
+            produce: bluePrint.produce,
+            canBeSmart: bluePrint.canBeSmart,
+            smartMaster: bluePrint.smartMaster,
+          );
+          expect(newBluePrint, same(bluePrint));
+        });
+
+        test('when smart master list does not change', () {
+          final bluePrint =
+              NodeBluePrint.example().copyWith(smartMaster: ['a', 'b', 'c']);
+          final newBluePrint = bluePrint.copyWith(smartMaster: ['a', 'b', 'c']);
+          expect(newBluePrint, same(bluePrint));
+        });
       });
 
-      test('returns a new instance with the same values', () {
-        final bluePrint = NodeBluePrint.example();
-        final newBluePrint = bluePrint.copyWith();
-        expect(newBluePrint.initialProduct, bluePrint.initialProduct);
-        expect(newBluePrint.key, bluePrint.key);
-        expect(newBluePrint.suppliers, bluePrint.suppliers);
-        expect(newBluePrint.produce([], 0), 1);
+      group('returns a modified instance', () {
+        test('when parameters have different values', () {
+          final bluePrint = NodeBluePrint.example();
+          final newBluePrint = bluePrint.copyWith(
+            initialProduct: 1,
+            key: 'node2',
+            suppliers: ['supplier2'],
+            produce: (components, previousProduct) => 2,
+            canBeSmart: !bluePrint.canBeSmart,
+            smartMaster: ['other'],
+          );
+          expect(newBluePrint.initialProduct, 1);
+          expect(newBluePrint.key, 'node2');
+          expect(newBluePrint.suppliers, ['supplier2']);
+          expect(newBluePrint.produce([], 0), 2);
+          expect(newBluePrint.canBeSmart, !bluePrint.canBeSmart);
+          expect(
+            newBluePrint.copyWith(canBeSmart: true).smartMaster,
+            ['other'],
+          );
+        });
       });
 
       test('should apply builders', () {
@@ -379,6 +407,62 @@ void main() {
       }
 
       n1.initSuppliers(supplierMap);
+    });
+
+    group('smart nodes', () {
+      const node = NodeBluePrint<int>(
+        key: 'node',
+        initialProduct: 0,
+      );
+
+      const smartNode = NodeBluePrint<int>(
+        key: 'node',
+        initialProduct: 0,
+        smartMaster: ['x', 'y'],
+      );
+
+      group('smartMaster', () {
+        group('returns an empty list', () {
+          test('by default', () {
+            expect(node.smartMaster, const <String>[]);
+          });
+        });
+        test('returns the smart mather path handed over in constructor', () {
+          expect(smartNode.smartMaster, ['x', 'y']);
+        });
+      });
+
+      group('isSmartNode', () {
+        test('returns false by default', () {
+          expect(node.isSmartNode, false);
+        });
+
+        test('returns true when smartMaster is not empty', () {
+          expect(smartNode.isSmartNode, true);
+        });
+
+        group('returns false when canBeSmart is set to false', () {
+          test('anyway if a smart master is set or not', () {
+            expect(node.copyWith(canBeSmart: false).isSmartNode, false);
+            expect(smartNode.copyWith(canBeSmart: false).isSmartNode, false);
+          });
+        });
+      });
+
+      group('canBeSmart', () {
+        test('make a node never be a smart node', () {
+          final n = node.copyWith(canBeSmart: false);
+          final s = smartNode.copyWith(canBeSmart: false);
+
+          expect(n.canBeSmart, false);
+          expect(n.isSmartNode, false);
+          expect(n.smartMaster, isEmpty);
+
+          expect(s.canBeSmart, false);
+          expect(s.isSmartNode, false);
+          expect(s.smartMaster, isEmpty);
+        });
+      });
     });
   });
 

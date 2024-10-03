@@ -44,8 +44,10 @@ class NodeBluePrint<T> {
     this.suppliers = const <String>[],
     this.allowedProducts = const [],
     Produce<T>? produce,
-    this.smartMaster = const [],
-  }) : produce = produce ?? doNothing<T>;
+    List<String> smartMaster = const [],
+    this.canBeSmart = true,
+  })  : produce = produce ?? doNothing<T>,
+        _smartMaster = smartMaster;
 
   /// Maps a supplier to a different key
   factory NodeBluePrint.map({
@@ -94,9 +96,14 @@ class NodeBluePrint<T> {
   /// Returns true if this node is a smart node, i.e. it has a smartMaster
   bool get isSmartNode => smartMaster.isNotEmpty;
 
-  /// If set this node will automatically connect to the smartMaster and
-  /// take over it's values once it is available.
-  final List<String> smartMaster;
+  /// If [canBeSmart] is set to false this node will not be a smart node,
+  /// also if it is placed within a smart scope
+  /// or if it has a smart master path set.
+  final bool canBeSmart;
+
+  /// If [smartMaster] is set this node will automatically connect to the
+  /// smartMaster and take over it's values once it is available.
+  List<String> get smartMaster => canBeSmart ? _smartMaster : const [];
 
   // ...........................................................................
   /// An example instance for test purposes
@@ -155,6 +162,20 @@ class NodeBluePrint<T> {
     );
   }
 
+  static bool _listEquals<T>(List<T> a, List<T> b) {
+    if (a.length != b.length) {
+      return false;
+    }
+
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   // ...........................................................................
   /// Create a modified copy of the blue print
   NodeBluePrint<T> copyWith({
@@ -162,12 +183,28 @@ class NodeBluePrint<T> {
     String? key,
     Iterable<String>? suppliers,
     Produce<T>? produce,
+    bool? canBeSmart,
+    List<String>? smartMaster,
   }) {
+    if ((initialProduct == null || initialProduct == this.initialProduct) &&
+        (key == null || key == this.key) &&
+        (suppliers == null || suppliers == this.suppliers) &&
+        (produce == null || produce == this.produce) &&
+        (canBeSmart == null || canBeSmart == this.canBeSmart) &&
+        (smartMaster == null ||
+            smartMaster == this.smartMaster ||
+            _listEquals(smartMaster, this.smartMaster) ||
+            (smartMaster.isEmpty && this.smartMaster.isEmpty))) {
+      return this;
+    }
+
     return NodeBluePrint<T>(
       initialProduct: initialProduct ?? this.initialProduct,
       key: key ?? this.key,
       suppliers: suppliers ?? this.suppliers,
       produce: produce ?? this.produce,
+      canBeSmart: canBeSmart ?? this.canBeSmart,
+      smartMaster: smartMaster ?? _smartMaster,
     );
   }
 
@@ -236,6 +273,8 @@ class NodeBluePrint<T> {
   // ######################
   // Private
   // ######################
+
+  final List<String> _smartMaster;
 
   void _applyScBuilders(Node<dynamic> node, {Scope? scope}) {
     scope ??= node.scope;

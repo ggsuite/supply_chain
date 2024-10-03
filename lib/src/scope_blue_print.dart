@@ -29,6 +29,7 @@ class ScopeBluePrint {
     void Function(Scope)? onInstantiate,
     void Function(Scope)? onDispose,
     List<String> smartMaster = const [],
+    this.canBeSmart = true,
   })  : _aliases = aliases,
         _smartMaster = smartMaster,
         _builders = builders,
@@ -144,6 +145,19 @@ class ScopeBluePrint {
   }
 
   // ...........................................................................
+  static bool _listsAreEqual<T>(List<T> a, List<T> b) {
+    if (a.length != b.length) {
+      return false;
+    }
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // ...........................................................................
   /// Creates a copy of the scope with the given changes
   ScopeBluePrint copyWith({
     String? key,
@@ -153,7 +167,25 @@ class ScopeBluePrint {
     List<String>? aliases,
     Map<String, String>? connections,
     List<String>? smartMaster,
+    bool? canBeSmart,
   }) {
+    if ((key == null || key == this.key) &&
+        (modifiedNodes == null ||
+            modifiedNodes.isEmpty ||
+            _listsAreEqual(modifiedNodes, nodes)) &&
+        (modifiedScopes == null ||
+            modifiedScopes.isEmpty ||
+            _listsAreEqual(modifiedScopes, children)) &&
+        (builders == null || builders == this.builders) &&
+        (aliases == null || aliases == this.aliases) &&
+        (connections == null ||
+            connections == this.connections ||
+            connections.isEmpty) &&
+        (smartMaster == null || smartMaster == _smartMaster) &&
+        (canBeSmart == null || canBeSmart == this.canBeSmart)) {
+      return this;
+    }
+
     // Merge the node overrides
     final mergedNodes = _mergeNodes(
       nodes,
@@ -174,17 +206,23 @@ class ScopeBluePrint {
       children: mergedScopes,
       connections: mergedConnections,
       builders: builders ?? this.builders,
-      smartMaster: smartMaster ?? this.smartMaster,
+      smartMaster: smartMaster ?? _smartMaster,
+      canBeSmart: canBeSmart ?? this.canBeSmart,
     );
   }
 
   // ...........................................................................
   /// If a smartMaster is set, all nodes of the scope will be connected to
   /// the corresponding nodes of the smart master.
-  List<String> get smartMaster => _smartMaster;
+  List<String> get smartMaster => canBeSmart ? _smartMaster : const [];
 
   /// Returns true if this scope is a smart scope, i.e. it has a smartMaster
-  bool get isSmartScope => _smartMaster.isNotEmpty;
+  bool get isSmartScope => smartMaster.isNotEmpty;
+
+  /// If [canBeSmart] is set to false this scope will not be a smart node,
+  /// also if it is placed within another smart scope
+  /// or if it has a smart master path set.
+  final bool canBeSmart;
 
   // ...........................................................................
   @override
@@ -428,6 +466,7 @@ class ScopeBluePrint {
     void Function(Scope)? onInstantiate,
     void Function(Scope)? onDispose,
     List<String> smartMaster = const [],
+    this.canBeSmart = true,
   })  : _smartMaster = smartMaster,
         _connections = connections,
         _aliases = aliases,

@@ -118,7 +118,7 @@ class Node<T> {
   bool get isDisposed => _isDisposed;
 
   /// Returns true if node is a smartNode
-  bool get isSmartNode => _bluePrints.first.isSmartNode;
+  bool get isSmartNode => smartMaster.isNotEmpty;
 
   // ...........................................................................
   /// Set back to initial state
@@ -437,9 +437,9 @@ class Node<T> {
 
   // ...........................................................................
   /// Returns the master node for the smart node
-  Node<T>? findMasterNode() {
+  Node<T>? findSmartMaster() {
     assert(isSmartNode);
-    final masterPath = this.allBluePrints.first.smartMaster;
+    final masterPath = this.smartMaster;
     Scope? parent = scope;
     while (parent != null) {
       final foundNode = parent.findDirectChildNode<T>(masterPath);
@@ -463,13 +463,37 @@ class Node<T> {
       return false;
     }
 
-    final masterPath = smartNode.allBluePrints.first.smartMaster;
-
-    if (!_matchesPath(masterPath)) {
+    if (!_matchesPath(smartNode.smartMaster)) {
       return false;
     }
 
     return true;
+  }
+
+  // ...........................................................................
+  /// Returns the smart master path of this node or an empty path if this node
+  /// is not a smart node.
+  List<String> get smartMaster {
+    /// Meta nodes are not smart nodes
+    if (isMetaNode) {
+      return const [];
+    }
+
+    /// If this node has a blue print that defines a smart master,
+    /// return the smart master defined by the blue print
+    final bp = allBluePrints.first;
+    if (bp.smartMaster.isNotEmpty) {
+      return bp.smartMaster;
+    }
+
+    /// Otherwise check, if the node is contained within a smart scope.
+    final scopeSmartMaster = scope.smartMaster;
+    if (scopeSmartMaster.isNotEmpty) {
+      return [...scopeSmartMaster, key];
+    }
+
+    /// Return an empty array otherwise
+    return const [];
   }
 
   // ...........................................................................

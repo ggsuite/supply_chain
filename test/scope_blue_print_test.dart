@@ -858,6 +858,72 @@ void main() {
     });
 
     group('copyWith', () {
+      group('returns the same instance', () {
+        test('when no parameter is provided', () {
+          final bluePrint = ScopeBluePrint.example();
+          final copy = bluePrint.copyWith();
+          expect(copy, same(bluePrint));
+        });
+
+        test('when given parameters are not changes', () {
+          final bluePrint = ScopeBluePrint.example();
+          final copy = bluePrint.copyWith(
+            key: bluePrint.key,
+            modifiedNodes: bluePrint.nodes,
+            modifiedScopes: bluePrint.children,
+            builders: bluePrint.builders,
+            aliases: bluePrint.aliases,
+            connections: bluePrint.connections,
+            smartMaster: bluePrint.smartMaster,
+            canBeSmart: bluePrint.canBeSmart,
+          );
+          expect(copy, same(bluePrint));
+        });
+
+        test('when modifiedNodes and scopes are empty', () {
+          final bluePrint = ScopeBluePrint.example();
+          final copy = bluePrint.copyWith(
+            modifiedNodes: [],
+            modifiedScopes: [],
+            connections: {},
+          );
+          expect(copy, same(bluePrint));
+        });
+      });
+
+      group('returns a modified instance', () {
+        test('with overridden properties', () {
+          final bluePrint = ScopeBluePrint.example();
+          const node = NodeBluePrint<int>(key: 'node', initialProduct: 5);
+          final scope = ScopeBluePrint.example(key: 'scope');
+          const builders = [ScBuilderBluePrint(key: 'builder')];
+          final aliases = ['alias'];
+          final connections = {'a': 'b'};
+          final smartMaster = ['a', 'b', 'c'];
+          const canBeSmart = false;
+
+          final copy = bluePrint.copyWith(
+            key: 'copy',
+            modifiedNodes: [node],
+            modifiedScopes: [scope],
+            builders: builders,
+            aliases: aliases,
+            connections: connections,
+            smartMaster: smartMaster,
+            canBeSmart: canBeSmart,
+          );
+
+          expect(copy.key, 'copy');
+          expect(copy.node<int>('node'), node);
+          expect(copy.children.last, scope);
+          expect(copy.builders, builders);
+          expect(copy.aliases, aliases);
+          expect(copy.connections, connections);
+          expect(copy.copyWith(canBeSmart: true).smartMaster, smartMaster);
+          expect(copy.canBeSmart, canBeSmart);
+        });
+      });
+
       group('should return a copy of the ScopeBluePrint', () {
         test('with the given key', () {
           final bluePrint = ScopeBluePrint.example();
@@ -1057,19 +1123,25 @@ void main() {
     });
 
     group('isSmartScope', () {
-      test('returns true if a smartMaster is set', () {
-        final bluePrint = ScopeBluePrint.example().copyWith(
-          smartMaster: ['a', 'b'],
-        );
-        expect(bluePrint.isSmartScope, isTrue);
-        expect(bluePrint.smartMaster, ['a', 'b']);
+      final bluePrint = ScopeBluePrint.example().copyWith(
+        smartMaster: ['a', 'b'],
+      );
+
+      group('returns true', () {
+        test('if a smartMaster is set', () {
+          expect(bluePrint.isSmartScope, isTrue);
+          expect(bluePrint.smartMaster, ['a', 'b']);
+        });
       });
 
-      test('returns false if node is not a smart scope', () {
-        final bluePrint = ScopeBluePrint.example().copyWith(
-          smartMaster: [],
-        );
-        expect(bluePrint.isSmartScope, isFalse);
+      group('returns false', () {
+        test('if node is not a smart scope', () {
+          expect(bluePrint.copyWith(smartMaster: []).isSmartScope, isFalse);
+        });
+
+        test('if not is a smart node but canBeSmart is set to false', () {
+          expect(bluePrint.copyWith(canBeSmart: false).isSmartScope, isFalse);
+        });
       });
     });
   });

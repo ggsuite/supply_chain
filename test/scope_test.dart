@@ -2839,20 +2839,19 @@ void main() {
       });
     });
 
-    group('smartMaster, isSmartScope', () {
-      test('by default a scope is not a smart scope', () {
+    group('isSmartScope', () {
+      test('should be false by default', () {
         final scope = Scope.example();
         expect(scope.isSmartScope, isFalse);
-        expect(scope.smartMaster, isEmpty);
       });
 
-      test('should be a smart scope if a smart master is set', () {
+      test('should be true if a master is set on the blue print', () {
         final scope = Scope.example(smartMaster: ['a', 'b']);
         expect(scope.isSmartScope, isTrue);
-        expect(scope.smartMaster, ['a', 'b']);
       });
 
-      test('children of a smart scope should be smart scopes', () {
+      test('should be tree if the scope is instantiated within a smart scope',
+          () {
         final scope = Scope.example(smartMaster: ['x', 'y']);
         scope.mockContent({
           'a': {
@@ -2862,13 +2861,51 @@ void main() {
           },
         });
 
-        final a = scope.findScope('a')!;
-        expect(a.isSmartScope, isTrue);
-        expect(a.smartMaster, ['x', 'y', 'a']);
+        expect(scope.findScope('a')!.isSmartScope, isTrue);
+        expect(scope.findScope('b')!.isSmartScope, isTrue);
+      });
 
-        final b = scope.findScope('a.b')!;
-        expect(b.isSmartScope, isTrue);
-        expect(b.smartMaster, ['x', 'y', 'a', 'b']);
+      test('should be false for meta scopes', () {
+        final smartScope = Scope.example(smartMaster: ['x', 'y']);
+        expect(smartScope.isSmartScope, isTrue);
+        for (final metaScope in smartScope.metaScopes) {
+          expect(metaScope.isSmartScope, isFalse);
+        }
+      });
+    });
+
+    group('smartMaster', () {
+      test('should be empty default', () {
+        final scope = Scope.example();
+        expect(scope.smartMaster, isEmpty);
+      });
+
+      test('should return the blue print smart master when available', () {
+        final scope = Scope.example(smartMaster: ['a', 'b']);
+        expect(scope.smartMaster, ['a', 'b']);
+      });
+
+      test('should be the path between the parent smart scope and the scope',
+          () {
+        final scope = Scope.example(smartMaster: ['x', 'y']);
+        scope.mockContent({
+          'a': {
+            'b': {
+              'c': 0,
+            },
+          },
+        });
+
+        expect(scope.findScope('a')!.smartMaster, ['x', 'y', 'a']);
+        expect(scope.findScope('b')!.smartMaster, ['x', 'y', 'a', 'b']);
+      });
+
+      test('should be falseempty for meta scopes', () {
+        final smartScope = Scope.example(smartMaster: ['x', 'y']);
+        expect(smartScope.isSmartScope, isTrue);
+        for (final metaScope in smartScope.metaScopes) {
+          expect(metaScope.smartMaster, isEmpty);
+        }
       });
     });
   });
