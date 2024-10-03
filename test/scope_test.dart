@@ -2838,5 +2838,38 @@ void main() {
         expect(didEraseCalls, [s, c]);
       });
     });
+
+    group('smartMaster, isSmartScope', () {
+      test('by default a scope is not a smart scope', () {
+        final scope = Scope.example();
+        expect(scope.isSmartScope, isFalse);
+        expect(scope.smartMaster, isEmpty);
+      });
+
+      test('should be a smart scope if a smart master is set', () {
+        final scope = Scope.example(smartMaster: ['a', 'b']);
+        expect(scope.isSmartScope, isTrue);
+        expect(scope.smartMaster, ['a', 'b']);
+      });
+
+      test('children of a smart scope should be smart scopes', () {
+        final scope = Scope.example(smartMaster: ['x', 'y']);
+        scope.mockContent({
+          'a': {
+            'b': {
+              'c': 0,
+            },
+          },
+        });
+
+        final a = scope.findScope('a')!;
+        expect(a.isSmartScope, isTrue);
+        expect(a.smartMaster, ['x', 'y', 'a']);
+
+        final b = scope.findScope('a.b')!;
+        expect(b.isSmartScope, isTrue);
+        expect(b.smartMaster, ['x', 'y', 'a', 'b']);
+      });
+    });
   });
 }

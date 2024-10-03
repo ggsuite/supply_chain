@@ -702,6 +702,7 @@ class Scope {
     List<ScBuilderBluePrint> builders = const [],
     List<ScopeBluePrint> children = const [],
     bool createNode = true,
+    List<String> smartMaster = const [],
   }) {
     scm ??= Scm.example();
     final root = Scope.root(key: 'root', scm: scm);
@@ -711,6 +712,7 @@ class Scope {
         aliases: aliases,
         builders: builders,
         children: children,
+        smartMaster: smartMaster,
       );
       final result = bluePrint.instantiate(scope: root);
       return result;
@@ -829,6 +831,15 @@ class Scope {
       }
     }
   }
+
+  // ...........................................................................
+  /// Returns true if this scope is a smart scope, i.e. it either has
+  /// a blue print that defines a smart master or it has a parent that is a
+  /// smart scope.
+  bool get isSmartScope => _smartMaster.isNotEmpty;
+
+  /// Returns the smart master path of the scope
+  List<String> get smartMaster => _smartMaster;
 
   // ######################
   // Private
@@ -1448,6 +1459,23 @@ class Scope {
 
       result.add('$currentPath$dot${node.key}$value');
     }
+  }
+
+  // ...........................................................................
+  List<String> get _smartMaster {
+    // If this scope's blue print is a smart scope return the blue print's
+    // smart master path
+    if (bluePrint.isSmartScope) {
+      return bluePrint.smartMaster;
+    }
+
+    // Otherwise this scope becomes a smart scope when it is contained in a
+    // a smart scope.
+    if (parent?.isSmartScope == true) {
+      return [...parent!.smartMaster, key];
+    }
+
+    return const [];
   }
 }
 

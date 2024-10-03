@@ -51,6 +51,7 @@
 - Add onInstantiate bluePrint
 - Add ScopeBluePrint.onInstantiate, onDispose
 - Add Scope.smartMaster and Scope.isSmartScope
+- Add smart scopes
 
 ### Changed
 
