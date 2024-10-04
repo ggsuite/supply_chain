@@ -1140,7 +1140,7 @@ void main() {
       });
     });
 
-    group('findMasterNode(smartNode)', () {
+    group('findSmartMaster(smartNode)', () {
       test('returns null when no master node is found or the master node', () {
         final scope = Scope.example();
         scope.mockContent({
@@ -1201,43 +1201,195 @@ void main() {
         expect(masterOfNodeX, isNull);
       });
 
-      test('should not find sibling nodes', () {
-        final scope = Scope.example();
-        scope.mockContent({
-          'a': {
-            'node': 0,
-            'b': const {
-              'node': NodeBluePrint(
-                initialProduct: 0,
-                key: 'node',
-                smartMaster: ['node'],
-              ),
+      group('does return sibling nodes', () {
+        test('szenario 1', () {
+          final scope = Scope.example();
+          scope.mockContent({
+            'a': {
+              'node': 0,
+              'b': const {
+                'node': NodeBluePrint(
+                  initialProduct: 0,
+                  key: 'node',
+                  smartMaster: ['node'],
+                ),
+              },
+              'c': const {
+                'node': NodeBluePrint(
+                  initialProduct: 0,
+                  key: 'node',
+                  smartMaster: ['node'],
+                ),
+              },
             },
-            'c': const {
-              'node': NodeBluePrint(
-                initialProduct: 0,
-                key: 'node',
-                smartMaster: ['node'],
-              ),
-            },
-          },
+          });
+
+          final masterNode = scope.findNode<int>('a.node')!;
+
+          scope.scm.testFlushTasks();
+          final nodeB = scope.findNode<int>('b.node')!;
+          final masterNodeB = nodeB.findSmartMaster();
+          expect(masterNodeB, masterNode);
+
+          final nodeC = scope.findNode<int>('c.node')!;
+          final masterNodeOfC = nodeC.findSmartMaster();
+          expect(masterNodeOfC, masterNode);
+
+          masterNode.dispose();
+          scope.scm.testFlushTasks();
+          expect(nodeB.findSmartMaster(), isNull);
+          expect(nodeC.findSmartMaster(), isNull);
         });
 
-        final masterNode = scope.findNode<int>('a.node')!;
+        test('szenario 2: direct circular dependency', () {
+          final scope = Scope.example();
 
-        scope.scm.testFlushTasks();
-        final nodeB = scope.findNode<int>('b.node')!;
-        final masterNodeB = nodeB.findSmartMaster();
-        expect(masterNodeB, masterNode);
+          // Might create a circular dependency: input -> output -> input
+          scope.mockContent({
+            'parent': {
+              'child': {
+                'input': const NodeBluePrint(
+                  initialProduct: 0,
+                  key: 'input',
+                  smartMaster: ['parent', 'child', 'output'],
+                ),
+                'output': NodeBluePrint<int>(
+                  initialProduct: 0,
+                  key: 'output',
+                  suppliers: ['input'],
+                  produce: (components, previousProduct) {
+                    return (components[0] as int) + 1;
+                  },
+                ),
+              },
+            },
+          });
 
-        final nodeC = scope.findNode<int>('c.node')!;
-        final masterNodeOfC = nodeC.findSmartMaster();
-        expect(masterNodeOfC, masterNode);
+          scope.scm.testFlushTasks();
+          final input = scope.findNode<int>('parent.child.input')!;
+          final output = scope.findNode<int>('output')!;
 
-        masterNode.dispose();
-        scope.scm.testFlushTasks();
-        expect(nodeB.findSmartMaster(), isNull);
-        expect(nodeC.findSmartMaster(), isNull);
+          // Because input is already a supplier of output
+          // input will not connect to parent.child.output.
+          // If it would do so, a circular dependency would be created.
+          expect(input.customers, [output]);
+          expect(input.suppliers, isEmpty);
+
+          expect(output.customers, isEmpty);
+          expect(output.suppliers, [input]);
+        });
+
+        test('szenario 3: indirect circular dependency', () {
+          final scope = Scope.example();
+
+          // Might create a circular dependency:
+          // input -> between -> output -> input
+          scope.mockContent({
+            'parent': {
+              'child': {
+                'input': const NodeBluePrint(
+                  initialProduct: 0,
+                  key: 'input',
+                  smartMaster: ['parent', 'child', 'output'],
+                ),
+                'between': NodeBluePrint(
+                  initialProduct: 0,
+                  key: 'between',
+                  suppliers: ['input'],
+                  produce: (components, previousProduct) {
+                    return (components[0] as int) + 1;
+                  },
+                ),
+                'output': NodeBluePrint<int>(
+                  initialProduct: 0,
+                  key: 'output',
+                  suppliers: ['between'],
+                  produce: (components, previousProduct) {
+                    return (components[0] as int) + 1;
+                  },
+                ),
+              },
+            },
+          });
+
+          scope.scm.testFlushTasks();
+          final input = scope.findNode<int>('parent.child.input')!;
+          final output = scope.findNode<int>('output')!;
+          final between = scope.findNode<int>('between')!;
+
+          // Because input is already a supplier of output
+          // input will not connect to parent.child.output.
+          // If it would do so, a circular dependency would be created.
+          expect(input.suppliers, isEmpty);
+          expect(input.customers, [between]);
+
+          expect(between.suppliers, [input]);
+          expect(between.customers, [output]);
+
+          expect(output.suppliers, [between]);
+          expect(output.customers, isEmpty);
+        });
+
+        test('szenario 4: indirect circular dependency + parent match', () {
+          final scope = Scope.example();
+
+          scope.mockContent({
+            // Create an outer parent who should become master
+            'parent': {
+              'child': {
+                'output': 5,
+              },
+
+              // Create an inner parent
+              'parent': {
+                'child': {
+                  // Create an input which sould take over the input value
+                  // from the outer parent
+                  'input': const NodeBluePrint(
+                    initialProduct: 0,
+                    key: 'input',
+
+                    // This will connect to the outer parent.child.input
+                    // because the inner one would create a circular
+                    // dependency.
+                    smartMaster: ['parent', 'child', 'output'],
+                  ),
+                  'between': NodeBluePrint(
+                    initialProduct: 0,
+                    key: 'between',
+                    suppliers: ['input'],
+                    produce: (components, previousProduct) {
+                      return (components[0] as int) + 1;
+                    },
+                  ),
+                  'output': NodeBluePrint<int>(
+                    initialProduct: 0,
+                    key: 'output',
+                    suppliers: ['between'],
+                    produce: (components, previousProduct) {
+                      return (components[0] as int) + 1;
+                    },
+                  ),
+                },
+              },
+            },
+          });
+
+          scope.scm.testFlushTasks();
+          final outerOutput = scope.findNode<int>('parent.child.output')!;
+          final innerInput = scope.findNode<int>('parent.parent.child.input')!;
+          final innerOutput =
+              scope.findNode<int>('parent.parent.child.output')!;
+          final between = scope.findNode<int>('between')!;
+
+          // This should create the following chain:
+          // outerOutput -> innerInput -> between -> innerOutput
+
+          expect(outerOutput.customers, [innerInput]);
+          expect(innerInput.customers, [between]);
+          expect(between.customers, [innerOutput]);
+          expect(innerOutput.customers, isEmpty);
+        });
       });
     });
 

@@ -217,6 +217,7 @@ Modifications can only be done via builders.
 - Fix issues with smart nodes
 - Fixing memory leaks
 - Fix an issue with onInstantiate
+- Fix circular dependency issue in relation with smart nodes
 
 ### Removed
 
