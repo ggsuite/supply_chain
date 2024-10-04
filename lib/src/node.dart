@@ -445,11 +445,9 @@ class Node<T> {
       final foundMaster = parent.findDirectChildNode<T>(masterPath);
       if (foundMaster != null &&
           !foundMaster.isDisposed &&
-          foundMaster != this) {
-        // Master must not already be a customer of this node
-        if (!foundMaster._couldBeCustomerOf(this)) {
-          return foundMaster;
-        }
+          foundMaster != this &&
+          foundMaster.scope != this.scope) {
+        return foundMaster;
       }
       parent = parent.parent;
     }
@@ -936,26 +934,6 @@ class Node<T> {
         ],
       );
     }
-  }
-
-  // ...........................................................................
-  bool _couldBeCustomerOf(
-    Node<dynamic> supplier,
-  ) {
-    for (final ownSupplier in this.bluePrint.suppliers) {
-      if (supplier.matchesPath(ownSupplier)) {
-        return true;
-      }
-
-      // Performance tip: Replace findNode by findInParents
-      final ownSupplierNode = this.scope.findNode<dynamic>(ownSupplier);
-      if (ownSupplierNode != null &&
-          ownSupplierNode._couldBeCustomerOf(supplier)) {
-        return true;
-      }
-    }
-
-    return false;
   }
 }
 

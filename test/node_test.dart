@@ -1069,7 +1069,7 @@ void main() {
         expect(customer.product, smartNodeValue);
       });
 
-      test('should be able to connect to a master in own scope', () {
+      test('should not be able to connect to a master in own scope', () {
         final scope = Scope.example();
         final scm = scope.scm;
         scope.mockContent({
@@ -1081,7 +1081,12 @@ void main() {
           ),
         });
         scm.testFlushTasks();
-        expect(scope.findNode<int>('b')!.product, 5);
+        final a = scope.findNode<int>('a')!;
+        final b = scope.findNode<int>('b')!;
+        expect(a.customers, isEmpty);
+        expect(b.suppliers, isEmpty);
+
+        expect(scope.findNode<int>('b')!.product, 1);
       });
 
       test('should remove suppliers from disposed smart nodes', () {
@@ -1202,7 +1207,7 @@ void main() {
       });
 
       group('does return sibling nodes', () {
-        test('szenario 1', () {
+        test('scenario 1', () {
           final scope = Scope.example();
           scope.mockContent({
             'a': {
@@ -1241,7 +1246,7 @@ void main() {
           expect(nodeC.findSmartMaster(), isNull);
         });
 
-        test('szenario 2: direct circular dependency', () {
+        test('scenario 2: direct circular dependency', () {
           final scope = Scope.example();
 
           // Might create a circular dependency: input -> output -> input
@@ -1279,7 +1284,7 @@ void main() {
           expect(output.suppliers, [input]);
         });
 
-        test('szenario 3: indirect circular dependency', () {
+        test('scenario 3: indirect circular dependency', () {
           final scope = Scope.example();
 
           // Might create a circular dependency:
@@ -1330,7 +1335,7 @@ void main() {
           expect(output.customers, isEmpty);
         });
 
-        test('szenario 4: indirect circular dependency + parent match', () {
+        test('scenario 4: indirect circular dependency + parent match', () {
           final scope = Scope.example();
 
           scope.mockContent({

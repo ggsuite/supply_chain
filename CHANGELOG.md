@@ -191,6 +191,7 @@ Modifications can only be done via builders.
 - Throw if a smart scope is instantiated within a smart scope
 - Finalize smart scope concept
 - Rename hostScope back into scope
+- Smart nodes must not be in the same scope as its master nodes
 
 ### Fixed
 
