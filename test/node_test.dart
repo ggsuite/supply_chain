@@ -137,6 +137,29 @@ void main() {
         node.mockedProduct = null;
         expect(node.product, 2);
       });
+
+      test('should work as normal products', () {
+        final scope = Scope.example();
+        final scm = scope.scm;
+
+        final supplier = const NodeBluePrint<int>(
+          key: 'test',
+          initialProduct: 5,
+        ).instantiate(scope: scope);
+
+        final customer = NodeBluePrint<int>.map(
+          supplier: 'test',
+          toKey: 'customer',
+          initialProduct: 0,
+        ).instantiate(scope: scope);
+
+        scope.scm.testFlushTasks();
+        expect(customer.product, 5);
+
+        supplier.mockedProduct = 2;
+        scm.testFlushTasks();
+        expect(customer.product, 2);
+      });
     });
 
     group('deepSuppliers, deepCustomers', () {

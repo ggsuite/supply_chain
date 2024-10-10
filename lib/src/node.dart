@@ -318,6 +318,9 @@ class Node<T> {
     assert(!isDisposed);
     assert(_suppliersAreInitialized);
     if (_mockedProduct != null) {
+      if (announce) {
+        scm.hasNewProduct(this);
+      }
       return;
     }
 
