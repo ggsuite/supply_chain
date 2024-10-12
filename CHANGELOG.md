@@ -194,6 +194,7 @@ Modifications can only be done via builders.
 - Rename hostScope back into scope
 - Smart nodes must not be in the same scope as its master nodes
 - Breaking change: Turn shouldStopProcessingAfter -
+- Improve tests for shouldProcessScope
 
 ### Fixed
 

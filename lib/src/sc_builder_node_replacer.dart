@@ -53,7 +53,9 @@ class ScBuilderNodeReplacer {
     }
 
     for (final childScope in scope.children) {
-      applyToScope(childScope);
+      if (builder.bluePrint.shouldProcessScope(childScope)) {
+        applyToScope(childScope);
+      }
     }
   }
 
@@ -68,8 +70,6 @@ class ScBuilderNodeReplacer {
 
   // ...........................................................................
   void _applyToScope(Scope scope) {
-    if (!builder.bluePrint.shouldProcessScope(scope)) return;
-
     for (final node in scope.nodes) {
       _applyToNode(node);
     }

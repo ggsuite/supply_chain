@@ -55,7 +55,9 @@ class ScBuilderNodeAdder {
     }
 
     for (final childScope in scope.children) {
-      applyToScope(childScope);
+      if (builder.bluePrint.shouldProcessScope(childScope)) {
+        applyToScope(childScope);
+      }
     }
   }
 
@@ -78,8 +80,6 @@ class ScBuilderNodeAdder {
 
   // ...........................................................................
   void _applyToScope(Scope scope) {
-    if (!builder.bluePrint.shouldProcessScope(scope)) return;
-
     final bluePrints = builder.bluePrint.addNodes(
       hostScope: scope,
     );

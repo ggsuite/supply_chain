@@ -246,7 +246,11 @@ void main() {
           final panelCreator = ScBuilderBluePrint(
             key: 'panelCreator',
             shouldProcessChildren: (scope) => scope.key != 'panel',
-            shouldProcessScope: (scope) => true,
+            shouldProcessScope: (scope) => const [
+              'example',
+              'container',
+              'panel',
+            ].contains(scope.key),
             addScopes: ({required hostScope}) {
               if (hostScope.key == 'container') {
                 return [

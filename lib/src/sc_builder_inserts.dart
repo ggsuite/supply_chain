@@ -46,7 +46,9 @@ class ScBuilderInserts {
     }
 
     for (final childScope in scope.children) {
-      applyToScope(childScope);
+      if (builder.bluePrint.shouldProcessScope(childScope)) {
+        applyToScope(childScope);
+      }
     }
   }
 
@@ -62,8 +64,6 @@ class ScBuilderInserts {
 
   // ...........................................................................
   void _applyToScope(Scope scope) {
-    if (!builder.bluePrint.shouldProcessScope(scope)) return;
-
     // Iterare all nodes and child nodes and apply the insert
     for (final node in scope.nodes) {
       _applyToNode(node);

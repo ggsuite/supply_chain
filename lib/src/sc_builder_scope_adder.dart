@@ -61,7 +61,9 @@ class ScBuilderScopeAdder {
     }
 
     for (final childScope in scope.children) {
-      applyToScope(childScope);
+      if (builder.bluePrint.shouldProcessScope(childScope)) {
+        applyToScope(childScope);
+      }
     }
   }
 
@@ -93,8 +95,6 @@ class ScBuilderScopeAdder {
 
   // ...........................................................................
   void _applyToScope(Scope scope) {
-    if (!builder.bluePrint.shouldProcessScope(scope)) return;
-
     // Add the scopes to the host scope
     final bluePrints = builder.bluePrint.addScopes(
       hostScope: scope,
