@@ -112,6 +112,11 @@ class ExampleScBuilderAddingNodes extends ScBuilderBluePrint {
   ExampleScBuilderAddingNodes() : super(key: 'example');
 
   @override
+  bool shouldProcessChildren(Scope scope) {
+    return true;
+  }
+
+  @override
   bool shouldProcessScope(Scope scope) {
     return true;
   }

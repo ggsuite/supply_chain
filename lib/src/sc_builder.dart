@@ -41,16 +41,20 @@ class ScBuilder {
 
   /// Applies the builder to this scope and all its children
   void applyToScope(Scope scope, {bool applyChildBuilders = true}) {
-    if (!bluePrint.shouldProcessScope(scope)) return;
+    // Process the current scope
+    if (bluePrint.shouldProcessScope(scope)) {
+      inserts.applyToScope(scope);
+      nodeReplacer.applyToScope(scope);
+      nodeAdder.applyToScope(scope);
+      scopeAdder.applyToScope(scope);
 
-    inserts.applyToScope(scope);
-    nodeReplacer.applyToScope(scope);
-    nodeAdder.applyToScope(scope);
-    scopeAdder.applyToScope(scope);
-
-    if (applyChildBuilders) {
-      _applyChildBuilders(scope);
+      if (applyChildBuilders) {
+        _applyChildBuilders(scope);
+      }
     }
+
+    // Process children
+    if (!bluePrint.shouldProcessChildren(scope)) return;
 
     for (final child in scope.children) {
       applyToScope(child, applyChildBuilders: applyChildBuilders);

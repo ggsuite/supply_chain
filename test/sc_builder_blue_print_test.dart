@@ -277,10 +277,35 @@ void main() {
       });
     });
 
-    group('shouldProcessScope(scope)', () {
+    group('shouldProcessChildren(scope)', () {
       group('should throw', () {
         test(
           'when not derived or specified by constructor / derived class',
+          () {
+            const builder = ScBuilderBluePrint(key: 'test');
+            expect(
+              () => builder.shouldProcessChildren(hostScope),
+              throwsA(
+                isA<UnimplementedError>().having(
+                  (e) => e.message,
+                  'message',
+                  contains('Please either specify shouldProcessChildren '
+                      'constructor parameter or override '
+                      'shouldProcessChildren method in your '
+                      'class derived from ScBuilderBluePrint.'),
+                ),
+              ),
+            );
+          },
+        );
+      });
+    });
+
+    group('shouldProcessScope(scope), shouldProcessChildren(scope)', () {
+      group('should throw', () {
+        test(
+          'when shouldProcessScope is not derived or specified '
+          'by constructor / derived class',
           () {
             const builder = ScBuilderBluePrint(key: 'test');
             expect(
@@ -298,14 +323,35 @@ void main() {
             );
           },
         );
+
+        test(
+          'when shouldProcessChildren is not derived or specified '
+          'by constructor / derived class',
+          () {
+            const builder = ScBuilderBluePrint(key: 'test');
+            expect(
+              () => builder.shouldProcessChildren(hostScope),
+              throwsA(
+                isA<UnimplementedError>().having(
+                  (e) => e.message,
+                  'message',
+                  contains('Please either specify shouldProcessChildren '
+                      'constructor parameter or override '
+                      'shouldProcessChildren method in your '
+                      'class derived from ScBuilderBluePrint.'),
+                ),
+              ),
+            );
+          },
+        );
       });
 
-      group('should only process nodes where shouldProcessScope returns true',
-          () {
+      group('should only process nodes matching the specified fillter', () {
         final t = ScBuilder.testScope.key;
         late ScBuilder builder;
         late Scope scope;
         final List<String> shouldProcessScopeCalls = [];
+        final List<String> shouldProcessChildrenCalls = [];
         final List<String> addNodesCalls = [];
         final List<String> addScopesCalls = [];
         final List<String> replaceNodeCalls = [];
@@ -320,6 +366,7 @@ void main() {
 
         void init({
           required bool Function(Scope scope) shouldProcessScope,
+          required bool Function(Scope scope) shouldProcessChildren,
         }) {
           for (var calls in allCalls) {
             calls.clear();
@@ -340,6 +387,10 @@ void main() {
             shouldProcessScope: (Scope scope) {
               shouldProcessScopeCalls.add(scope.key);
               return shouldProcessScope(scope);
+            },
+            shouldProcessChildren: (Scope scope) {
+              shouldProcessChildrenCalls.add(scope.key);
+              return shouldProcessChildren(scope);
             },
             addNodes: ({required hostScope}) {
               addNodesCalls.add(hostScope.key);
@@ -365,9 +416,13 @@ void main() {
           builder.scope.scm.testFlushTasks();
         }
 
-        group('with shouldProcessScope', () {
-          test('returns true', () {
-            init(shouldProcessScope: (scope) => true);
+        group('with shouldProcessScope and shouldProcessChildren configured',
+            () {
+          test('to process all scopes and nodes', () {
+            init(
+              shouldProcessScope: (scope) => true,
+              shouldProcessChildren: (scope) => true,
+            );
 
             expect(shouldProcessScopeCalls, ['example', 'c0', 'c1']);
             expect(addNodesCalls, [t, 'example', 'c0', 'c1']);
@@ -376,26 +431,27 @@ void main() {
             expect(replaceScopeCalls, <String>[]); // Not yet implemented
           });
 
-          test('returns true when scope is c0 or c1', () {
+          test('to process only c1', () {
             init(
-              shouldProcessScope: (scope) =>
+              shouldProcessScope: (scope) => scope.key == 'c1',
+              shouldProcessChildren: (scope) =>
                   const ['example', 'c0'].contains(scope.key),
             );
 
             expect(shouldProcessScopeCalls, ['example', 'c0', 'c1']);
-            expect(addNodesCalls, [t, 'example', 'c0']);
-            expect(addScopesCalls, [t, 'example', 'c0']);
-            expect(replaceNodeCalls, ['n0']);
+            expect(addNodesCalls, [t, 'c1']);
+            expect(addScopesCalls, [t, 'c1']);
+            expect(replaceNodeCalls, ['n2']);
             expect(replaceScopeCalls, <String>[]); // Not yet implemented
           });
 
-          test('returns true when scope is example', () {
+          test('to process only n0', () {
             init(
-              shouldProcessScope: (scope) =>
-                  const ['example'].contains(scope.key),
+              shouldProcessChildren: (scope) => false,
+              shouldProcessScope: (scope) => scope.key == 'example',
             );
 
-            expect(shouldProcessScopeCalls, ['example', 'c0']);
+            expect(shouldProcessScopeCalls, ['example']);
             expect(addNodesCalls, [t, 'example']);
             expect(addScopesCalls, [t, 'example']);
             expect(replaceNodeCalls, ['n0']);

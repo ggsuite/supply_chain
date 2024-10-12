@@ -16,6 +16,7 @@ class ScBuilderBluePrint {
     List<ScopeBluePrint> Function({
       required Scope hostScope,
     })? addScopes,
+    bool Function(Scope scope)? shouldProcessChildren,
     bool Function(Scope scope)? shouldProcessScope,
     ScopeBluePrint Function({
       required Scope hostScope,
@@ -45,6 +46,7 @@ class ScBuilderBluePrint {
         _inserts = inserts,
         _needsUpdate = needsUpdate,
         _children = children,
+        _shouldProcessChildren = shouldProcessChildren,
         _shouldProcessScope = shouldProcessScope;
 
   /// Instantiates this builder and it's children within the given hostScope
@@ -59,6 +61,34 @@ class ScBuilderBluePrint {
   // ...........................................................................
   /// Override this method to react to the instantiation of the builder
   void onInstantiate({required Scope hostScope}) {}
+
+  // ...........................................................................
+  /// Determines whether the builder should process a scope's children
+  ///
+  /// This method should be overridden to define which scopes should allow
+  /// their children to be processed by the builder.
+  ///
+  /// If the method returns `false` for a given [scope], the builder will skip
+  /// processing its children. If it returns `true`, the children will be
+  /// processed.
+  ///
+  /// By default, the method checks a delegate function
+  /// `shouldProcessChildren`
+  /// (if provided), and returns `true` if the function is not defined.
+  ///
+  /// - Parameter [scope]: The scope for which the decision to process
+  ///   children is made.
+  /// - Returns: A boolean indicating whether the children of the given scope
+  ///   should be processed.
+  bool shouldProcessChildren(Scope scope) {
+    return _shouldProcessChildren?.call(scope) ??
+        (throw UnimplementedError(
+          'Please either specify shouldProcessChildren constructor '
+          'parameter '
+          'or override shouldProcessChildren method in your class derived '
+          'from ScBuilderBluePrint.',
+        ));
+  }
 
   // ...........................................................................
   /// Determines whether the builder should process a scope
@@ -236,6 +266,7 @@ class ScBuilderBluePrint {
     required List<dynamic> components,
   })? _needsUpdate;
 
+  final bool Function(Scope scope)? _shouldProcessChildren;
   final bool Function(Scope scope)? _shouldProcessScope;
 }
 
@@ -247,6 +278,12 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
     super.key = 'exampleScBuilder',
     super.needsUpdateSuppliers,
   });
+
+  // ...........................................................................
+  @override
+  bool shouldProcessChildren(Scope scope) {
+    return true;
+  }
 
   // ...........................................................................
   @override
@@ -365,6 +402,12 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
 class ExampleChildScBuilderBluePrint extends ScBuilderBluePrint {
   /// The constructor
   const ExampleChildScBuilderBluePrint({super.key = 'exampleChildScBuilder'});
+
+  // ...........................................................................
+  @override
+  bool shouldProcessChildren(Scope scope) {
+    return true;
+  }
 
   // ...........................................................................
   @override

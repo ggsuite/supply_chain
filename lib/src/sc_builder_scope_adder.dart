@@ -123,6 +123,11 @@ class ExampleScBuilderAddingScopes extends ScBuilderBluePrint {
   ExampleScBuilderAddingScopes() : super(key: 'example');
 
   @override
+  bool shouldProcessChildren(Scope scope) {
+    return true;
+  }
+
+  @override
   bool shouldProcessScope(Scope scope) {
     return true;
   }

@@ -101,6 +101,11 @@ class ExampleScBuilderReplacingIntNodes extends ScBuilderBluePrint {
   ExampleScBuilderReplacingIntNodes() : super(key: 'example');
 
   @override
+  bool shouldProcessChildren(Scope scope) {
+    return true;
+  }
+
+  @override
   bool shouldProcessScope(Scope scope) {
     return true;
   }
