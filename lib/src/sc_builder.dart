@@ -40,17 +40,20 @@ class ScBuilder {
   static final instances = <ScBuilder>[];
 
   /// Applies the builder to this scope and all its children
-  void applyToScope(Scope scope, {bool applyToChildren = true}) {
+  void applyToScope(Scope scope, {bool applyChildBuilders = true}) {
     if (!bluePrint.shouldProcessScope(scope)) return;
 
     inserts.applyToScope(scope);
     nodeReplacer.applyToScope(scope);
     nodeAdder.applyToScope(scope);
     scopeAdder.applyToScope(scope);
-    _applyChildBuilders(scope);
 
-    if (applyToChildren) {
-      _applyBuildersToChildScopes(scope);
+    if (applyChildBuilders) {
+      _applyChildBuilders(scope);
+    }
+
+    for (final child in scope.children) {
+      applyToScope(child, applyChildBuilders: applyChildBuilders);
     }
   }
 
@@ -150,14 +153,6 @@ class ScBuilder {
         }
       },
     );
-  }
-
-  void _applyBuildersToChildScopes(Scope scope) {
-    _applyChildBuilders(scope);
-
-    for (final childScope in scope.children) {
-      _applyBuildersToChildScopes(childScope);
-    }
   }
 
   // ...........................................................................

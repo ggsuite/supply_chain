@@ -305,11 +305,11 @@ void main() {
         final t = ScBuilder.testScope.key;
         late ScBuilder builder;
         late Scope scope;
-        final Set<String> shouldProcessScopeCalls = {};
-        final Set<String> addNodesCalls = {};
-        final Set<String> addScopesCalls = {};
-        final Set<String> replaceNodeCalls = {};
-        final Set<String> replaceScopeCalls = {};
+        final List<String> shouldProcessScopeCalls = [];
+        final List<String> addNodesCalls = [];
+        final List<String> addScopesCalls = [];
+        final List<String> replaceNodeCalls = [];
+        final List<String> replaceScopeCalls = [];
         final allCalls = [
           shouldProcessScopeCalls,
           addNodesCalls,

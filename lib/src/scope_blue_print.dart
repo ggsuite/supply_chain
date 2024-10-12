@@ -755,7 +755,7 @@ class ScopeBluePrint {
 
     while (parent != null) {
       for (final builder in parent.builders) {
-        builder.applyToScope(scope, applyToChildren: false);
+        builder.applyToScope(scope, applyChildBuilders: false);
       }
       parent = parent.parent;
     }

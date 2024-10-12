@@ -196,6 +196,7 @@ Modifications can only be done via builders.
 - Smart nodes must not be in the same scope as its master nodes
 - Breaking change: Turn shouldStopProcessingAfter -
 - Improve tests for shouldProcessScope
+- Optimize application of sub builders
 
 ### Fixed
 

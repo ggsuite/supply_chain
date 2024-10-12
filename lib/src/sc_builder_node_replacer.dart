@@ -46,12 +46,7 @@ class ScBuilderNodeReplacer {
   // ...........................................................................
   /// Deeply iterate through all child nodes and replace nodes
   void applyToScope(Scope scope) {
-    if (!builder.bluePrint.shouldProcessScope(scope)) return;
     _applyToScope(scope);
-
-    for (final childScope in scope.children) {
-      applyToScope(childScope);
-    }
   }
 
   /// Apply the builder to a node
