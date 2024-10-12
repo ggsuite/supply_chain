@@ -19,6 +19,11 @@ class _AddExistingNodeScBuilder extends ScBuilderBluePrint {
   }
 
   @override
+  bool shouldProcessScope(Scope scope) {
+    return true;
+  }
+
+  @override
   List<NodeBluePrint<dynamic>> addNodes({
     required Scope hostScope,
   }) {

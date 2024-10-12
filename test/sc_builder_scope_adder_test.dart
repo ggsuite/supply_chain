@@ -19,6 +19,11 @@ class _AddExistingScopeScBuilder extends ScBuilderBluePrint {
   }
 
   @override
+  bool shouldProcessScope(Scope scope) {
+    return true;
+  }
+
+  @override
   List<ScopeBluePrint> addScopes({
     required Scope hostScope,
   }) {

@@ -62,6 +62,8 @@ class ScBuilderInserts {
 
   // ...........................................................................
   void _applyToScope(Scope scope) {
+    if (!builder.bluePrint.shouldProcessScope(scope)) return;
+
     // Iterare all nodes and child nodes and apply the insert
     for (final node in scope.nodes) {
       _applyToNode(node);

@@ -300,5 +300,29 @@ void main() {
         );
       });
     });
+
+    group('shouldProcessScope(scope)', () {
+      group('should throw', () {
+        test(
+          'when not derived or specified by constructor / derived class',
+          () {
+            const builder = ScBuilderBluePrint(key: 'test');
+            expect(
+              () => builder.shouldProcessScope(hostScope),
+              throwsA(
+                isA<UnimplementedError>().having(
+                  (e) => e.message,
+                  'message',
+                  contains('Please either specify shouldProcessScope '
+                      'constructor parameter or override '
+                      'shouldProcessScope method in your '
+                      'class derived from ScBuilderBluePrint.'),
+                ),
+              ),
+            );
+          },
+        );
+      });
+    });
   });
 }

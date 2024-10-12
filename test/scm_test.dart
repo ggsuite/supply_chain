@@ -955,6 +955,7 @@ void main() {
             ScBuilderBluePrint(
               key: 'builder',
               shouldProcessChildren: (scope) => scope.key != 'example',
+              shouldProcessScope: (scope) => true,
               addNodes: ({required hostScope}) {
                 if (hostScope == scope) {
                   return [

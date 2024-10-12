@@ -78,6 +78,8 @@ class ScBuilderNodeAdder {
 
   // ...........................................................................
   void _applyToScope(Scope scope) {
+    if (!builder.bluePrint.shouldProcessScope(scope)) return;
+
     final bluePrints = builder.bluePrint.addNodes(
       hostScope: scope,
     );
@@ -121,6 +123,11 @@ class ExampleScBuilderAddingNodes extends ScBuilderBluePrint {
 
   @override
   bool shouldProcessChildren(Scope scope) {
+    return true;
+  }
+
+  @override
+  bool shouldProcessScope(Scope scope) {
     return true;
   }
 

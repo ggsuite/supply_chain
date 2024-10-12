@@ -418,6 +418,7 @@ void main() {
             final cornersBuilder = ScBuilderBluePrint(
               key: 'corners',
               shouldProcessChildren: (scope) => scope != panel,
+              shouldProcessScope: (scope) => true,
               needsUpdateSuppliers: ['cornerCount'],
               needsUpdate: ({required components, required hostScope}) {
                 // Remove old corners scope
@@ -446,6 +447,7 @@ void main() {
             final panelBuilder = ScBuilderBluePrint(
               key: 'panel',
               shouldProcessChildren: (scope) => scope != panel,
+              shouldProcessScope: (scope) => true,
               needsUpdateSuppliers: ['cornerCount'],
               needsUpdate: ({required components, required hostScope}) {
                 // Remove old faces scope
