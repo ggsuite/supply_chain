@@ -101,7 +101,7 @@ void main() {
         // Create a parent builder
         ScBuilderBluePrint(
           key: 'parent',
-          shouldProcessChildren: (s) => true,
+
           shouldProcessScope: (s) => true,
 
           // Create one child builder
@@ -109,7 +109,6 @@ void main() {
             return [
               ScBuilderBluePrint(
                 key: 'child',
-                shouldProcessChildren: (scope) => true,
                 shouldProcessScope: (scope) => true,
               ),
             ];
@@ -137,7 +136,6 @@ void main() {
           // Create a first builder marking all panel nodes
           final panelMarker = ScBuilderBluePrint(
             key: 'panelMarker',
-            shouldProcessChildren: (s) => true,
             shouldProcessScope: (s) => true,
             addNodes: ({required hostScope}) {
               if (hostScope.key == 'panel') {
@@ -153,7 +151,6 @@ void main() {
           final panelCreator = ScBuilderBluePrint(
             key: 'panelCreator',
 
-            shouldProcessChildren: (scope) => true,
             shouldProcessScope: (scope) => true,
 
             // Add a node that triggers creating a panel
@@ -230,7 +227,6 @@ void main() {
           // Create a first builder marking all panel nodes
           final panelMarker = ScBuilderBluePrint(
             key: 'panelMarker',
-            shouldProcessChildren: (scope) => true,
             shouldProcessScope: (scope) => true,
             addNodes: ({required hostScope}) {
               if (hostScope.key == 'panel') {
@@ -245,7 +241,6 @@ void main() {
           // Create a scond builder that creates panel nodes
           final panelCreator = ScBuilderBluePrint(
             key: 'panelCreator',
-            shouldProcessChildren: (scope) => scope.key != 'panel',
             shouldProcessScope: (scope) => const [
               'example',
               'container',

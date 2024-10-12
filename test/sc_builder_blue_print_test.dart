@@ -277,30 +277,6 @@ void main() {
       });
     });
 
-    group('shouldProcessChildren(scope)', () {
-      group('should throw', () {
-        test(
-          'when not derived or specified by constructor / derived class',
-          () {
-            const builder = ScBuilderBluePrint(key: 'test');
-            expect(
-              () => builder.shouldProcessChildren(hostScope),
-              throwsA(
-                isA<UnimplementedError>().having(
-                  (e) => e.message,
-                  'message',
-                  contains('Please either specify shouldProcessChildren '
-                      'constructor parameter or override '
-                      'shouldProcessChildren method in your '
-                      'class derived from ScBuilderBluePrint.'),
-                ),
-              ),
-            );
-          },
-        );
-      });
-    });
-
     group('shouldProcessScope(scope)', () {
       group('should throw', () {
         test(

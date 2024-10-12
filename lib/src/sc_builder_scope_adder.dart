@@ -56,10 +56,6 @@ class ScBuilderScopeAdder {
 
     _applyToScope(scope);
 
-    if (!builder.bluePrint.shouldProcessChildren(scope)) {
-      return;
-    }
-
     for (final childScope in scope.children) {
       if (builder.bluePrint.shouldProcessScope(childScope)) {
         applyToScope(childScope);
@@ -131,11 +127,6 @@ class ScBuilderScopeAdder {
 class ExampleScBuilderAddingScopes extends ScBuilderBluePrint {
   /// The constructor
   ExampleScBuilderAddingScopes() : super(key: 'example');
-
-  @override
-  bool shouldProcessChildren(Scope scope) {
-    return true;
-  }
 
   @override
   bool shouldProcessScope(Scope scope) {

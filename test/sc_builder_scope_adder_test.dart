@@ -14,11 +14,6 @@ class _AddExistingScopeScBuilder extends ScBuilderBluePrint {
   _AddExistingScopeScBuilder() : super(key: 'addExistingScopeScBuilder');
 
   @override
-  bool shouldProcessChildren(Scope scope) {
-    return false;
-  }
-
-  @override
   bool shouldProcessScope(Scope scope) {
     return true;
   }
@@ -45,11 +40,6 @@ class _AddExistingScopeScBuilder extends ScBuilderBluePrint {
 class _AddScopesToEveryScopeBuilder extends ScBuilderBluePrint {
   /// The constructor
   _AddScopesToEveryScopeBuilder() : super(key: 'addScopesToEveryScopeBuilder');
-
-  @override
-  bool shouldProcessChildren(Scope scope) {
-    return true;
-  }
 
   @override
   List<ScopeBluePrint> addScopes({
