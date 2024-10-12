@@ -48,7 +48,7 @@ class ScBuilderNodeReplacer {
   void applyToScope(Scope scope) {
     _applyToScope(scope);
 
-    if (builder.bluePrint.shouldStopProcessingAfter(scope)) {
+    if (!builder.bluePrint.shouldProcessChildren(scope)) {
       return;
     }
 
@@ -109,8 +109,8 @@ class ExampleScBuilderReplacingIntNodes extends ScBuilderBluePrint {
   ExampleScBuilderReplacingIntNodes() : super(key: 'example');
 
   @override
-  bool shouldStopProcessingAfter(Scope scope) {
-    return false;
+  bool shouldProcessChildren(Scope scope) {
+    return true;
   }
 
   @override

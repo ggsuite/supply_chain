@@ -46,7 +46,7 @@
 - Add additional tests. Fix an issue with smart nodes.
 - Add additional checks for supplier consistency
 - Add tests for applying builders to nodes created by builders
-- Add shouldStopProcessingAfter to optimize application of builders
+- Add shouldProcessChildren to optimize application of builders
 - Add Scope.ls to print all children and nodes of a scope
 - Add onInstantiate bluePrint
 - Add ScopeBluePrint.onInstantiate, onDispose
@@ -177,10 +177,10 @@ Modifications can only be done via builders.
 - Optimize Scope.matchesKey
 - Optimize master path of smart nodes
 - Optimize smart node handling
-- Work on shouldStopProcessingAfter
-- Rename shouldDigInto into shouldStopProcessingAfter
+- Work on shouldProcessChildren
+- Rename shouldDigInto into shouldProcessChildren
 - Provide a method to stop processing at a certain point
-- Implementers of ScBuilderBluePrint must implement shouldStopProcessingAfter
+- Implementers of ScBuilderBluePrint must implement shouldProcessChildren
 - Optimize comparison of ScopeBluePrints
 - Optimizations
 - Optimize produce performance
@@ -192,6 +192,7 @@ Modifications can only be done via builders.
 - Finalize smart scope concept
 - Rename hostScope back into scope
 - Smart nodes must not be in the same scope as its master nodes
+- Breaking change: Turn shouldStopProcessingAfter -
 
 ### Fixed
 

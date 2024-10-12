@@ -16,7 +16,7 @@ class ScBuilderBluePrint {
     List<ScopeBluePrint> Function({
       required Scope hostScope,
     })? addScopes,
-    bool Function(Scope scope)? shouldStopProcessingAfter,
+    bool Function(Scope scope)? shouldProcessChildren,
     ScopeBluePrint Function({
       required Scope hostScope,
       required ScopeBluePrint scopeToBeReplaced,
@@ -45,7 +45,7 @@ class ScBuilderBluePrint {
         _inserts = inserts,
         _needsUpdate = needsUpdate,
         _children = children,
-        _shouldStopProcessingAfter = shouldStopProcessingAfter;
+        _shouldProcessChildren = shouldProcessChildren;
 
   /// Instantiates this builder and it's children within the given hostScope
   ///
@@ -71,19 +71,19 @@ class ScBuilderBluePrint {
   /// processed.
   ///
   /// By default, the method checks a delegate function
-  /// `shouldStopProcessingAfter`
+  /// `shouldProcessChildren`
   /// (if provided), and returns `true` if the function is not defined.
   ///
   /// - Parameter [scope]: The scope for which the decision to process
   ///   children is made.
   /// - Returns: A boolean indicating whether the children of the given scope
   ///   should be processed.
-  bool shouldStopProcessingAfter(Scope scope) {
-    return _shouldStopProcessingAfter?.call(scope) ??
+  bool shouldProcessChildren(Scope scope) {
+    return _shouldProcessChildren?.call(scope) ??
         (throw UnimplementedError(
-          'Please either specify shouldStopProcessingAfter constructor '
+          'Please either specify shouldProcessChildren constructor '
           'parameter '
-          'or override shouldStopProcessingAfter method in your class derived '
+          'or override shouldProcessChildren method in your class derived '
           'from ScBuilderBluePrint.',
         ));
   }
@@ -236,7 +236,7 @@ class ScBuilderBluePrint {
     required List<dynamic> components,
   })? _needsUpdate;
 
-  final bool Function(Scope scope)? _shouldStopProcessingAfter;
+  final bool Function(Scope scope)? _shouldProcessChildren;
 }
 
 // #############################################################################
@@ -250,8 +250,8 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
 
   // ...........................................................................
   @override
-  bool shouldStopProcessingAfter(Scope scope) {
-    return false;
+  bool shouldProcessChildren(Scope scope) {
+    return true;
   }
 
   // ...........................................................................
@@ -368,8 +368,8 @@ class ExampleChildScBuilderBluePrint extends ScBuilderBluePrint {
 
   // ...........................................................................
   @override
-  bool shouldStopProcessingAfter(Scope scope) {
-    return false;
+  bool shouldProcessChildren(Scope scope) {
+    return true;
   }
 
   // ...........................................................................

@@ -101,14 +101,14 @@ void main() {
         // Create a parent builder
         ScBuilderBluePrint(
           key: 'parent',
-          shouldStopProcessingAfter: (s) => s == scope,
+          shouldProcessChildren: (s) => s != scope,
 
           // Create one child builder
           children: ({required hostScope}) {
             return [
               ScBuilderBluePrint(
                 key: 'child',
-                shouldStopProcessingAfter: (scope) => false,
+                shouldProcessChildren: (scope) => true,
               ),
             ];
           },
@@ -135,7 +135,7 @@ void main() {
           // Create a first builder marking all panel nodes
           final panelMarker = ScBuilderBluePrint(
             key: 'panelMarker',
-            shouldStopProcessingAfter: (s) => false,
+            shouldProcessChildren: (s) => true,
             addNodes: ({required hostScope}) {
               if (hostScope.key == 'panel') {
                 return [
@@ -150,7 +150,7 @@ void main() {
           final panelCreator = ScBuilderBluePrint(
             key: 'panelCreator',
 
-            shouldStopProcessingAfter: (scope) => false,
+            shouldProcessChildren: (scope) => true,
 
             // Add a node that triggers creating a panel
             addNodes: ({required hostScope}) {
@@ -226,7 +226,7 @@ void main() {
           // Create a first builder marking all panel nodes
           final panelMarker = ScBuilderBluePrint(
             key: 'panelMarker',
-            shouldStopProcessingAfter: (scope) => false,
+            shouldProcessChildren: (scope) => true,
             addNodes: ({required hostScope}) {
               if (hostScope.key == 'panel') {
                 return [
@@ -240,7 +240,7 @@ void main() {
           // Create a scond builder that creates panel nodes
           final panelCreator = ScBuilderBluePrint(
             key: 'panelCreator',
-            shouldStopProcessingAfter: (scope) => scope.key == 'panel',
+            shouldProcessChildren: (scope) => scope.key != 'panel',
             addScopes: ({required hostScope}) {
               if (hostScope.key == 'container') {
                 return [

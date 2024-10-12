@@ -277,21 +277,21 @@ void main() {
       });
     });
 
-    group('shouldStopProcessingAfter(scope)', () {
+    group('shouldProcessChildren(scope)', () {
       group('should throw', () {
         test(
           'when not derived or specified by constructor / derived class',
           () {
             const builder = ScBuilderBluePrint(key: 'test');
             expect(
-              () => builder.shouldStopProcessingAfter(hostScope),
+              () => builder.shouldProcessChildren(hostScope),
               throwsA(
                 isA<UnimplementedError>().having(
                   (e) => e.message,
                   'message',
-                  contains('Please either specify shouldStopProcessingAfter '
+                  contains('Please either specify shouldProcessChildren '
                       'constructor parameter or override '
-                      'shouldStopProcessingAfter method in your '
+                      'shouldProcessChildren method in your '
                       'class derived from ScBuilderBluePrint.'),
                 ),
               ),

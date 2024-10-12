@@ -14,7 +14,7 @@ class _AddExistingNodeScBuilder extends ScBuilderBluePrint {
   _AddExistingNodeScBuilder() : super(key: 'addExistingNodeScBuilder');
 
   @override
-  bool shouldStopProcessingAfter(Scope scope) {
+  bool shouldProcessChildren(Scope scope) {
     return false;
   }
 
@@ -43,8 +43,8 @@ class _AddNodesToEveryScopeBuilder extends ScBuilderBluePrint {
   _AddNodesToEveryScopeBuilder() : super(key: 'addNodesToEveryScopeBuilder');
 
   @override
-  bool shouldStopProcessingAfter(Scope scope) {
-    return false;
+  bool shouldProcessChildren(Scope scope) {
+    return true;
   }
 
   @override
