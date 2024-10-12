@@ -54,12 +54,11 @@ class ScBuilderScopeAdder {
       return;
     }
 
+    if (!builder.bluePrint.shouldProcessScope(scope)) return;
     _applyToScope(scope);
 
     for (final childScope in scope.children) {
-      if (builder.bluePrint.shouldProcessScope(childScope)) {
-        applyToScope(childScope);
-      }
+      applyToScope(childScope);
     }
   }
 

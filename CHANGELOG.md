@@ -53,6 +53,7 @@
 - Add Scope.smartMaster and Scope.isSmartScope
 - Add smart scopes
 - Add shouldProcessScope
+- Add tests for shouldProcessScope and make sure it is called or the root
 
 ### Changed
 

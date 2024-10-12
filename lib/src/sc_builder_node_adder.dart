@@ -48,12 +48,12 @@ class ScBuilderNodeAdder {
   // ...........................................................................
   /// Deeply iterate through all child nodes and replace nodes
   void applyToScope(Scope scope) {
+    if (!builder.bluePrint.shouldProcessScope(scope)) return;
+
     _applyToScope(scope);
 
     for (final childScope in scope.children) {
-      if (builder.bluePrint.shouldProcessScope(childScope)) {
-        applyToScope(childScope);
-      }
+      applyToScope(childScope);
     }
   }
 

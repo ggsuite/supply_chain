@@ -299,6 +299,110 @@ void main() {
           },
         );
       });
+
+      group('should only process nodes where shouldProcessScope returns true',
+          () {
+        final t = ScBuilder.testScope.key;
+        late ScBuilder builder;
+        late Scope scope;
+        final Set<String> shouldProcessScopeCalls = {};
+        final Set<String> addNodesCalls = {};
+        final Set<String> addScopesCalls = {};
+        final Set<String> replaceNodeCalls = {};
+        final Set<String> replaceScopeCalls = {};
+        final allCalls = [
+          shouldProcessScopeCalls,
+          addNodesCalls,
+          addScopesCalls,
+          replaceNodeCalls,
+          replaceScopeCalls,
+        ];
+
+        void init({
+          required bool Function(Scope scope) shouldProcessScope,
+        }) {
+          for (var calls in allCalls) {
+            calls.clear();
+          }
+
+          scope = Scope.example();
+          scope.mockContent({
+            'n0': 0,
+            'c0': {
+              'c1': {
+                'n2': 2,
+              },
+            },
+          });
+
+          builder = ScBuilderBluePrint(
+            key: 'test',
+            shouldProcessScope: (Scope scope) {
+              shouldProcessScopeCalls.add(scope.key);
+              return shouldProcessScope(scope);
+            },
+            addNodes: ({required hostScope}) {
+              addNodesCalls.add(hostScope.key);
+              return [];
+            },
+            addScopes: ({required hostScope}) {
+              addScopesCalls.add(hostScope.key);
+              return [];
+            },
+            replaceNode: ({required hostScope, required nodeToBeReplaced}) {
+              replaceNodeCalls.add(nodeToBeReplaced.key);
+              return nodeToBeReplaced.bluePrint;
+            },
+            replaceScope: ({
+              required hostScope,
+              required scopeToBeReplaced,
+            }) {
+              replaceScopeCalls.add(hostScope.key);
+              return scopeToBeReplaced;
+            },
+          ).instantiate(scope: scope);
+
+          builder.scope.scm.testFlushTasks();
+        }
+
+        group('with shouldProcessScope', () {
+          test('returns true', () {
+            init(shouldProcessScope: (scope) => true);
+
+            expect(shouldProcessScopeCalls, ['example', 'c0', 'c1']);
+            expect(addNodesCalls, [t, 'example', 'c0', 'c1']);
+            expect(addScopesCalls, [t, 'example', 'c0', 'c1']);
+            expect(replaceNodeCalls, ['n0', 'n2']);
+            expect(replaceScopeCalls, <String>[]); // Not yet implemented
+          });
+
+          test('returns true when scope is c0 or c1', () {
+            init(
+              shouldProcessScope: (scope) =>
+                  const ['example', 'c0'].contains(scope.key),
+            );
+
+            expect(shouldProcessScopeCalls, ['example', 'c0', 'c1']);
+            expect(addNodesCalls, [t, 'example', 'c0']);
+            expect(addScopesCalls, [t, 'example', 'c0']);
+            expect(replaceNodeCalls, ['n0']);
+            expect(replaceScopeCalls, <String>[]); // Not yet implemented
+          });
+
+          test('returns true when scope is example', () {
+            init(
+              shouldProcessScope: (scope) =>
+                  const ['example'].contains(scope.key),
+            );
+
+            expect(shouldProcessScopeCalls, ['example', 'c0']);
+            expect(addNodesCalls, [t, 'example']);
+            expect(addScopesCalls, [t, 'example']);
+            expect(replaceNodeCalls, ['n0']);
+            expect(replaceScopeCalls, <String>[]); // Not yet implemented
+          });
+        });
+      });
     });
   });
 }
