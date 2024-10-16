@@ -197,6 +197,7 @@ Modifications can only be done via builders.
 - Breaking change: Turn shouldStopProcessingAfter -
 - Improve tests for shouldProcessScope
 - Optimize application of sub builders
+- Allow to search nodes only in parents by adding ..
 
 ### Fixed
 

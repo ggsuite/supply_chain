@@ -1981,6 +1981,28 @@ void main() {
           );
         });
       });
+
+      group('with path starting with ..', () {
+        test('shhould only search in parent scopes', () {
+          final scope = Scope.example();
+          scope.mockContent({
+            'a': {
+              'n0': 0,
+              'b': {
+                'n1': 1,
+                'c': {
+                  'n0': 0,
+                  'n2': 2,
+                },
+              },
+            },
+          });
+
+          final c = scope.findScope('a.b.c')!;
+          final a = c.findNode<int>('..n0')!;
+          expect(a.path, 'root.example.a.n0');
+        });
+      });
     });
 
     group('findDirectChildNode()', () {
@@ -2031,9 +2053,15 @@ void main() {
               'd': 0,
             },
           },
+          'f': {
+            'g': 1,
+          },
           'e': {
             'f': {
               'g': 2,
+              'f': {
+                'h': 3,
+              },
             },
           },
         },
@@ -2060,6 +2088,15 @@ void main() {
             final c = scope.findScope('a')!;
             final a = c.findScope('a')!;
             expect(a.key, 'a');
+          });
+
+          test('if the address starts ..', () {
+            final f0 = scope.findScope('a.f')!;
+            final f1 = scope.findScope('a.e.f')!;
+            final f2 = scope.findScope('a.e.f.f')!;
+
+            expect(f1.findScope('f'), f2);
+            expect(f1.findScope('..f'), f0);
           });
         });
       });

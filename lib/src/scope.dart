@@ -1066,58 +1066,76 @@ class Scope {
     }
     // coverage:ignore-end
 
+    final searchInParentsOnly = key.startsWith('..');
+    if (searchInParentsOnly) {
+      key = key.substring(2);
+    }
+    final searchRoot = searchInParentsOnly ? parent : this;
+
     final keyParts = key.split('.');
     final nodeKey = keyParts.last;
     final scopePath =
         findNodes ? keyParts.sublist(0, keyParts.length - 1) : keyParts;
 
-    final node = _findItemInOwnScope<T>(
-          nodeKey,
-          scopePath,
-          skipInserts,
-          findNodes,
-          findScopes,
-          excludedNodes,
-        ) ??
-        _findItemNodeInParentScopes<T>(
-          nodeKey,
-          scopePath,
-          skipInserts,
-          findNodes,
-          findScopes,
-          excludedNodes,
-        ) ??
-        _findOneItemInChildScopes<T>(
-          nodeKey,
-          scopePath,
-          skipInserts,
-          findNodes,
-          findScopes,
-          excludedNodes,
-        ) ??
-        _findItemInDirectSiblingScopes<T>(
-          nodeKey,
-          scopePath,
-          skipInserts,
-          findNodes,
-          findScopes,
-          excludedNodes,
-        ) ??
-        _findItemInParentsChildScopes<T>(
-          nodeKey,
-          scopePath,
-          skipInserts,
-          findNodes,
-          findScopes,
-          excludedNodes,
-        );
+    Object? result;
 
-    if (node == null && throwIfNotFound) {
+    if (!searchInParentsOnly) {
+      result = searchRoot?._findItemInOwnScope<T>(
+        nodeKey,
+        scopePath,
+        skipInserts,
+        findNodes,
+        findScopes,
+        excludedNodes,
+      );
+    }
+
+    result ??= searchRoot?._findItemNodeInParentScopes<T>(
+      nodeKey,
+      scopePath,
+      skipInserts,
+      findNodes,
+      findScopes,
+      excludedNodes,
+    );
+
+    if (!searchInParentsOnly) {
+      result ??= searchRoot?._findOneItemInChildScopes<T>(
+        nodeKey,
+        scopePath,
+        skipInserts,
+        findNodes,
+        findScopes,
+        excludedNodes,
+      );
+    }
+
+    if (!searchInParentsOnly) {
+      result ??= searchRoot?._findItemInDirectSiblingScopes<T>(
+        nodeKey,
+        scopePath,
+        skipInserts,
+        findNodes,
+        findScopes,
+        excludedNodes,
+      );
+    }
+
+    result ??= searchRoot?._findItemInParentsChildScopes<T>(
+      nodeKey,
+      scopePath,
+      skipInserts,
+      findNodes,
+      findScopes,
+      excludedNodes,
+    );
+
+    if (result == null && throwIfNotFound) {
       final item = findNodes ? 'Node' : 'Scope';
       throw ArgumentError('$item with path "$key" not found.');
     }
 
-    return node;
+    return result;
   }
 
   // ...........................................................................
