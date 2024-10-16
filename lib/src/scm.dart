@@ -399,7 +399,11 @@ class Scm {
         }
       }
 
-      suppliers[supplierPath] = supplier;
+      final supplierPathWithoutDots = supplierPath.startsWith('..')
+          ? supplierPath.substring(2)
+          : supplierPath;
+
+      suppliers[supplierPathWithoutDots] = supplier;
     }
 
     // If all suppliers are found, add them to node

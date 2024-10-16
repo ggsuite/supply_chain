@@ -397,9 +397,12 @@ class Node<T> {
   void initSuppliers(Map<String, Node<dynamic>> newSuppliers) {
     _detectCircularDependencies(this, newSuppliers.values, [this]);
 
-    // Make sure the keys match the blue prin'ts suppliers
-    for (final supplierKey in newSuppliers.keys) {
-      assert(bluePrint.suppliers.contains(supplierKey));
+    // Make sure the keys match the blue print's suppliers
+    final s = bluePrint.suppliers;
+    for (var supplierKey in newSuppliers.keys) {
+      assert(
+        s.contains(supplierKey) || s.contains('..$supplierKey'),
+      );
     }
 
     // Reset old suppliers
@@ -818,7 +821,7 @@ class Node<T> {
       return false;
     }
 
-    path.removeLast(); // Todo: Use subarray
+    path = path.sublist(0, path.length - 1);
     return scope.matchesPathArray(path);
   }
 

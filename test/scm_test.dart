@@ -1196,6 +1196,31 @@ void main() {
         scm.updateSmartNodes(master);
         scm.updateSmartNodes(follower);
       });
+
+      group('should connect suppliers of parent nodes', () {
+        test('when the supplier path starts with ..', () {
+          final scope = Scope.example();
+          final scm = scope.scm;
+          scope.mockContent({
+            'a': {
+              'supplier': 0,
+              'b': {
+                'supplier': 1,
+                'customer': NodeBluePrint<int>(
+                  key: 'customer',
+                  suppliers: ['..supplier'],
+                  initialProduct: 0,
+                  produce: (c, p) => 1,
+                ),
+              },
+            },
+          });
+          scm.testFlushTasks();
+          final customer = scope.findNode<int>('a.b.customer')!;
+          final supplier = scope.findNode<int>('a.supplier')!;
+          expect(customer.suppliers, [supplier]);
+        });
+      });
     });
   });
 }

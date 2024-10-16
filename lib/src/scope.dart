@@ -1425,6 +1425,10 @@ class Scope {
 
     while (i >= 0 && parent != null) {
       final segment = path[i];
+      if (segment.isEmpty) {
+        i--;
+        continue;
+      }
       if (!parent.matchesKey(segment)) {
         return false;
       }

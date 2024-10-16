@@ -198,6 +198,7 @@ Modifications can only be done via builders.
 - Improve tests for shouldProcessScope
 - Optimize application of sub builders
 - Allow to search nodes only in parents by adding ..
+- Point to parent suppliers by adding ..
 
 ### Fixed
 

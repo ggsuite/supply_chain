@@ -665,6 +665,24 @@ void main() {
           expect(b.matchesPath('c0'), isFalse);
         });
       });
+
+      test('with .. in path', () {
+        final scope = Scope.example();
+        scope.mockContent({
+          'a': {
+            'b': {
+              'c': {
+                'd': 0,
+              },
+            },
+          },
+        });
+
+        final c = scope.findChildScope('a.b.c')!;
+        expect(c.matchesPath('..c'), isTrue);
+        expect(c.matchesPath('..a.b.c'), isTrue);
+        expect(c.matchesPath('..a.b.x'), isFalse);
+      });
     });
 
     group('addChild(child), addChildren(children)', () {
