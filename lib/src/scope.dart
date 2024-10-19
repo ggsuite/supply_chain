@@ -1059,10 +1059,6 @@ class Scope {
     required bool findScopes,
     List<Node<T>> excludedNodes = const [],
   }) {
-    if (key.startsWith('..')) {
-      print('Remove this code');
-    }
-
     // coverage:ignore-start
     if (findNodes == false && findScopes == false) {
       throw ArgumentError('findNodes and findScopes cannot be both false.');
