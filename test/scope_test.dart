@@ -2020,6 +2020,26 @@ void main() {
           final a = c.findNode<int>('..n0')!;
           expect(a.path, 'root.example.a.n0');
         });
+
+        test('must not find the scope itself', () {
+          final scope = Scope.example();
+          scope.mockContent({
+            'a': {
+              'c': {
+                'n0': 3, // a.c.n0
+              },
+              'b': {
+                'c': {
+                  'n0': 0, // b.c.n0
+                },
+              },
+            },
+          });
+
+          final c0 = scope.findScope('a.b.c')!;
+          final c1 = c0.findNode<int>('..c.n0')!;
+          expect(c1.path, 'root.example.a.c.n0');
+        });
       });
     });
 
@@ -2108,13 +2128,32 @@ void main() {
             expect(a.key, 'a');
           });
 
-          test('if the address starts ..', () {
-            final f0 = scope.findScope('a.f')!;
-            final f1 = scope.findScope('a.e.f')!;
-            final f2 = scope.findScope('a.e.f.f')!;
+          group('if the address starts ..', () {
+            test('find the parent scope', () {
+              final f0 = scope.findScope('a.f')!;
+              final f1 = scope.findScope('a.e.f')!;
+              final f2 = scope.findScope('a.e.f.f')!;
 
-            expect(f1.findScope('f'), f2);
-            expect(f1.findScope('..f'), f0);
+              expect(f1.findScope('f'), f2);
+              expect(f1.findScope('..f'), f0);
+            });
+
+            test('must not find the scope itself', () {
+              final scope = Scope.example();
+              scope.mockContent({
+                'a': {
+                  'b': {
+                    'c': {
+                      'n0': 0, // b.c.n0
+                    },
+                  },
+                },
+              });
+
+              final c0 = scope.findScope('a.b.c')!;
+              final c1 = c0.findScope('..c');
+              expect(c1, isNull);
+            });
           });
         });
       });

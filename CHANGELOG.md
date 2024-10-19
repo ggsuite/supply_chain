@@ -199,6 +199,7 @@ Modifications can only be done via builders.
 - Optimize application of sub builders
 - Allow to search nodes only in parents by adding ..
 - Point to parent suppliers by adding ..
+- Improve searching things in parent scopes
 
 ### Fixed
 

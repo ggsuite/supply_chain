@@ -4,6 +4,8 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:supply_chain/supply_chain.dart';
 
@@ -393,6 +395,7 @@ class Scope {
         true,
         true,
         false,
+        const [],
         const [],
       ) as Node<T>?;
 
@@ -1056,6 +1059,10 @@ class Scope {
     required bool findScopes,
     List<Node<T>> excludedNodes = const [],
   }) {
+    if (key.startsWith('..')) {
+      print('Remove this code');
+    }
+
     // coverage:ignore-start
     if (findNodes == false && findScopes == false) {
       throw ArgumentError('findNodes and findScopes cannot be both false.');
@@ -1066,12 +1073,27 @@ class Scope {
     }
     // coverage:ignore-end
 
-    final searchInParentsOnly = key.startsWith('..');
-    if (searchInParentsOnly) {
-      key = key.substring(2);
-    }
-    final searchRoot = searchInParentsOnly ? parent : this;
+    var searchRoot = this;
+    var excludedScopes = const <Scope>[];
 
+    // Handle the case that we must only search in parent scopes
+    if (key.startsWith('..')) {
+      key = key.substring(2);
+
+      if (parent == null) {
+        return null;
+      }
+      searchRoot = parent!;
+      excludedScopes = [this];
+      final excludedNode = node<dynamic>(key);
+      if (excludedNode != null &&
+          excludedNode is Node<T> &&
+          !excludedNodes.contains(excludedNode)) {
+        excludedNodes = [...excludedNodes, excludedNode];
+      }
+    }
+
+    // Continue processing
     final keyParts = key.split('.');
     final nodeKey = keyParts.last;
     final scopePath =
@@ -1079,55 +1101,54 @@ class Scope {
 
     Object? result;
 
-    if (!searchInParentsOnly) {
-      result = searchRoot?._findItemInOwnScope<T>(
-        nodeKey,
-        scopePath,
-        skipInserts,
-        findNodes,
-        findScopes,
-        excludedNodes,
-      );
-    }
-
-    result ??= searchRoot?._findItemNodeInParentScopes<T>(
+    result = searchRoot._findItemInOwnScope<T>(
       nodeKey,
       scopePath,
       skipInserts,
       findNodes,
       findScopes,
       excludedNodes,
+      excludedScopes,
     );
 
-    if (!searchInParentsOnly) {
-      result ??= searchRoot?._findOneItemInChildScopes<T>(
-        nodeKey,
-        scopePath,
-        skipInserts,
-        findNodes,
-        findScopes,
-        excludedNodes,
-      );
-    }
-
-    if (!searchInParentsOnly) {
-      result ??= searchRoot?._findItemInDirectSiblingScopes<T>(
-        nodeKey,
-        scopePath,
-        skipInserts,
-        findNodes,
-        findScopes,
-        excludedNodes,
-      );
-    }
-
-    result ??= searchRoot?._findItemInParentsChildScopes<T>(
+    result ??= searchRoot._findItemNodeInParentScopes<T>(
       nodeKey,
       scopePath,
       skipInserts,
       findNodes,
       findScopes,
       excludedNodes,
+      excludedScopes,
+    );
+
+    result ??= searchRoot._findOneItemInChildScopes<T>(
+      nodeKey,
+      scopePath,
+      skipInserts,
+      findNodes,
+      findScopes,
+      excludedNodes,
+      excludedScopes,
+    );
+
+    result ??= searchRoot._findItemInDirectSiblingScopes<T>(
+      nodeKey,
+      scopePath,
+      skipInserts,
+      findNodes,
+      findScopes,
+      excludedNodes,
+      excludedScopes,
+    );
+
+    result ??= searchRoot._findItemInParentsChildScopes<T>(
+      nodeKey,
+      scopePath,
+      skipInserts,
+      findNodes,
+      findScopes,
+      excludedNodes,
+      excludedScopes,
     );
 
     if (result == null && throwIfNotFound) {
@@ -1146,11 +1167,24 @@ class Scope {
     bool findNodes,
     bool findScopes,
     List<Node<T>> excludedNodes,
+    List<Scope> excludedScopes,
   ) {
+    // Return null if the scope is excluded
+    if (excludedScopes.isNotEmpty) {
+      if (excludedScopes.contains(this)) {
+        return null;
+      }
+    }
+
     // If path matches own scope and path segment is the last one
     // Return this scope.
     if (findScopes && scopePath.length == 1) {
       final result = child(scopePath.first) ?? _metaScopes[scopePath.first];
+
+      if (excludedScopes.isNotEmpty && excludedScopes.contains(result)) {
+        return null;
+      }
+
       return result;
     }
 
@@ -1171,6 +1205,7 @@ class Scope {
           findNodes,
           findScopes,
           excludedNodes,
+          excludedScopes,
         );
       }
     }
@@ -1216,6 +1251,7 @@ class Scope {
     bool findNodes,
     bool findScopes,
     List<Node<T>> excludedNodes,
+    List<Scope> excludedScopes,
   ) {
     return parent?._findItemInOwnScope<T>(
           key,
@@ -1224,6 +1260,7 @@ class Scope {
           findNodes,
           findScopes,
           excludedNodes,
+          excludedScopes,
         ) ??
         parent?._findItemNodeInParentScopes<T>(
           key,
@@ -1232,6 +1269,7 @@ class Scope {
           findNodes,
           findScopes,
           excludedNodes,
+          excludedScopes,
         );
   }
 
@@ -1243,6 +1281,7 @@ class Scope {
     bool findNodes,
     bool findScopes,
     List<Node<T>> excludedNodes,
+    List<Scope> excludedScopes,
   ) {
     if (parent == null) {
       return null;
@@ -1256,6 +1295,7 @@ class Scope {
         findNodes,
         findScopes,
         excludedNodes,
+        excludedScopes,
       );
       if (node != null) {
         return node;
@@ -1273,7 +1313,16 @@ class Scope {
     bool findNodes,
     bool findScopes,
     List<Node<T>> excludedNodes,
+    List<Scope> excludedScopes,
   ) {
+    if (excludedScopes.isNotEmpty) {
+      for (final child in children) {
+        if (excludedScopes.contains(child)) {
+          return null;
+        }
+      }
+    }
+
     List<dynamic> result = _findMultipleNodesInChildScopes<dynamic>(
       key,
       scopePath,
@@ -1281,6 +1330,7 @@ class Scope {
       findNodes,
       findScopes,
       excludedNodes,
+      excludedScopes,
     );
 
     if (result.isEmpty) {
@@ -1304,6 +1354,7 @@ class Scope {
     bool findNodes,
     bool findScopes,
     List<Node<T>> excludedNodes,
+    List<Scope> excludedScopes,
   ) {
     final result = <Object>[];
 
@@ -1315,6 +1366,7 @@ class Scope {
         findNodes,
         findScopes,
         excludedNodes,
+        excludedScopes,
       );
       if (node != null) {
         result.add(node);
@@ -1333,6 +1385,7 @@ class Scope {
         findNodes,
         findScopes,
         excludedNodes,
+        excludedScopes,
       );
       result.addAll(nodes);
     }
@@ -1348,6 +1401,7 @@ class Scope {
     bool findNodes,
     bool findScopes,
     List<Node<T>> excludedNodes,
+    List<Scope> excludedScopes,
   ) {
     if (parent == null) {
       return null;
@@ -1360,6 +1414,7 @@ class Scope {
       findNodes,
       findScopes,
       excludedNodes,
+      excludedScopes,
     );
 
     if (result != null) {
@@ -1372,6 +1427,7 @@ class Scope {
         findNodes,
         findScopes,
         excludedNodes,
+        excludedScopes,
       );
     }
   }
