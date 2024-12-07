@@ -12,7 +12,7 @@ dependencies:
   gg_fake_stopwatch: ^1.1.0
   gg_fake_timer: ^1.0.3
   gg_log: ^1.0.6
-  gg_cache: ^1.0.6
+  gg_cache: ^1.0.7
   gg_is_github: ^1.0.5
   collection: ^1.18.0
   mocktail: ^1.0.3
