@@ -1402,7 +1402,7 @@ void main() {
       });
     });
 
-    group('ls', () {
+    group('ls, jsonDump', () {
       group('returns a list with all pathes of the scope', () {
         late Scope scope;
         late Scope b;
@@ -1433,6 +1433,7 @@ void main() {
 
         test('with default params', () {
           final ls = scope.ls();
+          final json = scope.jsonDump();
           expect(ls, [
             'a',
             'a.b',
@@ -1443,7 +1444,23 @@ void main() {
             'a.b.g',
           ]);
 
+          expect(json, {
+            'example': {
+              'a': {
+                'b': {
+                  'c': {
+                    'd': 0,
+                    'e': 1,
+                  },
+                  'f': 2,
+                  'g': '...',
+                },
+              },
+            },
+          });
+
           final lsb = b.ls();
+          final jsonB = b.jsonDump();
           expect(lsb, [
             'c',
             'c.d (0)',
@@ -1451,6 +1468,17 @@ void main() {
             'f (2)',
             'g',
           ]);
+
+          expect(jsonB, {
+            'b': {
+              'c': {
+                'd': 0,
+                'e': 1,
+              },
+              'f': 2,
+              'g': '...',
+            },
+          });
         });
 
         group('with parentDepth', () {
@@ -1466,6 +1494,24 @@ void main() {
               'example.a.b.f (2)',
               'example.a.b.g',
             ]);
+
+            final jsonDump = b.jsonDump(parentDepth: -1);
+            expect(jsonDump, {
+              'root': {
+                'example': {
+                  'a': {
+                    'b': {
+                      'c': {
+                        'd': 0,
+                        'e': 1,
+                      },
+                      'f': 2,
+                      'g': '...',
+                    },
+                  },
+                },
+              },
+            });
           });
 
           test(' = 1', () {
@@ -1478,6 +1524,20 @@ void main() {
               'b.f (2)',
               'b.g',
             ]);
+
+            final jsonDump = b.jsonDump(parentDepth: 1);
+            expect(jsonDump, {
+              'a': {
+                'b': {
+                  'c': {
+                    'd': 0,
+                    'e': 1,
+                  },
+                  'f': 2,
+                  'g': '...',
+                },
+              },
+            });
           });
 
           test(' = 1000', () {
@@ -1490,6 +1550,20 @@ void main() {
               'b.f (2)',
               'b.g',
             ]);
+
+            final jsonDump = b.jsonDump(parentDepth: 1);
+            expect(jsonDump, {
+              'a': {
+                'b': {
+                  'c': {
+                    'd': 0,
+                    'e': 1,
+                  },
+                  'f': 2,
+                  'g': '...',
+                },
+              },
+            });
           });
         });
 
@@ -1503,6 +1577,18 @@ void main() {
               'f (2)',
               'g',
             ]);
+
+            final jsonDump = b.jsonDump(childDepth: -1);
+            expect(jsonDump, {
+              'b': {
+                'c': {
+                  'd': 0,
+                  'e': 1,
+                },
+                'f': 2,
+                'g': '...',
+              },
+            });
           });
 
           test('1', () {
@@ -1514,6 +1600,18 @@ void main() {
               'f (2)',
               'g',
             ]);
+
+            final jsonDump = b.jsonDump(childDepth: 1);
+            expect(jsonDump, {
+              'b': {
+                'c': {
+                  'd': 0,
+                  'e': 1,
+                },
+                'f': 2,
+                'g': '...',
+              },
+            });
           });
 
           test('1000', () {
@@ -1525,6 +1623,18 @@ void main() {
               'f (2)',
               'g',
             ]);
+
+            final jsonDump = b.jsonDump(childDepth: 1000);
+            expect(jsonDump, {
+              'b': {
+                'c': {
+                  'd': 0,
+                  'e': 1,
+                },
+                'f': 2,
+                'g': '...',
+              },
+            });
           });
         });
       });

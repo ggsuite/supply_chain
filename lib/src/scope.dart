@@ -643,6 +643,47 @@ class Scope {
   }
 
   // ...........................................................................
+  /// Prints all pathes of the scope or its parent
+  ///
+  /// If parentDepth < 0, start at the root
+  /// If childDepth < 0, show all children
+  Map<String, dynamic> jsonDump({int parentDepth = 0, int childDepth = -1}) {
+    var start = this;
+
+    // If parentDepth < 0, start at the root
+    if (parentDepth < 0) {
+      parentDepth = 0xFFFF;
+    }
+
+    // Find  parent node that matches the parentDepth
+    var realParentDepth = 0;
+
+    while (parentDepth > 0 && start.parent != null) {
+      start = start.parent!;
+      realParentDepth++;
+      parentDepth--;
+    }
+
+    // If childDepth > 0, we need to add the parent depth to childDepth
+    if (childDepth > 0) {
+      childDepth += realParentDepth;
+    }
+
+    // Define the result array
+    final result = <String, dynamic>{};
+
+    // Write the tree
+    _jsonDump(
+      scope: start,
+      result: result,
+      depth: childDepth,
+      infinite: childDepth < 0,
+    );
+
+    return result;
+  }
+
+  // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz
   String dot({
     int childScopeDepth = -1,
@@ -1532,6 +1573,41 @@ class Scope {
           : '';
 
       result.add('$currentPath$dot${node.key}$value');
+    }
+  }
+
+  // ...........................................................................
+  void _jsonDump({
+    required Scope scope,
+    required Map<String, dynamic> result,
+    required int depth,
+    required bool infinite,
+  }) {
+    if (!infinite && depth < 0) {
+      return;
+    }
+
+    final content = <String, dynamic>{};
+    result[scope.key] = content;
+
+    // Write children
+    for (final child in scope.children) {
+      child._jsonDump(
+        scope: child,
+        result: content,
+        depth: depth - 1,
+        infinite: infinite,
+      );
+    }
+
+    // Write nodes
+    for (final node in scope.nodes) {
+      final product = node.product;
+      final value = product is int || product is double || product is String
+          ? node.product
+          : '...';
+
+      content[node.key] = value;
     }
   }
 

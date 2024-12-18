@@ -54,6 +54,7 @@
 - Add smart scopes
 - Add shouldProcessScope
 - Add tests for shouldProcessScope and make sure it is called or the root
+- Add Scope.jsonDump
 
 ### Changed
 
