@@ -1637,6 +1637,88 @@ void main() {
             });
           });
         });
+
+        group('with sourceNodesOnly', () {
+          late final Scope scope;
+
+          setUpAll(
+            () {
+              scope = Scope.example();
+              scope.mockContent({
+                'a': {
+                  'b': {
+                    'c': {
+                      'd': 0,
+                      'e': 1,
+                    },
+                    'f': 2,
+
+                    // G has suppliers and is therefore not a source node
+                    'g': nbp(from: ['a.b.c.d'], to: 'g', init: 5),
+                  },
+                },
+              });
+              scope.scm.testFlushTasks();
+            },
+          );
+
+          group('true', () {
+            test('returns only nodes that have no suppliers', () {
+              final ls = scope.ls(sourceNodesOnly: true);
+              expect(ls, [
+                'a.b.c.d (0)',
+                'a.b.c.e (1)',
+                'a.b.f (2)',
+              ]);
+
+              final jsonDump = scope.jsonDump(sourceNodesOnly: true);
+              expect(jsonDump, {
+                'example': {
+                  'a': {
+                    'b': {
+                      'c': {
+                        'd': 0,
+                        'e': 1,
+                      },
+                      'f': 2,
+                    },
+                  },
+                },
+              });
+            });
+          });
+
+          group('false', () {
+            test('returns all nodes', () {
+              final ls = scope.ls(sourceNodesOnly: false);
+              expect(ls, [
+                'a',
+                'a.b',
+                'a.b.c',
+                'a.b.c.d (0)',
+                'a.b.c.e (1)',
+                'a.b.f (2)',
+                'a.b.g (5)',
+              ]);
+
+              final jsonDump = scope.jsonDump(sourceNodesOnly: false);
+              expect(jsonDump, {
+                'example': {
+                  'a': {
+                    'b': {
+                      'c': {
+                        'd': 0,
+                        'e': 1,
+                      },
+                      'f': 2,
+                      'g': 5,
+                    },
+                  },
+                },
+              });
+            });
+          });
+        });
       });
     });
 

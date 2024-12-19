@@ -605,7 +605,11 @@ class Scope {
   ///
   /// If parentDepth < 0, start at the root
   /// If childDepth < 0, show all children
-  List<String> ls({int parentDepth = 0, int childDepth = -1}) {
+  List<String> ls({
+    int parentDepth = 0,
+    int childDepth = -1,
+    bool sourceNodesOnly = false,
+  }) {
     var start = this;
 
     // If parentDepth < 0, start at the root
@@ -637,6 +641,7 @@ class Scope {
       depth: childDepth,
       currentPath: '',
       infinite: childDepth < 0,
+      sourceNodesOnly: sourceNodesOnly,
     );
 
     return result;
@@ -647,7 +652,11 @@ class Scope {
   ///
   /// If parentDepth < 0, start at the root
   /// If childDepth < 0, show all children
-  Map<String, dynamic> jsonDump({int parentDepth = 0, int childDepth = -1}) {
+  Map<String, dynamic> jsonDump({
+    int parentDepth = 0,
+    int childDepth = -1,
+    bool sourceNodesOnly = false,
+  }) {
     var start = this;
 
     // If parentDepth < 0, start at the root
@@ -678,6 +687,7 @@ class Scope {
       result: result,
       depth: childDepth,
       infinite: childDepth < 0,
+      sourceNodesOnly: sourceNodesOnly,
     );
 
     return result;
@@ -1544,6 +1554,7 @@ class Scope {
     required String currentPath,
     required int depth,
     required bool infinite,
+    required bool sourceNodesOnly,
   }) {
     if (!infinite && depth < 0) {
       return;
@@ -1554,7 +1565,9 @@ class Scope {
     // Write children
     for (final child in scope.children) {
       final childPath = '$currentPath$dot${child.key}';
-      result.add(childPath);
+      if (!sourceNodesOnly) {
+        result.add(childPath);
+      }
 
       child._ls(
         scope: child,
@@ -1562,11 +1575,16 @@ class Scope {
         depth: depth - 1,
         currentPath: childPath,
         infinite: infinite,
+        sourceNodesOnly: sourceNodesOnly,
       );
     }
 
     // Write nodes
     for (final node in scope.nodes) {
+      if (sourceNodesOnly && node.bluePrint.suppliers.isNotEmpty) {
+        continue;
+      }
+
       final product = node.product;
       final value = product is int || product is double || product is String
           ? ' (${node.product})'
@@ -1582,6 +1600,7 @@ class Scope {
     required Map<String, dynamic> result,
     required int depth,
     required bool infinite,
+    required bool sourceNodesOnly,
   }) {
     if (!infinite && depth < 0) {
       return;
@@ -1597,11 +1616,16 @@ class Scope {
         result: content,
         depth: depth - 1,
         infinite: infinite,
+        sourceNodesOnly: sourceNodesOnly,
       );
     }
 
     // Write nodes
     for (final node in scope.nodes) {
+      if (sourceNodesOnly && node.bluePrint.suppliers.isNotEmpty) {
+        continue;
+      }
+
       final product = node.product;
       final value = product is int || product is double || product is String
           ? node.product
