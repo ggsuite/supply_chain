@@ -714,6 +714,8 @@ class Scope {
   void setPreset(
     Map<String, dynamic> preset, {
     bool resetBefore = true,
+    bool throwOnErrors = true,
+    List<String>? errors,
   }) {
     final oldPreset = this.preset();
 
@@ -739,7 +741,7 @@ class Scope {
 
     // Apply the preset
     final path = key;
-    final errors = <String>[];
+    errors ??= <String>[];
 
     try {
       _setPreset(
@@ -759,7 +761,9 @@ class Scope {
         errors,
       );
 
-      throw Exception('Error while applying preset:\n${errors.join('\n')}');
+      if (throwOnErrors) {
+        throw Exception('Error while applying preset:\n${errors.join('\n')}');
+      }
     }
   }
 

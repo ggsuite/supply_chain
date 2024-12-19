@@ -205,6 +205,7 @@ Modifications can only be done via builders.
 - Point to parent suppliers by adding ..
 - Improve searching things in parent scopes
 - Update gg\_cache
+- Allow to return an error array without throwing when setting presets
 
 ### Fixed
 

@@ -2082,6 +2082,40 @@ void main() {
           preset1,
         );
       });
+
+      group('returns a list of errors without throwing', () {
+        test(
+          'when throwOnErrors is false '
+          'and an errors array is set',
+          () {
+            const presetWithErrors = {
+              'example': {
+                'a': {
+                  'b': {
+                    'c': {
+                      'UNKNOWN_NODE': 0,
+                      'e': 1,
+                    },
+                  },
+                },
+                'UNKNOWN_SCOPE': <String, dynamic>{},
+              },
+            };
+
+            final errors = <String>[];
+            scope.setPreset(
+              presetWithErrors,
+              errors: errors,
+              throwOnErrors: false,
+            );
+
+            expect(errors, [
+              'Node "example.a.b.c.UNKNOWN_NODE" not found.',
+              'Scope "example.UNKNOWN_SCOPE" not found.',
+            ]);
+          },
+        );
+      });
     });
 
     group('findNode(key)', () {
