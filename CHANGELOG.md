@@ -56,6 +56,7 @@
 - Add tests for shouldProcessScope and make sure it is called or the root
 - Add Scope.jsonDump
 - Add sourceNodesOnly option for jsonDump
+- Add Scope.preset
 
 ### Changed
 

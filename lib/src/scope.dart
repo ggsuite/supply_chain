@@ -656,6 +656,7 @@ class Scope {
     int parentDepth = 0,
     int childDepth = -1,
     bool sourceNodesOnly = false,
+    bool simpleTypesOnly = false,
   }) {
     var start = this;
 
@@ -688,9 +689,24 @@ class Scope {
       depth: childDepth,
       infinite: childDepth < 0,
       sourceNodesOnly: sourceNodesOnly,
+      simpleTypesOnly: simpleTypesOnly,
     );
 
     return result;
+  }
+
+  // ...........................................................................
+  /// Exports the current configuration of the scope as a json map.
+  ///
+  /// Exports the params of the source nodes.
+  /// Note: Currently only simple types are exported.
+  Map<String, dynamic> get preset {
+    return jsonDump(
+      parentDepth: 0,
+      childDepth: -1,
+      sourceNodesOnly: true,
+      simpleTypesOnly: true,
+    );
   }
 
   // ...........................................................................
@@ -1601,6 +1617,7 @@ class Scope {
     required int depth,
     required bool infinite,
     required bool sourceNodesOnly,
+    required bool simpleTypesOnly,
   }) {
     if (!infinite && depth < 0) {
       return;
@@ -1617,12 +1634,21 @@ class Scope {
         depth: depth - 1,
         infinite: infinite,
         sourceNodesOnly: sourceNodesOnly,
+        simpleTypesOnly: simpleTypesOnly,
       );
     }
 
     // Write nodes
     for (final node in scope.nodes) {
       if (sourceNodesOnly && node.bluePrint.suppliers.isNotEmpty) {
+        continue;
+      }
+
+      if (simpleTypesOnly &&
+          node.product is! int &&
+          node.product is! int &&
+          node.product is! double &&
+          node.product is! String) {
         continue;
       }
 

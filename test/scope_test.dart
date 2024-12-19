@@ -1402,7 +1402,7 @@ void main() {
       });
     });
 
-    group('ls, jsonDump', () {
+    group('ls, jsonDump, preset', () {
       group('returns a list with all pathes of the scope', () {
         late Scope scope;
         late Scope b;
@@ -1433,7 +1433,6 @@ void main() {
 
         test('with default params', () {
           final ls = scope.ls();
-          final json = scope.jsonDump();
           expect(ls, [
             'a',
             'a.b',
@@ -1444,6 +1443,7 @@ void main() {
             'a.b.g',
           ]);
 
+          final json = scope.jsonDump();
           expect(json, {
             'example': {
               'a': {
@@ -1459,8 +1459,22 @@ void main() {
             },
           });
 
+          final preset = scope.preset;
+          expect(preset, {
+            'example': {
+              'a': {
+                'b': {
+                  'c': {
+                    'd': 0,
+                    'e': 1,
+                  },
+                  'f': 2,
+                },
+              },
+            },
+          });
+
           final lsb = b.ls();
-          final jsonB = b.jsonDump();
           expect(lsb, [
             'c',
             'c.d (0)',
@@ -1469,6 +1483,7 @@ void main() {
             'g',
           ]);
 
+          final jsonB = b.jsonDump();
           expect(jsonB, {
             'b': {
               'c': {
@@ -1477,6 +1492,17 @@ void main() {
               },
               'f': 2,
               'g': '...',
+            },
+          });
+
+          final presetB = b.preset;
+          expect(presetB, {
+            'b': {
+              'c': {
+                'd': 0,
+                'e': 1,
+              },
+              'f': 2,
             },
           });
         });
@@ -1672,7 +1698,7 @@ void main() {
               ]);
 
               final jsonDump = scope.jsonDump(sourceNodesOnly: true);
-              expect(jsonDump, {
+              const expected = {
                 'example': {
                   'a': {
                     'b': {
@@ -1684,7 +1710,8 @@ void main() {
                     },
                   },
                 },
-              });
+              };
+              expect(jsonDump, expected);
             });
           });
 
