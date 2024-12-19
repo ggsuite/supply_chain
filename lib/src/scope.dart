@@ -700,13 +700,67 @@ class Scope {
   ///
   /// Exports the params of the source nodes.
   /// Note: Currently only simple types are exported.
-  Map<String, dynamic> get preset {
+  Map<String, dynamic> preset() {
     return jsonDump(
       parentDepth: 0,
       childDepth: -1,
       sourceNodesOnly: true,
       simpleTypesOnly: true,
     );
+  }
+
+  // ...........................................................................
+  /// Applies a preset to the scope
+  void setPreset(
+    Map<String, dynamic> preset, {
+    bool resetBefore = true,
+  }) {
+    final oldPreset = this.preset();
+
+    // Does the key of the preset match?
+    if (preset.keys.length > 1) {
+      throw Exception('Preset must have only one key "$key".');
+    }
+
+    if (preset.keys.first != key) {
+      throw Exception(
+        'Preset key "${preset.keys.first}" does not match scope key "$key".',
+      );
+    }
+
+    if (preset.values.first is! Map<String, dynamic>) {
+      throw Exception('Preset value must be a JSON object.');
+    }
+
+    // Reset old state before applying the preset
+    if (resetBefore) {
+      reset();
+    }
+
+    // Apply the preset
+    final path = key;
+    final errors = <String>[];
+
+    try {
+      _setPreset(
+        preset.values.first as Map<String, dynamic>,
+        path,
+        errors,
+      );
+    } catch (e) {
+      errors.add(e.toString()); // coverage:ignore-line
+    }
+
+    // Rollback the preset if an error occurs
+    if (errors.isNotEmpty) {
+      _setPreset(
+        oldPreset.values.first as Map<String, dynamic>,
+        path,
+        errors,
+      );
+
+      throw Exception('Error while applying preset:\n${errors.join('\n')}');
+    }
   }
 
   // ...........................................................................
@@ -1658,6 +1712,41 @@ class Scope {
           : '...';
 
       content[node.key] = value;
+    }
+  }
+
+  // ...........................................................................
+  void _setPreset(
+    Map<String, dynamic> preset,
+    String path,
+    List<String> errors,
+  ) {
+    for (final key in preset.keys) {
+      final value = preset[key];
+      final childPath = '$path.$key';
+
+      if (value is Map<String, dynamic>) {
+        final c = child(key);
+        if (c != null) {
+          c._setPreset(value, childPath, errors);
+        } else {
+          errors.add('Scope "$childPath" not found.');
+        }
+      } else {
+        final n = node<dynamic>(key);
+        if (n != null) {
+          try {
+            n.product = value;
+          } catch (e) {
+            errors.add(
+              'Node "$childPath" could not be set to value "$value". '
+              '$e',
+            );
+          }
+        } else {
+          errors.add('Node "$childPath" not found.');
+        }
+      }
     }
   }
 

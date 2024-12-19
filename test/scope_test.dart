@@ -1402,7 +1402,7 @@ void main() {
       });
     });
 
-    group('ls, jsonDump, preset', () {
+    group('ls, jsonDump', () {
       group('returns a list with all pathes of the scope', () {
         late Scope scope;
         late Scope b;
@@ -1459,7 +1459,7 @@ void main() {
             },
           });
 
-          final preset = scope.preset;
+          final preset = scope.preset();
           expect(preset, {
             'example': {
               'a': {
@@ -1495,7 +1495,7 @@ void main() {
             },
           });
 
-          final presetB = b.preset;
+          final presetB = b.preset();
           expect(presetB, {
             'b': {
               'c': {
@@ -1746,6 +1746,341 @@ void main() {
             });
           });
         });
+      });
+    });
+
+    group('preset(), setPreset()', () {
+      late final Scope scope;
+      late final Map<String, dynamic> initialPreset;
+      late final Map<String, dynamic> preset1;
+      setUpAll(() {
+        scope = Scope.example();
+        scope.mockContent({
+          'a': {
+            'b': {
+              'c': {
+                'd': 0,
+                'e': 1,
+              },
+              'f': 2,
+            },
+          },
+        });
+        initialPreset = scope.preset();
+        scope.scm.testFlushTasks();
+
+        expect(initialPreset, {
+          'example': {
+            'a': {
+              'b': {
+                'c': {
+                  'd': 0,
+                  'e': 1,
+                },
+                'f': 2,
+              },
+            },
+          },
+        });
+
+        preset1 = {
+          'example': {
+            'a': {
+              'b': {
+                'c': {
+                  'd': 10,
+                  'e': 11,
+                },
+                'f': 12,
+              },
+            },
+          },
+        };
+      });
+
+      setUp(() {
+        scope.reset();
+        expect(scope.preset(), initialPreset);
+      });
+
+      test('allows to write multiple values into the the supply chain', () {
+        // Apply a preset
+        scope.setPreset(preset1);
+        expect(scope.preset(), preset1);
+      });
+
+      test(
+        'resets the previously applied preset before applying the new one',
+        () {
+          // Apply a first preset
+          scope.setPreset(preset1);
+          expect(scope.preset(), {
+            'example': {
+              'a': {
+                'b': {
+                  'c': {
+                    'd': 10,
+                    'e': 11,
+                  },
+                  'f': 12,
+                },
+              },
+            },
+          });
+
+          // Apply a second preset
+          scope.setPreset(
+            {
+              'example': {
+                'a': {
+                  'b': {
+                    'c': {'d': 20},
+                  },
+                },
+              },
+            },
+          );
+
+          // The values of e and f are reset to their initial values.
+          // The value of d is set to 20.
+          expect(
+            scope.preset(),
+            {
+              'example': {
+                'a': {
+                  'b': {
+                    'c': {
+                      'd': 20, // overridden by the preset
+                      'e': 1, // Reset to initial value
+                    },
+                    'f': 2, //  Reset to initial value
+                  },
+                },
+              },
+            },
+          );
+        },
+      );
+
+      test(
+        'does not resets the previous preset, when resetBefore is false',
+        () {
+          // Apply a first preset
+          scope.setPreset(preset1);
+          expect(scope.preset(), {
+            'example': {
+              'a': {
+                'b': {
+                  'c': {
+                    'd': 10,
+                    'e': 11,
+                  },
+                  'f': 12,
+                },
+              },
+            },
+          });
+
+          // Apply a second preset with resetBefore = false
+          scope.setPreset(
+            {
+              'example': {
+                'a': {
+                  'b': {
+                    'c': {'d': 20},
+                  },
+                },
+              },
+            },
+            resetBefore: false,
+          );
+
+          // The values of e and f are NOT reset to their initial values.
+          // The value of d is set to 20.
+          expect(
+            scope.preset(),
+            {
+              'example': {
+                'a': {
+                  'b': {
+                    'c': {
+                      'd': 20, // overridden by the preset
+                      'e': 11, // Not reset to initial value
+                    },
+                    'f': 12, //  Not reset to initial value
+                  },
+                },
+              },
+            },
+          );
+        },
+      );
+
+      group('throws', () {
+        test('when the preset contains more then one key', () {
+          late final String message;
+
+          try {
+            scope.setPreset({
+              'example': {'a': 'b'},
+              'example2': {'a': 'b'},
+            });
+          } on Exception catch (e) {
+            message = e.toString();
+          }
+
+          expect(
+            message,
+            'Exception: Preset must have only one key "example".',
+          );
+        });
+
+        test('when the preset key does not match the scope key', () {
+          late final String message;
+
+          try {
+            scope.setPreset({
+              'example2': {'a': 'b'},
+            });
+          } on Exception catch (e) {
+            message = e.toString();
+          }
+
+          expect(
+            message,
+            'Exception: Preset key "example2" '
+            'does not match scope key "example".',
+          );
+        });
+
+        test('when the preset value is not an JSON object', () {
+          late final String message;
+
+          try {
+            scope.setPreset({
+              'example': 'a',
+            });
+          } on Exception catch (e) {
+            message = e.toString();
+          }
+
+          expect(
+            message,
+            'Exception: Preset value must be a JSON object.',
+          );
+        });
+
+        test('when a scope cannot be found', () {
+          late final String message;
+
+          try {
+            scope.setPreset({
+              'example': {
+                'a': {
+                  'b': {
+                    'UNKNOWN': <String, dynamic>{},
+                  },
+                },
+              },
+            });
+          } on Exception catch (e) {
+            message = e.toString();
+          }
+
+          expect(
+            message,
+            'Exception: Error while applying preset:\n'
+            'Scope "example.a.b.UNKNOWN" not found.',
+          );
+        });
+
+        test('when a node is not found', () {
+          late final String message;
+
+          try {
+            scope.setPreset({
+              'example': {
+                'a': {
+                  'b': {
+                    'c': {
+                      'UNKNOWN': 0,
+                      'e': 1,
+                    },
+                  },
+                },
+              },
+            });
+          } on Exception catch (e) {
+            message = e.toString();
+          }
+
+          expect(
+            message,
+            'Exception: Error while applying preset:\n'
+            'Node "example.a.b.c.UNKNOWN" not found.',
+          );
+        });
+
+        test('when a node has wrong data type', () {
+          late final String message;
+
+          try {
+            scope.setPreset({
+              'example': {
+                'a': {
+                  'b': {
+                    'c': {
+                      'd': 'string',
+                      'e': 1,
+                    },
+                  },
+                },
+              },
+            });
+          } on Exception catch (e) {
+            message = e.toString();
+          }
+
+          expect(
+            message,
+            'Exception: Error while applying preset:\n'
+            'Node "example.a.b.c.d" could not be set to value "string". '
+            'type \'String\' is not a subtype of type \'int\' of \'v\'',
+          );
+        });
+      });
+
+      test('restores the previous state on errors', () {
+        // Set a first preset
+        scope.setPreset(preset1);
+        var hadError = false;
+
+        // Set another preset that has an error
+        try {
+          scope.setPreset({
+            'example': {
+              'a': {
+                'b': {
+                  'c': {
+                    'd': 0,
+                    'e': 1,
+                  },
+                  'f': 2,
+                  'g': 'ERROR. Must be an integer.',
+                },
+              },
+            },
+          });
+        } catch (e) {
+          hadError = true;
+        }
+
+        // The preset should be reset to the previous state
+        expect(hadError, isTrue);
+        expect(
+          scope.preset(),
+          preset1,
+        );
       });
     });
 

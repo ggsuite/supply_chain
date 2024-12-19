@@ -57,6 +57,7 @@
 - Add Scope.jsonDump
 - Add sourceNodesOnly option for jsonDump
 - Add Scope.preset
+- Add Scope.preset() and Scope.setPreset()
 
 ### Changed
 
