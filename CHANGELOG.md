@@ -207,6 +207,7 @@ Modifications can only be done via builders.
 - Update gg\_cache
 - Allow to return an error array without throwing when setting presets
 - Setting an empty preset will reset the supply chain
+- Presets do not export empty scopes
 
 ### Fixed
 

@@ -2130,6 +2130,26 @@ void main() {
           expect(scope.preset(), initialPreset);
         });
       });
+
+      test('does not export empty scopes', () {
+        final scope = Scope.example();
+        scope.mockContent({
+          'scopeWithValues': {
+            'b': 0,
+            'emptyScope': <String, dynamic>{},
+          },
+          'emptyScope': <String, dynamic>{},
+        });
+
+        final preset = scope.preset();
+        expect(preset, {
+          'example': {
+            'scopeWithValues': {
+              'b': 0,
+            },
+          },
+        });
+      });
     });
 
     group('findNode(key)', () {

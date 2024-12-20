@@ -657,6 +657,7 @@ class Scope {
     int childDepth = -1,
     bool sourceNodesOnly = false,
     bool simpleTypesOnly = false,
+    bool removeEmptyScopes = false,
   }) {
     var start = this;
 
@@ -692,6 +693,10 @@ class Scope {
       simpleTypesOnly: simpleTypesOnly,
     );
 
+    if (removeEmptyScopes) {
+      _removeEmptyScopes(result);
+    }
+
     return result;
   }
 
@@ -706,6 +711,7 @@ class Scope {
       childDepth: -1,
       sourceNodesOnly: true,
       simpleTypesOnly: true,
+      removeEmptyScopes: true,
     );
   }
 
@@ -1721,6 +1727,20 @@ class Scope {
           : '...';
 
       content[node.key] = value;
+    }
+  }
+
+  // ...........................................................................
+  void _removeEmptyScopes(Map<String, dynamic> map) {
+    final keys = map.keys.toList();
+    for (final key in keys) {
+      final value = map[key];
+      if (value is Map<String, dynamic>) {
+        _removeEmptyScopes(value);
+        if (value.isEmpty) {
+          map.remove(key);
+        }
+      }
     }
   }
 
