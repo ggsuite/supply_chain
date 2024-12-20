@@ -2116,6 +2116,20 @@ void main() {
           },
         );
       });
+
+      group('just resets everything when preset is empty', () {
+        test('and does not throw', () {
+          // Set a non default preset
+          scope.setPreset(preset1);
+          expect(scope.preset(), preset1);
+
+          // Set an empty preset
+          scope.setPreset({});
+
+          // The preset should be reset to the default state
+          expect(scope.preset(), initialPreset);
+        });
+      });
     });
 
     group('findNode(key)', () {

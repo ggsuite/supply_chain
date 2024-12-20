@@ -724,19 +724,24 @@ class Scope {
       throw Exception('Preset must have only one key "$key".');
     }
 
-    if (preset.keys.first != key) {
+    if (preset.keys.length == 1 && preset.keys.first != key) {
       throw Exception(
         'Preset key "${preset.keys.first}" does not match scope key "$key".',
       );
     }
 
-    if (preset.values.first is! Map<String, dynamic>) {
+    if (preset.isNotEmpty && preset.values.first is! Map<String, dynamic>) {
       throw Exception('Preset value must be a JSON object.');
     }
 
     // Reset old state before applying the preset
     if (resetBefore) {
       reset();
+    }
+
+    // If preset is empty, everything is only reset
+    if (preset.isEmpty) {
+      return;
     }
 
     // Apply the preset

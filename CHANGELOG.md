@@ -206,6 +206,7 @@ Modifications can only be done via builders.
 - Improve searching things in parent scopes
 - Update gg\_cache
 - Allow to return an error array without throwing when setting presets
+- Setting an empty preset will reset the supply chain
 
 ### Fixed
 
