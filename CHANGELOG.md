@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Update repo URL from inlavigo to ggsuite
+
 ## [1.0.14] - 2025-05-21
 
 ### Added
@@ -377,18 +383,19 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
-[1.0.14]: https://github.com/inlavigo/supply_chain/compare/1.0.13...1.0.14
-[1.0.13]: https://github.com/inlavigo/supply_chain/compare/1.0.12...1.0.13
-[1.0.12]: https://github.com/inlavigo/supply_chain/compare/1.0.11...1.0.12
-[1.0.11]: https://github.com/inlavigo/supply_chain/compare/1.0.10...1.0.11
-[1.0.10]: https://github.com/inlavigo/supply_chain/compare/1.0.9...1.0.10
-[1.0.9]: https://github.com/inlavigo/supply_chain/compare/1.0.8...1.0.9
-[1.0.8]: https://github.com/inlavigo/supply_chain/compare/1.0.7...1.0.8
-[1.0.7]: https://github.com/inlavigo/supply_chain/compare/1.0.6...1.0.7
-[1.0.6]: https://github.com/inlavigo/supply_chain/compare/1.0.5...1.0.6
-[1.0.5]: https://github.com/inlavigo/supply_chain/compare/1.0.4...1.0.5
-[1.0.4]: https://github.com/inlavigo/supply_chain/compare/1.0.3...1.0.4
-[1.0.3]: https://github.com/inlavigo/supply_chain/compare/1.0.2...1.0.3
-[1.0.2]: https://github.com/inlavigo/supply_chain/compare/1.0.1...1.0.2
-[1.0.1]: https://github.com/inlavigo/supply_chain/compare/1.0.0...1.0.1
-[1.0.0]: https://github.com/inlavigo/supply_chain/tag/%tag
+[Unreleased]: https://github.com/ggsuite/supply_chain/compare/1.0.14...HEAD
+[1.0.14]: https://github.com/ggsuite/supply_chain/compare/1.0.13...1.0.14
+[1.0.13]: https://github.com/ggsuite/supply_chain/compare/1.0.12...1.0.13
+[1.0.12]: https://github.com/ggsuite/supply_chain/compare/1.0.11...1.0.12
+[1.0.11]: https://github.com/ggsuite/supply_chain/compare/1.0.10...1.0.11
+[1.0.10]: https://github.com/ggsuite/supply_chain/compare/1.0.9...1.0.10
+[1.0.9]: https://github.com/ggsuite/supply_chain/compare/1.0.8...1.0.9
+[1.0.8]: https://github.com/ggsuite/supply_chain/compare/1.0.7...1.0.8
+[1.0.7]: https://github.com/ggsuite/supply_chain/compare/1.0.6...1.0.7
+[1.0.6]: https://github.com/ggsuite/supply_chain/compare/1.0.5...1.0.6
+[1.0.5]: https://github.com/ggsuite/supply_chain/compare/1.0.4...1.0.5
+[1.0.4]: https://github.com/ggsuite/supply_chain/compare/1.0.3...1.0.4
+[1.0.3]: https://github.com/ggsuite/supply_chain/compare/1.0.2...1.0.3
+[1.0.2]: https://github.com/ggsuite/supply_chain/compare/1.0.1...1.0.2
+[1.0.1]: https://github.com/ggsuite/supply_chain/compare/1.0.0...1.0.1
+[1.0.0]: https://github.com/ggsuite/supply_chain/tag/%tag

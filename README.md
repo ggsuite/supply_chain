@@ -89,4 +89,4 @@ Supply Chain (SC) is a data flow and state management architecture.
 
 ## Features and bugs
 
-Please file feature requests and bugs at [GitHub](https://github.com/inlavigo/supply_chain).
+Please file feature requests and bugs at [GitHub](https://github.com/ggsuite/supply_chain).

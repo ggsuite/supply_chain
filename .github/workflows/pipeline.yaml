@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Setup git user
         run: |
-          git config --global user.email "githubaction@inlavigo.com"
+          git config --global user.email "githubaction@grace.cloud"
           git config --global user.name "Github Action"
 
       - name: Set up SSH key
