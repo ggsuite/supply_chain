@@ -189,7 +189,7 @@ class Graph {
     }
     // coverage:ignore-start
     else {
-      if (Platform.environment.containsKey('GITHUB_ACTIONS')) {
+      if (!Platform.environment.containsKey('GITHUB_ACTIONS')) {
         // Write dot file to tmp
         final fileName = path.split('/').last;
 

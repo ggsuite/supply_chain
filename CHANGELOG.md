@@ -1,10 +1,14 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.15] - 2025-05-21
 
 ### Changed
 
 - Update repo URL from inlavigo to ggsuite
+
+### Fixed
+
+- Fix unit test errors
 
 ## [1.0.14] - 2025-05-21
 
@@ -383,7 +387,7 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
-[Unreleased]: https://github.com/ggsuite/supply_chain/compare/1.0.14...HEAD
+[1.0.15]: https://github.com/ggsuite/supply_chain/compare/1.0.14...1.0.15
 [1.0.14]: https://github.com/ggsuite/supply_chain/compare/1.0.13...1.0.14
 [1.0.13]: https://github.com/ggsuite/supply_chain/compare/1.0.12...1.0.13
 [1.0.12]: https://github.com/ggsuite/supply_chain/compare/1.0.11...1.0.12
