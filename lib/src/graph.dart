@@ -6,7 +6,6 @@
 
 import 'dart:io';
 
-import 'package:gg_is_github/gg_is_github.dart';
 import 'package:supply_chain/supply_chain.dart';
 
 /// The separation between nodes
@@ -190,7 +189,7 @@ class Graph {
     }
     // coverage:ignore-start
     else {
-      if (!isGitHub) {
+      if (Platform.environment.containsKey('GITHUB_ACTIONS')) {
         // Write dot file to tmp
         final fileName = path.split('/').last;
 

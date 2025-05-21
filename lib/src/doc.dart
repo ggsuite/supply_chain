@@ -6,7 +6,6 @@
 
 import 'dart:io';
 
-import 'package:gg_is_github/gg_is_github.dart';
 import 'package:supply_chain/supply_chain.dart';
 
 /// Creates a html documentation of a given scope and its children
@@ -132,7 +131,7 @@ class Doc {
 
   // ...........................................................................
   Future<void> _nodeGraph(Node<dynamic> node) async {
-    if (isGitHub) {
+    if (Platform.environment.containsKey('GITHUB_ACTIONS')) {
       return;
     }
 
