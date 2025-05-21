@@ -4,7 +4,6 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-import 'package:mocktail/mocktail.dart';
 import 'package:supply_chain/supply_chain.dart';
 
 /// A node producing scope blue prints depending on components
@@ -68,6 +67,3 @@ class ScopeBluePrintFactory extends NodeBluePrint<List<ScopeBluePrint>> {
     return rowScopeBluePrintFactory;
   }
 }
-
-/// Mock for [ScopeFactory]
-class MockScopeBluePrintFactory extends Mock implements ScopeBluePrintFactory {}
