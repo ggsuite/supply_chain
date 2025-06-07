@@ -1,6 +1,6 @@
 name: supply_chain
 description: Supply Chain (SC) is a data flow and state management architecture.
-version: 1.1.1
+version: 1.1.2
 repository: https://github.com/ggsuite/supply_chain
 
 environment:
