@@ -6,7 +6,7 @@ digraph unix {
   edge [fontname="Arial"]
   subgraph cluster_empty_278 {
     label = "empty"; // scope
-    invisible8 [label = "", shape = point, style=invis]; // empty
+    invisible0 [label = "", shape = point, style=invis]; // empty
     
   }
 }

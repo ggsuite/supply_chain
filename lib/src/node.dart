@@ -687,15 +687,13 @@ class Node<T> {
     int dpi = Graph.defaultDpi,
     bool write2x = false,
   }) async {
-    const graph = Graph();
-
     final dot = this.dot(
       supplierDepth: supplierDepth,
       customerDepth: customerDepth,
       highlightedNodes: highlightedNodes,
       highlightedScopes: highlightedScopes,
     );
-    await graph.writeImageFile(
+    await GraphToDot.writeImageFile(
       path: path,
       dot: dot,
       dpi: dpi,

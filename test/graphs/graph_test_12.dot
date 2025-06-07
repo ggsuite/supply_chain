@@ -6,7 +6,7 @@ digraph unix {
   edge [fontname="Arial"]
   subgraph cluster_butterFly_210 {
     label = "butterFly"; // scope
-    invisible2 [label = "", shape = point, style=invis]; // butterFly
+    invisible0 [label = "", shape = point, style=invis]; // butterFly
     subgraph cluster_level3_212 {
       label = "level3"; // scope
       s111_213 [

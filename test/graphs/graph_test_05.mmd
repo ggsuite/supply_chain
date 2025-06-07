@@ -1,0 +1,17 @@
+flowchart TD
+  subgraph level1_104["level1"]
+    s1_98["s1"]
+    s0_99["s0"]
+    c0_101["c0"]
+    c1_102["c1"]
+    subgraph level0_106["level0"]
+      x_100["x"]
+    end
+  end
+
+  s1_98 --> x_100;
+  s0_99 --> x_100;
+  x_100 --> c0_101;
+  x_100 --> c1_102;
+
+  classDef highlight fill:#FFFFAA,stroke:#333;

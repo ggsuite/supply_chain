@@ -1297,8 +1297,10 @@ void main() {
         await chain.writeImageFile(graphFile);
 
         // Save svg file
-        final svgFile = graphFile.replaceAll('.dot', '.svg');
-        await chain.writeImageFile(svgFile);
+        if (GraphToDot.testSvgAndPngExport) {
+          final svgFile = graphFile.replaceAll('.dot', '.svg');
+          await chain.writeImageFile(svgFile);
+        }
 
         // Create graph directly
         final graph = chain.dot();
@@ -1382,24 +1384,26 @@ void main() {
         await updateGraphFile(root, 'graphs_with_scopes.dot');
       });
 
-      group('with write2x == true', () {
-        test('should wrid also a 2x version of the file', () async {
-          if (isGitHub) {
-            return;
-          }
+      if (GraphToDot.testSvgAndPngExport) {
+        group('with write2x == true', () {
+          test('should wrid also a 2x version of the file', () async {
+            if (isGitHub) {
+              return;
+            }
 
-          // coveralls: ignore-start
-          final tmpDir = Directory.systemTemp.createTempSync();
-          final imagePath = '${tmpDir.path}/test.png';
-          final image2xPath = '${tmpDir.path}/test_2x.png';
-          final root = ExampleScopeRoot(scm: Scm.testInstance);
-          await root.writeImageFile(imagePath, write2x: true);
-          expect(await File(imagePath).exists(), isTrue);
-          expect(await File(image2xPath).exists(), isTrue);
-          await tmpDir.delete(recursive: true);
-          // coveralls: ignore-end
+            // coveralls: ignore-start
+            final tmpDir = Directory.systemTemp.createTempSync();
+            final imagePath = '${tmpDir.path}/test.png';
+            final image2xPath = '${tmpDir.path}/test_2x.png';
+            final root = ExampleScopeRoot(scm: Scm.testInstance);
+            await root.writeImageFile(imagePath, write2x: true);
+            expect(await File(imagePath).exists(), isTrue);
+            expect(await File(image2xPath).exists(), isTrue);
+            await tmpDir.delete(recursive: true);
+            // coveralls: ignore-end
+          });
         });
-      });
+      }
     });
 
     group('ls, jsonDump', () {

@@ -6,7 +6,7 @@ digraph unix {
   edge [fontname="Arial"]
   subgraph cluster_triangle_4 {
     label = "triangle"; // scope
-    invisible12 [label = "", shape = point, style=invis]; // triangle
+    invisible0 [label = "", shape = point, style=invis]; // triangle
     subgraph cluster_left_6 {
       label = "left"; // scope
       left_1 [

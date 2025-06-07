@@ -1,0 +1,43 @@
+flowchart TD
+  subgraph butterFly_210["butterFly"]
+    subgraph level3_212["level3"]
+      s111_213["s111"]
+      c111_227["c111"]
+      subgraph level2_214["level2"]
+        s11_214["s11"]
+        s10_215["s10"]
+        s01_216["s01"]
+        s00_217["s00"]
+        c00_223["c00"]
+        c01_224["c01"]
+        c10_225["c10"]
+        c11_226["c11"]
+        subgraph level1_216["level1"]
+          s1_218["s1"]
+          s0_219["s0"]
+          c0_221["c0"]
+          c1_222["c1"]
+          subgraph level0_218["level0"]
+            x_220["x"]
+          end
+        end
+      end
+    end
+  end
+
+  s111_213 --> s11_214;
+  s11_214 --> s1_218;
+  s10_215 --> s1_218;
+  s01_216 --> s0_219;
+  s00_217 --> s0_219;
+  c11_226 --> c111_227;
+  s1_218 --> x_220;
+  s0_219 --> x_220;
+  c0_221 --> c00_223;
+  c0_221 --> c01_224;
+  c1_222 --> c10_225;
+  c1_222 --> c11_226;
+  x_220 --> c0_221;
+  x_220 --> c1_222;
+
+  classDef highlight fill:#FFFFAA,stroke:#333;

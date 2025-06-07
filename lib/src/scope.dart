@@ -822,7 +822,7 @@ class Scope {
       highlightedScopes: highlightedScopes,
     );
 
-    await const Graph().writeImageFile(
+    await GraphToDot.writeImageFile(
       dot: dot,
       path: path,
       dpi: dpi,

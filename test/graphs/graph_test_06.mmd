@@ -1,0 +1,41 @@
+flowchart TD
+  subgraph level3_128["level3"]
+    s111_123["s111"]
+    c111_137["c111"]:::highlight
+    subgraph level2_130["level2"]
+      s11_124["s11"]
+      s10_125["s10"]
+      s01_126["s01"]:::highlight
+      s00_127["s00"]
+      c00_133["c00"]
+      c01_134["c01"]
+      c10_135["c10"]
+      c11_136["c11"]
+      subgraph level1_132["level1"]
+        s1_128["s1"]
+        s0_129["s0"]
+        c0_131["c0"]
+        c1_132["c1"]:::highlight
+        subgraph level0_134["level0"]
+          x_130["x"]
+        end
+      end
+    end
+  end
+
+  s111_123 --> s11_124;
+  s11_124 --> s1_128;
+  s10_125 --> s1_128;
+  s01_126 --> s0_129;
+  s00_127 --> s0_129;
+  c11_136 --> c111_137;
+  s1_128 --> x_130;
+  s0_129 --> x_130;
+  c0_131 --> c00_133;
+  c0_131 --> c01_134;
+  c1_132 --> c10_135;
+  c1_132 --> c11_136;
+  x_130 --> c0_131;
+  x_130 --> c1_132;
+
+  classDef highlight fill:#FFFFAA,stroke:#333;

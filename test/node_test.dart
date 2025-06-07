@@ -780,13 +780,15 @@ void main() {
       });
 
       test('should save a 2x version when write2x is defined', () async {
-        final node = ButterFlyExample(withScopes: true).x;
-        const path = 'test/graphs/graph_test/node_test_saveGraphToFile.png';
-        const path2x =
-            'test/graphs/graph_test/node_test_saveGraphToFile_2x.png';
-        await node.writeImageFile(path, write2x: true);
-        await (File(path).exists());
-        await (File(path2x).exists());
+        if (GraphToDot.testSvgAndPngExport) {
+          final node = ButterFlyExample(withScopes: true).x;
+          const path = 'test/graphs/graph_test/node_test_saveGraphToFile.png';
+          const path2x =
+              'test/graphs/graph_test/node_test_saveGraphToFile_2x.png';
+          await node.writeImageFile(path, write2x: true);
+          await (File(path).exists());
+          await (File(path2x).exists());
+        }
       });
     });
 

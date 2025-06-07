@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Add mermaid support
+
+### Changed
+
+- Tests do not create png and svg files anymore
+
 ## [1.0.15] - 2025-05-21
 
 ### Changed
@@ -387,6 +397,7 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
+[Unreleased]: https://github.com/ggsuite/supply_chain/compare/1.0.15...HEAD
 [1.0.15]: https://github.com/ggsuite/supply_chain/compare/1.0.14...1.0.15
 [1.0.14]: https://github.com/ggsuite/supply_chain/compare/1.0.13...1.0.14
 [1.0.13]: https://github.com/ggsuite/supply_chain/compare/1.0.12...1.0.13
