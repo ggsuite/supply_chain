@@ -8,6 +8,15 @@ import 'dart:io';
 
 import 'package:supply_chain/supply_chain.dart';
 
+/// The markdown export format
+enum MarkdownFormat {
+  /// Wraps mermaid code into ```
+  gitHub,
+
+  /// Wraps mermaid code into :::
+  azure,
+}
+
 /// Converts a graph to the Mermaid format.
 class GraphToMermaid {
   /// Constructor
@@ -29,6 +38,18 @@ class GraphToMermaid {
     return '$header$nodes\n$edges\n$style';
   }
 
+  /// Turn a graph into mermaid markdown
+  String markdown({MarkdownFormat markdownFormat = MarkdownFormat.gitHub}) {
+    final d = switch (markdownFormat) {
+      MarkdownFormat.azure => ':::',
+      MarkdownFormat.gitHub => '```',
+    };
+
+    // :::mermaid ...code ... :::
+    final result = ['${d}mermaid', mermaid, d].join('\n');
+    return result;
+  }
+
   /// Save the graph as an image file
   ///
   /// The format can be dot, mmd, md, svg, png, pdf
@@ -36,6 +57,7 @@ class GraphToMermaid {
     required String path,
     double scale = 1.0,
     bool write2x = false,
+    MarkdownFormat markdownFormat = MarkdownFormat.gitHub,
   }) async {
     // Get the format
     final format = path.split('.').last;
@@ -46,6 +68,11 @@ class GraphToMermaid {
     if (format == 'mmd') {
       await file.writeAsString(mm);
       return;
+    }
+    // Write markdown file
+    else if (format == 'md') {
+      final result = markdown(markdownFormat: markdownFormat);
+      await file.writeAsString(result);
     }
     // coverage:ignore-start
     else {

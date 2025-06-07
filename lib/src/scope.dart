@@ -807,11 +807,7 @@ class Scope {
 
   /// Save the graph to a file
   ///
-  /// The format can be
-  /// bmp canon cgimage cmap cmapx cmapx_np dot dot_json eps exr fig gd gd2 gif
-  /// gv icns ico imap imap_np ismap jp2 jpe jpeg jpg json json0 kitty kittyz
-  /// mp pct pdf pic pict plain plain-ext png pov ps ps2 psd sgi svg svgz tga
-  /// tif tiff tk vrml vt vt-24bit wbmp webp xdot xdot1.2 xdot1.4 xdot_json
+  /// The format can be dot, mmd, md, svg, png, pdf
   Future<void> writeImageFile(
     String path, {
     int childScopeDepth = -1,
@@ -820,6 +816,7 @@ class Scope {
     List<Scope>? highlightedScopes,
     double scale = 1.0,
     bool write2x = false,
+    MarkdownFormat markdownFormat = MarkdownFormat.gitHub,
   }) async {
     final g = graph(
       childScopeDepth: childScopeDepth,
@@ -833,6 +830,7 @@ class Scope {
       graph: g,
       scale: scale,
       write2x: write2x,
+      markdownFormat: markdownFormat,
     );
   }
 

@@ -668,6 +668,7 @@ class Node<T> {
     List<Scope>? highlightedScopes,
     double scale = 1.0,
     bool write2x = false,
+    MarkdownFormat markdownFormat = MarkdownFormat.gitHub,
   }) async {
     final g = graph(
       supplierDepth: supplierDepth,
@@ -681,6 +682,7 @@ class Node<T> {
       graph: g,
       scale: scale,
       write2x: write2x,
+      markdownFormat: markdownFormat,
     );
   }
 

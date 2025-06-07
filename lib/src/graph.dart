@@ -164,6 +164,7 @@ class Graph {
     required GraphScopeItem graph,
     required String path,
     double scale = 1.0,
+    MarkdownFormat markdownFormat = MarkdownFormat.gitHub,
     bool write2x = false,
   }) async {
     final format = path.split('.').last;
@@ -174,9 +175,12 @@ class Graph {
       await file.writeAsString(Graph.dot(graph: graph));
       return;
     } else {
-      await GraphToMermaid(
-        graph: graph,
-      ).writeImageFile(path: path, scale: scale, write2x: write2x);
+      await GraphToMermaid(graph: graph).writeImageFile(
+        path: path,
+        scale: scale,
+        write2x: write2x,
+        markdownFormat: markdownFormat,
+      );
     }
   }
 

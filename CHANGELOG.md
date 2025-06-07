@@ -5,6 +5,7 @@
 ### Changed
 
 - BREAKING CHANGE: Update API to generate graph images
+- Allow to specify the markdown format (azure or github) when exporting mermaid diagrams
 
 ## [1.1.0] - 2025-06-07
 

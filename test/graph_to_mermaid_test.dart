@@ -4,8 +4,6 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-import 'dart:io';
-
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
@@ -18,9 +16,16 @@ void main() {
     t = TestGraphs();
   });
 
-  Future<void> writeFile(String mermaid, String postfix) async {
-    final path = 'test/graphs/graph_test_$postfix.mmd';
-    await File(path).writeAsString(mermaid);
+  Future<void> writeFile(GraphScopeItem graph, String postfix) async {
+    final path = 'test/graphs/graph_test_$postfix';
+    await GraphToMermaid(graph: graph).writeImageFile(
+      path: '$path.github.md',
+      markdownFormat: MarkdownFormat.gitHub,
+    );
+    await GraphToMermaid(graph: graph).writeImageFile(
+      path: '$path.azure.md',
+      markdownFormat: MarkdownFormat.azure,
+    );
   }
 
   void expectNodes(String result, List<Node<dynamic>> nodes) {
@@ -132,6 +137,33 @@ void main() {
   });
 
   group('Graph', () {
+    group('markdown', () {
+      group('with markdownFormat', () {
+        group('gitHub', () {
+          test('wraps the mermaid into ```... ```', () {
+            // Create the tree
+            final tree = t.graph.treeForNode(node: t.x);
+            final markdown = GraphToMermaid(
+              graph: tree,
+            ).markdown(markdownFormat: MarkdownFormat.gitHub);
+            expect(markdown, startsWith('```mermaid\n'));
+            expect(markdown, endsWith('\n```'));
+          });
+        });
+        group('azure', () {
+          test('wraps the mermaid into :::... :::', () {
+            // Create the tree
+            final tree = t.graph.treeForNode(node: t.x);
+            final markdown = GraphToMermaid(
+              graph: tree,
+            ).markdown(markdownFormat: MarkdownFormat.azure);
+            expect(markdown, startsWith(':::mermaid\n'));
+            expect(markdown, endsWith('\n:::'));
+          });
+        });
+      });
+    });
+
     group('tree, mermaid', () {
       group('treeForNode', () {
         group('should print a node', () {
@@ -141,7 +173,7 @@ void main() {
 
             // Create mermaid
             final mermaid = Graph.mermaid(graph: tree);
-            await writeFile(mermaid, '01');
+            await writeFile(tree, '01');
 
             // Check mermaid
             expectNodes(mermaid, [t.x]);
@@ -156,7 +188,7 @@ void main() {
 
               // Create mermaid
               final mermaid = Graph.mermaid(graph: tree);
-              await writeFile(mermaid, '02');
+              await writeFile(tree, '02');
 
               // .........
               // Check mermaid
@@ -175,7 +207,7 @@ void main() {
 
               // Create mermaid
               final mermaid = Graph.mermaid(graph: tree);
-              await writeFile(mermaid, '03');
+              await writeFile(tree, '03');
 
               // .........
               // Check mermaid
@@ -198,7 +230,7 @@ void main() {
 
               // Create mermaid
               final mermaid = Graph.mermaid(graph: tree);
-              await writeFile(mermaid, '05');
+              await writeFile(tree, '05');
 
               // .........
               // Check mermaid
@@ -223,7 +255,7 @@ void main() {
 
               // Create mermaid
               final mermaid = Graph.mermaid(graph: tree);
-              await writeFile(mermaid, '04');
+              await writeFile(tree, '04');
 
               // .........
               // Check mermaid
@@ -263,7 +295,7 @@ void main() {
 
               // Create mermaid
               final mermaid = Graph.mermaid(graph: tree);
-              await writeFile(mermaid, '06');
+              await writeFile(tree, '06');
 
               // .........
               // Check mermaid
@@ -288,7 +320,7 @@ void main() {
 
                 // Create mermaid
                 final mermaid = Graph.mermaid(graph: tree);
-                await writeFile(mermaid, '08');
+                await writeFile(tree, '08');
 
                 //// Check mermaid
                 expectNodes(mermaid, [t.x]);
@@ -308,7 +340,7 @@ void main() {
 
               // Create mermaid
               final mermaid = Graph.mermaid(graph: l1);
-              await writeFile(mermaid, '09');
+              await writeFile(l1, '09');
 
               // Check mermaid
               expectNodes(mermaid, [t.x, t.s1, t.s0, t.c0, t.c1]);
@@ -331,7 +363,7 @@ void main() {
 
               // Create mermaid
               final mermaid = Graph.mermaid(graph: l1);
-              await writeFile(mermaid, '10');
+              await writeFile(l1, '10');
 
               // Check mermaid
               expectNodes(mermaid, [t.x, t.s1, t.s0, t.c0, t.c1]);
@@ -354,7 +386,7 @@ void main() {
 
               // Create mermaid
               final mermaid = Graph.mermaid(graph: root);
-              await writeFile(mermaid, '11');
+              await writeFile(root, '11');
 
               //// Check mermaid
               expectNodes(mermaid, t.allNodes);
@@ -375,7 +407,7 @@ void main() {
 
               // Create mermaid
               final mermaid = Graph.mermaid(graph: root);
-              await writeFile(mermaid, '12');
+              await writeFile(root, '12');
 
               //// Check mermaid
               expectNodes(mermaid, t.allNodes);
@@ -409,8 +441,7 @@ void main() {
                 expect(firstChild.nodeItems, isEmpty);
 
                 // Print the mermaid graph
-                final mermaid = Graph.mermaid(graph: graphNode);
-                await writeFile(mermaid, '18');
+                await writeFile(graphNode, '18');
               });
             });
           });
@@ -436,8 +467,7 @@ void main() {
             expect(graphNode.children.first.children, hasLength(1));
 
             // Print the mermaid graph
-            final mermaid = Graph.mermaid(graph: graphNode);
-            await writeFile(mermaid, '19');
+            await writeFile(graphNode, '19');
           });
         });
       });
@@ -450,8 +480,7 @@ void main() {
               scope: emptyScope,
               childScopeDepth: -1,
             );
-            final mermaid = Graph.mermaid(graph: tree);
-            await writeFile(mermaid, '13');
+            await writeFile(tree, '13');
           });
 
           test('multiple', () async {
@@ -461,8 +490,7 @@ void main() {
             });
 
             final tree = t.graph.treeForScope(scope: a, childScopeDepth: -1);
-            final mermaid = Graph.mermaid(graph: tree);
-            await writeFile(mermaid, '14');
+            await writeFile(tree, '14');
           });
         });
 
@@ -489,7 +517,7 @@ void main() {
 
             // Create mermaid
             final mermaid = Graph.mermaid(graph: tree);
-            await writeFile(mermaid, '15');
+            await writeFile(tree, '15');
 
             // Check mermaid
             expectNodes(mermaid, triangle.allNodes);
@@ -504,16 +532,14 @@ void main() {
             final tree = t.graph.treeForNode(node: leftNode, customerDepth: 1);
 
             // Create mermaid
-            final mermaid = Graph.mermaid(graph: tree);
-            await writeFile(mermaid, '16');
+            await writeFile(tree, '16');
           });
 
           test('sibling node as supplier', () async {
             final tree = t.graph.treeForNode(node: rightNode, supplierDepth: 1);
 
             // Create mermaid
-            final mermaid = Graph.mermaid(graph: tree);
-            await writeFile(mermaid, '17');
+            await writeFile(tree, '17');
           });
         });
       });
