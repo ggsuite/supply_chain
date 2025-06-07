@@ -11,10 +11,10 @@ import 'package:supply_chain/supply_chain.dart';
 /// Converts a graph to the DOT format.
 class GraphToDot {
   /// Constructor
-  GraphToDot({required this.tree, this.dpi = defaultDpi});
+  GraphToDot({required this.graph, this.dpi = defaultDpi});
 
   /// The graph to be converted
-  final GraphScopeItem tree;
+  final GraphScopeItem graph;
 
   /// The dpi the graph is rendered
   final int dpi;
@@ -37,8 +37,8 @@ class GraphToDot {
     result += 'fontname="Arial"\n';
     result += 'node [fontname="Arial"]\n';
     result += 'edge [fontname="Arial"]\n';
-    result += _dotNodes(tree);
-    result += _dotEdges(tree);
+    result += _dotNodes(graph);
+    result += _dotEdges(graph);
     result += '}\n';
     return _indentDotGraph(result);
   }

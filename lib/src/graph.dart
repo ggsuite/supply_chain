@@ -4,6 +4,8 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'dart:io';
+
 import 'package:supply_chain/supply_chain.dart';
 
 /// The separation between nodes
@@ -106,9 +108,6 @@ class Graph {
   /// Constructor
   const Graph();
 
-  /// The default dpi used for exporting the graph
-  static const int defaultDpi = 72;
-
   // ...........................................................................
   /// Returns graph for a node that can be converted to the dot format later
   GraphScopeItem treeForNode({
@@ -147,14 +146,38 @@ class Graph {
 
   // ...........................................................................
   /// Turn a graph into dot format
-  String dot({required GraphScopeItem tree, int dpi = Graph.defaultDpi}) {
-    return GraphToDot(tree: tree, dpi: dpi).dot;
+  static String dot({required GraphScopeItem graph}) {
+    return GraphToDot(graph: graph).dot;
   }
 
   // ...........................................................................
   /// Turn a graph into mermaid format
-  String mermaid({required GraphScopeItem tree}) {
-    return GraphToMermaid(graph: tree).mermaid;
+  static String mermaid({required GraphScopeItem graph}) {
+    return GraphToMermaid(graph: graph).mermaid;
+  }
+
+  // ...........................................................................
+  /// Save the graph to a file
+  ///
+  /// The format can be dot, mmd, md, svg, png, pdf
+  static Future<void> writeImageFile({
+    required GraphScopeItem graph,
+    required String path,
+    double scale = 1.0,
+    bool write2x = false,
+  }) async {
+    final format = path.split('.').last;
+
+    // Write a dot file when form
+    if (format == 'dot') {
+      final file = File(path);
+      await file.writeAsString(Graph.dot(graph: graph));
+      return;
+    } else {
+      await GraphToMermaid(
+        graph: graph,
+      ).writeImageFile(path: path, scale: scale, write2x: write2x);
+    }
   }
 
   // ######################

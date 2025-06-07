@@ -59,22 +59,32 @@ void main() {
   });
 
   group('Graph', () {
-    group('tree, dot', () {
+    group('dot, mermaid, writeImageFile', () {
+      test('generates dot graphs and writes image files', () async {
+        // Create the tree
+        final graph = t.graph.treeForNode(node: t.x);
+
+        // Test dot
+        expect(Graph.dot(graph: graph), isNotEmpty);
+        await Graph.writeImageFile(
+          graph: graph,
+          path: 'test/graphs/graph_test/graph_test_01.dot',
+        );
+
+        // Test mermaid
+        expect(Graph.mermaid(graph: graph), isNotEmpty);
+        await Graph.writeImageFile(
+          graph: graph,
+          path: 'test/graphs/graph_test/graph_test_01.mmd',
+        );
+      });
+    });
+    group('tree', () {
       group('treeForNode', () {
         group('should print a node', () {
           test('with no suppliers and customers', () async {
             // Create the tree
             final tree = t.graph.treeForNode(node: t.x);
-
-            // Create dot & mermaid
-            final dot = t.graph.dot(tree: tree);
-            expect(dot, isNotEmpty); // Is tested in graph_to_dot_test.dart
-
-            final mermaid = t.graph.mermaid(tree: tree);
-            expect(
-              mermaid,
-              isNotEmpty,
-            ); // Is tested in graph_to_mermaid_test.dart
 
             // Check tree
             expect(tree.isHighlighted, isFalse);

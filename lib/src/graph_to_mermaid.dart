@@ -4,6 +4,8 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'dart:io';
+
 import 'package:supply_chain/supply_chain.dart';
 
 /// Converts a graph to the Mermaid format.
@@ -25,6 +27,79 @@ class GraphToMermaid {
     final edges = _mermaidEdges(graph);
     final style = _style;
     return '$header$nodes\n$edges\n$style';
+  }
+
+  /// Save the graph as an image file
+  ///
+  /// The format can be dot, mmd, md, svg, png, pdf
+  Future<void> writeImageFile({
+    required String path,
+    double scale = 1.0,
+    bool write2x = false,
+  }) async {
+    // Get the format
+    final format = path.split('.').last;
+    final mm = mermaid;
+
+    // Write mmd files directly
+    final file = File(path);
+    if (format == 'mmd') {
+      await file.writeAsString(mm);
+      return;
+    }
+    // coverage:ignore-start
+    else {
+      if (!Platform.environment.containsKey('GITHUB_ACTIONS') &&
+          !Platform.environment.containsKey('TF_BUILD')) {
+        // Check if mmdc is installed
+        final mmdcProcess = await Process.run('mmdc', ['--version']);
+        if (mmdcProcess.exitCode != 0) {
+          throw Exception(
+            [
+              'Mermaid CLI (mmdc) is not installed. ',
+              'Please install it via npm:',
+              'npm install -g @mermaid-js/mermaid-cli',
+            ].join('\n'),
+          );
+        }
+
+        // Write mermaid file to tmp
+        final fileName = path.split('/').last;
+
+        final tempDir = await Directory.systemTemp.createTemp();
+        final tempPath = '${tempDir.path}/$fileName.mmd';
+        final tempFile = File(tempPath);
+
+        await tempFile.writeAsString(mm);
+
+        // ..................................
+        // Convert dot file to target format
+        final process = await Process.run('mmdc', [
+          '-i$tempPath',
+          '-o$path',
+          '-s$scale',
+        ]);
+        assert(process.exitCode == 0, process.stderr);
+
+        // ..............
+        // Write 2x image
+        if (write2x && ['png', 'webp', 'jpg', 'jpeg'].contains(format)) {
+          final path2x = path.replaceAll(RegExp('\\.$format\$'), '_2x.$format');
+
+          final process = await Process.run('dot', [
+            '-T$format',
+            tempPath,
+            '-o$path2x',
+            '-s$scale',
+          ]);
+          assert(process.exitCode == 0, process.stderr);
+        }
+
+        // Delete the temporary directory
+        await tempDir.delete(recursive: true);
+      }
+    }
+    // coverage:ignore-end
   }
 
   // ######################

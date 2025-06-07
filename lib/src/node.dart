@@ -657,57 +657,88 @@ class Node<T> {
   }
 
   // ...........................................................................
-  // Graph
   /// Save the graph to a file
   ///
-  /// The format can be
-  /// bmp canon cgimage cmap cmapx cmapx_np dot dot_json eps exr fig gd gd2 gif
-  /// gv icns ico imap imap_np ismap jp2 jpe jpeg jpg json json0 kitty kittyz
-  /// mp pct pdf pic pict plain plain-ext png pov ps ps2 psd sgi svg svgz tga
-  /// tif tiff tk vrml vt vt-24bit wbmp webp xdot xdot1.2 xdot1.4 xdot_json
+  /// The format can be dot, mmd, md, svg, png, pdf
   Future<void> writeImageFile(
     String path, {
     int supplierDepth = 0,
     int customerDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
-    int dpi = Graph.defaultDpi,
+    double scale = 1.0,
     bool write2x = false,
   }) async {
-    final dot = this.dot(
+    final g = graph(
       supplierDepth: supplierDepth,
       customerDepth: customerDepth,
-      highlightedNodes: highlightedNodes,
+      highlightedNodes: highlightedNodes ?? [this],
       highlightedScopes: highlightedScopes,
     );
-    await GraphToDot.writeImageFile(
+
+    await Graph.writeImageFile(
       path: path,
-      dot: dot,
-      dpi: dpi,
+      graph: g,
+      scale: scale,
       write2x: write2x,
     );
   }
 
   // ...........................................................................
-  /// Returns a graph that can be turned into svg using graphviz
-  String dot({
+  /// Returns an graph
+  GraphScopeItem graph({
     int supplierDepth = 0,
     int customerDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
-    int dpi = Graph.defaultDpi,
-    bool write2x = false,
   }) {
     const graph = Graph();
     final tree = graph.treeForNode(
       node: this,
       supplierDepth: supplierDepth,
       customerDepth: customerDepth,
+      highlightedNodes: highlightedNodes ?? [this], // coverage:ignore-line
+      highlightedScopes: highlightedScopes,
+    );
+    return tree;
+  }
+
+  // ...........................................................................
+  /// Returns a dot graph that can be turned into svg using graphviz
+  String dot({
+    int supplierDepth = 0,
+    int customerDepth = 0,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
+  }) {
+    final g = graph(
+      supplierDepth: supplierDepth,
+      customerDepth: customerDepth,
       highlightedNodes: highlightedNodes ?? [this],
       highlightedScopes: highlightedScopes,
     );
-    final dot = graph.dot(tree: tree, dpi: dpi);
+
+    final dot = GraphToDot(graph: g).dot;
     return dot;
+  }
+
+  // ...........................................................................
+  /// Returns a mermaid graph
+  String mermaid({
+    int supplierDepth = 0,
+    int customerDepth = 0,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
+  }) {
+    final g = graph(
+      supplierDepth: supplierDepth,
+      customerDepth: customerDepth,
+      highlightedNodes: highlightedNodes ?? [this],
+      highlightedScopes: highlightedScopes,
+    );
+
+    final mm = GraphToMermaid(graph: g).mermaid;
+    return mm;
   }
 
   // ######################

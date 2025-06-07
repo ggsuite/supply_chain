@@ -772,12 +772,21 @@ void main() {
       });
     });
 
-    group('graph', () {
+    group('dot', () {
       test('should return a dot representation of node and its suppliers '
           'and customers', () {
         final node = ButterFlyExample(withScopes: true).x;
-        final graph = node.dot();
-        expect(graph, isNotNull);
+        final dot = node.dot();
+        expect(dot, isNotNull);
+      });
+    });
+
+    group('mermaid', () {
+      test('should return a mermaid representation of node and its suppliers '
+          'and customers', () {
+        final node = ButterFlyExample(withScopes: true).x;
+        final mm = node.mermaid();
+        expect(mm, isNotNull);
       });
     });
 

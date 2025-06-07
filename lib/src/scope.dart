@@ -749,23 +749,59 @@ class Scope {
   }
 
   // ...........................................................................
-  /// Returns a graph that can be turned into svg using graphviz
-  String dot({
+  /// Returns an graph
+  GraphScopeItem graph({
     int childScopeDepth = -1,
     int parentScopeDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
-    int dpi = Graph.defaultDpi,
   }) {
-    final tree = const Graph().treeForScope(
+    const graph = Graph();
+    final tree = graph.treeForScope(
       scope: this,
       childScopeDepth: childScopeDepth,
       parentScopeDepth: parentScopeDepth,
       highlightedNodes: highlightedNodes,
       highlightedScopes: highlightedScopes,
     );
+    return tree;
+  }
 
-    final dot = const Graph().dot(tree: tree, dpi: dpi);
+  // ...........................................................................
+  /// Returns a mermaid graph
+  String mermaid({
+    int childScopeDepth = -1,
+    int parentScopeDepth = 0,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
+  }) {
+    final g = graph(
+      childScopeDepth: childScopeDepth,
+      parentScopeDepth: parentScopeDepth,
+      highlightedNodes: highlightedNodes,
+      highlightedScopes: highlightedScopes,
+    );
+
+    final mm = GraphToMermaid(graph: g).mermaid;
+    return mm;
+  }
+
+  // ...........................................................................
+  /// Returns a graph that can be turned into svg using graphviz
+  String dot({
+    int childScopeDepth = -1,
+    int parentScopeDepth = 0,
+    List<Node<dynamic>>? highlightedNodes,
+    List<Scope>? highlightedScopes,
+  }) {
+    final g = graph(
+      childScopeDepth: childScopeDepth,
+      parentScopeDepth: parentScopeDepth,
+      highlightedNodes: highlightedNodes,
+      highlightedScopes: highlightedScopes,
+    );
+
+    final dot = GraphToDot(graph: g).dot;
     return dot;
   }
 
@@ -782,20 +818,20 @@ class Scope {
     int parentScopeDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
-    int dpi = Graph.defaultDpi,
+    double scale = 1.0,
     bool write2x = false,
   }) async {
-    final dot = this.dot(
+    final g = graph(
       childScopeDepth: childScopeDepth,
       parentScopeDepth: parentScopeDepth,
       highlightedNodes: highlightedNodes,
       highlightedScopes: highlightedScopes,
     );
 
-    await GraphToDot.writeImageFile(
-      dot: dot,
+    await Graph.writeImageFile(
       path: path,
-      dpi: dpi,
+      graph: g,
+      scale: scale,
       write2x: write2x,
     );
   }

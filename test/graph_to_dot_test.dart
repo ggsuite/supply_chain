@@ -188,7 +188,7 @@ void main() {
             final tree = t.graph.treeForNode(node: t.x);
 
             // Create dot
-            final dot = t.graph.dot(tree: tree);
+            final dot = Graph.dot(graph: tree);
             await writeDotFile(dot, '01');
 
             // Check dot
@@ -203,7 +203,7 @@ void main() {
               final tree = t.graph.treeForNode(node: t.x, supplierDepth: 1);
 
               // Create dot
-              final dot = t.graph.dot(tree: tree);
+              final dot = Graph.dot(graph: tree);
               writeDotFile(dot, '02');
 
               // .........
@@ -222,7 +222,7 @@ void main() {
               final tree = t.graph.treeForNode(node: t.x, customerDepth: 1);
 
               // Create dot
-              final dot = t.graph.dot(tree: tree);
+              final dot = Graph.dot(graph: tree);
               writeDotFile(dot, '03');
 
               // .........
@@ -245,7 +245,7 @@ void main() {
               );
 
               // Create dot
-              final dot = t.graph.dot(tree: tree);
+              final dot = Graph.dot(graph: tree);
               writeDotFile(dot, '05');
 
               // .........
@@ -270,7 +270,7 @@ void main() {
               );
 
               // Create dot
-              final dot = t.graph.dot(tree: tree);
+              final dot = Graph.dot(graph: tree);
               writeDotFile(dot, '04');
 
               // .........
@@ -310,7 +310,7 @@ void main() {
               );
 
               // Create dot
-              final dot = t.graph.dot(tree: tree);
+              final dot = Graph.dot(graph: tree);
               writeDotFile(dot, '06');
 
               // .........
@@ -330,7 +330,7 @@ void main() {
               );
 
               // Create dot
-              final dot = t.graph.dot(tree: tree);
+              final dot = Graph.dot(graph: tree);
               writeDotFile(dot, '07');
 
               // .........
@@ -351,7 +351,7 @@ void main() {
                 final tree = t.graph.treeForScope(scope: t.x.scope);
 
                 // Create dot
-                final dot = t.graph.dot(tree: tree);
+                final dot = Graph.dot(graph: tree);
                 await writeDotFile(dot, '08');
 
                 //// Check dot
@@ -371,7 +371,7 @@ void main() {
               );
 
               // Create dot
-              final dot = t.graph.dot(tree: l1);
+              final dot = Graph.dot(graph: l1);
               await writeDotFile(dot, '09');
 
               // Check dot
@@ -394,7 +394,7 @@ void main() {
               );
 
               // Create dot
-              final dot = t.graph.dot(tree: l1);
+              final dot = Graph.dot(graph: l1);
               await writeDotFile(dot, '10');
 
               // Check dot
@@ -417,7 +417,7 @@ void main() {
               );
 
               // Create dot
-              final dot = t.graph.dot(tree: root);
+              final dot = Graph.dot(graph: root);
               await writeDotFile(dot, '11');
 
               //// Check dot
@@ -438,7 +438,7 @@ void main() {
               );
 
               // Create dot
-              final dot = t.graph.dot(tree: root);
+              final dot = Graph.dot(graph: root);
               await writeDotFile(dot, '12');
 
               //// Check dot
@@ -473,7 +473,7 @@ void main() {
                 expect(firstChild.nodeItems, isEmpty);
 
                 // Print the dot graph
-                final dot = t.graph.dot(tree: graphNode);
+                final dot = Graph.dot(graph: graphNode);
                 await writeDotFile(dot, '18');
               });
             });
@@ -500,7 +500,7 @@ void main() {
             expect(graphNode.children.first.children, hasLength(1));
 
             // Print the dot graph
-            final dot = t.graph.dot(tree: graphNode);
+            final dot = Graph.dot(graph: graphNode);
             await writeDotFile(dot, '19');
           });
         });
@@ -514,7 +514,7 @@ void main() {
               scope: emptyScope,
               childScopeDepth: -1,
             );
-            final dot = t.graph.dot(tree: tree);
+            final dot = Graph.dot(graph: tree);
             writeDotFile(dot, '13');
             expectEmptyScope(dot, emptyScope);
           });
@@ -529,7 +529,7 @@ void main() {
             final c = b.findChildScope('c')!;
 
             final tree = t.graph.treeForScope(scope: a, childScopeDepth: -1);
-            final dot = t.graph.dot(tree: tree);
+            final dot = Graph.dot(graph: tree);
             writeDotFile(dot, '14');
             expectEmptyScope(dot, a);
             expectEmptyScope(dot, b);
@@ -559,7 +559,7 @@ void main() {
             );
 
             // Create dot
-            final dot = t.graph.dot(tree: tree);
+            final dot = Graph.dot(graph: tree);
             writeDotFile(dot, '15');
 
             // Check dot
@@ -575,7 +575,7 @@ void main() {
             final tree = t.graph.treeForNode(node: leftNode, customerDepth: 1);
 
             // Create dot
-            final dot = t.graph.dot(tree: tree);
+            final dot = Graph.dot(graph: tree);
             writeDotFile(dot, '16');
           });
 
@@ -583,7 +583,7 @@ void main() {
             final tree = t.graph.treeForNode(node: rightNode, supplierDepth: 1);
 
             // Create dot
-            final dot = t.graph.dot(tree: tree);
+            final dot = Graph.dot(graph: tree);
             writeDotFile(dot, '17');
           });
         });

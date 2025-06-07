@@ -1191,7 +1191,7 @@ void main() {
       });
     });
 
-    group('dot, graph, saveGraphToFile', () {
+    group('dot, mermaid, graph, saveGraphToFile', () {
       late Scope scope;
 
       setUp(() {
@@ -1243,9 +1243,13 @@ void main() {
           await chain.writeImageFile(svgFile);
         }
 
-        // Create graph directly
-        final graph = chain.dot();
-        expect(graph, isNotNull);
+        // Create dot
+        final dot = chain.dot();
+        expect(dot, isNotNull);
+
+        // Create mermaid
+        final mm = chain.mermaid();
+        expect(mm, isNotNull);
       }
 
       // .......................................................................
