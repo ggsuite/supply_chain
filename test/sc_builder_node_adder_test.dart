@@ -24,18 +24,11 @@ class _AddExistingNodeScBuilder extends ScBuilderBluePrint {
   }
 
   @override
-  List<NodeBluePrint<dynamic>> addNodes({
-    required Scope hostScope,
-  }) {
+  List<NodeBluePrint<dynamic>> addNodes({required Scope hostScope}) {
     // Try to add the already existing node "existing" to the host scope
     // Will throw.
     if (hostScope.key == 'example') {
-      return const [
-        NodeBluePrint<int>(
-          key: 'existing',
-          initialProduct: 12,
-        ),
-      ];
+      return const [NodeBluePrint<int>(key: 'existing', initialProduct: 12)];
     }
 
     return super.addNodes(hostScope: hostScope);
@@ -53,17 +46,10 @@ class _AddNodesToEveryScopeBuilder extends ScBuilderBluePrint {
   }
 
   @override
-  List<NodeBluePrint<dynamic>> addNodes({
-    required Scope hostScope,
-  }) {
+  List<NodeBluePrint<dynamic>> addNodes({required Scope hostScope}) {
     // Try to add the already existing node "existing" to the host scope
     // Will throw.
-    return const [
-      NodeBluePrint<int>(
-        key: 'noEvaluation',
-        initialProduct: 12,
-      ),
-    ];
+    return const [NodeBluePrint<int>(key: 'noEvaluation', initialProduct: 12)];
   }
 }
 

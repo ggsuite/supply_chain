@@ -9,9 +9,7 @@ import 'package:supply_chain/supply_chain.dart';
 /// Manages the nodes added by a builder
 class ScBuilderNodeReplacer {
   /// The constructor
-  ScBuilderNodeReplacer({
-    required this.builder,
-  });
+  ScBuilderNodeReplacer({required this.builder});
 
   // ...........................................................................
   /// Disposes the nodes and removes it from the scope
@@ -31,15 +29,12 @@ class ScBuilderNodeReplacer {
     scope.mockContent({
       'a': 1,
       'b': 2,
-      'c': {
-        'd': 4,
-        'e': 5,
-        'f': 'f',
-      },
+      'c': {'d': 4, 'e': 5, 'f': 'f'},
     });
 
-    final builder =
-        ExampleScBuilderReplacingIntNodes().instantiate(scope: scope);
+    final builder = ExampleScBuilderReplacingIntNodes().instantiate(
+      scope: scope,
+    );
     return builder.nodeReplacer;
   }
 

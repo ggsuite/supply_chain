@@ -9,6 +9,7 @@
 ### Changed
 
 - Tests do not create png and svg files anymore
+- Upgrade to dart 2.8
 
 ## [1.0.15] - 2025-05-21
 

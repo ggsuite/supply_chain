@@ -24,17 +24,11 @@ class _AddExistingScopeScBuilder extends ScBuilderBluePrint {
   }
 
   @override
-  List<ScopeBluePrint> addScopes({
-    required Scope hostScope,
-  }) {
+  List<ScopeBluePrint> addScopes({required Scope hostScope}) {
     // Try to add the already existing scope "existing" to the host scope
     // Will throw.
     if (hostScope.matchesKey('example')) {
-      return const [
-        ScopeBluePrint(
-          key: 'existing',
-        ),
-      ];
+      return const [ScopeBluePrint(key: 'existing')];
     }
 
     return super.addScopes(hostScope: hostScope);
@@ -52,17 +46,11 @@ class _AddScopesToEveryScopeBuilder extends ScBuilderBluePrint {
   }
 
   @override
-  List<ScopeBluePrint> addScopes({
-    required Scope hostScope,
-  }) {
+  List<ScopeBluePrint> addScopes({required Scope hostScope}) {
     // Try to add the already existing node "existing" to the host scope
     // Will throw.
 
-    return const [
-      ScopeBluePrint(
-        key: 'someNode',
-      ),
-    ];
+    return const [ScopeBluePrint(key: 'someNode')];
   }
 }
 

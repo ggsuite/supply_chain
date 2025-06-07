@@ -56,8 +56,10 @@ void main() {
         expect(productC, (initialC + 111) * 10 * 2);
 
         // Add another node to the scope
-        final hostD = const NodeBluePrint<int>(key: 'hostD', initialProduct: 0)
-            .instantiate(scope: scope);
+        final hostD = const NodeBluePrint<int>(
+          key: 'hostD',
+          initialProduct: 0,
+        ).instantiate(scope: scope);
         expect(hostD.inserts, isNotEmpty);
 
         // Finally let's dispose the builder

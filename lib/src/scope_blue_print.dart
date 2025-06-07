@@ -30,14 +30,14 @@ class ScopeBluePrint {
     void Function(Scope)? onDispose,
     List<String> smartMaster = const [],
     this.canBeSmart = true,
-  })  : _aliases = aliases,
-        _smartMaster = smartMaster,
-        _builders = builders,
-        _connections = connect,
-        _nodes = nodes,
-        _children = children,
-        _onInstantiate = onInstantiate,
-        _onDispose = onDispose;
+  }) : _aliases = aliases,
+       _smartMaster = smartMaster,
+       _builders = builders,
+       _connections = connect,
+       _nodes = nodes,
+       _children = children,
+       _onInstantiate = onInstantiate,
+       _onDispose = onDispose;
   // coverage:ignore-end
 
   // ...........................................................................
@@ -96,25 +96,25 @@ class ScopeBluePrint {
       // Parse nodes
       final nodeBluePrint = switch (subValue.runtimeType) {
         const (int) => NodeBluePrint<int>(
-            key: subKey,
-            initialProduct: subValue as int,
-          ),
+          key: subKey,
+          initialProduct: subValue as int,
+        ),
         const (double) => NodeBluePrint<double>(
-            initialProduct: subValue as double,
-            key: subKey,
-          ),
+          initialProduct: subValue as double,
+          key: subKey,
+        ),
         const (String) => NodeBluePrint<String>(
-            initialProduct: subValue as String,
-            key: subKey,
-          ),
+          initialProduct: subValue as String,
+          key: subKey,
+        ),
         const (bool) => NodeBluePrint<bool>(
-            initialProduct: subValue as bool,
-            key: subKey,
-          ),
+          initialProduct: subValue as bool,
+          key: subKey,
+        ),
         _ => throw ArgumentError(
-            'Type ${value.runtimeType} not supported. '
-            'Use NodeBluePrint<${value.runtimeType}> instead.',
-          )
+          'Type ${value.runtimeType} not supported. '
+          'Use NodeBluePrint<${value.runtimeType}> instead.',
+        ),
       };
 
       nodes.add(nodeBluePrint);
@@ -187,15 +187,9 @@ class ScopeBluePrint {
     }
 
     // Merge the node overrides
-    final mergedNodes = _mergeNodes(
-      nodes,
-      modifiedNodes,
-    );
+    final mergedNodes = _mergeNodes(nodes, modifiedNodes);
 
-    final mergedScopes = _mergeScopes(
-      children,
-      modifiedScopes,
-    );
+    final mergedScopes = _mergeScopes(children, modifiedScopes);
 
     final mergedConnections = {..._connections, ...connections ?? {}};
 
@@ -262,16 +256,14 @@ class ScopeBluePrint {
   static List<NodeBluePrint<dynamic>> mergeNodes({
     required List<NodeBluePrint<dynamic>> original,
     required List<NodeBluePrint<dynamic>>? overrides,
-  }) =>
-      _mergeNodes(original, overrides);
+  }) => _mergeNodes(original, overrides);
 
   // ...........................................................................
   /// Merge scopes with overrides
   static List<ScopeBluePrint> mergeScopes({
     required List<ScopeBluePrint> original,
     required List<ScopeBluePrint>? overrides,
-  }) =>
-      _mergeScopes(original, overrides);
+  }) => _mergeScopes(original, overrides);
 
   // ...........................................................................
   /// The key of the scope
@@ -334,9 +326,7 @@ class ScopeBluePrint {
   }
 
   /// Returns the pathes of all nodes belonging to this scope
-  List<String> allNodePathes({
-    bool appendRootScopeKey = false,
-  }) =>
+  List<String> allNodePathes({bool appendRootScopeKey = false}) =>
       _allNodePathes(this, appendRootScopeKey: appendRootScopeKey);
 
   // ...........................................................................
@@ -435,17 +425,9 @@ class ScopeBluePrint {
     /// return the result
     return ExampleScopeBluePrintSimple(
       key: key,
-      nodes: [
-        dependency,
-      ],
+      nodes: [dependency],
       children: [
-        ScopeBluePrint(
-          key: 'childScope',
-          nodes: [
-            node,
-            customer,
-          ],
-        ),
+        ScopeBluePrint(key: 'childScope', nodes: [node, customer]),
       ],
     );
   }
@@ -467,14 +449,14 @@ class ScopeBluePrint {
     void Function(Scope)? onDispose,
     List<String> smartMaster = const [],
     this.canBeSmart = true,
-  })  : _smartMaster = smartMaster,
-        _connections = connections,
-        _aliases = aliases,
-        _nodes = nodes,
-        _children = children,
-        _builders = builders,
-        _onInstantiate = onInstantiate,
-        _onDispose = onDispose;
+  }) : _smartMaster = smartMaster,
+       _connections = connections,
+       _aliases = aliases,
+       _nodes = nodes,
+       _children = children,
+       _builders = builders,
+       _onInstantiate = onInstantiate,
+       _onDispose = onDispose;
 
   // ...........................................................................
   final List<String> _smartMaster;
@@ -507,9 +489,7 @@ class ScopeBluePrint {
 
   // ...........................................................................
   void _checkForDuplicateKeys(List<NodeBluePrint<dynamic>> nodes) {
-    final keys = nodes.map(
-      (e) => e.key,
-    );
+    final keys = nodes.map((e) => e.key);
     var occurrences = <dynamic, int>{};
     for (var element in keys) {
       occurrences.update(element, (value) => value + 1, ifAbsent: () => 1);
@@ -545,14 +525,14 @@ class ScopeBluePrint {
     // Iterate all new overrides and merge them with the current ones
     final mergedOverrides = [...original];
     for (final newOverride in overrides) {
-      final index = mergedOverrides
-          .indexWhere((element) => element.key == newOverride.key);
+      final index = mergedOverrides.indexWhere(
+        (element) => element.key == newOverride.key,
+      );
 
       // Original element with same key existing? Replace it.
       if (index != -1) {
         mergedOverrides[index] = newOverride;
       }
-
       // No original element with same key existing? Add it.
       else {
         mergedOverrides.add(newOverride);
@@ -580,14 +560,14 @@ class ScopeBluePrint {
     // Iterate all new overrides and merge them with the current ones
     final mergedOverrides = [...original];
     for (final newOverride in overrides) {
-      final index = mergedOverrides
-          .indexWhere((element) => element.key == newOverride.key);
+      final index = mergedOverrides.indexWhere(
+        (element) => element.key == newOverride.key,
+      );
 
       // Original element with same key existing? Replace it.
       if (index != -1) {
         mergedOverrides[index] = newOverride;
       }
-
       // No original element with same key existing? Add it.
       else {
         mergedOverrides.add(newOverride);
@@ -607,9 +587,7 @@ class ScopeBluePrint {
     if (path.length == 1) {
       final n = scope.node<dynamic>(path.first)!;
       final modifiedN = n.connectSupplier(supplier);
-      return scope.copyWith(
-        modifiedNodes: [modifiedN],
-      );
+      return scope.copyWith(modifiedNodes: [modifiedN]);
     }
 
     // Apply to child scope
@@ -622,9 +600,7 @@ class ScopeBluePrint {
       supplier,
     );
 
-    final result = scope.copyWith(
-      modifiedScopes: [modifiedScope],
-    );
+    final result = scope.copyWith(modifiedScopes: [modifiedScope]);
     return result;
   }
 
@@ -635,8 +611,9 @@ class ScopeBluePrint {
     bool appendRootScopeKey = false,
   }) {
     final pathes = <String>[];
-    final firstSegmentName =
-        isFirstSegment && appendRootScopeKey ? '${scope.key}.' : '';
+    final firstSegmentName = isFirstSegment && appendRootScopeKey
+        ? '${scope.key}.'
+        : '';
 
     for (final node in scope.nodes) {
       pathes.add('$firstSegmentName${node.key}');
@@ -650,8 +627,9 @@ class ScopeBluePrint {
       );
 
       pathes.addAll(
-        childPathes
-            .map((childPath) => '$firstSegmentName${child.key}.$childPath'),
+        childPathes.map(
+          (childPath) => '$firstSegmentName${child.key}.$childPath',
+        ),
       );
     }
 
@@ -661,8 +639,9 @@ class ScopeBluePrint {
   // ...........................................................................
   static (
     Map<String, String> mappedConnections,
-    Map<String, String> missingConnections
-  ) _convertScopePathToNodePathes(
+    Map<String, String> missingConnections,
+  )
+  _convertScopePathToNodePathes(
     ScopeBluePrint scope,
     Map<String, String> connections,
   ) {
@@ -748,9 +727,7 @@ class ScopeBluePrint {
   }
 
   // ...........................................................................
-  void _applyParentScBuilders({
-    required Scope scope,
-  }) {
+  void _applyParentScBuilders({required Scope scope}) {
     var parent = scope.parent;
 
     while (parent != null) {
@@ -808,9 +785,7 @@ class ScopeBluePrint {
     // Find the child scope that matches the first segment
     final childScope = key == path[0]
         ? this
-        : children.firstWhereOrNull(
-            (element) => element.key == path[0],
-          );
+        : children.firstWhereOrNull((element) => element.key == path[0]);
 
     // Continue searching in the child scope
     final remainingPath = path.sublist(1);
@@ -835,11 +810,7 @@ class ScopeBluePrint {
     subPath.clear();
     final foundItems = <Object>[];
     for (final child in children) {
-      result = child._findItem<T>(
-        path,
-        subPath,
-        isFirstSegment: true,
-      );
+      result = child._findItem<T>(path, subPath, isFirstSegment: true);
       if (result != null) {
         foundItems.add(result);
       }
@@ -880,28 +851,28 @@ class ExampleScopeBluePrint extends ScopeBluePrint {
     List<NodeBluePrint<dynamic>> nodes = const [],
     List<ScopeBluePrint> children = const [],
   }) : super(
-          nodes: [
-            const NodeBluePrint<int>(
-              key: 'nodeConstructedByParent',
-              initialProduct: 0,
-              suppliers: [],
-            ),
-            ...nodes,
-          ],
-          children: [
-            const ScopeBluePrint(
-              key: 'childScopeConstructedByParent',
-              nodes: [
-                NodeBluePrint<int>(
-                  key: 'nodeConstructedByChildScope',
-                  initialProduct: 0,
-                  suppliers: [],
-                ),
-              ],
-            ),
-            ...children,
-          ],
-        );
+         nodes: [
+           const NodeBluePrint<int>(
+             key: 'nodeConstructedByParent',
+             initialProduct: 0,
+             suppliers: [],
+           ),
+           ...nodes,
+         ],
+         children: [
+           const ScopeBluePrint(
+             key: 'childScopeConstructedByParent',
+             nodes: [
+               NodeBluePrint<int>(
+                 key: 'nodeConstructedByChildScope',
+                 initialProduct: 0,
+                 suppliers: [],
+               ),
+             ],
+           ),
+           ...children,
+         ],
+       );
 
   @override
   List<NodeBluePrint<dynamic>> buildNodes() {

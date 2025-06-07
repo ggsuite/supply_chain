@@ -19,9 +19,7 @@ class Scm {
 
   // ...........................................................................
   /// Supply chain manager constructor
-  Scm({
-    this.isTest = false,
-  }) {
+  Scm({this.isTest = false}) {
     _init();
   }
 
@@ -100,8 +98,10 @@ class Scm {
     // Throw an exception. Only producing nodes should call hasNewProduct()
     final check = extraChecks ?? Scm.extraChecks;
     if (check && !_producingNodes.contains(node)) {
-      throw StateError('Node "$node" did call "hasNewProduct()" '
-          'without being nominated before.');
+      throw StateError(
+        'Node "$node" did call "hasNewProduct()" '
+        'without being nominated before.',
+      );
     }
 
     // Finalize production
@@ -347,10 +347,7 @@ class Scm {
   void _initSuppliers() {
     // Init suppliers of new nodes
     for (final node in _nodesNeedingSupplierUpdate) {
-      _addSuppliers(
-        node,
-        throwIfNotThere: false,
-      );
+      _addSuppliers(node, throwIfNotThere: false);
     }
     _nodesNeedingSupplierUpdate.clear();
   }
@@ -361,10 +358,7 @@ class Scm {
     // try again to prepare nodes that head missed suppliers before
 
     for (final node in _nodesWithMissedSuppliers) {
-      _addSuppliers(
-        node,
-        throwIfNotThere: true,
-      );
+      _addSuppliers(node, throwIfNotThere: true);
     }
 
     _addPreparedNodes(_nodesWithMissedSuppliers);
@@ -373,10 +367,7 @@ class Scm {
   }
 
   // ...........................................................................
-  void _addSuppliers(
-    Node<dynamic> node, {
-    required bool throwIfNotThere,
-  }) {
+  void _addSuppliers(Node<dynamic> node, {required bool throwIfNotThere}) {
     // Collect all suppliers
     final suppliers = <String, Node<dynamic>>{};
     for (final supplierPath in node.bluePrint.suppliers) {
@@ -474,7 +465,6 @@ class Scm {
         _prepareNode(customer);
       }
     }
-
     // Not last insert? Prepare the following inserts
     else {
       bool isLaterInsert = false;
@@ -499,8 +489,9 @@ class Scm {
   // Process fast, when realtime nodes are prepared
 
   void _scheduleProduction() {
-    final schedule =
-        _preparedRealtimeNodesExist ? _scheduleFast : _scheduleNormal;
+    final schedule = _preparedRealtimeNodesExist
+        ? _scheduleFast
+        : _scheduleNormal;
     _scheduleProductionDebouncer.trigger(scheduleTask: schedule);
   }
 
@@ -853,9 +844,7 @@ class Scm {
     // If a replacement is available,
     // link smartNode to replacement
     smartNode.addSmartNodeReplacement(
-      smartNode.bluePrint.connectSupplier(
-        masterNode.path,
-      ),
+      smartNode.bluePrint.connectSupplier(masterNode.path),
     );
 
     // Init suppliers
@@ -875,9 +864,7 @@ class Scm {
   }
 
   // ...........................................................................
-  void _updateSmartNodes(
-    Node<dynamic> node,
-  ) {
+  void _updateSmartNodes(Node<dynamic> node) {
     // Node is a smartNode?
     if (node.isSmartNode) {
       // Add the node to list of smartNodes.

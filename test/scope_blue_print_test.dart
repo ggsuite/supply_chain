@@ -42,9 +42,7 @@ void main() {
               initialProduct: 8,
             ),
             'b': {
-              'c': {
-                'x': 123,
-              },
+              'c': {'x': 123},
             },
             'c': const ScopeBluePrint(key: 'c'),
           },
@@ -66,14 +64,8 @@ void main() {
 
         expect(scopeBluePrint.children.length, 2);
         expect(scopeBluePrint.children.first.key, 'b');
-        expect(
-          scopeBluePrint.children.first.children.length,
-          1,
-        );
-        expect(
-          scopeBluePrint.children.first.children.first.key,
-          'c',
-        );
+        expect(scopeBluePrint.children.first.children.length, 1);
+        expect(scopeBluePrint.children.first.children.first.key, 'c');
         expect(scopeBluePrint.children.last.key, 'c');
 
         expect(
@@ -83,7 +75,13 @@ void main() {
 
         expect(
           scopeBluePrint
-              .children.first.children.first.nodes.first.initialProduct,
+              .children
+              .first
+              .children
+              .first
+              .nodes
+              .first
+              .initialProduct,
           123,
         );
       });
@@ -109,9 +107,7 @@ void main() {
 
       test('should throw when in invalid type is provided', () {
         final json = {
-          'a': {
-            'invalid': List<int>.empty(),
-          },
+          'a': {'invalid': List<int>.empty()},
         };
 
         expect(
@@ -131,9 +127,7 @@ void main() {
 
       test('should assert that the key of a scope and JSON are equal', () {
         final json = {
-          'a': {
-            'key': const ScopeBluePrint(key: 'otherKey'),
-          },
+          'a': {'key': const ScopeBluePrint(key: 'otherKey')},
         };
 
         expect(
@@ -151,69 +145,68 @@ void main() {
 
     group('instantiate(scope)', () {
       group('should instantiate scopes and nodes returned in build()', () {
-        test('when build() returns a list of scope and node overrides',
-            () async {
-          // Create a scope blue print
-          // which overrides the with key nodeConstructedByChildScope
-          const overridenScope = ScopeBluePrint(
-            key: 'childScopeConstructedByParent',
-            nodes: [
-              NodeBluePrint<int>(
-                key: 'nodeConstructedByChildScope',
-                initialProduct: 6,
-              ),
-            ],
-          );
+        test(
+          'when build() returns a list of scope and node overrides',
+          () async {
+            // Create a scope blue print
+            // which overrides the with key nodeConstructedByChildScope
+            const overridenScope = ScopeBluePrint(
+              key: 'childScopeConstructedByParent',
+              nodes: [
+                NodeBluePrint<int>(
+                  key: 'nodeConstructedByChildScope',
+                  initialProduct: 6,
+                ),
+              ],
+            );
 
-          // Instantiate ExampleScopeBluePrint
-          // and override the childScopeConstructedByParent
-          final bluePrint = ExampleScopeBluePrint(
-            children: [
+            // Instantiate ExampleScopeBluePrint
+            // and override the childScopeConstructedByParent
+            final bluePrint = ExampleScopeBluePrint(children: [overridenScope]);
+
+            // Instantiate the scope blue print
+            final rootScope = Scope.root(key: 'root', scm: Scm.example());
+            final scope = bluePrint.instantiate(scope: rootScope);
+
+            // Check if all nodes were instantiated
+            expect(
+              scope.findNode<int>('parentScope.nodeBuiltByParent'),
+              isNotNull,
+            );
+
+            expect(
+              scope.findChildScope('childScopeConstructedByParent')!.bluePrint,
               overridenScope,
-            ],
-          );
+            );
 
-          // Instantiate the scope blue print
-          final rootScope = Scope.root(key: 'root', scm: Scm.example());
-          final scope = bluePrint.instantiate(scope: rootScope);
+            expect(
+              scope.findNode<int>('parentScope.nodeConstructedByParent'),
+              isNotNull,
+            );
 
-          // Check if all nodes were instantiated
-          expect(
-            scope.findNode<int>('parentScope.nodeBuiltByParent'),
-            isNotNull,
-          );
+            // Find nodeBuiltByChildScope
+            expect(
+              scope.findNode<int>(
+                'parentScope.childScopeBuiltByParent.nodeBuiltByChildScope',
+              ),
+              isNotNull,
+            );
 
-          expect(
-            scope.findChildScope('childScopeConstructedByParent')!.bluePrint,
-            overridenScope,
-          );
+            // Find childScopeConstructedByParent
+            expect(
+              scope.findNode<int>(
+                'parentScope.childScopeConstructedByParent.'
+                'nodeConstructedByChildScope',
+              ),
+              isNotNull,
+            );
 
-          expect(
-            scope.findNode<int>('parentScope.nodeConstructedByParent'),
-            isNotNull,
-          );
-
-          // Find nodeBuiltByChildScope
-          expect(
-            scope.findNode<int>(
-              'parentScope.childScopeBuiltByParent.nodeBuiltByChildScope',
-            ),
-            isNotNull,
-          );
-
-          // Find childScopeConstructedByParent
-          expect(
-            scope.findNode<int>(
-              'parentScope.childScopeConstructedByParent.'
-              'nodeConstructedByChildScope',
-            ),
-            isNotNull,
-          );
-
-          // Write image
-          await scope
-              .writeImageFile('test.graphs.example_scope_blue_print.dot');
-        });
+            // Write image
+            await scope.writeImageFile(
+              'test.graphs.example_scope_blue_print.dot',
+            );
+          },
+        );
 
         test('and apply nodesFromConstructor when provided', () {
           const replacedBluePrint = NodeBluePrint<int>(
@@ -224,9 +217,7 @@ void main() {
           final rootScope = Scope.example();
           final scope = ExampleScopeBluePrint(
             nodes: [replacedBluePrint],
-          ).instantiate(
-            scope: rootScope,
-          );
+          ).instantiate(scope: rootScope);
 
           expect(
             scope.findNode<int>('parentScope.nodeBuiltByParent')!.bluePrint,
@@ -262,147 +253,130 @@ void main() {
       });
 
       group('should apply connections', () {
-        test(
-          'and connect direct children to specified suppliers',
-          () {
-            // Create a scope providing a width and a height
-            final wh0Bp = ScopeBluePrint.fromJson({
-              'wh0': {
+        test('and connect direct children to specified suppliers', () {
+          // Create a scope providing a width and a height
+          final wh0Bp = ScopeBluePrint.fromJson({
+            'wh0': {
+              'w': 100,
+              'h': 200,
+              'd': 250, // Not connected
+            },
+          });
+
+          // Create a second scope also providing a width2 and the height2
+          final wh1Bp = ScopeBluePrint.fromJson({
+            'wh1': {'w': 300, 'h': 400, 'd': 450},
+          });
+
+          // Instantiate the second scope and connect the width2 and height2
+          // to the width and height of the first scope.
+          final root = Scope.example();
+          final wh0 = wh0Bp.instantiate(scope: root);
+          final wh1 = wh1Bp.instantiate(
+            scope: root,
+            connect: {
+              'w': 'wh0.w',
+              'h': 'wh0.h',
+              // 'd': 'wh0.d', // Not connected
+            },
+          );
+
+          // Changing width and height should change width2 and height2 too
+          final scm = root.scm;
+          scm.testFlushTasks();
+          final wh0Width = wh0.node<int>('w')!;
+          final wh0Height = wh0.node<int>('h')!;
+          final wh0Depth = wh0.node<int>('d')!;
+          final wh1Width = wh1.node<int>('w')!;
+          final wh1Height = wh1.node<int>('h')!;
+          final wh1Depth = wh1.node<int>('d')!;
+
+          expect(wh0Width.product, 100);
+          expect(wh0Height.product, 200);
+          expect(wh0Depth.product, 250);
+          expect(wh1Width.product, 100);
+          expect(wh1Height.product, 200);
+          expect(
+            wh1Depth.product,
+            450,
+          ); // Not changed because it is not connected
+
+          // Change the width and height of the first scope
+          wh0Width.product = 101;
+          wh0Height.product = 201;
+          scm.testFlushTasks();
+
+          // Check if the width and height of the second scope changed
+          expect(wh1Width.product, 101);
+          expect(wh1Height.product, 201);
+        });
+
+        test('and connect deep children to specified suppliers', () {
+          // Create a scope providing a width and a height
+          final wh0Bp = ScopeBluePrint.fromJson({
+            'wh0': {
+              'child': {
                 'w': 100,
                 'h': 200,
                 'd': 250, // Not connected
               },
-            });
+            },
+          });
 
-            // Create a second scope also providing a width2 and the height2
-            final wh1Bp = ScopeBluePrint.fromJson({
-              'wh1': {
-                'w': 300,
-                'h': 400,
-                'd': 450,
-              },
-            });
+          // Create a second scope also providing a width2 and the height2
+          final wh1Bp = ScopeBluePrint.fromJson({
+            'wh1': {'w': 300, 'h': 400, 'd': 450},
+          });
 
-            // Instantiate the second scope and connect the width2 and height2
-            // to the width and height of the first scope.
-            final root = Scope.example();
-            final wh0 = wh0Bp.instantiate(scope: root);
-            final wh1 = wh1Bp.instantiate(
-              scope: root,
-              connect: {
-                'w': 'wh0.w',
-                'h': 'wh0.h',
-                // 'd': 'wh0.d', // Not connected
-              },
-            );
+          // Instantiate the second scope and connect the width2 and height2
+          // to the width and height of the first scope.
+          final root = Scope.example();
+          final wh0 = wh0Bp.instantiate(scope: root);
+          final wh1 = wh1Bp.instantiate(
+            scope: root,
+            connect: {
+              'w': 'wh0.child.w',
+              'h': 'wh0.child.h',
+              // 'child.d': 'wh0.child.d', // Not connected
+            },
+          );
 
-            // Changing width and height should change width2 and height2 too
-            final scm = root.scm;
-            scm.testFlushTasks();
-            final wh0Width = wh0.node<int>('w')!;
-            final wh0Height = wh0.node<int>('h')!;
-            final wh0Depth = wh0.node<int>('d')!;
-            final wh1Width = wh1.node<int>('w')!;
-            final wh1Height = wh1.node<int>('h')!;
-            final wh1Depth = wh1.node<int>('d')!;
+          // Changing width and height should change width2 and height2 too
+          final scm = root.scm;
+          scm.testFlushTasks();
+          final wh0Width = wh0.findNode<int>('child.w')!;
+          final wh0Height = wh0.findNode<int>('child.h')!;
+          final wh0Depth = wh0.findNode<int>('child.d')!;
+          final wh1Width = wh1.findNode<int>('w')!;
+          final wh1Height = wh1.findNode<int>('h')!;
+          final wh1Depth = wh1.findNode<int>('d')!;
 
-            expect(wh0Width.product, 100);
-            expect(wh0Height.product, 200);
-            expect(wh0Depth.product, 250);
-            expect(wh1Width.product, 100);
-            expect(wh1Height.product, 200);
-            expect(
-              wh1Depth.product,
-              450,
-            ); // Not changed because it is not connected
+          expect(wh0Width.product, 100);
+          expect(wh0Height.product, 200);
+          expect(wh0Depth.product, 250);
+          expect(wh1Width.product, 100);
+          expect(wh1Height.product, 200);
+          expect(
+            wh1Depth.product,
+            450,
+          ); // Not changed because it is not connected
 
-            // Change the width and height of the first scope
-            wh0Width.product = 101;
-            wh0Height.product = 201;
-            scm.testFlushTasks();
+          // Change the width and height of the first scope
+          wh0Width.product = 101;
+          wh0Height.product = 201;
+          scm.testFlushTasks();
 
-            // Check if the width and height of the second scope changed
-            expect(wh1Width.product, 101);
-            expect(wh1Height.product, 201);
-          },
-        );
-
-        test(
-          'and connect deep children to specified suppliers',
-          () {
-            // Create a scope providing a width and a height
-            final wh0Bp = ScopeBluePrint.fromJson({
-              'wh0': {
-                'child': {
-                  'w': 100,
-                  'h': 200,
-                  'd': 250, // Not connected
-                },
-              },
-            });
-
-            // Create a second scope also providing a width2 and the height2
-            final wh1Bp = ScopeBluePrint.fromJson({
-              'wh1': {
-                'w': 300,
-                'h': 400,
-                'd': 450,
-              },
-            });
-
-            // Instantiate the second scope and connect the width2 and height2
-            // to the width and height of the first scope.
-            final root = Scope.example();
-            final wh0 = wh0Bp.instantiate(scope: root);
-            final wh1 = wh1Bp.instantiate(
-              scope: root,
-              connect: {
-                'w': 'wh0.child.w',
-                'h': 'wh0.child.h',
-                // 'child.d': 'wh0.child.d', // Not connected
-              },
-            );
-
-            // Changing width and height should change width2 and height2 too
-            final scm = root.scm;
-            scm.testFlushTasks();
-            final wh0Width = wh0.findNode<int>('child.w')!;
-            final wh0Height = wh0.findNode<int>('child.h')!;
-            final wh0Depth = wh0.findNode<int>('child.d')!;
-            final wh1Width = wh1.findNode<int>('w')!;
-            final wh1Height = wh1.findNode<int>('h')!;
-            final wh1Depth = wh1.findNode<int>('d')!;
-
-            expect(wh0Width.product, 100);
-            expect(wh0Height.product, 200);
-            expect(wh0Depth.product, 250);
-            expect(wh1Width.product, 100);
-            expect(wh1Height.product, 200);
-            expect(
-              wh1Depth.product,
-              450,
-            ); // Not changed because it is not connected
-
-            // Change the width and height of the first scope
-            wh0Width.product = 101;
-            wh0Height.product = 201;
-            scm.testFlushTasks();
-
-            // Check if the width and height of the second scope changed
-            expect(wh1Width.product, 101);
-            expect(wh1Height.product, 201);
-          },
-        );
+          // Check if the width and height of the second scope changed
+          expect(wh1Width.product, 101);
+          expect(wh1Height.product, 201);
+        });
 
         test('and connect a complete scope', () {
           // Create a scope providing a width and a height
           final parentBp = ScopeBluePrint.fromJson({
             'parent': {
               'wh0': {
-                'child': {
-                  'w': 300,
-                  'h': 400,
-                },
+                'child': {'w': 300, 'h': 400},
               },
             },
           });
@@ -410,10 +384,7 @@ void main() {
           // Create another scope providing a width2 and the height2
           final wh1Bp = ScopeBluePrint.fromJson({
             'wh1': {
-              'child': {
-                'w': 700,
-                'h': 800,
-              },
+              'child': {'w': 700, 'h': 800},
             },
           });
 
@@ -458,20 +429,14 @@ void main() {
           // Create a scope providing a width and a height
           final wh0Bp = ScopeBluePrint.fromJson({
             'wh0': {
-              'child': {
-                'w': 300,
-                'h': 400,
-              },
+              'child': {'w': 300, 'h': 400},
             },
           });
 
           // Create another scope providing a width2 and the height2
           final wh1Bp = ScopeBluePrint.fromJson({
             'wh1': {
-              'child': {
-                'w': 700,
-                'h': 800,
-              },
+              'child': {'w': 700, 'h': 800},
             },
           });
 
@@ -482,9 +447,7 @@ void main() {
 
           final wh1 = wh1Bp.instantiate(
             scope: root,
-            connect: {
-              'child': 'wh0.child',
-            },
+            connect: {'child': 'wh0.child'},
           );
 
           // Changing width and height should change width2 and height2 too
@@ -517,10 +480,7 @@ void main() {
             'wh0': {
               'w': 100,
               'h': 200,
-              'child': {
-                'w': 300,
-                'h': 400,
-              },
+              'child': {'w': 300, 'h': 400},
             },
           });
 
@@ -529,10 +489,7 @@ void main() {
             'wh1': {
               'w': 500,
               'h': 600,
-              'child': {
-                'w': 700,
-                'h': 800,
-              },
+              'child': {'w': 700, 'h': 800},
             },
           });
 
@@ -542,10 +499,7 @@ void main() {
           final wh0 = wh0Bp.instantiate(scope: root);
           final wh1 = wh1Bp.instantiate(
             scope: root,
-            connect: {
-              'child.w': 'wh0.child.w',
-              'child.h': 'wh0.child.h',
-            },
+            connect: {'child.w': 'wh0.child.w', 'child.h': 'wh0.child.h'},
           );
 
           // Changing width and height should change width2 and height2 too
@@ -577,18 +531,13 @@ void main() {
             'wh0': {
               'w': 100,
               'h': 200,
-              'child': {
-                'w': 300,
-                'h': 400,
-              },
+              'child': {'w': 300, 'h': 400},
             },
           });
 
           expect(
-            () => wh0Bp.instantiate(
-              scope: Scope.example(),
-              connect: {'x': 'y'},
-            ),
+            () =>
+                wh0Bp.instantiate(scope: Scope.example(), connect: {'x': 'y'}),
             throwsA(
               isA<ArgumentError>().having(
                 (e) => e.toString(),
@@ -611,28 +560,25 @@ void main() {
       });
 
       group('should throw', () {
-        test(
-          'when a smart scope is instantiated in a smart scope',
-          () {
-            final host = Scope.example(smartMaster: ['x', 'y']);
-            const smartScope = ScopeBluePrint(
-              key: 'smartScope',
-              smartMaster: ['x', 'y'],
-            );
-            expect(
-              () => smartScope.instantiate(scope: host),
-              throwsA(
-                isA<ArgumentError>().having(
-                  (e) => e.message,
-                  'message',
-                  contains(
-                    'Smart scopes must not be instantiated in smart scopes.',
-                  ),
+        test('when a smart scope is instantiated in a smart scope', () {
+          final host = Scope.example(smartMaster: ['x', 'y']);
+          const smartScope = ScopeBluePrint(
+            key: 'smartScope',
+            smartMaster: ['x', 'y'],
+          );
+          expect(
+            () => smartScope.instantiate(scope: host),
+            throwsA(
+              isA<ArgumentError>().having(
+                (e) => e.message,
+                'message',
+                contains(
+                  'Smart scopes must not be instantiated in smart scopes.',
                 ),
               ),
-            );
-          },
-        );
+            ),
+          );
+        });
       });
     });
 
@@ -640,9 +586,7 @@ void main() {
       test('should print a simple graph correctly', () async {
         final bluePrint = ScopeBluePrint.example();
         final parentScope = Scope.root(key: 'outer', scm: Scm.example());
-        bluePrint.instantiate(
-          scope: parentScope,
-        );
+        bluePrint.instantiate(scope: parentScope);
 
         await parentScope.writeImageFile('test/graphs/scope_blue_print.dot');
       });
@@ -682,9 +626,7 @@ void main() {
         'a': {
           'n': 0,
           'b': {
-            'c': {
-              'd': 5,
-            },
+            'c': {'d': 5},
           },
         },
       });
@@ -750,12 +692,8 @@ void main() {
             final bluePrint = ScopeBluePrint.fromJson({
               'a': {
                 'k': 0,
-                'b': {
-                  'n': 1,
-                },
-                'c': {
-                  'n': 1,
-                },
+                'b': {'n': 1},
+                'c': {'n': 1},
               },
             });
 
@@ -835,9 +773,7 @@ void main() {
         'a': {
           'n': 0,
           'b': {
-            'c': {
-              'd': 5,
-            },
+            'c': {'d': 5},
           },
         },
       });
@@ -941,10 +877,7 @@ void main() {
           final bluePrint = ScopeBluePrint.example();
           final otherSubScopes = <ScopeBluePrint>[];
           final copy = bluePrint.copyWith(modifiedScopes: otherSubScopes);
-          expect(
-            copy.children,
-            bluePrint.children,
-          );
+          expect(copy.children, bluePrint.children);
         });
 
         test('with the given overrides', () {
@@ -967,8 +900,10 @@ void main() {
 
     group('aliases', () {
       test('should return the aliases of the scope', () {
-        const bluePrint =
-            _ScopeBluePrintWithBuildAliases(key: 'test', aliases: ['hello']);
+        const bluePrint = _ScopeBluePrintWithBuildAliases(
+          key: 'test',
+          aliases: ['hello'],
+        );
         expect(bluePrint.aliases, ['extraAlias', 'hello']);
         expect(bluePrint.buildAliases(), ['extraAlias', 'hello']);
         expect(bluePrint.matchesKey('extraAlias'), isTrue);
@@ -1149,10 +1084,7 @@ void main() {
 
 // #############################################################################
 class _ScopeBluePrintWithBuildAliases extends ScopeBluePrint {
-  const _ScopeBluePrintWithBuildAliases({
-    required super.key,
-    super.aliases,
-  });
+  const _ScopeBluePrintWithBuildAliases({required super.key, super.aliases});
 
   @override
   List<String> buildAliases() {

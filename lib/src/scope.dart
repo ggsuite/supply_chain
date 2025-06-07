@@ -88,25 +88,23 @@ class Scope {
     required this.parent,
     Owner<Scope>? owner,
     required this.isMetaScope,
-  })  : scm = parent!.scm,
-        _owner = owner,
-        assert(
-          bluePrint.key.isCamelCase,
-          // coverage:ignore-start
-          'Key "${bluePrint.key}" must be lower camel case',
-          // coverage:ignore-end
-        ) {
+  }) : scm = parent!.scm,
+       _owner = owner,
+       assert(
+         bluePrint.key.isCamelCase,
+         // coverage:ignore-start
+         'Key "${bluePrint.key}" must be lower camel case',
+         // coverage:ignore-end
+       ) {
     _init();
   }
 
   /// Create a root supply scope having no parent
-  Scope.root({
-    required String key,
-    required this.scm,
-  })  : parent = null,
-        bluePrint = ScopeBluePrint(key: key),
-        assert(key.isCamelCase),
-        isMetaScope = false {
+  Scope.root({required String key, required this.scm})
+    : parent = null,
+      bluePrint = ScopeBluePrint(key: key),
+      assert(key.isCamelCase),
+      isMetaScope = false {
     _init();
   }
 
@@ -114,12 +112,10 @@ class Scope {
   Owner<Scope>? get owner => _owner;
 
   /// Instantiates the scope as a meta scope
-  Scope.metaScope({
-    required String key,
-    required this.parent,
-  })  : scm = parent!.scm,
-        bluePrint = ScopeBluePrint(key: key),
-        isMetaScope = true {
+  Scope.metaScope({required String key, required this.parent})
+    : scm = parent!.scm,
+      bluePrint = ScopeBluePrint(key: key),
+      isMetaScope = true {
     _init(isMetaScope: true);
   }
 
@@ -285,14 +281,8 @@ class Scope {
   }
 
   /// Adds a child scope
-  Scope addChild(
-    ScopeBluePrint bluePrint, {
-    Owner<Scope>? owner,
-  }) {
-    return bluePrint.instantiate(
-      scope: this,
-      owner: owner,
-    );
+  Scope addChild(ScopeBluePrint bluePrint, {Owner<Scope>? owner}) {
+    return bluePrint.instantiate(scope: this, owner: owner);
   }
 
   /// Adds a number of children
@@ -365,10 +355,7 @@ class Scope {
       return existingMetaScope;
     }
 
-    final result = Scope.metaScope(
-      key: key,
-      parent: this,
-    );
+    final result = Scope.metaScope(key: key, parent: this);
     _metaScopes[key] = result;
     return result;
   }
@@ -389,15 +376,9 @@ class Scope {
   Iterable<Node<dynamic>> get nodes => _nodes.values;
 
   /// Returns the own node for a given key or null if not found
-  Node<T>? node<T>(String key) => _findItemInOwnScope<T>(
-        key,
-        [],
-        true,
-        true,
-        false,
-        const [],
-        const [],
-      ) as Node<T>?;
+  Node<T>? node<T>(String key) =>
+      _findItemInOwnScope<T>(key, [], true, true, false, const [], const [])
+          as Node<T>?;
 
   /// Returns the node with key. If not available in scope the node is created.
   Node<T> findOrCreateNode<T>(NodeBluePrint<T> bluePrint) {
@@ -412,10 +393,7 @@ class Scope {
     }
 
     // Create a new node
-    final node = Node<T>(
-      bluePrint: bluePrint,
-      scope: this,
-    );
+    final node = Node<T>(bluePrint: bluePrint, scope: this);
 
     return node;
   }
@@ -452,7 +430,6 @@ class Scope {
       existingNode!.moveCustomersTo(node);
       assert(existingNode.isErased);
     }
-
     // Throw if node with key already exists
     else if (_nodes.containsKey(node.key)) {
       throw ArgumentError(
@@ -539,13 +516,14 @@ class Scope {
     List<Node<T>> excludedNodes = const [],
   }) {
     return _findItem<T>(
-      path,
-      throwIfNotFound: throwIfNotFound,
-      skipInserts: skipInserts,
-      findNodes: true,
-      findScopes: false,
-      excludedNodes: excludedNodes,
-    ) as Node<T>?;
+          path,
+          throwIfNotFound: throwIfNotFound,
+          skipInserts: skipInserts,
+          findNodes: true,
+          findScopes: false,
+          excludedNodes: excludedNodes,
+        )
+        as Node<T>?;
   }
 
   /// Returns the child node but only when it is a direct child
@@ -573,12 +551,13 @@ class Scope {
     bool skipInserts = false,
   }) {
     return _findItem<dynamic>(
-      path,
-      throwIfNotFound: throwIfNotFound,
-      skipInserts: skipInserts,
-      findNodes: false,
-      findScopes: true,
-    ) as Scope?;
+          path,
+          throwIfNotFound: throwIfNotFound,
+          skipInserts: skipInserts,
+          findNodes: false,
+          findScopes: true,
+        )
+        as Scope?;
   }
 
   // ...........................................................................
@@ -593,9 +572,8 @@ class Scope {
   }
 
   /// Retruns the builder with given key or null if not found
-  ScBuilder? builder(String key) => _builders.firstWhereOrNull(
-        (element) => element.bluePrint.key == key,
-      );
+  ScBuilder? builder(String key) =>
+      _builders.firstWhereOrNull((element) => element.bluePrint.key == key);
 
   /// Returns the scope inserts
   List<ScBuilder> get builders => _builders;
@@ -755,22 +733,14 @@ class Scope {
     errors ??= <String>[];
 
     try {
-      _setPreset(
-        preset.values.first as Map<String, dynamic>,
-        path,
-        errors,
-      );
+      _setPreset(preset.values.first as Map<String, dynamic>, path, errors);
     } catch (e) {
       errors.add(e.toString()); // coverage:ignore-line
     }
 
     // Rollback the preset if an error occurs
     if (errors.isNotEmpty) {
-      _setPreset(
-        oldPreset.values.first as Map<String, dynamic>,
-        path,
-        errors,
-      );
+      _setPreset(oldPreset.values.first as Map<String, dynamic>, path, errors);
 
       if (throwOnErrors) {
         throw Exception('Error while applying preset:\n${errors.join('\n')}');
@@ -895,37 +865,27 @@ class Scope {
       // If the entry is a map, create a child scope
       if (value is Map<String, dynamic>) {
         // Read aliases
-        final aliases = key.split('|').map(
-              (e) => e.trim(),
-            );
+        final aliases = key.split('|').map((e) => e.trim());
         final k = aliases.first;
         final a = aliases.skip(1).toList();
 
         // Create the blue print
-        final bluePrint = ScopeBluePrint(
-          key: k,
-          aliases: a,
-        );
-        final child = bluePrint.instantiate(
-          scope: this,
-        );
+        final bluePrint = ScopeBluePrint(key: k, aliases: a);
+        final child = bluePrint.instantiate(scope: this);
 
         // Forward child content to child
         child.mockContent(value);
       }
-
       // If value is a NodeBluePrint, create a child node
       else if (value is NodeBluePrint) {
         assert(value.key == key);
         value.instantiate(scope: this);
       }
-
       // If value is a ScopeBluePrint, instantiate the scope
       else if (value is ScopeBluePrint) {
         assert(value.key == key);
         value.instantiate(scope: this);
       }
-
       // If value is a ScopeBluePrint, instantiate the scope
       else if (value is List) {
         final scope = ScopeBluePrint(key: key).instantiate(scope: this);
@@ -934,36 +894,33 @@ class Scope {
           if (item is ScopeBluePrint) {
             item.instantiate(scope: scope);
           } else {
-            throw ArgumentError(
-              'Lists must only contain ScopeBluePrints.',
-            );
+            throw ArgumentError('Lists must only contain ScopeBluePrints.');
           }
         }
       }
-
       // If value is a basic type, create a node
       else {
         final bluePrint = switch (value.runtimeType) {
           const (int) => NodeBluePrint<int>(
-              key: key,
-              initialProduct: value as int,
-            ),
+            key: key,
+            initialProduct: value as int,
+          ),
           const (double) => NodeBluePrint<double>(
-              initialProduct: value as double,
-              key: key,
-            ),
+            initialProduct: value as double,
+            key: key,
+          ),
           const (String) => NodeBluePrint<String>(
-              initialProduct: value as String,
-              key: key,
-            ),
+            initialProduct: value as String,
+            key: key,
+          ),
           const (bool) => NodeBluePrint<bool>(
-              initialProduct: value as bool,
-              key: key,
-            ),
+            initialProduct: value as bool,
+            key: key,
+          ),
           _ => throw ArgumentError(
-              'Type ${value.runtimeType} not supported. '
-              'Use NodeBluePrint<${value.runtimeType}> instead.',
-            ),
+            'Type ${value.runtimeType} not supported. '
+            'Use NodeBluePrint<${value.runtimeType}> instead.',
+          ),
         };
 
         bluePrint.instantiate(scope: this);
@@ -1002,9 +959,7 @@ class Scope {
   final List<ScBuilder> _builders = [];
 
   // ...........................................................................
-  void _init({
-    bool isMetaScope = false,
-  }) {
+  void _init({bool isMetaScope = false}) {
     _initParent(isMetaScope);
     _initPath();
     _initAliases();
@@ -1051,10 +1006,7 @@ class Scope {
   // ...........................................................................
   void _initOnMetaScope() {
     // Adds a 'on' meta scope providing event suppliers like on.change, etc.
-    Scope.metaScope(
-      key: 'on',
-      parent: this,
-    );
+    Scope.metaScope(key: 'on', parent: this);
   }
 
   // ...........................................................................
@@ -1089,7 +1041,6 @@ class Scope {
     if (!_isEmpty) {
       scm.disposedItems.addScope(this);
     }
-
     // Erase the scope if it has no content anymore
     else {
       _erase();
@@ -1228,8 +1179,9 @@ class Scope {
     // Continue processing
     final keyParts = key.split('.');
     final nodeKey = keyParts.last;
-    final scopePath =
-        findNodes ? keyParts.sublist(0, keyParts.length - 1) : keyParts;
+    final scopePath = findNodes
+        ? keyParts.sublist(0, keyParts.length - 1)
+        : keyParts;
 
     Object? result;
 
@@ -1809,10 +1761,8 @@ class Scope {
 /// An example root scope
 class ExampleScopeRoot extends Scope {
   /// Constructor
-  ExampleScopeRoot({
-    required super.scm,
-    super.key = 'exampleRoot',
-  }) : super.root() {
+  ExampleScopeRoot({required super.scm, super.key = 'exampleRoot'})
+    : super.root() {
     findOrCreateNode(
       NodeBluePrint(
         initialProduct: 0,
@@ -1838,10 +1788,8 @@ class ExampleScopeRoot extends Scope {
 /// An example child scope
 class ExampleChildScope extends Scope {
   /// Constructor
-  ExampleChildScope({
-    required String key,
-    required super.parent,
-  }) : super._private(bluePrint: ScopeBluePrint(key: key), isMetaScope: false) {
+  ExampleChildScope({required String key, required super.parent})
+    : super._private(bluePrint: ScopeBluePrint(key: key), isMetaScope: false) {
     /// Create a node
     findOrCreateNode(
       NodeBluePrint<int>(
@@ -1863,10 +1811,7 @@ class ExampleChildScope extends Scope {
     );
 
     /// Create two example child scopes
-    ExampleGrandChildScope(
-      key: 'grandChildScope',
-      parent: this,
-    );
+    ExampleGrandChildScope(key: 'grandChildScope', parent: this);
   }
 }
 
@@ -1874,21 +1819,14 @@ class ExampleChildScope extends Scope {
 /// An example child scope
 class ExampleGrandChildScope extends Scope {
   /// Constructor
-  ExampleGrandChildScope({
-    required String key,
-    required super.parent,
-  }) : super._private(
-          bluePrint: ScopeBluePrint(key: key),
-          isMetaScope: false,
-        ) {
+  ExampleGrandChildScope({required String key, required super.parent})
+    : super._private(bluePrint: ScopeBluePrint(key: key), isMetaScope: false) {
     findOrCreateNode(
       NodeBluePrint(
         initialProduct: 0,
         produce: (components, previous) => previous + 1,
         key: 'grandChildNodeA',
-        suppliers: [
-          'rootA',
-        ],
+        suppliers: ['rootA'],
       ),
     );
   }

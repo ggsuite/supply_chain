@@ -10,7 +10,7 @@ import 'package:supply_chain/supply_chain.dart';
 class GraphToMermaid {
   /// Constructor
   GraphToMermaid({required this.graph, this.indent = 2})
-      : _baseIndent = ' ' * indent;
+    : _baseIndent = ' ' * indent;
 
   /// The graph to be converted
   final GraphScopeItem graph;
@@ -61,9 +61,7 @@ class GraphToMermaid {
   final String _baseIndent;
 
   // ...........................................................................
-  String _mermaidEdges(
-    GraphScopeItem scopeItem,
-  ) {
+  String _mermaidEdges(GraphScopeItem scopeItem) {
     var result = '';
 
     // Write dependencies

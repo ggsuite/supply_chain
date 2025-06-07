@@ -36,11 +36,15 @@ void main() {
         // added after the builder was instantiated.
         // Lets add another two int nodes to scope  and c:
         // Both nodes should deliver 42 because the customer is applied
-        final g = const NodeBluePrint<int>(key: 'g', initialProduct: 7)
-            .instantiate(scope: scope);
+        final g = const NodeBluePrint<int>(
+          key: 'g',
+          initialProduct: 7,
+        ).instantiate(scope: scope);
 
-        final h = const NodeBluePrint<int>(key: 'h', initialProduct: 8)
-            .instantiate(scope: c);
+        final h = const NodeBluePrint<int>(
+          key: 'h',
+          initialProduct: 8,
+        ).instantiate(scope: c);
 
         scope.scm.testFlushTasks();
         expect(g.product, 42);

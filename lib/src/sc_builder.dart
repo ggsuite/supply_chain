@@ -11,11 +11,7 @@ import 'package:supply_chain/supply_chain.dart';
 /// Realizes a builder
 class ScBuilder {
   /// Instante of a builder blue print
-  ScBuilder({
-    required this.bluePrint,
-    required this.scope,
-    this.parent,
-  }) {
+  ScBuilder({required this.bluePrint, required this.scope, this.parent}) {
     _init();
     applyToScope(scope);
     instances.add(this);
@@ -91,8 +87,9 @@ class ScBuilder {
   late final ScBuilderScopeAdder scopeAdder;
 
   /// This scope is used to perform checks
-  static final testScope =
-      Scope.example(key: 'scBuilderTestScope${Random().nextInt(1000)}');
+  static final testScope = Scope.example(
+    key: 'scBuilderTestScope${Random().nextInt(1000)}',
+  );
 
   // ######################
   // Private
@@ -120,9 +117,7 @@ class ScBuilder {
 
     scope.addScBuilder(this);
 
-    _dispose.add(
-      () => scope.removeScBuilder(this),
-    );
+    _dispose.add(() => scope.removeScBuilder(this));
   }
 
   void _initInserts() {
@@ -150,13 +145,11 @@ class ScBuilder {
       _children.add(child.instantiate(scope: scope, parent: this));
     }
 
-    _dispose.add(
-      () {
-        for (var child in [..._children]) {
-          child.dispose();
-        }
-      },
-    );
+    _dispose.add(() {
+      for (var child in [..._children]) {
+        child.dispose();
+      }
+    });
   }
 
   // ...........................................................................
@@ -174,17 +167,13 @@ class ScBuilder {
       key: '${bluePrint.key}NeedsUpdate',
       suppliers: bluePrint.needsUpdateSuppliers,
       initialProduct: null,
-      produce: (components, previousProduct) => bluePrint.needsUpdate(
-        hostScope: scope,
-        components: components,
-      ),
+      produce: (components, previousProduct) =>
+          bluePrint.needsUpdate(hostScope: scope, components: components),
     );
 
     // Instantiate the blue print within host scospe
     final onChangeNode = needsUpdate.instantiate(scope: buildersMetaScope);
 
-    _dispose.add(
-      () => onChangeNode.dispose(),
-    );
+    _dispose.add(() => onChangeNode.dispose());
   }
 }

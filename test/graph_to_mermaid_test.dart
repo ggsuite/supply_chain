@@ -14,16 +14,11 @@ import 'test_graphs.dart';
 void main() {
   late TestGraphs t;
 
-  setUp(
-    () {
-      t = TestGraphs();
-    },
-  );
+  setUp(() {
+    t = TestGraphs();
+  });
 
-  Future<void> writeFile(
-    String mermaid,
-    String postfix,
-  ) async {
+  Future<void> writeFile(String mermaid, String postfix) async {
     final path = 'test/graphs/graph_test_$postfix.mmd';
     await File(path).writeAsString(mermaid);
   }
@@ -43,15 +38,9 @@ void main() {
     final expectedScopeKeys = scopes.map((s) => s.key);
     for (final k in t.allScopeKeys) {
       if (expectedScopeKeys.contains(k)) {
-        expect(
-          mermaid,
-          contains('["$k"]'),
-        );
+        expect(mermaid, contains('["$k"]'));
       } else {
-        expect(
-          mermaid,
-          isNot(contains('["$k"]')),
-        );
+        expect(mermaid, isNot(contains('["$k"]')));
       }
     }
   }
@@ -75,9 +64,8 @@ void main() {
   ) {
     final expectedKeys = highlightedNodes.map((n) => n.key);
 
-    RegExp regExp(String key) => RegExp(
-          '\\s+${key}_\\d+\\["$key"\\]:::highlight',
-        );
+    RegExp regExp(String key) =>
+        RegExp('\\s+${key}_\\d+\\["$key"\\]:::highlight');
 
     for (final key in t.allNodeKeys) {
       if (expectedKeys.contains(key)) {
@@ -96,10 +84,7 @@ void main() {
             scope: t.x.scope,
             children: [],
             nodeItems: [
-              GraphNodeItem(
-                node: t.x.scm.nodes.first,
-                shownCustomers: [],
-              ),
+              GraphNodeItem(node: t.x.scm.nodes.first, shownCustomers: []),
             ],
           ),
           throwsA(
@@ -127,10 +112,7 @@ void main() {
   group('GraphNodeItem', () {
     group('toString', () {
       test('should return the node.key', () {
-        final item = GraphNodeItem(
-          node: t.x,
-          shownCustomers: [],
-        );
+        final item = GraphNodeItem(node: t.x, shownCustomers: []);
         expect(item.toString(), t.x.key);
       });
     });
@@ -140,22 +122,19 @@ void main() {
     group('tree, mermaid', () {
       group('treeForNode', () {
         group('should print a node', () {
-          test(
-            'with no suppliers and customers',
-            () async {
-              // Create the tree
-              final tree = t.graph.treeForNode(node: t.x);
+          test('with no suppliers and customers', () async {
+            // Create the tree
+            final tree = t.graph.treeForNode(node: t.x);
 
-              // Create mermaid
-              final mermaid = t.graph.mermaid(tree: tree);
-              await writeFile(mermaid, '01');
+            // Create mermaid
+            final mermaid = t.graph.mermaid(tree: tree);
+            await writeFile(mermaid, '01');
 
-              // Check mermaid
-              expectNodes(mermaid, [t.x]);
-              expectScopes(mermaid, [t.level0]);
-              expectEdgeCount(mermaid, 0);
-            },
-          );
+            // Check mermaid
+            expectNodes(mermaid, [t.x]);
+            expectScopes(mermaid, [t.level0]);
+            expectEdgeCount(mermaid, 0);
+          });
 
           group('with direct suppliers', () {
             test('when supplierDepth == 1', () async {
@@ -307,101 +286,89 @@ void main() {
           });
 
           group('with one parent scope', () {
-            test(
-              'when parentScopeDepth == 1',
-              () async {
-                // Create the tree
-                final l1 = t.graph.treeForScope(
-                  scope: t.level0,
-                  parentScopeDepth: 1,
-                );
+            test('when parentScopeDepth == 1', () async {
+              // Create the tree
+              final l1 = t.graph.treeForScope(
+                scope: t.level0,
+                parentScopeDepth: 1,
+              );
 
-                // Create mermaid
-                final mermaid = t.graph.mermaid(tree: l1);
-                await writeFile(mermaid, '09');
+              // Create mermaid
+              final mermaid = t.graph.mermaid(tree: l1);
+              await writeFile(mermaid, '09');
 
-                // Check mermaid
-                expectNodes(mermaid, [t.x, t.s1, t.s0, t.c0, t.c1]);
-                expectScopes(mermaid, [t.level0, t.level1]);
-                expectEdgeCount(mermaid, 4);
-                expectEdge(mermaid, t.s1, t.x);
-                expectEdge(mermaid, t.s0, t.x);
-                expectEdge(mermaid, t.x, t.c0);
-                expectEdge(mermaid, t.x, t.c1);
-              },
-            );
+              // Check mermaid
+              expectNodes(mermaid, [t.x, t.s1, t.s0, t.c0, t.c1]);
+              expectScopes(mermaid, [t.level0, t.level1]);
+              expectEdgeCount(mermaid, 4);
+              expectEdge(mermaid, t.s1, t.x);
+              expectEdge(mermaid, t.s0, t.x);
+              expectEdge(mermaid, t.x, t.c0);
+              expectEdge(mermaid, t.x, t.c1);
+            });
           });
 
           group('with one child scope', () {
-            test(
-              'when childScopeDepth == 1',
-              () async {
-                // Create the tree
-                final l1 = t.graph.treeForScope(
-                  scope: t.level1,
-                  childScopeDepth: 1,
-                );
+            test('when childScopeDepth == 1', () async {
+              // Create the tree
+              final l1 = t.graph.treeForScope(
+                scope: t.level1,
+                childScopeDepth: 1,
+              );
 
-                // Create mermaid
-                final mermaid = t.graph.mermaid(tree: l1);
-                await writeFile(mermaid, '10');
+              // Create mermaid
+              final mermaid = t.graph.mermaid(tree: l1);
+              await writeFile(mermaid, '10');
 
-                // Check mermaid
-                expectNodes(mermaid, [t.x, t.s1, t.s0, t.c0, t.c1]);
-                expectScopes(mermaid, [t.level0, t.level1]);
-                expectEdgeCount(mermaid, 4);
-                expectEdge(mermaid, t.s1, t.x);
-                expectEdge(mermaid, t.s0, t.x);
-                expectEdge(mermaid, t.x, t.c0);
-                expectEdge(mermaid, t.x, t.c1);
-              },
-            );
+              // Check mermaid
+              expectNodes(mermaid, [t.x, t.s1, t.s0, t.c0, t.c1]);
+              expectScopes(mermaid, [t.level0, t.level1]);
+              expectEdgeCount(mermaid, 4);
+              expectEdge(mermaid, t.s1, t.x);
+              expectEdge(mermaid, t.s0, t.x);
+              expectEdge(mermaid, t.x, t.c0);
+              expectEdge(mermaid, t.x, t.c1);
+            });
           });
 
           group('with all parent scopes', () {
-            test(
-              'when parentScopeDepth == -1',
-              () async {
-                // Create the tree
-                final root = t.graph.treeForScope(
-                  scope: t.level0,
-                  parentScopeDepth: -1,
-                );
+            test('when parentScopeDepth == -1', () async {
+              // Create the tree
+              final root = t.graph.treeForScope(
+                scope: t.level0,
+                parentScopeDepth: -1,
+              );
 
-                // Create mermaid
-                final mermaid = t.graph.mermaid(tree: root);
-                await writeFile(mermaid, '11');
+              // Create mermaid
+              final mermaid = t.graph.mermaid(tree: root);
+              await writeFile(mermaid, '11');
 
-                //// Check mermaid
-                expectNodes(mermaid, t.allNodes);
-                expectScopes(mermaid, [...t.allScopes, t.level0.root]);
-                expectEdgeCount(mermaid, 14);
-              },
-            );
+              //// Check mermaid
+              expectNodes(mermaid, t.allNodes);
+              expectScopes(mermaid, [...t.allScopes, t.level0.root]);
+              expectEdgeCount(mermaid, 14);
+            });
           });
 
           group('with all child scopes', () {
-            test(
-              'when childScopeDepth == -1',
-              () async {
-                final start = t.level0.root.children.first;
+            test('when childScopeDepth == -1', () async {
+              final start = t.level0.root.children.first;
 
-                // Create the tree
-                final root = t.graph.treeForScope(
-                  scope: start,
-                  childScopeDepth: -1,
-                );
+              // Create the tree
+              final root = t.graph.treeForScope(
+                scope: start,
+                childScopeDepth: -1,
+              );
 
-                // Create mermaid
-                final mermaid = t.graph.mermaid(tree: root);
-                await writeFile(mermaid, '12');
+              // Create mermaid
+              final mermaid = t.graph.mermaid(tree: root);
+              await writeFile(mermaid, '12');
 
-                //// Check mermaid
-                expectNodes(mermaid, t.allNodes);
-                expectScopes(mermaid, t.allScopes);
-                expectEdgeCount(mermaid, 14);
-              },
-            );
+              //// Check mermaid
+              expectNodes(mermaid, t.allNodes);
+              expectScopes(mermaid, t.allScopes);
+              expectEdgeCount(mermaid, 14);
+            });
           });
         });
 
@@ -439,13 +406,11 @@ void main() {
             // Create a scope hierarchy without nodes
 
             final scopesWithoutNodes = Scope.example()
-              ..mockContent(
-                {
-                  'a': {
-                    'b': {'c': <String, dynamic>{}},
-                  },
+              ..mockContent({
+                'a': {
+                  'b': {'c': <String, dynamic>{}},
                 },
-              );
+              });
 
             // Create a graph
             final graphNode = t.graph.treeForScope(
@@ -472,27 +437,18 @@ void main() {
               scope: emptyScope,
               childScopeDepth: -1,
             );
-            final mermaid = t.graph.mermaid(
-              tree: tree,
-            );
+            final mermaid = t.graph.mermaid(tree: tree);
             await writeFile(mermaid, '13');
           });
 
           test('multiple', () async {
             final a = Scope.example(key: 'a');
             a.mockContent({
-              'b': {
-                'c': <String, dynamic>{},
-              },
+              'b': {'c': <String, dynamic>{}},
             });
 
-            final tree = t.graph.treeForScope(
-              scope: a,
-              childScopeDepth: -1,
-            );
-            final mermaid = t.graph.mermaid(
-              tree: tree,
-            );
+            final tree = t.graph.treeForScope(scope: a, childScopeDepth: -1);
+            final mermaid = t.graph.mermaid(tree: tree);
             await writeFile(mermaid, '14');
           });
         });
@@ -532,28 +488,18 @@ void main() {
           });
 
           test('sibling node as customer', () async {
-            final tree = t.graph.treeForNode(
-              node: leftNode,
-              customerDepth: 1,
-            );
+            final tree = t.graph.treeForNode(node: leftNode, customerDepth: 1);
 
             // Create mermaid
-            final mermaid = t.graph.mermaid(
-              tree: tree,
-            );
+            final mermaid = t.graph.mermaid(tree: tree);
             await writeFile(mermaid, '16');
           });
 
           test('sibling node as supplier', () async {
-            final tree = t.graph.treeForNode(
-              node: rightNode,
-              supplierDepth: 1,
-            );
+            final tree = t.graph.treeForNode(node: rightNode, supplierDepth: 1);
 
             // Create mermaid
-            final mermaid = t.graph.mermaid(
-              tree: tree,
-            );
+            final mermaid = t.graph.mermaid(tree: tree);
             await writeFile(mermaid, '17');
           });
         });

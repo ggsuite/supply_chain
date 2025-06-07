@@ -55,15 +55,11 @@ void main() {
           addNodes: ({required Scope hostScope}) => [resultNode],
           replaceNode: ({required hostScope, required nodeToBeReplaced}) =>
               resultNode,
-          inserts: ({required Node<dynamic> hostNode}) => [
-            resultNode,
-          ],
-          needsUpdate: ({
-            required Scope hostScope,
-            required List<dynamic> components,
-          }) {
-            didCallNeedsUpdate = true;
-          },
+          inserts: ({required Node<dynamic> hostNode}) => [resultNode],
+          needsUpdate:
+              ({required Scope hostScope, required List<dynamic> components}) {
+                didCallNeedsUpdate = true;
+              },
         );
 
         expect(builder.addScopes(hostScope: Scope.example()), [resultScope]);
@@ -76,10 +72,7 @@ void main() {
           resultScope,
         );
 
-        expect(
-          builder.addNodes(hostScope: hostScope),
-          [resultNode],
-        );
+        expect(builder.addNodes(hostScope: hostScope), [resultNode]);
 
         expect(
           builder.replaceNode(
@@ -89,15 +82,11 @@ void main() {
           resultNode,
         );
 
-        expect(
-          builder.inserts(hostNode: Node.example(scope: hostScope)),
-          [resultNode],
-        );
+        expect(builder.inserts(hostNode: Node.example(scope: hostScope)), [
+          resultNode,
+        ]);
 
-        builder.needsUpdate(
-          hostScope: hostScope,
-          components: [1, 2, 3],
-        );
+        builder.needsUpdate(hostScope: hostScope, components: [1, 2, 3]);
         expect(didCallNeedsUpdate, isTrue);
       });
     });
@@ -183,15 +172,9 @@ void main() {
           () {},
         );
 
-        group(
-          'should throw',
-          () {
-            test(
-              'if there are customers relying on the scope',
-              () {},
-            );
-          },
-        );
+        group('should throw', () {
+          test('if there are customers relying on the scope', () {});
+        });
       });
     });
 
@@ -226,25 +209,19 @@ void main() {
 
       group('dispose', () {
         test('should remove all added nodes', () {});
-        test(
-          'should remove all added nodes',
-          () {},
-        );
+        test('should remove all added nodes', () {});
 
         test(
           'should re-replace all replaced nodes by its original nodes',
           () {},
         );
 
-        group(
-          'should throw',
-          () {
-            test(
-              'if there are customers relying on the nodes to be removed',
-              () {},
-            );
-          },
-        );
+        group('should throw', () {
+          test(
+            'if there are customers relying on the nodes to be removed',
+            () {},
+          );
+        });
       });
     });
     group('inserts', () {
@@ -289,10 +266,12 @@ void main() {
                 isA<UnimplementedError>().having(
                   (e) => e.message,
                   'message',
-                  contains('Please either specify shouldProcessChildren '
-                      'constructor parameter or override '
-                      'shouldProcessChildren method in your '
-                      'class derived from ScBuilderBluePrint.'),
+                  contains(
+                    'Please either specify shouldProcessChildren '
+                    'constructor parameter or override '
+                    'shouldProcessChildren method in your '
+                    'class derived from ScBuilderBluePrint.',
+                  ),
                 ),
               ),
             );
@@ -303,47 +282,45 @@ void main() {
 
     group('shouldProcessScope(scope), shouldProcessChildren(scope)', () {
       group('should throw', () {
-        test(
-          'when shouldProcessScope is not derived or specified '
-          'by constructor / derived class',
-          () {
-            const builder = ScBuilderBluePrint(key: 'test');
-            expect(
-              () => builder.shouldProcessScope(hostScope),
-              throwsA(
-                isA<UnimplementedError>().having(
-                  (e) => e.message,
-                  'message',
-                  contains('Please either specify shouldProcessScope '
-                      'constructor parameter or override '
-                      'shouldProcessScope method in your '
-                      'class derived from ScBuilderBluePrint.'),
+        test('when shouldProcessScope is not derived or specified '
+            'by constructor / derived class', () {
+          const builder = ScBuilderBluePrint(key: 'test');
+          expect(
+            () => builder.shouldProcessScope(hostScope),
+            throwsA(
+              isA<UnimplementedError>().having(
+                (e) => e.message,
+                'message',
+                contains(
+                  'Please either specify shouldProcessScope '
+                  'constructor parameter or override '
+                  'shouldProcessScope method in your '
+                  'class derived from ScBuilderBluePrint.',
                 ),
               ),
-            );
-          },
-        );
+            ),
+          );
+        });
 
-        test(
-          'when shouldProcessChildren is not derived or specified '
-          'by constructor / derived class',
-          () {
-            const builder = ScBuilderBluePrint(key: 'test');
-            expect(
-              () => builder.shouldProcessChildren(hostScope),
-              throwsA(
-                isA<UnimplementedError>().having(
-                  (e) => e.message,
-                  'message',
-                  contains('Please either specify shouldProcessChildren '
-                      'constructor parameter or override '
-                      'shouldProcessChildren method in your '
-                      'class derived from ScBuilderBluePrint.'),
+        test('when shouldProcessChildren is not derived or specified '
+            'by constructor / derived class', () {
+          const builder = ScBuilderBluePrint(key: 'test');
+          expect(
+            () => builder.shouldProcessChildren(hostScope),
+            throwsA(
+              isA<UnimplementedError>().having(
+                (e) => e.message,
+                'message',
+                contains(
+                  'Please either specify shouldProcessChildren '
+                  'constructor parameter or override '
+                  'shouldProcessChildren method in your '
+                  'class derived from ScBuilderBluePrint.',
                 ),
               ),
-            );
-          },
-        );
+            ),
+          );
+        });
       });
 
       group('should only process nodes matching the specified fillter', () {
@@ -376,9 +353,7 @@ void main() {
           scope.mockContent({
             'n0': 0,
             'c0': {
-              'c1': {
-                'n2': 2,
-              },
+              'c1': {'n2': 2},
             },
           });
 
@@ -404,10 +379,7 @@ void main() {
               replaceNodeCalls.add(nodeToBeReplaced.key);
               return nodeToBeReplaced.bluePrint;
             },
-            replaceScope: ({
-              required hostScope,
-              required scopeToBeReplaced,
-            }) {
+            replaceScope: ({required hostScope, required scopeToBeReplaced}) {
               replaceScopeCalls.add(hostScope.key);
               return scopeToBeReplaced;
             },
@@ -416,48 +388,50 @@ void main() {
           builder.scope.scm.testFlushTasks();
         }
 
-        group('with shouldProcessScope and shouldProcessChildren configured',
-            () {
-          test('to process all scopes and nodes', () {
-            init(
-              shouldProcessScope: (scope) => true,
-              shouldProcessChildren: (scope) => true,
-            );
+        group(
+          'with shouldProcessScope and shouldProcessChildren configured',
+          () {
+            test('to process all scopes and nodes', () {
+              init(
+                shouldProcessScope: (scope) => true,
+                shouldProcessChildren: (scope) => true,
+              );
 
-            expect(shouldProcessScopeCalls, ['example', 'c0', 'c1']);
-            expect(addNodesCalls, [t, 'example', 'c0', 'c1']);
-            expect(addScopesCalls, [t, 'example', 'c0', 'c1']);
-            expect(replaceNodeCalls, ['n0', 'n2']);
-            expect(replaceScopeCalls, <String>[]); // Not yet implemented
-          });
+              expect(shouldProcessScopeCalls, ['example', 'c0', 'c1']);
+              expect(addNodesCalls, [t, 'example', 'c0', 'c1']);
+              expect(addScopesCalls, [t, 'example', 'c0', 'c1']);
+              expect(replaceNodeCalls, ['n0', 'n2']);
+              expect(replaceScopeCalls, <String>[]); // Not yet implemented
+            });
 
-          test('to process only c1', () {
-            init(
-              shouldProcessScope: (scope) => scope.key == 'c1',
-              shouldProcessChildren: (scope) =>
-                  const ['example', 'c0'].contains(scope.key),
-            );
+            test('to process only c1', () {
+              init(
+                shouldProcessScope: (scope) => scope.key == 'c1',
+                shouldProcessChildren: (scope) =>
+                    const ['example', 'c0'].contains(scope.key),
+              );
 
-            expect(shouldProcessScopeCalls, ['example', 'c0', 'c1']);
-            expect(addNodesCalls, [t, 'c1']);
-            expect(addScopesCalls, [t, 'c1']);
-            expect(replaceNodeCalls, ['n2']);
-            expect(replaceScopeCalls, <String>[]); // Not yet implemented
-          });
+              expect(shouldProcessScopeCalls, ['example', 'c0', 'c1']);
+              expect(addNodesCalls, [t, 'c1']);
+              expect(addScopesCalls, [t, 'c1']);
+              expect(replaceNodeCalls, ['n2']);
+              expect(replaceScopeCalls, <String>[]); // Not yet implemented
+            });
 
-          test('to process only n0', () {
-            init(
-              shouldProcessChildren: (scope) => false,
-              shouldProcessScope: (scope) => scope.key == 'example',
-            );
+            test('to process only n0', () {
+              init(
+                shouldProcessChildren: (scope) => false,
+                shouldProcessScope: (scope) => scope.key == 'example',
+              );
 
-            expect(shouldProcessScopeCalls, ['example']);
-            expect(addNodesCalls, [t, 'example']);
-            expect(addScopesCalls, [t, 'example']);
-            expect(replaceNodeCalls, ['n0']);
-            expect(replaceScopeCalls, <String>[]); // Not yet implemented
-          });
-        });
+              expect(shouldProcessScopeCalls, ['example']);
+              expect(addNodesCalls, [t, 'example']);
+              expect(addScopesCalls, [t, 'example']);
+              expect(replaceNodeCalls, ['n0']);
+              expect(replaceScopeCalls, <String>[]); // Not yet implemented
+            });
+          },
+        );
       });
     });
   });

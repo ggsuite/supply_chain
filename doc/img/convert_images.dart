@@ -12,8 +12,12 @@ void main() {
     final svgFilePath = dotFilePath.replaceAll('.dot', '.dot');
 
     // Run the 'dot' command to convert .dot to .dot
-    final process =
-        Process.runSync('dot', ['-Tsvg', dotFilePath, '-o', svgFilePath]);
+    final process = Process.runSync('dot', [
+      '-Tsvg',
+      dotFilePath,
+      '-o',
+      svgFilePath,
+    ]);
 
     if (process.exitCode == 0) {
       print('Converted $dotFilePath to $svgFilePath');
@@ -26,8 +30,8 @@ void main() {
 // ...........................................................................
 String? projectRoot() {
   var result = Directory.current;
-  while (
-      result.path != '/' && !File('${result.path}/pubspec.yaml').existsSync()) {
+  while (result.path != '/' &&
+      !File('${result.path}/pubspec.yaml').existsSync()) {
     result = result.parent;
   }
 

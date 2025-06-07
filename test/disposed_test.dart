@@ -43,67 +43,55 @@ void main() {
     disposed = Disposed.example;
     scm = disposed.scm;
     scope = Scope.example(scm: scm);
-    scope.mockContent(
-      {
-        // .........................
-        // Single node
-        'sSingle': {
-          'single': 0,
-        },
+    scope.mockContent({
+      // .........................
+      // Single node
+      'sSingle': {'single': 0},
 
-        // .........................
-        // Single connection a -> b
-        'sA': {
-          'a': 0,
-        },
-        'sB': {
-          'b': NodeBluePrint.map(
-            supplier: 'sA.a',
-            toKey: 'b',
-            initialProduct: 0,
-          ),
-        },
+      // .........................
+      // Single connection a -> b
+      'sA': {'a': 0},
+      'sB': {
+        'b': NodeBluePrint.map(supplier: 'sA.a', toKey: 'b', initialProduct: 0),
+      },
 
-        // ...............................................
-        // connection supplier -> intermediate -> customer
-        // Create a supplier node
-        's0': {
-          's1': {
-            's2': {
-              'supplier': 0,
-            },
-          },
+      // ...............................................
+      // connection supplier -> intermediate -> customer
+      // Create a supplier node
+      's0': {
+        's1': {
+          's2': {'supplier': 0},
         },
+      },
 
-        // Create a intermeidate node with a supplier
-        // forwarding its product to the customer node.
-        'i0': {
-          'i1': {
-            'i2': {
-              'intermediate': NodeBluePrint.map(
-                supplier: 's0.s1.s2.supplier',
-                toKey: 'intermediate',
-                initialProduct: 0,
-              ),
-            },
-          },
-        },
-
-        // Create a customer node that receives the product from the
-        // intermediate node.
-        'c0': {
-          'c1': {
-            'c2': {
-              'customer': NodeBluePrint.map(
-                supplier: 'i0.i1.i2.intermediate',
-                toKey: 'customer',
-                initialProduct: 0,
-              ),
-            },
+      // Create a intermeidate node with a supplier
+      // forwarding its product to the customer node.
+      'i0': {
+        'i1': {
+          'i2': {
+            'intermediate': NodeBluePrint.map(
+              supplier: 's0.s1.s2.supplier',
+              toKey: 'intermediate',
+              initialProduct: 0,
+            ),
           },
         },
       },
-    );
+
+      // Create a customer node that receives the product from the
+      // intermediate node.
+      'c0': {
+        'c1': {
+          'c2': {
+            'customer': NodeBluePrint.map(
+              supplier: 'i0.i1.i2.intermediate',
+              toKey: 'customer',
+              initialProduct: 0,
+            ),
+          },
+        },
+      },
+    });
 
     scm.testFlushTasks();
     s0 = scope.findScope('s0')!;
@@ -244,8 +232,7 @@ void main() {
           });
         });
 
-        group(
-            'dispose scope containing single node '
+        group('dispose scope containing single node '
             'without customers and suppliers', () {
           test('erases the scope and the node immediately', () {
             c2.dispose();
@@ -312,8 +299,7 @@ void main() {
           });
 
           group('and recreate scope node a', () {
-            test(
-                'should undispose scope sA '
+            test('should undispose scope sA '
                 'and remove old node a from disposed nodes', () {
               sA.dispose();
               expect(disposed.scopes, [sA]);
@@ -344,8 +330,7 @@ void main() {
 
       group('connection supplier -> intermediate -> customer', () {
         group('dispose supplier', () {
-          test(
-              'does not erase supplier '
+          test('does not erase supplier '
               'because supplier is supplier of intermediate', () {
             supplier.dispose();
             expect(supplier.isDisposed, isTrue);
@@ -366,8 +351,7 @@ void main() {
         });
 
         group('dispose intermediate', () {
-          test(
-              'does not erase customer '
+          test('does not erase customer '
               'because intermediate is supplier of customer', () {
             intermediate.dispose();
             expect(intermediate.isDisposed, isTrue);
@@ -404,77 +388,79 @@ void main() {
         late Scope panel;
         late Node<int> cornerCount;
 
-        setUp(
-          () {
-            // Create a panels scope
-            // The scope contains a number of corners node
-            panel = Scope.example(key: 'panel');
-            cornerCount =
-                const NodeBluePrint<int>(key: 'cornerCount', initialProduct: 2)
-                    .instantiate(scope: panel);
+        setUp(() {
+          // Create a panels scope
+          // The scope contains a number of corners node
+          panel = Scope.example(key: 'panel');
+          cornerCount = const NodeBluePrint<int>(
+            key: 'cornerCount',
+            initialProduct: 2,
+          ).instantiate(scope: panel);
 
-            // Create a first builder that adds a corners scope to the panel
-            // scope containing one corner scope and node for each corner.
-            final cornersBuilder = ScBuilderBluePrint(
-              key: 'corners',
-              shouldProcessChildren: (scope) => scope != panel,
-              shouldProcessScope: (scope) => true,
-              needsUpdateSuppliers: ['cornerCount'],
-              needsUpdate: ({required components, required hostScope}) {
-                // Remove old corners scope
-                hostScope.child('corners')?.dispose();
+          // Create a first builder that adds a corners scope to the panel
+          // scope containing one corner scope and node for each corner.
+          final cornersBuilder = ScBuilderBluePrint(
+            key: 'corners',
+            shouldProcessChildren: (scope) => scope != panel,
+            shouldProcessScope: (scope) => true,
+            needsUpdateSuppliers: ['cornerCount'],
+            needsUpdate: ({required components, required hostScope}) {
+              // Remove old corners scope
+              hostScope.child('corners')?.dispose();
 
-                // Add a new corners scope
-                final cornersScope = const ScopeBluePrint(key: 'corners')
-                    .instantiate(scope: hostScope);
+              // Add a new corners scope
+              final cornersScope = const ScopeBluePrint(
+                key: 'corners',
+              ).instantiate(scope: hostScope);
 
-                // Add a subscope and a node for each corner
-                final [int cornerCount] = components;
-                for (int i = 0; i < cornerCount; i++) {
-                  final cornerScope =
-                      ScopeBluePrint(key: 'corner$i').instantiate(
-                    scope: cornersScope,
-                  );
-                  NodeBluePrint<int>(key: 'cValue', initialProduct: i)
-                      .instantiate(scope: cornerScope);
-                }
-              },
-            )..instantiate(scope: panel);
+              // Add a subscope and a node for each corner
+              final [int cornerCount] = components;
+              for (int i = 0; i < cornerCount; i++) {
+                final cornerScope = ScopeBluePrint(
+                  key: 'corner$i',
+                ).instantiate(scope: cornersScope);
+                NodeBluePrint<int>(
+                  key: 'cValue',
+                  initialProduct: i,
+                ).instantiate(scope: cornerScope);
+              }
+            },
+          )..instantiate(scope: panel);
 
-            // Create a second builder that adds a faces scope to the panel
-            // scope containing one face for each corner.
-            // Each face has a node referencing to the corner node.
-            final panelBuilder = ScBuilderBluePrint(
-              key: 'panel',
-              shouldProcessChildren: (scope) => scope != panel,
-              shouldProcessScope: (scope) => true,
-              needsUpdateSuppliers: ['cornerCount'],
-              needsUpdate: ({required components, required hostScope}) {
-                // Remove old faces scope
-                hostScope.child('faces')?.dispose();
+          // Create a second builder that adds a faces scope to the panel
+          // scope containing one face for each corner.
+          // Each face has a node referencing to the corner node.
+          final panelBuilder = ScBuilderBluePrint(
+            key: 'panel',
+            shouldProcessChildren: (scope) => scope != panel,
+            shouldProcessScope: (scope) => true,
+            needsUpdateSuppliers: ['cornerCount'],
+            needsUpdate: ({required components, required hostScope}) {
+              // Remove old faces scope
+              hostScope.child('faces')?.dispose();
 
-                // Add a new faces scope
-                final facesScope = const ScopeBluePrint(key: 'faces')
-                    .instantiate(scope: hostScope);
+              // Add a new faces scope
+              final facesScope = const ScopeBluePrint(
+                key: 'faces',
+              ).instantiate(scope: hostScope);
 
-                // Add a subscope and a node for each face
-                final [int cornerCount] = components;
-                for (int i = 0; i < cornerCount; i++) {
-                  final faceScope = ScopeBluePrint(key: 'face$i').instantiate(
-                    scope: facesScope,
-                  );
-                  NodeBluePrint<int>.map(
-                    supplier: 'corners.corner$i.cValue',
-                    toKey: 'fValue',
-                    initialProduct: 0,
-                  ).instantiate(scope: faceScope);
-                }
-              },
-            )..instantiate(scope: panel);
+              // Add a subscope and a node for each face
+              final [int cornerCount] = components;
+              for (int i = 0; i < cornerCount; i++) {
+                final faceScope = ScopeBluePrint(
+                  key: 'face$i',
+                ).instantiate(scope: facesScope);
+                NodeBluePrint<int>.map(
+                  supplier: 'corners.corner$i.cValue',
+                  toKey: 'fValue',
+                  initialProduct: 0,
+                ).instantiate(scope: faceScope);
+              }
+            },
+          )..instantiate(scope: panel);
 
-            panel.scm.testFlushTasks();
-          },
-        );
+          panel.scm.testFlushTasks();
+        });
 
         test('should work', () {
           // Check the initial configuration

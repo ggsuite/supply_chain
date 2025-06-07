@@ -14,17 +14,15 @@ void main() {
   late Scope chain;
   late Node<int> node;
 
-  setUp(
-    () {
-      Node.onChangeEnabled = true;
-      Node.onRecursiveChangeEnabled = true;
-      testSetNextKeyCounter(0);
-      Node.testResetIdCounter();
-      scm = Scm(isTest: true);
-      chain = Scope.example(scm: scm);
-      node = Node.example(scope: chain);
-    },
-  );
+  setUp(() {
+    Node.onChangeEnabled = true;
+    Node.onRecursiveChangeEnabled = true;
+    testSetNextKeyCounter(0);
+    Node.testResetIdCounter();
+    scm = Scm(isTest: true);
+    chain = Scope.example(scm: scm);
+    node = Node.example(scope: chain);
+  });
 
   // #########################################################################
   group('node', () {
@@ -61,9 +59,7 @@ void main() {
         scope.mockContent({
           'a': {
             'b': {
-              'c0|c1|c2': {
-                'd': 0,
-              },
+              'c0|c1|c2': {'d': 0},
             },
           },
         });
@@ -81,12 +77,8 @@ void main() {
         final parent = Scope.example(key: 'root');
         parent.mockContent({
           'k': {
-            'a': {
-              'b': 0,
-            },
-            'c': {
-              'd': 0,
-            },
+            'a': {'b': 0},
+            'c': {'d': 0},
           },
         });
 
@@ -101,10 +93,9 @@ void main() {
     test('product, produce(), reportUpdate()', () {
       // Check initial values
       expect(node.product, 0);
-      expect(
-        scm.nominatedNodes.where((element) => !element.isMetaNode),
-        [node],
-      );
+      expect(scm.nominatedNodes.where((element) => !element.isMetaNode), [
+        node,
+      ]);
       expect(node.suppliers, isEmpty);
       expect(node.customers, isEmpty);
       expect(scm.nodes.where((element) => !element.isMetaNode), [node]);
@@ -119,10 +110,7 @@ void main() {
       test('should override the produced product by a given value', () {
         final node = Node<int>(
           scope: Scope.example(),
-          bluePrint: const NodeBluePrint<int>(
-            key: 'test',
-            initialProduct: 5,
-          ),
+          bluePrint: const NodeBluePrint<int>(key: 'test', initialProduct: 5),
         );
 
         // Set  a product. Which should be returned.
@@ -180,7 +168,9 @@ void main() {
           :c10,
           :c11,
           :c111,
-        ) = ButterFlyExample(withScopes: withScopes);
+        ) = ButterFlyExample(
+          withScopes: withScopes,
+        );
 
         group('should empty arrays', () {
           test('when depth == 0', () {
@@ -196,13 +186,15 @@ void main() {
           });
         });
 
-        group('should return suppliers of supplier and customers of customers',
-            () {
-          test('when depth == 2', () {
-            expect(x.deepSuppliers(depth: 2), [s1, s0, s11, s10, s01, s00]);
-            expect(x.deepCustomers(depth: 2), [c0, c1, c00, c01, c10, c11]);
-          });
-        });
+        group(
+          'should return suppliers of supplier and customers of customers',
+          () {
+            test('when depth == 2', () {
+              expect(x.deepSuppliers(depth: 2), [s1, s0, s11, s10, s01, s00]);
+              expect(x.deepCustomers(depth: 2), [c0, c1, c00, c01, c10, c11]);
+            });
+          },
+        );
 
         group('should return all suppliers and customers', () {
           test('when depth == 1000', () {
@@ -471,21 +463,18 @@ void main() {
         expect(supplier.isErased, isTrue);
       });
 
-      test(
-        'should erase the node, when it is replaced by another node',
-        () {
-          supplier.dispose();
-          expect(supplier.isErased, isFalse);
+      test('should erase the node, when it is replaced by another node', () {
+        supplier.dispose();
+        expect(supplier.isErased, isFalse);
 
-          // Replace the node by another node with the same key
-          supplier.bluePrint.instantiate(scope: supplier.scope);
-          scope.scm.testFlushTasks();
+        // Replace the node by another node with the same key
+        supplier.bluePrint.instantiate(scope: supplier.scope);
+        scope.scm.testFlushTasks();
 
-          expect(supplier.isErased, isTrue);
-          final replacedSuppliers = scope.findNode<int>('supplier');
-          expect(replacedSuppliers, isNot(supplier));
-        },
-      );
+        expect(supplier.isErased, isTrue);
+        final replacedSuppliers = scope.findNode<int>('supplier');
+        expect(replacedSuppliers, isNot(supplier));
+      });
     });
 
     test('reset', () {
@@ -596,43 +585,42 @@ void main() {
     });
 
     group('set and get product', () {
-      test('should be possible if no suppliers and produce function is given',
-          () {
-        // Create a node -> customer chain
-        final chain = Scope.example(scm: scm);
+      test(
+        'should be possible if no suppliers and produce function is given',
+        () {
+          // Create a node -> customer chain
+          final chain = Scope.example(scm: scm);
 
-        final node = Node<int>(
-          scope: chain,
-          bluePrint: const NodeBluePrint<int>(
-            key: 'node',
-            initialProduct: 0,
-          ),
-        );
+          final node = Node<int>(
+            scope: chain,
+            bluePrint: const NodeBluePrint<int>(key: 'node', initialProduct: 0),
+          );
 
-        final customer = Node<int>(
-          scope: chain,
-          bluePrint: NodeBluePrint<int>(
-            key: 'customer',
-            initialProduct: 0,
-            suppliers: ['node'],
-            produce: (components, previousProduct) =>
-                (components[0] as int) * 10,
-          ),
-        );
+          final customer = Node<int>(
+            scope: chain,
+            bluePrint: NodeBluePrint<int>(
+              key: 'customer',
+              initialProduct: 0,
+              suppliers: ['node'],
+              produce: (components, previousProduct) =>
+                  (components[0] as int) * 10,
+            ),
+          );
 
-        // Check initial values
-        expect(node.product, 0);
+          // Check initial values
+          expect(node.product, 0);
 
-        // Set a product from the outside
-        node.product = 1;
-        expect(node.product, 1);
+          // Set a product from the outside
+          node.product = 1;
+          expect(node.product, 1);
 
-        // Let the chain run
-        chain.scm.testFlushTasks();
+          // Let the chain run
+          chain.scm.testFlushTasks();
 
-        // Check if customer got the new component
-        expect(customer.product, 10);
-      });
+          // Check if customer got the new component
+          expect(customer.product, 10);
+        },
+      );
 
       test('should throw if a produce method is given', () {
         // Create a node -> customer chain
@@ -684,9 +672,10 @@ void main() {
       });
 
       test('should replace the previous blue print and nominate the node', () {
-        const NodeBluePrint(key: 'supplier', initialProduct: 12).instantiate(
-          scope: chain,
-        );
+        const NodeBluePrint(
+          key: 'supplier',
+          initialProduct: 12,
+        ).instantiate(scope: chain);
 
         final otherBluePrint = node.bluePrint.copyWith(
           initialProduct: 6,
@@ -696,10 +685,7 @@ void main() {
 
         node.addBluePrint(otherBluePrint);
 
-        expect(
-          node.bluePrint,
-          otherBluePrint,
-        );
+        expect(node.bluePrint, otherBluePrint);
 
         node.scm.testFlushTasks();
 
@@ -736,40 +722,34 @@ void main() {
               isA<ArgumentError>().having(
                 (e) => e.message,
                 'message',
-                contains(
-                  'Cannot remove last bluePrint.',
-                ),
+                contains('Cannot remove last bluePrint.'),
               ),
             ),
           );
         });
       });
 
-      test('should remove the blue print and the previous one becomes active',
-          () {
-        final previousBluePrint = node.bluePrint;
+      test(
+        'should remove the blue print and the previous one becomes active',
+        () {
+          final previousBluePrint = node.bluePrint;
 
-        final otherBluePrint = node.bluePrint.copyWith(
-          initialProduct: 6,
-          produce: (components, previousProduct) => 7,
-        );
+          final otherBluePrint = node.bluePrint.copyWith(
+            initialProduct: 6,
+            produce: (components, previousProduct) => 7,
+          );
 
-        node.addBluePrint(otherBluePrint);
+          node.addBluePrint(otherBluePrint);
 
-        expect(
-          node.bluePrint,
-          otherBluePrint,
-        );
+          expect(node.bluePrint, otherBluePrint);
 
-        scm.testFlushTasks();
+          scm.testFlushTasks();
 
-        node.removeBluePrint(otherBluePrint);
+          node.removeBluePrint(otherBluePrint);
 
-        expect(
-          node.bluePrint,
-          previousBluePrint,
-        );
-      });
+          expect(node.bluePrint, previousBluePrint);
+        },
+      );
     });
 
     group('writeImageFile', () {
@@ -793,15 +773,12 @@ void main() {
     });
 
     group('graph', () {
-      test(
-        'should return a dot representation of node and its suppliers '
-        'and customers',
-        () {
-          final node = ButterFlyExample(withScopes: true).x;
-          final graph = node.dot();
-          expect(graph, isNotNull);
-        },
-      );
+      test('should return a dot representation of node and its suppliers '
+          'and customers', () {
+        final node = ButterFlyExample(withScopes: true).x;
+        final graph = node.dot();
+        expect(graph, isNotNull);
+      });
     });
 
     group('special cases', () {
@@ -881,9 +858,7 @@ void main() {
                 isA<Exception>().having(
                   (e) => e.toString(),
                   'toString()',
-                  contains(
-                    'Circular dependency detected: b -> a -> b',
-                  ),
+                  contains('Circular dependency detected: b -> a -> b'),
                 ),
               ),
             );
@@ -931,9 +906,7 @@ void main() {
           // Create a master scope within the root scope
           // containing one node.
           scope.mockContent({
-            'master': {
-              'node': 0,
-            },
+            'master': {'node': 0},
           });
 
           // Create a non smart node called follower
@@ -1034,9 +1007,7 @@ void main() {
 
         // Add x.height to the scope a
         a.mockContent({
-          'x': {
-            'height': master0Value,
-          },
+          'x': {'height': master0Value},
         });
         final master0 = scope.findNode<int>('x.height')!;
         scm.testFlushTasks();
@@ -1059,9 +1030,7 @@ void main() {
         // ..........................................................
         // Insert another master1 between smartNode and master0
         b.mockContent({
-          'x': {
-            'height': master1Value,
-          },
+          'x': {'height': master1Value},
         });
         final master1 = scope.findNode<int>('b.x.height')!;
         scm.testFlushTasks();
@@ -1119,20 +1088,18 @@ void main() {
         final scm = scope.scm;
 
         // Create two sibling nodes that might reference each other.
-        scope.mockContent(
-          {
-            'scope0': {
-              'master': 0,
-              'a': {
-                'smartNode': const NodeBluePrint(
-                  key: 'smartNode',
-                  smartMaster: ['master'],
-                  initialProduct: 1,
-                ),
-              },
+        scope.mockContent({
+          'scope0': {
+            'master': 0,
+            'a': {
+              'smartNode': const NodeBluePrint(
+                key: 'smartNode',
+                smartMaster: ['master'],
+                initialProduct: 1,
+              ),
             },
           },
-        );
+        });
 
         scm.testFlushTasks();
 
@@ -1200,9 +1167,7 @@ void main() {
                 ),
               },
             },
-            'f': {
-              'node': 6,
-            },
+            'f': {'node': 6},
           },
         });
         scope.scm.testFlushTasks();
@@ -1366,9 +1331,7 @@ void main() {
           scope.mockContent({
             // Create an outer parent who should become master
             'parent': {
-              'child': {
-                'output': 5,
-              },
+              'child': {'output': 5},
 
               // Create an inner parent
               'parent': {
@@ -1408,8 +1371,9 @@ void main() {
           scope.scm.testFlushTasks();
           final outerOutput = scope.findNode<int>('parent.child.output')!;
           final innerInput = scope.findNode<int>('parent.parent.child.input')!;
-          final innerOutput =
-              scope.findNode<int>('parent.parent.child.output')!;
+          final innerOutput = scope.findNode<int>(
+            'parent.parent.child.output',
+          )!;
           final between = scope.findNode<int>('between')!;
 
           // This should create the following chain:

@@ -147,18 +147,13 @@ class Graph {
 
   // ...........................................................................
   /// Turn a graph into dot format
-  String dot({
-    required GraphScopeItem tree,
-    int dpi = Graph.defaultDpi,
-  }) {
+  String dot({required GraphScopeItem tree, int dpi = Graph.defaultDpi}) {
     return GraphToDot(tree: tree, dpi: dpi).dot;
   }
 
   // ...........................................................................
   /// Turn a graph into mermaid format
-  String mermaid({
-    required GraphScopeItem tree,
-  }) {
+  String mermaid({required GraphScopeItem tree}) {
     return GraphToMermaid(graph: tree).mermaid;
   }
 

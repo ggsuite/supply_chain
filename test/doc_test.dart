@@ -44,10 +44,7 @@ void main() {
           },
         });
 
-        final doc = Doc(
-          targetDirectory: targetDir,
-          scope: scope,
-        );
+        final doc = Doc(targetDirectory: targetDir, scope: scope);
 
         // Create the directory. It should be deleted.
         final dir = Directory(targetDir);

@@ -11,10 +11,7 @@ import 'package:supply_chain/supply_chain.dart';
 /// Creates a html documentation of a given scope and its children
 class Doc {
   /// Constructor
-  Doc({
-    required this.scope,
-    required this.targetDirectory,
-  });
+  Doc({required this.scope, required this.targetDirectory});
 
   /// Creates the documentation
   Future<void> create() async {
@@ -120,8 +117,9 @@ class Doc {
     lines.add('Ergibt sich aus: ');
     lines.add('<ul>');
     for (final supplier in node.suppliers) {
-      final supplerAddress =
-          node.bluePrint.suppliers.where((e) => supplier.matchesPath(e)).first;
+      final supplerAddress = node.bluePrint.suppliers
+          .where((e) => supplier.matchesPath(e))
+          .first;
 
       lines.add('<li><code>$supplerAddress</code></li>');
     }
@@ -138,15 +136,9 @@ class Doc {
     // coverage:ignore-start
     final fileName = '${node.path}.png';
     final path = '$targetDirectory/$fileName';
-    await node.writeImageFile(
-      path,
-      supplierDepth: -1,
-      customerDepth: 0,
-    );
+    await node.writeImageFile(path, supplierDepth: -1, customerDepth: 0);
 
-    lines.add(
-      '<img src="$fileName" alt="${node.key}"><br>',
-    );
+    lines.add('<img src="$fileName" alt="${node.key}"><br>');
 
     // coverage:ignore-end
   }

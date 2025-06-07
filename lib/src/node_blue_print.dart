@@ -17,13 +17,12 @@ NodeBluePrint<T> nbp<T>({
   required String to,
   required T init,
   Produce<T>? produce,
-}) =>
-    NodeBluePrint(
-      key: to,
-      initialProduct: init,
-      suppliers: from,
-      produce: produce ?? doNothing,
-    );
+}) => NodeBluePrint(
+  key: to,
+  initialProduct: init,
+  suppliers: from,
+  produce: produce ?? doNothing,
+);
 
 // .............................................................................
 /// The blue print of a node
@@ -46,8 +45,8 @@ class NodeBluePrint<T> {
     Produce<T>? produce,
     List<String> smartMaster = const [],
     this.canBeSmart = true,
-  })  : produce = produce ?? doNothing<T>,
-        _smartMaster = smartMaster;
+  }) : produce = produce ?? doNothing<T>,
+       _smartMaster = smartMaster;
 
   /// Maps a supplier to a different key
   factory NodeBluePrint.map({
@@ -107,10 +106,7 @@ class NodeBluePrint<T> {
 
   // ...........................................................................
   /// An example instance for test purposes
-  static NodeBluePrint<int> example({
-    String? key,
-    Produce<int>? produce,
-  }) =>
+  static NodeBluePrint<int> example({String? key, Produce<int>? produce}) =>
       NodeBluePrint<int>(
         key: key ?? nextKey,
         initialProduct: 0,
@@ -134,11 +130,7 @@ class NodeBluePrint<T> {
       return node as Node<T>;
     }
 
-    final result = Node<T>(
-      bluePrint: this,
-      scope: scope,
-      owner: owner,
-    );
+    final result = Node<T>(bluePrint: this, scope: scope, owner: owner);
 
     if (applyScBuilders) {
       _applyScBuilders(result);
@@ -154,12 +146,7 @@ class NodeBluePrint<T> {
     Scope? scope,
     int? index,
   }) {
-    return Insert<T>(
-      bluePrint: this,
-      host: host,
-      index: index,
-      scope: scope,
-    );
+    return Insert<T>(bluePrint: this, host: host, index: index, scope: scope);
   }
 
   static bool _listEquals<T>(List<T> a, List<T> b) {
@@ -210,17 +197,17 @@ class NodeBluePrint<T> {
 
   /// Maps the key of the blue print to another key
   NodeBluePrint<T> forwardTo(String toKey) => NodeBluePrint.map(
-        supplier: key,
-        toKey: toKey,
-        initialProduct: initialProduct,
-      );
+    supplier: key,
+    toKey: toKey,
+    initialProduct: initialProduct,
+  );
 
   /// Makes the node forwarding the value of the supplier
   NodeBluePrint<T> connectSupplier(String supplier) => NodeBluePrint.map(
-        supplier: supplier,
-        toKey: key,
-        initialProduct: initialProduct,
-      );
+    supplier: supplier,
+    toKey: key,
+    initialProduct: initialProduct,
+  );
 
   /// Provites an operator =
   bool equals(Object other) {

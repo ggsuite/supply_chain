@@ -10,11 +10,7 @@ import 'package:gg_is_github/gg_is_github.dart';
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
-enum TestEnum {
-  a,
-  b,
-  c,
-}
+enum TestEnum { a, b, c }
 
 void main() {
   late Node<int> node;
@@ -33,11 +29,7 @@ void main() {
     scope = Scope.example(scm: scm);
 
     node = scope.findOrCreateNode(
-      NodeBluePrint(
-        initialProduct: 0,
-        produce: produce,
-        key: 'node',
-      ),
+      NodeBluePrint(initialProduct: 0, produce: produce, key: 'node'),
     );
 
     scm.testFlushTasks();
@@ -73,20 +65,12 @@ void main() {
                 'p0': {
                   'x': {
                     'c0': {
-                      'c00': {
-                        'c000': 0,
-                      },
-                      'c01': {
-                        'c010': 0,
-                      },
+                      'c00': {'c000': 0},
+                      'c01': {'c010': 0},
                     },
                     'c1': {
-                      'c10': {
-                        'c100': 0,
-                      },
-                      'c11': {
-                        'c110': 0,
-                      },
+                      'c10': {'c100': 0},
+                      'c11': {'c110': 0},
                     },
                   },
                 },
@@ -119,8 +103,10 @@ void main() {
             final parents = x.deepParents(depth: 2).map((e) => e.key).toList();
             expect(parents, ['p0', 'p1']);
 
-            final children =
-                x.deepChildren(depth: 2).map((e) => e.key).toList();
+            final children = x
+                .deepChildren(depth: 2)
+                .map((e) => e.key)
+                .toList();
             expect(children, ['c0', 'c1', 'c00', 'c01', 'c10', 'c11']);
           });
         });
@@ -133,8 +119,10 @@ void main() {
             parents = x.deepParents(depth: -1).map((e) => e.key).toList();
             expect(parents, ['p0', 'p1', 'p2', 'example', 'root']);
 
-            var children =
-                x.deepChildren(depth: 1000).map((e) => e.key).toList();
+            var children = x
+                .deepChildren(depth: 1000)
+                .map((e) => e.key)
+                .toList();
             expect(children, ['c0', 'c1', 'c00', 'c01', 'c10', 'c11']);
 
             children = x.deepChildren(depth: -1).map((e) => e.key).toList();
@@ -144,29 +132,27 @@ void main() {
       });
 
       group('allScopes', () {
-        test('should provide an iterator iterating over all scopes recursively',
-            () {
-          final scope = Scope.example()
-            ..mockContent({
-              'a': {
-                'b': {
-                  'c': {
-                    'd': 0,
+        test(
+          'should provide an iterator iterating over all scopes recursively',
+          () {
+            final scope = Scope.example()
+              ..mockContent({
+                'a': {
+                  'b': {
+                    'c': {'d': 0},
                   },
                 },
-              },
-              'x': {
-                'y': {
-                  'z': {
-                    'w': 0,
+                'x': {
+                  'y': {
+                    'z': {'w': 0},
                   },
                 },
-              },
-            });
+              });
 
-          final allScopes = scope.allScopes.map((e) => e.key).toList();
-          expect(allScopes, ['example', 'a', 'b', 'c', 'x', 'y', 'z']);
-        });
+            final allScopes = scope.allScopes.map((e) => e.key).toList();
+            expect(allScopes, ['example', 'a', 'b', 'c', 'x', 'y', 'z']);
+          },
+        );
       });
     });
 
@@ -181,9 +167,7 @@ void main() {
           'a': {
             'b': {
               'n0': 10,
-              'c': {
-                'n1': 11,
-              },
+              'c': {'n1': 11},
             },
           },
         });
@@ -222,9 +206,7 @@ void main() {
         root.mockContent({
           'a': {
             'b': {
-              'c': {
-                'd': 0,
-              },
+              'c': {'d': 0},
             },
           },
         });
@@ -233,56 +215,53 @@ void main() {
       });
     });
 
-    group(
-      'commonParent(scope)',
-      () {
-        test('should return the scope itself when the other scope is scope',
-            () {
-          final root = ExampleScopeRoot(scm: Scm.testInstance);
-          final childScopeA = root.child('childScopeA')!;
-          expect(childScopeA.commonParent(childScopeA), childScopeA);
-        });
+    group('commonParent(scope)', () {
+      test('should return the scope itself when the other scope is scope', () {
+        final root = ExampleScopeRoot(scm: Scm.testInstance);
+        final childScopeA = root.child('childScopeA')!;
+        expect(childScopeA.commonParent(childScopeA), childScopeA);
+      });
 
-        test('should return the common parent scope', () {
-          final root = ExampleScopeRoot(scm: Scm.testInstance);
-          final childScopeA = root.child('childScopeA')!;
-          final childScopeB = root.child('childScopeB')!;
-          final grandChildScope = childScopeA.child('grandChildScope')!;
-          final grandChildNodeA =
-              grandChildScope.findNode<int>('grandChildNodeA')!;
+      test('should return the common parent scope', () {
+        final root = ExampleScopeRoot(scm: Scm.testInstance);
+        final childScopeA = root.child('childScopeA')!;
+        final childScopeB = root.child('childScopeB')!;
+        final grandChildScope = childScopeA.child('grandChildScope')!;
+        final grandChildNodeA = grandChildScope.findNode<int>(
+          'grandChildNodeA',
+        )!;
 
-          var commonScope = root.commonParent(grandChildNodeA.scope);
-          expect(commonScope, root);
+        var commonScope = root.commonParent(grandChildNodeA.scope);
+        expect(commonScope, root);
 
-          commonScope = childScopeA.commonParent(grandChildScope);
-          expect(commonScope, childScopeA);
+        commonScope = childScopeA.commonParent(grandChildScope);
+        expect(commonScope, childScopeA);
 
-          commonScope = grandChildScope.commonParent(childScopeA);
-          expect(commonScope, childScopeA);
+        commonScope = grandChildScope.commonParent(childScopeA);
+        expect(commonScope, childScopeA);
 
-          commonScope = grandChildScope.commonParent(root);
-          expect(commonScope, root);
+        commonScope = grandChildScope.commonParent(root);
+        expect(commonScope, root);
 
-          commonScope = childScopeA.commonParent(childScopeB);
-          expect(commonScope, root);
-        });
+        commonScope = childScopeA.commonParent(childScopeB);
+        expect(commonScope, root);
+      });
 
-        test('should throw if no common parent is found', () {
-          final scope = Scope.example().root;
-          final scopeB = Scope.example().root;
-          expect(
-            () => scopeB.commonParent(scope),
-            throwsA(
-              isA<ArgumentError>().having(
-                (e) => e.message,
-                'message',
-                'No common parent found.',
-              ),
+      test('should throw if no common parent is found', () {
+        final scope = Scope.example().root;
+        final scopeB = Scope.example().root;
+        expect(
+          () => scopeB.commonParent(scope),
+          throwsA(
+            isA<ArgumentError>().having(
+              (e) => e.message,
+              'message',
+              'No common parent found.',
             ),
-          );
-        });
-      },
-    );
+          ),
+        );
+      });
+    });
 
     group('dispose', () {
       late Scope scope;
@@ -300,9 +279,7 @@ void main() {
         // Define a supplier a.b.c that has a customer a.d.e;
         scope.mockContent({
           'a': {
-            'b': {
-              'supplier': 0,
-            },
+            'b': {'supplier': 0},
             'd': {
               'customer': NodeBluePrint.map(
                 supplier: 'b.supplier',
@@ -481,10 +458,7 @@ void main() {
             const scope5 = ScopeBluePrint(
               key: 'scope',
               children: [
-                ScopeBluePrint(
-                  key: 'child',
-                  nodes: [node5],
-                ),
+                ScopeBluePrint(key: 'child', nodes: [node5]),
               ],
             );
 
@@ -492,10 +466,7 @@ void main() {
             const scope6 = ScopeBluePrint(
               key: 'scope',
               children: [
-                ScopeBluePrint(
-                  key: 'child',
-                  nodes: [node6],
-                ),
+                ScopeBluePrint(key: 'child', nodes: [node6]),
               ],
             );
 
@@ -548,21 +519,13 @@ void main() {
             // Crate a child scope and a node with customers
             const scope5 = ScopeBluePrint(
               key: 'scope',
-              children: [
-                ScopeBluePrint(
-                  key: 'child',
-                ),
-              ],
+              children: [ScopeBluePrint(key: 'child')],
             );
 
             // Crate a child scope and a node with customers
             const scope6 = ScopeBluePrint(
               key: 'scope',
-              children: [
-                ScopeBluePrint(
-                  key: 'child',
-                ),
-              ],
+              children: [ScopeBluePrint(key: 'child')],
             );
 
             // Create two meta scope observers
@@ -584,10 +547,11 @@ void main() {
             // ...........
             // Instantiate
             var scopeInstance = scope5.instantiate(scope: root);
-            final onChangeObserverInstance =
-                onChangeObserver.instantiate(scope: root);
-            final helloMetaScopeObserverInstance =
-                helloMetaScopeObserver.instantiate(scope: root);
+            final onChangeObserverInstance = onChangeObserver.instantiate(
+              scope: root,
+            );
+            final helloMetaScopeObserverInstance = helloMetaScopeObserver
+                .instantiate(scope: root);
 
             final helloMetaScope = scopeInstance.metaScopeFindOrCreate('hello');
             final helloMetaScopeNodeInstance = const NodeBluePrint<int>(
@@ -633,10 +597,11 @@ void main() {
         expect(childScopeA.path, 'exampleRoot.childScopeA');
         expect(childScopeA.pathArray, ['exampleRoot', 'childScopeA']);
         expect(grandChildScope.path, 'exampleRoot.childScopeA.grandChildScope');
-        expect(
-          grandChildScope.pathArray,
-          ['exampleRoot', 'childScopeA', 'grandChildScope'],
-        );
+        expect(grandChildScope.pathArray, [
+          'exampleRoot',
+          'childScopeA',
+          'grandChildScope',
+        ]);
         expect(grandChildScope.depth, 3);
       });
     });
@@ -648,9 +613,7 @@ void main() {
           scope.mockContent({
             'a': {
               'b': {
-                'c0|c1|c2': {
-                  'd': 0,
-                },
+                'c0|c1|c2': {'d': 0},
               },
             },
           });
@@ -671,9 +634,7 @@ void main() {
         scope.mockContent({
           'a': {
             'b': {
-              'c': {
-                'd': 0,
-              },
+              'c': {'d': 0},
             },
           },
         });
@@ -707,36 +668,32 @@ void main() {
         late Scope s0;
         late Scope s1;
         late Node<int> supplier;
-        setUp(
-          () {
-            scope = Scope.example();
-            scope.mockContent({
-              // Define a supplier within scopes a.s0.s1
-              'a': {
-                's0': {
-                  's1': {
-                    'supplier': 0,
-                  },
-                },
-
-                // Define a customer within scopes a.c
-                'c': {
-                  'customer': NodeBluePrint.map(
-                    supplier: 's0.s1.supplier',
-                    toKey: 'customer',
-                    initialProduct: 0,
-                  ),
-                },
+        setUp(() {
+          scope = Scope.example();
+          scope.mockContent({
+            // Define a supplier within scopes a.s0.s1
+            'a': {
+              's0': {
+                's1': {'supplier': 0},
               },
-            });
 
-            scope.scm.testFlushTasks();
+              // Define a customer within scopes a.c
+              'c': {
+                'customer': NodeBluePrint.map(
+                  supplier: 's0.s1.supplier',
+                  toKey: 'customer',
+                  initialProduct: 0,
+                ),
+              },
+            },
+          });
 
-            s0 = scope.findScope('a.s0')!;
-            s1 = scope.findScope('a.s0.s1')!;
-            supplier = scope.findNode<int>('a.s0.s1.supplier')!;
-          },
-        );
+          scope.scm.testFlushTasks();
+
+          s0 = scope.findScope('a.s0')!;
+          s1 = scope.findScope('a.s0.s1')!;
+          supplier = scope.findNode<int>('a.s0.s1.supplier')!;
+        });
 
         test('when a fresh node is added to the disposed scope', () {
           // Dispose scope s.
@@ -751,8 +708,9 @@ void main() {
           expect(supplier.isErased, isFalse);
 
           // Now add supplier again.
-          final newSupplier =
-              supplier.bluePrint.instantiate(scope: supplier.scope);
+          final newSupplier = supplier.bluePrint.instantiate(
+            scope: supplier.scope,
+          );
 
           // The previous supplier should be erased now
           expect(supplier.isErased, isTrue);
@@ -782,8 +740,9 @@ void main() {
           expect(supplier.isErased, isFalse);
 
           // Now add a fresh scope
-          final newChildScope =
-              const ScopeBluePrint(key: 'freshScope').instantiate(scope: s1);
+          final newChildScope = const ScopeBluePrint(
+            key: 'freshScope',
+          ).instantiate(scope: s1);
           expect(newChildScope.isDisposed, isFalse);
           expect(newChildScope.isErased, isFalse);
 
@@ -803,13 +762,15 @@ void main() {
     });
 
     group('findOrCreateChild(key)', () {
-      test('should create a child scope with key or return an existing one',
-          () {
-        final scope = Scope.example();
-        final childScopeA = scope.findOrCreateChild('child');
-        final childScopeB = scope.findOrCreateChild('child');
-        expect(childScopeA, same(childScopeB));
-      });
+      test(
+        'should create a child scope with key or return an existing one',
+        () {
+          final scope = Scope.example();
+          final childScopeA = scope.findOrCreateChild('child');
+          final childScopeB = scope.findOrCreateChild('child');
+          expect(childScopeA, same(childScopeB));
+        },
+      );
     });
 
     group('node(key)', () {
@@ -827,8 +788,8 @@ void main() {
           throwsA(
             predicate<ArgumentError>(
               (e) => e.toString().contains(
-                    'Node with key "node" is not of type String',
-                  ),
+                'Node with key "node" is not of type String',
+              ),
             ),
           ),
         );
@@ -853,9 +814,7 @@ void main() {
           final scope = Scope.example();
           scope.mockContent({
             'a': {
-              'b': {
-                'c': 0,
-              },
+              'b': {'c': 0},
             },
           });
           expect(scope.findChildScope('a')?.key, 'a');
@@ -867,9 +826,7 @@ void main() {
           scope.mockContent({
             'a': {
               'b': {
-                'c': {
-                  'd': 0,
-                },
+                'c': {'d': 0},
               },
             },
           });
@@ -885,16 +842,12 @@ void main() {
               'panels': {
                 'left': {
                   'faces': {
-                    'right': {
-                      'x': 0,
-                    },
+                    'right': {'x': 0},
                   },
                 },
                 'right': {
                   'faces': {
-                    'right': {
-                      'x': 0,
-                    },
+                    'right': {'x': 0},
                   },
                 },
               },
@@ -919,29 +872,20 @@ void main() {
 
       test('should throw if multiple scopes with the path exist', () {
         final scope = Scope.example();
-        scope.mockContent(
-          {
-            'a': {
-              'duplicate': {
-                'c': 0,
-                'duplicate': {
-                  'd': 0,
-                },
-              },
+        scope.mockContent({
+          'a': {
+            'duplicate': {
+              'c': 0,
+              'duplicate': {'d': 0},
             },
           },
-        );
+        });
       });
     });
 
     group('findOrCreateNode()', () {
       test('should return an existing node when possible', () {
-        expect(
-          scope.findOrCreateNode(
-            node.bluePrint,
-          ),
-          node,
-        );
+        expect(scope.findOrCreateNode(node.bluePrint), node);
       });
 
       group('should throw', () {
@@ -958,9 +902,9 @@ void main() {
               throwsA(
                 predicate<AssertionError>(
                   (e) => e.toString().contains(
-                        'Node with key "example" already exists '
-                        'with different configuration',
-                      ),
+                    'Node with key "example" already exists '
+                    'with different configuration',
+                  ),
                 ),
               ),
             );
@@ -978,9 +922,9 @@ void main() {
               throwsA(
                 predicate<AssertionError>(
                   (e) => e.toString().contains(
-                        'Node with key "example" already exists '
-                        'with different configuration',
-                      ),
+                    'Node with key "example" already exists '
+                    'with different configuration',
+                  ),
                 ),
               ),
             );
@@ -1086,21 +1030,23 @@ void main() {
     });
 
     group('addOBluePrintverlay(), removeBluePrintOverlay()', () {
-      test('should overlay another blueprint on the top of the existing one',
-          () {
-        final newBluePrint = NodeBluePrint<int>(
-          initialProduct: 0,
-          produce: (components, previousProduct) => previousProduct,
-          key: 'node',
-        );
+      test(
+        'should overlay another blueprint on the top of the existing one',
+        () {
+          final newBluePrint = NodeBluePrint<int>(
+            initialProduct: 0,
+            produce: (components, previousProduct) => previousProduct,
+            key: 'node',
+          );
 
-        final node = scope.node<int>('node')!;
-        final bluePrintBefore = node.bluePrint;
-        scope.addOBluePrintverlay(newBluePrint);
-        expect(node.bluePrint, newBluePrint);
-        scope.removeBluePrintverlay(newBluePrint);
-        expect(node.bluePrint, bluePrintBefore);
-      });
+          final node = scope.node<int>('node')!;
+          final bluePrintBefore = node.bluePrint;
+          scope.addOBluePrintverlay(newBluePrint);
+          expect(node.bluePrint, newBluePrint);
+          scope.removeBluePrintverlay(newBluePrint);
+          expect(node.bluePrint, bluePrintBefore);
+        },
+      );
 
       test('should throw if the node does not exist', () {
         final newNode = NodeBluePrint<int>(
@@ -1114,8 +1060,8 @@ void main() {
           throwsA(
             predicate<ArgumentError>(
               (e) => e.toString().contains(
-                    'Node with key "unknown" does not exist in scope "example"',
-                  ),
+                'Node with key "unknown" does not exist in scope "example"',
+              ),
             ),
           ),
         );
@@ -1125,8 +1071,8 @@ void main() {
           throwsA(
             predicate<ArgumentError>(
               (e) => e.toString().contains(
-                    'Node with key "unknown" does not exist in scope "example"',
-                  ),
+                'Node with key "unknown" does not exist in scope "example"',
+              ),
             ),
           ),
         );
@@ -1135,11 +1081,7 @@ void main() {
     group('removeNode(), removeNodes()', () {
       test('should remove the node with the given key', () {
         expect(
-          scope.findOrCreateNode(
-            NodeBluePrint.example(
-              key: 'node1',
-            ),
-          ),
+          scope.findOrCreateNode(NodeBluePrint.example(key: 'node1')),
           isNotNull,
         );
 
@@ -1168,35 +1110,36 @@ void main() {
       });
 
       test('should do nothing if node does not exist', () {
-        expect(
-          () => scope.removeNode('Unknown'),
-          returnsNormally,
-        );
+        expect(() => scope.removeNode('Unknown'), returnsNormally);
       });
     });
 
     group('isAncestorOf(scope)', () {
-      test('should return true if the scope is an ancestor of the given scope',
-          () {
-        final root = ExampleScopeRoot(scm: Scm.testInstance);
-        final childScopeA = root.child('childScopeA')!;
-        final grandChildScope = childScopeA.child('grandChildScope')!;
-        expect(root.isAncestorOf(childScopeA), isTrue);
-        expect(root.isAncestorOf(grandChildScope), isTrue);
-        expect(childScopeA.isAncestorOf(grandChildScope), isTrue);
-      });
+      test(
+        'should return true if the scope is an ancestor of the given scope',
+        () {
+          final root = ExampleScopeRoot(scm: Scm.testInstance);
+          final childScopeA = root.child('childScopeA')!;
+          final grandChildScope = childScopeA.child('grandChildScope')!;
+          expect(root.isAncestorOf(childScopeA), isTrue);
+          expect(root.isAncestorOf(grandChildScope), isTrue);
+          expect(childScopeA.isAncestorOf(grandChildScope), isTrue);
+        },
+      );
     });
 
     group('isDescendantOf(scope)', () {
-      test('should return true if the scope is a descendant of the given scope',
-          () {
-        final root = ExampleScopeRoot(scm: Scm.testInstance);
-        final childScopeA = root.child('childScopeA')!;
-        final grandChildScope = childScopeA.child('grandChildScope')!;
-        expect(childScopeA.isDescendantOf(root), isTrue);
-        expect(grandChildScope.isDescendantOf(root), isTrue);
-        expect(grandChildScope.isDescendantOf(childScopeA), isTrue);
-      });
+      test(
+        'should return true if the scope is a descendant of the given scope',
+        () {
+          final root = ExampleScopeRoot(scm: Scm.testInstance);
+          final childScopeA = root.child('childScopeA')!;
+          final grandChildScope = childScopeA.child('grandChildScope')!;
+          expect(childScopeA.isDescendantOf(root), isTrue);
+          expect(grandChildScope.isDescendantOf(root), isTrue);
+          expect(grandChildScope.isDescendantOf(childScopeA), isTrue);
+        },
+      );
     });
 
     group('node.dispose(), removeNode()', () {
@@ -1251,42 +1194,40 @@ void main() {
     group('dot, graph, saveGraphToFile', () {
       late Scope scope;
 
-      setUp(
-        () {
-          scope = Scope.example(createNode: false);
+      setUp(() {
+        scope = Scope.example(createNode: false);
 
-          Supplier<int>(
-            bluePrint: NodeBluePrint<int>(
-              initialProduct: 0,
-              key: 'supplier',
-              produce: (components, previousProduct) => previousProduct + 1,
-            ),
-            scope: scope,
-          );
+        Supplier<int>(
+          bluePrint: NodeBluePrint<int>(
+            initialProduct: 0,
+            key: 'supplier',
+            produce: (components, previousProduct) => previousProduct + 1,
+          ),
+          scope: scope,
+        );
 
-          Node<int>(
-            bluePrint: NodeBluePrint<int>(
-              initialProduct: 0,
-              key: 'producer',
-              produce: (List<dynamic> components, int previousProduct) {
-                return (components.first as int) * 10;
-              },
-            ),
-            scope: scope,
-          );
+        Node<int>(
+          bluePrint: NodeBluePrint<int>(
+            initialProduct: 0,
+            key: 'producer',
+            produce: (List<dynamic> components, int previousProduct) {
+              return (components.first as int) * 10;
+            },
+          ),
+          scope: scope,
+        );
 
-          Node<int>(
-            bluePrint: NodeBluePrint<int>(
-              initialProduct: 0,
-              key: 'customer',
-              produce: (List<dynamic> components, int previousProduct) {
-                return (components.first as int) + 1;
-              },
-            ),
-            scope: scope,
-          );
-        },
-      );
+        Node<int>(
+          bluePrint: NodeBluePrint<int>(
+            initialProduct: 0,
+            key: 'customer',
+            produce: (List<dynamic> components, int previousProduct) {
+              return (components.first as int) + 1;
+            },
+          ),
+          scope: scope,
+        );
+      });
 
       // .......................................................................
       Future<void> updateGraphFile(Scope chain, String fileName) async {
@@ -1308,76 +1249,68 @@ void main() {
       }
 
       // .......................................................................
-      test(
-        'should print a simple graph correctly',
-        () async {
-          await updateGraphFile(scope, 'simple_graph.dot');
-        },
-      );
+      test('should print a simple graph correctly', () async {
+        await updateGraphFile(scope, 'simple_graph.dot');
+      });
 
-      test(
-        'should print a more advanced graph correctly',
-        () async {
-          final scope = Scope.example(createNode: false);
+      test('should print a more advanced graph correctly', () async {
+        final scope = Scope.example(createNode: false);
 
-          // .................................
-          // Create the following supply chain
-          //  key
-          //   |-synth
-          //   |  |-audio (realtime)
-          //   |
-          //   |-screen
-          //   |  |-grid
-          scope.mockContent(
-            {
-              'key': nbp(
-                from: [],
-                to: 'key',
-                init: 0,
-                produce: (c, p) {
-                  return (p) + 1;
-                },
-              ),
-              'synth': nbp(
-                from: ['key'],
-                to: 'synth',
-                init: 0,
-                produce: (c, p) {
-                  return (c.first as int) * 10;
-                },
-              ),
-              'audio': nbp(
-                from: ['synth'],
-                to: 'audio',
-                init: 0,
-                produce: (c, p) {
-                  return (c.first as int) + 1;
-                },
-              ),
-              'screen': nbp(
-                from: ['key'],
-                to: 'screen',
-                init: 0,
-                produce: (c, p) {
-                  return (c.first as int) * 100;
-                },
-              ),
-              'grid': nbp(
-                from: ['screen'],
-                to: 'grid',
-                init: 0,
-                produce: (c, p) {
-                  return (c.first as int) + 2;
-                },
-              ),
+        // .................................
+        // Create the following supply chain
+        //  key
+        //   |-synth
+        //   |  |-audio (realtime)
+        //   |
+        //   |-screen
+        //   |  |-grid
+        scope.mockContent({
+          'key': nbp(
+            from: [],
+            to: 'key',
+            init: 0,
+            produce: (c, p) {
+              return (p) + 1;
             },
-          );
+          ),
+          'synth': nbp(
+            from: ['key'],
+            to: 'synth',
+            init: 0,
+            produce: (c, p) {
+              return (c.first as int) * 10;
+            },
+          ),
+          'audio': nbp(
+            from: ['synth'],
+            to: 'audio',
+            init: 0,
+            produce: (c, p) {
+              return (c.first as int) + 1;
+            },
+          ),
+          'screen': nbp(
+            from: ['key'],
+            to: 'screen',
+            init: 0,
+            produce: (c, p) {
+              return (c.first as int) * 100;
+            },
+          ),
+          'grid': nbp(
+            from: ['screen'],
+            to: 'grid',
+            init: 0,
+            produce: (c, p) {
+              return (c.first as int) + 2;
+            },
+          ),
+        });
 
-          scope.scm.testFlushTasks();
+        scope.scm.testFlushTasks();
 
-          await updateGraphFile(scope, 'advanced_graph.dot');
-        },
-      );
+        await updateGraphFile(scope, 'advanced_graph.dot');
+      });
 
       test('should print scopes correctly', () async {
         final root = ExampleScopeRoot(scm: Scm.testInstance);
@@ -1422,10 +1355,7 @@ void main() {
           scope.mockContent({
             'a': {
               'b': {
-                'c': {
-                  'd': 0,
-                  'e': 1,
-                },
+                'c': {'d': 0, 'e': 1},
                 'f': 2,
                 'g': const NodeBluePrint(key: 'g', initialProduct: Object()),
               },
@@ -1452,10 +1382,7 @@ void main() {
             'example': {
               'a': {
                 'b': {
-                  'c': {
-                    'd': 0,
-                    'e': 1,
-                  },
+                  'c': {'d': 0, 'e': 1},
                   'f': 2,
                   'g': '...',
                 },
@@ -1468,10 +1395,7 @@ void main() {
             'example': {
               'a': {
                 'b': {
-                  'c': {
-                    'd': 0,
-                    'e': 1,
-                  },
+                  'c': {'d': 0, 'e': 1},
                   'f': 2,
                 },
               },
@@ -1479,21 +1403,12 @@ void main() {
           });
 
           final lsb = b.ls();
-          expect(lsb, [
-            'c',
-            'c.d (0)',
-            'c.e (1)',
-            'f (2)',
-            'g',
-          ]);
+          expect(lsb, ['c', 'c.d (0)', 'c.e (1)', 'f (2)', 'g']);
 
           final jsonB = b.jsonDump();
           expect(jsonB, {
             'b': {
-              'c': {
-                'd': 0,
-                'e': 1,
-              },
+              'c': {'d': 0, 'e': 1},
               'f': 2,
               'g': '...',
             },
@@ -1502,10 +1417,7 @@ void main() {
           final presetB = b.preset();
           expect(presetB, {
             'b': {
-              'c': {
-                'd': 0,
-                'e': 1,
-              },
+              'c': {'d': 0, 'e': 1},
               'f': 2,
             },
           });
@@ -1531,10 +1443,7 @@ void main() {
                 'example': {
                   'a': {
                     'b': {
-                      'c': {
-                        'd': 0,
-                        'e': 1,
-                      },
+                      'c': {'d': 0, 'e': 1},
                       'f': 2,
                       'g': '...',
                     },
@@ -1559,10 +1468,7 @@ void main() {
             expect(jsonDump, {
               'a': {
                 'b': {
-                  'c': {
-                    'd': 0,
-                    'e': 1,
-                  },
+                  'c': {'d': 0, 'e': 1},
                   'f': 2,
                   'g': '...',
                 },
@@ -1585,10 +1491,7 @@ void main() {
             expect(jsonDump, {
               'a': {
                 'b': {
-                  'c': {
-                    'd': 0,
-                    'e': 1,
-                  },
+                  'c': {'d': 0, 'e': 1},
                   'f': 2,
                   'g': '...',
                 },
@@ -1600,21 +1503,12 @@ void main() {
         group('with childDepth', () {
           test('-1', () {
             final ls = b.ls(childDepth: -1);
-            expect(ls, [
-              'c',
-              'c.d (0)',
-              'c.e (1)',
-              'f (2)',
-              'g',
-            ]);
+            expect(ls, ['c', 'c.d (0)', 'c.e (1)', 'f (2)', 'g']);
 
             final jsonDump = b.jsonDump(childDepth: -1);
             expect(jsonDump, {
               'b': {
-                'c': {
-                  'd': 0,
-                  'e': 1,
-                },
+                'c': {'d': 0, 'e': 1},
                 'f': 2,
                 'g': '...',
               },
@@ -1623,21 +1517,12 @@ void main() {
 
           test('1', () {
             final ls = b.ls(childDepth: 1);
-            expect(ls, [
-              'c',
-              'c.d (0)',
-              'c.e (1)',
-              'f (2)',
-              'g',
-            ]);
+            expect(ls, ['c', 'c.d (0)', 'c.e (1)', 'f (2)', 'g']);
 
             final jsonDump = b.jsonDump(childDepth: 1);
             expect(jsonDump, {
               'b': {
-                'c': {
-                  'd': 0,
-                  'e': 1,
-                },
+                'c': {'d': 0, 'e': 1},
                 'f': 2,
                 'g': '...',
               },
@@ -1646,21 +1531,12 @@ void main() {
 
           test('1000', () {
             final ls = b.ls(childDepth: 1000);
-            expect(ls, [
-              'c',
-              'c.d (0)',
-              'c.e (1)',
-              'f (2)',
-              'g',
-            ]);
+            expect(ls, ['c', 'c.d (0)', 'c.e (1)', 'f (2)', 'g']);
 
             final jsonDump = b.jsonDump(childDepth: 1000);
             expect(jsonDump, {
               'b': {
-                'c': {
-                  'd': 0,
-                  'e': 1,
-                },
+                'c': {'d': 0, 'e': 1},
                 'f': 2,
                 'g': '...',
               },
@@ -1671,45 +1547,33 @@ void main() {
         group('with sourceNodesOnly', () {
           late final Scope scope;
 
-          setUpAll(
-            () {
-              scope = Scope.example();
-              scope.mockContent({
-                'a': {
-                  'b': {
-                    'c': {
-                      'd': 0,
-                      'e': 1,
-                    },
-                    'f': 2,
+          setUpAll(() {
+            scope = Scope.example();
+            scope.mockContent({
+              'a': {
+                'b': {
+                  'c': {'d': 0, 'e': 1},
+                  'f': 2,
 
-                    // G has suppliers and is therefore not a source node
-                    'g': nbp(from: ['a.b.c.d'], to: 'g', init: 5),
-                  },
+                  // G has suppliers and is therefore not a source node
+                  'g': nbp(from: ['a.b.c.d'], to: 'g', init: 5),
                 },
-              });
-              scope.scm.testFlushTasks();
-            },
-          );
+              },
+            });
+            scope.scm.testFlushTasks();
+          });
 
           group('true', () {
             test('returns only nodes that have no suppliers', () {
               final ls = scope.ls(sourceNodesOnly: true);
-              expect(ls, [
-                'a.b.c.d (0)',
-                'a.b.c.e (1)',
-                'a.b.f (2)',
-              ]);
+              expect(ls, ['a.b.c.d (0)', 'a.b.c.e (1)', 'a.b.f (2)']);
 
               final jsonDump = scope.jsonDump(sourceNodesOnly: true);
               const expected = {
                 'example': {
                   'a': {
                     'b': {
-                      'c': {
-                        'd': 0,
-                        'e': 1,
-                      },
+                      'c': {'d': 0, 'e': 1},
                       'f': 2,
                     },
                   },
@@ -1737,10 +1601,7 @@ void main() {
                 'example': {
                   'a': {
                     'b': {
-                      'c': {
-                        'd': 0,
-                        'e': 1,
-                      },
+                      'c': {'d': 0, 'e': 1},
                       'f': 2,
                       'g': 5,
                     },
@@ -1762,10 +1623,7 @@ void main() {
         scope.mockContent({
           'a': {
             'b': {
-              'c': {
-                'd': 0,
-                'e': 1,
-              },
+              'c': {'d': 0, 'e': 1},
               'f': 2,
             },
           },
@@ -1777,10 +1635,7 @@ void main() {
           'example': {
             'a': {
               'b': {
-                'c': {
-                  'd': 0,
-                  'e': 1,
-                },
+                'c': {'d': 0, 'e': 1},
                 'f': 2,
               },
             },
@@ -1791,10 +1646,7 @@ void main() {
           'example': {
             'a': {
               'b': {
-                'c': {
-                  'd': 10,
-                  'e': 11,
-                },
+                'c': {'d': 10, 'e': 11},
                 'f': 12,
               },
             },
@@ -1822,10 +1674,7 @@ void main() {
             'example': {
               'a': {
                 'b': {
-                  'c': {
-                    'd': 10,
-                    'e': 11,
-                  },
+                  'c': {'d': 10, 'e': 11},
                   'f': 12,
                 },
               },
@@ -1833,36 +1682,31 @@ void main() {
           });
 
           // Apply a second preset
-          scope.setPreset(
-            {
-              'example': {
-                'a': {
-                  'b': {
-                    'c': {'d': 20},
-                  },
+          scope.setPreset({
+            'example': {
+              'a': {
+                'b': {
+                  'c': {'d': 20},
                 },
               },
             },
-          );
+          });
 
           // The values of e and f are reset to their initial values.
           // The value of d is set to 20.
-          expect(
-            scope.preset(),
-            {
-              'example': {
-                'a': {
-                  'b': {
-                    'c': {
-                      'd': 20, // overridden by the preset
-                      'e': 1, // Reset to initial value
-                    },
-                    'f': 2, //  Reset to initial value
+          expect(scope.preset(), {
+            'example': {
+              'a': {
+                'b': {
+                  'c': {
+                    'd': 20, // overridden by the preset
+                    'e': 1, // Reset to initial value
                   },
+                  'f': 2, //  Reset to initial value
                 },
               },
             },
-          );
+          });
         },
       );
 
@@ -1875,10 +1719,7 @@ void main() {
             'example': {
               'a': {
                 'b': {
-                  'c': {
-                    'd': 10,
-                    'e': 11,
-                  },
+                  'c': {'d': 10, 'e': 11},
                   'f': 12,
                 },
               },
@@ -1886,37 +1727,31 @@ void main() {
           });
 
           // Apply a second preset with resetBefore = false
-          scope.setPreset(
-            {
-              'example': {
-                'a': {
-                  'b': {
-                    'c': {'d': 20},
-                  },
+          scope.setPreset({
+            'example': {
+              'a': {
+                'b': {
+                  'c': {'d': 20},
                 },
               },
             },
-            resetBefore: false,
-          );
+          }, resetBefore: false);
 
           // The values of e and f are NOT reset to their initial values.
           // The value of d is set to 20.
-          expect(
-            scope.preset(),
-            {
-              'example': {
-                'a': {
-                  'b': {
-                    'c': {
-                      'd': 20, // overridden by the preset
-                      'e': 11, // Not reset to initial value
-                    },
-                    'f': 12, //  Not reset to initial value
+          expect(scope.preset(), {
+            'example': {
+              'a': {
+                'b': {
+                  'c': {
+                    'd': 20, // overridden by the preset
+                    'e': 11, // Not reset to initial value
                   },
+                  'f': 12, //  Not reset to initial value
                 },
               },
             },
-          );
+          });
         },
       );
 
@@ -1961,17 +1796,12 @@ void main() {
           late final String message;
 
           try {
-            scope.setPreset({
-              'example': 'a',
-            });
+            scope.setPreset({'example': 'a'});
           } on Exception catch (e) {
             message = e.toString();
           }
 
-          expect(
-            message,
-            'Exception: Preset value must be a JSON object.',
-          );
+          expect(message, 'Exception: Preset value must be a JSON object.');
         });
 
         test('when a scope cannot be found', () {
@@ -1981,9 +1811,7 @@ void main() {
             scope.setPreset({
               'example': {
                 'a': {
-                  'b': {
-                    'UNKNOWN': <String, dynamic>{},
-                  },
+                  'b': {'UNKNOWN': <String, dynamic>{}},
                 },
               },
             });
@@ -2006,10 +1834,7 @@ void main() {
               'example': {
                 'a': {
                   'b': {
-                    'c': {
-                      'UNKNOWN': 0,
-                      'e': 1,
-                    },
+                    'c': {'UNKNOWN': 0, 'e': 1},
                   },
                 },
               },
@@ -2033,10 +1858,7 @@ void main() {
               'example': {
                 'a': {
                   'b': {
-                    'c': {
-                      'd': 'string',
-                      'e': 1,
-                    },
+                    'c': {'d': 'string', 'e': 1},
                   },
                 },
               },
@@ -2065,10 +1887,7 @@ void main() {
             'example': {
               'a': {
                 'b': {
-                  'c': {
-                    'd': 0,
-                    'e': 1,
-                  },
+                  'c': {'d': 0, 'e': 1},
                   'f': 2,
                   'g': 'ERROR. Must be an integer.',
                 },
@@ -2081,44 +1900,35 @@ void main() {
 
         // The preset should be reset to the previous state
         expect(hadError, isTrue);
-        expect(
-          scope.preset(),
-          preset1,
-        );
+        expect(scope.preset(), preset1);
       });
 
       group('returns a list of errors without throwing', () {
-        test(
-          'when throwOnErrors is false '
-          'and an errors array is set',
-          () {
-            const presetWithErrors = {
-              'example': {
-                'a': {
-                  'b': {
-                    'c': {
-                      'UNKNOWN_NODE': 0,
-                      'e': 1,
-                    },
-                  },
+        test('when throwOnErrors is false '
+            'and an errors array is set', () {
+          const presetWithErrors = {
+            'example': {
+              'a': {
+                'b': {
+                  'c': {'UNKNOWN_NODE': 0, 'e': 1},
                 },
-                'UNKNOWN_SCOPE': <String, dynamic>{},
               },
-            };
+              'UNKNOWN_SCOPE': <String, dynamic>{},
+            },
+          };
 
-            final errors = <String>[];
-            scope.setPreset(
-              presetWithErrors,
-              errors: errors,
-              throwOnErrors: false,
-            );
+          final errors = <String>[];
+          scope.setPreset(
+            presetWithErrors,
+            errors: errors,
+            throwOnErrors: false,
+          );
 
-            expect(errors, [
-              'Node "example.a.b.c.UNKNOWN_NODE" not found.',
-              'Scope "example.UNKNOWN_SCOPE" not found.',
-            ]);
-          },
-        );
+          expect(errors, [
+            'Node "example.a.b.c.UNKNOWN_NODE" not found.',
+            'Scope "example.UNKNOWN_SCOPE" not found.',
+          ]);
+        });
       });
 
       group('just resets everything when preset is empty', () {
@@ -2138,19 +1948,14 @@ void main() {
       test('does not export empty scopes', () {
         final scope = Scope.example();
         scope.mockContent({
-          'scopeWithValues': {
-            'b': 0,
-            'emptyScope': <String, dynamic>{},
-          },
+          'scopeWithValues': {'b': 0, 'emptyScope': <String, dynamic>{}},
           'emptyScope': <String, dynamic>{},
         });
 
         final preset = scope.preset();
         expect(preset, {
           'example': {
-            'scopeWithValues': {
-              'b': 0,
-            },
+            'scopeWithValues': {'b': 0},
           },
         });
       });
@@ -2176,8 +1981,9 @@ void main() {
 
               // Child nodes should find their own nodes
               final childScopeA = rootScope.child('childScopeA')!;
-              final childNodeAFromChild =
-                  childScopeA.findNode<int>('childNodeA');
+              final childNodeAFromChild = childScopeA.findNode<int>(
+                'childNodeA',
+              );
               expect(childNodeAFromChild?.key, 'childNodeA');
             });
 
@@ -2186,9 +1992,7 @@ void main() {
               scope.mockContent({
                 'a': {
                   'b': {
-                    'c0|c1|c2': {
-                      'd': 0,
-                    },
+                    'c0|c1|c2': {'d': 0},
                   },
                 },
               });
@@ -2214,12 +2018,8 @@ void main() {
                   'width': 600.0,
                   'depth': 615.0,
                   'panels': {
-                    'rightPanel': {
-                      'thickness': 19.0,
-                    },
-                    'leftPanel': {
-                      'thickness': 19.0,
-                    },
+                    'rightPanel': {'thickness': 19.0},
+                    'leftPanel': {'thickness': 19.0},
                     'bottomPanel': ScopeBluePrint(
                       key: 'bottomPanel',
                       nodes: [
@@ -2256,24 +2056,26 @@ void main() {
                 ).instantiate(scope: root);
 
                 // Add a NodeA to ChildScopeA
-                final nodeA =
-                    root.findChildScope('a.childScope')!.findOrCreateNode<int>(
-                          NodeBluePrint(
-                            key: 'node',
-                            initialProduct: 0,
-                            produce: (components, previous) => previous,
-                          ),
-                        );
+                final nodeA = root
+                    .findChildScope('a.childScope')!
+                    .findOrCreateNode<int>(
+                      NodeBluePrint(
+                        key: 'node',
+                        initialProduct: 0,
+                        produce: (components, previous) => previous,
+                      ),
+                    );
 
                 // Add a NodeA to ChildScopeA
-                final nodeB =
-                    root.findChildScope('b.childScope')!.findOrCreateNode<int>(
-                          NodeBluePrint(
-                            key: 'node',
-                            initialProduct: 0,
-                            produce: (components, previous) => previous,
-                          ),
-                        );
+                final nodeB = root
+                    .findChildScope('b.childScope')!
+                    .findOrCreateNode<int>(
+                      NodeBluePrint(
+                        key: 'node',
+                        initialProduct: 0,
+                        produce: (components, previous) => previous,
+                      ),
+                    );
 
                 // ChildScopeB should find the node in ChildScopeA
                 final Node<int>? foundNodeB = b.findNode<int>('node');
@@ -2292,16 +2094,12 @@ void main() {
                         'corners': {
                           'backTopRight': {
                             'leftPanelMiterCut': {
-                              'yInserts': {
-                                'somethingElse': 0,
-                              },
+                              'yInserts': {'somethingElse': 0},
                             },
                           },
                           'frontTopRight': {
                             'leftPanelMiterCut': {
-                              'yInserts': {
-                                'frontTopRightMiterCut': 0,
-                              },
+                              'yInserts': {'frontTopRightMiterCut': 0},
                             },
                           },
                         },
@@ -2310,9 +2108,7 @@ void main() {
                         'corners': {
                           'frontTopRight': {
                             'bottomPanelMiterCut': {
-                              'xInserts': {
-                                'frontTopRightMiterCut': 0,
-                              },
+                              'xInserts': {'frontTopRightMiterCut': 0},
                             },
                           },
                         },
@@ -2327,8 +2123,9 @@ void main() {
                   endsWith('yInserts.frontTopRightMiterCut'),
                 );
 
-                final startScope1 = scope
-                    .findChildScope('backTopRight.leftPanelMiterCut.yInserts')!;
+                final startScope1 = scope.findChildScope(
+                  'backTopRight.leftPanelMiterCut.yInserts',
+                )!;
 
                 expect(
                   startScope1.findNode<int>('frontTopRightMiterCut')!.path,
@@ -2342,27 +2139,22 @@ void main() {
               scope.mockContent({
                 'root': {
                   'corpus': {
-                    'bounds': {
-                      'xLeft': 0,
-                    },
+                    'bounds': {'xLeft': 0},
                     'corners': {
-                      'frontBottomLeft': {
-                        'x': 0,
-                      },
+                      'frontBottomLeft': {'x': 0},
                     },
                     'panels': {
                       'left': {
-                        'bounds': {
-                          'xLeft': 0,
-                        },
+                        'bounds': {'xLeft': 0},
                       },
                     },
                   },
                 },
               });
 
-              final frontBottomLeft =
-                  scope.findChildScope('corners.frontBottomLeft')!;
+              final frontBottomLeft = scope.findChildScope(
+                'corners.frontBottomLeft',
+              )!;
               final xLeft = frontBottomLeft.findNode<dynamic>('bounds.xLeft')!;
               expect(xLeft.path, endsWith('corpus.bounds.xLeft'));
             });
@@ -2371,8 +2163,9 @@ void main() {
               final root = ExampleScopeRoot(scm: Scm.testInstance);
 
               // Create a node somewhere deep in the hierarchy
-              final grandChildScope =
-                  root.child('childScopeA')!.child('grandChildScope')!;
+              final grandChildScope = root
+                  .child('childScopeA')!
+                  .child('grandChildScope')!;
 
               final grandChildNodeX = Node<int>(
                 bluePrint: NodeBluePrint<int>(
@@ -2384,8 +2177,9 @@ void main() {
               );
 
               // Search the node from the root
-              final foundGRandChildNodeX =
-                  root.findNode<int>('grandChildNodeX');
+              final foundGRandChildNodeX = root.findNode<int>(
+                'grandChildNodeX',
+              );
               expect(foundGRandChildNodeX, grandChildNodeX);
             });
           });
@@ -2440,51 +2234,39 @@ void main() {
               });
               test('and the scope key is an alias', () {
                 final scope = Scope.example();
-                scope.mockContent(
-                  {
-                    'a': {
-                      // .........................................
-                      // Create a first scope scA with the alias X
-                      'scA': const ScopeBluePrint(
-                        key: 'scA',
-                        aliases: ['x'],
+                scope.mockContent({
+                  'a': {
+                    // .........................................
+                    // Create a first scope scA with the alias X
+                    'scA': const ScopeBluePrint(
+                      key: 'scA',
+                      aliases: ['x'],
 
-                        // The scope has a child scope
-                        children: [
-                          ScopeBluePrint(key: 'scAChild0'),
-                        ],
+                      // The scope has a child scope
+                      children: [ScopeBluePrint(key: 'scAChild0')],
 
-                        // And a node
-                        nodes: [
-                          NodeBluePrint<int>(
-                            key: 'scANode',
-                            initialProduct: 0,
-                          ),
-                        ],
-                      ),
+                      // And a node
+                      nodes: [
+                        NodeBluePrint<int>(key: 'scANode', initialProduct: 0),
+                      ],
+                    ),
 
-                      // .........................................
-                      // Create a second scope scB, also with the alias X
-                      'scB': const ScopeBluePrint(
-                        key: 'scB',
-                        aliases: ['x'],
+                    // .........................................
+                    // Create a second scope scB, also with the alias X
+                    'scB': const ScopeBluePrint(
+                      key: 'scB',
+                      aliases: ['x'],
 
-                        // The scope has also a child scope
-                        children: [
-                          ScopeBluePrint(key: 'scAChild1'),
-                        ],
+                      // The scope has also a child scope
+                      children: [ScopeBluePrint(key: 'scAChild1')],
 
-                        // And it as also a node
-                        nodes: [
-                          NodeBluePrint<int>(
-                            key: 'scANode',
-                            initialProduct: 0,
-                          ),
-                        ],
-                      ),
-                    },
+                      // And it as also a node
+                      nodes: [
+                        NodeBluePrint<int>(key: 'scANode', initialProduct: 0),
+                      ],
+                    ),
                   },
-                );
+                });
 
                 // Get one of the child scopes
                 final scAChild0 = scope.findChildScope('scAChild0')!;
@@ -2519,19 +2301,14 @@ void main() {
           final scope = builder.scope;
           final hostB = scope.findNode<int>('hostB')!;
 
-          expect(
-            hostB.inserts.map(
-              (e) => e.key,
-            ),
-            [
-              // Currently we instantiate the root builders first
-              'p0Add111',
-              'p1MultiplyByTen',
+          expect(hostB.inserts.map((e) => e.key), [
+            // Currently we instantiate the root builders first
+            'p0Add111',
+            'p1MultiplyByTen',
 
-              // Followed by child builders
-              'c0MultiplyByTwo',
-            ],
-          );
+            // Followed by child builders
+            'c0MultiplyByTwo',
+          ]);
 
           // skipInserts is false. The insert node will be found.
           expect(
@@ -2552,10 +2329,7 @@ void main() {
           final scope = Scope.example();
           scope.mockContent({
             'a': {
-              'b': {
-                'c': 0,
-                'd': 1,
-              },
+              'b': {'c': 0, 'd': 1},
             },
           });
 
@@ -2563,21 +2337,12 @@ void main() {
           final d = scope.findNode<int>('a.b.d')!;
 
           // Search without excludeNodes
-          expect(
-            scope.findNode<int>('a.b.c', excludedNodes: []),
-            c,
-          );
+          expect(scope.findNode<int>('a.b.c', excludedNodes: []), c);
 
           // Search with excludeNodes
-          expect(
-            scope.findNode<int>('a.b.c', excludedNodes: [c]),
-            isNull,
-          );
+          expect(scope.findNode<int>('a.b.c', excludedNodes: [c]), isNull);
 
-          expect(
-            scope.findNode<int>('a.b.d', excludedNodes: [c]),
-            d,
-          );
+          expect(scope.findNode<int>('a.b.d', excludedNodes: [c]), d);
         });
       });
 
@@ -2588,9 +2353,9 @@ void main() {
             () => rootScope.findNode<String>('rootA'),
             throwsA(
               predicate<ArgumentError>(
-                (e) => e
-                    .toString()
-                    .contains('Node with key "rootA" is not of type String'),
+                (e) => e.toString().contains(
+                  'Node with key "rootA" is not of type String',
+                ),
               ),
             ),
           );
@@ -2616,10 +2381,10 @@ void main() {
             throwsA(
               predicate<ArgumentError>(
                 (e) => e.toString().contains(
-                      'Scope "exampleRoot": More than one node '
-                      'with key "grandChildNodeA" and '
-                      'Type<int> found:',
-                    ),
+                  'Scope "exampleRoot": More than one node '
+                  'with key "grandChildNodeA" and '
+                  'Type<int> found:',
+                ),
               ),
             ),
           );
@@ -2634,10 +2399,7 @@ void main() {
               'n0': 0,
               'b': {
                 'n1': 1,
-                'c': {
-                  'n0': 0,
-                  'n2': 2,
-                },
+                'c': {'n0': 0, 'n2': 2},
               },
             },
           });
@@ -2677,17 +2439,11 @@ void main() {
             'n': 3,
             'b': {
               'n': 4,
-              'c': {
-                'n': 5,
-              },
+              'c': {'n': 5},
             },
-            'd': {
-              'n': 6,
-            },
+            'd': {'n': 6},
           },
-          'e': {
-            'n': 6,
-          },
+          'e': {'n': 6},
         });
 
         scope.scm.testFlushTasks();
@@ -2713,19 +2469,13 @@ void main() {
       scope.mockContent({
         'a': {
           'b': {
-            'c': {
-              'd': 0,
-            },
+            'c': {'d': 0},
           },
-          'f': {
-            'g': 1,
-          },
+          'f': {'g': 1},
           'e': {
             'f': {
               'g': 2,
-              'f': {
-                'h': 3,
-              },
+              'f': {'h': 3},
             },
           },
         },
@@ -2742,11 +2492,13 @@ void main() {
             expect(c.key, 'c');
           });
 
-          test('if the address matches a scope with a sub part of the path',
-              () {
-            final b = scope.findScope('a.b')!;
-            expect(b.key, 'b');
-          });
+          test(
+            'if the address matches a scope with a sub part of the path',
+            () {
+              final b = scope.findScope('a.b')!;
+              expect(b.key, 'b');
+            },
+          );
 
           test('if the address matches a scope in the parent', () {
             final c = scope.findScope('a')!;
@@ -2791,8 +2543,8 @@ void main() {
             throwsA(
               predicate<ArgumentError>(
                 (e) => e.toString().contains(
-                      'Scope with path "a.b.c.d" not found.',
-                    ),
+                  'Scope with path "a.b.c.d" not found.',
+                ),
               ),
             ),
           );
@@ -2857,16 +2609,14 @@ void main() {
           final scope = Scope.example();
           expect(
             () => scope.mockContent({
-              'a': {
-                'unsupported': TestEnum.a,
-              },
+              'a': {'unsupported': TestEnum.a},
             }),
             throwsA(
               predicate<ArgumentError>(
                 (e) => e.toString().contains(
-                      'Type TestEnum not supported. '
-                      'Use NodeBluePrint<TestEnum> instead.',
-                    ),
+                  'Type TestEnum not supported. '
+                  'Use NodeBluePrint<TestEnum> instead.',
+                ),
               ),
             ),
           );
@@ -2883,8 +2633,8 @@ void main() {
             throwsA(
               predicate<ArgumentError>(
                 (e) => e.toString().contains(
-                      'Lists must only contain ScopeBluePrints.',
-                    ),
+                  'Lists must only contain ScopeBluePrints.',
+                ),
               ),
             ),
           );
@@ -2897,9 +2647,7 @@ void main() {
         final scope = Scope.example();
         scope.mockContent({
           'a': {
-            'b': {
-              'node0': 0,
-            },
+            'b': {'node0': 0},
           },
         });
         final bluePrint = ScBuilderBluePrint.example.bluePrint;
@@ -2925,9 +2673,7 @@ void main() {
         scope = Scope.example();
         scope.mockContent({
           'a': {
-            'b': {
-              'c': 0,
-            },
+            'b': {'c': 0},
           },
         });
       }
@@ -2969,8 +2715,7 @@ void main() {
         });
 
         group('isMetaScope', () {
-          test(
-              'should return true if a scope is a meta scope '
+          test('should return true if a scope is a meta scope '
               'and false otherwise', () {
             expect(scope.findChildScope('on')!.isMetaScope, isTrue);
             expect(scope.findChildScope('a.on')!.isMetaScope, isTrue);
@@ -3011,10 +2756,7 @@ void main() {
             'b': {
               'b0': 1,
               'b1': 2,
-              'c': {
-                'c0': 0,
-                'c1': 1,
-              },
+              'c': {'c0': 0, 'c1': 1},
             },
           },
         });
@@ -3133,8 +2875,7 @@ void main() {
           expect(onChange.key, 'changeRecursive');
         });
 
-        test(
-            'should allow to observe all changes of in a scope '
+        test('should allow to observe all changes of in a scope '
             'and its child scopes.', () {
           // ........................................
           // Create nodes observing scopes a,b and e
@@ -3227,22 +2968,18 @@ void main() {
         late Scope scope;
         late Scm scm;
 
-        setUp(
-          () {
-            scope = Scope.example();
-            scm = scope.scm;
+        setUp(() {
+          scope = Scope.example();
+          scm = scope.scm;
 
-            scope.mockContent({
-              'a|b|c': {
-                'd': {
-                  'e': {
-                    'f': 0,
-                  },
-                },
+          scope.mockContent({
+            'a|b|c': {
+              'd': {
+                'e': {'f': 0},
               },
-            });
-          },
-        );
+            },
+          });
+        });
 
         test('with child', () {
           expect(scope.child('a')?.key, 'a');
@@ -3314,22 +3051,18 @@ void main() {
         late Scope scope;
         late Scm scm;
 
-        setUp(
-          () {
-            scope = Scope.example();
-            scm = scope.scm;
+        setUp(() {
+          scope = Scope.example();
+          scm = scope.scm;
 
-            scope.mockContent({
-              'a': {
-                'b|c|d': {
-                  'e': {
-                    'f': 0,
-                  },
-                },
+          scope.mockContent({
+            'a': {
+              'b|c|d': {
+                'e': {'f': 0},
               },
-            });
-          },
-        );
+            },
+          });
+        });
 
         test('with findNode', () {
           expect(scope.findNode<int>('a.b.e.f')?.key, 'f');
@@ -3400,22 +3133,18 @@ void main() {
         late Scope scope;
         late Scm scm;
 
-        setUp(
-          () {
-            scope = Scope.example();
-            scm = scope.scm;
+        setUp(() {
+          scope = Scope.example();
+          scm = scope.scm;
 
-            scope.mockContent({
-              'a': {
-                'b|c|d': {
-                  'e|e1|e2': {
-                    'f': 0,
-                  },
-                },
+          scope.mockContent({
+            'a': {
+              'b|c|d': {
+                'e|e1|e2': {'f': 0},
               },
-            });
-          },
-        );
+            },
+          });
+        });
 
         test('with findNode', () {
           expect(scope.findNode<int>('a.b.e.f')?.key, 'f');
@@ -3509,10 +3238,12 @@ void main() {
 
         // Create a customer and a supplier scope with an owner
         final scope = Scope.example();
-        final s = const ScopeBluePrint(key: 's')
-            .instantiate(scope: scope, owner: owner);
-        final c = const ScopeBluePrint(key: 'c')
-            .instantiate(scope: scope, owner: owner);
+        final s = const ScopeBluePrint(
+          key: 's',
+        ).instantiate(scope: scope, owner: owner);
+        final c = const ScopeBluePrint(
+          key: 'c',
+        ).instantiate(scope: scope, owner: owner);
 
         // Instantiate a customer and a supplier node
         const NodeBluePrint<int>(
@@ -3536,8 +3267,10 @@ void main() {
         expect(didEraseCalls, isEmpty);
 
         // Recreate the supplier
-        const NodeBluePrint<int>(key: 's', initialProduct: 0)
-            .instantiate(scope: s);
+        const NodeBluePrint<int>(
+          key: 's',
+          initialProduct: 0,
+        ).instantiate(scope: s);
 
         // The disposed scope s should be recreated
         expect(willUndisposeCalls, [s]);
@@ -3570,20 +3303,20 @@ void main() {
         expect(scope.isSmartScope, isTrue);
       });
 
-      test('should be tree if the scope is instantiated within a smart scope',
-          () {
-        final scope = Scope.example(smartMaster: ['x', 'y']);
-        scope.mockContent({
-          'a': {
-            'b': {
-              'c': 0,
+      test(
+        'should be tree if the scope is instantiated within a smart scope',
+        () {
+          final scope = Scope.example(smartMaster: ['x', 'y']);
+          scope.mockContent({
+            'a': {
+              'b': {'c': 0},
             },
-          },
-        });
+          });
 
-        expect(scope.findScope('a')!.isSmartScope, isTrue);
-        expect(scope.findScope('b')!.isSmartScope, isTrue);
-      });
+          expect(scope.findScope('a')!.isSmartScope, isTrue);
+          expect(scope.findScope('b')!.isSmartScope, isTrue);
+        },
+      );
 
       test('should be false for meta scopes', () {
         final smartScope = Scope.example(smartMaster: ['x', 'y']);
@@ -3605,20 +3338,20 @@ void main() {
         expect(scope.smartMaster, ['a', 'b']);
       });
 
-      test('should be the path between the parent smart scope and the scope',
-          () {
-        final scope = Scope.example(smartMaster: ['x', 'y']);
-        scope.mockContent({
-          'a': {
-            'b': {
-              'c': 0,
+      test(
+        'should be the path between the parent smart scope and the scope',
+        () {
+          final scope = Scope.example(smartMaster: ['x', 'y']);
+          scope.mockContent({
+            'a': {
+              'b': {'c': 0},
             },
-          },
-        });
+          });
 
-        expect(scope.findScope('a')!.smartMaster, ['x', 'y', 'a']);
-        expect(scope.findScope('b')!.smartMaster, ['x', 'y', 'a', 'b']);
-      });
+          expect(scope.findScope('a')!.smartMaster, ['x', 'y', 'a']);
+          expect(scope.findScope('b')!.smartMaster, ['x', 'y', 'a', 'b']);
+        },
+      );
 
       test('should be falseempty for meta scopes', () {
         final smartScope = Scope.example(smartMaster: ['x', 'y']);

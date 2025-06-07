@@ -10,16 +10,13 @@ import 'package:test/test.dart';
 
 void main() {
   group('ScheduleTask', () {
-    test(
-      'should work fine',
-      () {
-        final messages = <String>[];
+    test('should work fine', () {
+      final messages = <String>[];
 
-        exampleTask();
+      exampleTask();
 
-        exampleScheduleTask(() => messages.add('exampleTask'));
-        expect(messages[0], 'exampleTask');
-      },
-    );
+      exampleScheduleTask(() => messages.add('exampleTask'));
+      expect(messages[0], 'exampleTask');
+    });
   });
 }

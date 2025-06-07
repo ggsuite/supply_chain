@@ -39,13 +39,15 @@ void main() {
         final scopeA = scope.findChildScope('a')!;
         final scopeB = scope.findChildScope('b')!;
 
-        final hostA1 =
-            const NodeBluePrint<int>(key: 'hostA1', initialProduct: 11)
-                .instantiate(scope: scopeA);
+        final hostA1 = const NodeBluePrint<int>(
+          key: 'hostA1',
+          initialProduct: 11,
+        ).instantiate(scope: scopeA);
 
-        final hostB1 =
-            const NodeBluePrint<int>(key: 'hostB1', initialProduct: 12)
-                .instantiate(scope: scopeB);
+        final hostB1 = const NodeBluePrint<int>(
+          key: 'hostB1',
+          initialProduct: 12,
+        ).instantiate(scope: scopeB);
 
         // The builders are applied to the newly added nodes
         expect(hostA1.inserts, hasLength(2));
@@ -63,8 +65,7 @@ void main() {
     });
 
     group('should throw', () {
-      test(
-          'test when another builder with the same key '
+      test('test when another builder with the same key '
           'already exists in scope', () {
         // Create a scope
         final scope = Scope.example();
@@ -119,9 +120,7 @@ void main() {
         // Create a scope with one child scope
         final scopeBluePrint = ScopeBluePrint.fromJson({
           'parent': {
-            'child': {
-              'node': 0,
-            },
+            'child': {'node': 0},
           },
         });
 
@@ -176,8 +175,9 @@ void main() {
               final add = components.first as bool;
               final container = hostScope.findScope('container')!;
               if (add) {
-                const ScopeBluePrint(key: 'panel')
-                    .instantiate(scope: container);
+                const ScopeBluePrint(
+                  key: 'panel',
+                ).instantiate(scope: container);
               } else {
                 container.child('panel')?.dispose();
               }
@@ -190,9 +190,7 @@ void main() {
 
           // Add a panel to the scope
           ScopeBluePrint.fromJson({
-            'panel': {
-              'height': 100,
-            },
+            'panel': {'height': 100},
           }).instantiate(scope: scope);
 
           scope.scm.testFlushTasks();
@@ -246,16 +244,11 @@ void main() {
           final panelCreator = ScBuilderBluePrint(
             key: 'panelCreator',
             shouldProcessChildren: (scope) => scope.key != 'panel',
-            shouldProcessScope: (scope) => const [
-              'example',
-              'container',
-              'panel',
-            ].contains(scope.key),
+            shouldProcessScope: (scope) =>
+                const ['example', 'container', 'panel'].contains(scope.key),
             addScopes: ({required hostScope}) {
               if (hostScope.key == 'container') {
-                return [
-                  const ScopeBluePrint(key: 'panel'),
-                ];
+                return [const ScopeBluePrint(key: 'panel')];
               }
 
               return [];
@@ -271,9 +264,7 @@ void main() {
 
           // Add a panel to the scope
           ScopeBluePrint.fromJson({
-            'panel': {
-              'height': 100,
-            },
+            'panel': {'height': 100},
           }).instantiate(scope: scope);
 
           scope.scm.testFlushTasks();
@@ -311,8 +302,9 @@ void main() {
         expect(scope.node<int>('didCallOnInstantiate')?.product, 1);
 
         // Add a child scope
-        final child =
-            const ScopeBluePrint(key: 'child').instantiate(scope: scope);
+        final child = const ScopeBluePrint(
+          key: 'child',
+        ).instantiate(scope: scope);
 
         // The onInstantiate method should not be called for children
         expect(child.node<int>('didCallOnInstantiate'), isNull);

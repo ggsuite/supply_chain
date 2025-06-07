@@ -15,10 +15,7 @@ class Insert<T> extends Node<T> {
     required this.host,
     Scope? scope,
     int? index,
-  }) : super(
-          scope: scope ?? host.scope,
-          isInsert: true,
-        ) {
+  }) : super(scope: scope ?? host.scope, isInsert: true) {
     _insertInsert(index);
     _prepareRemoval();
   }
@@ -63,10 +60,7 @@ class Insert<T> extends Node<T> {
     int? index,
   }) {
     host ??= Node.example();
-    final bluePrint = NodeBluePrint.example(
-      key: key,
-      produce: produce,
-    );
+    final bluePrint = NodeBluePrint.example(key: key, produce: produce);
     final insert = bluePrint.instantiateAsInsert(
       host: host,
       scope: host.scope,
@@ -89,11 +83,13 @@ class Insert<T> extends Node<T> {
     }
 
     // Get the previous and following insert
-    final previousInsert =
-        index == 0 ? null : host.inserts.elementAt(index - 1);
+    final previousInsert = index == 0
+        ? null
+        : host.inserts.elementAt(index - 1);
 
-    final followingInsert =
-        index >= host.inserts.length ? null : host.inserts.elementAt(index);
+    final followingInsert = index >= host.inserts.length
+        ? null
+        : host.inserts.elementAt(index);
 
     // Connect previous and following insert to the new insert
     previousInsert?.output = this;
@@ -114,8 +110,9 @@ class Insert<T> extends Node<T> {
     final index = inserts.indexOf(this);
 
     final previousInsert = index > 0 ? inserts[index - 1] : null;
-    final followingInsert =
-        index < inserts.length - 1 ? inserts[index + 1] : null;
+    final followingInsert = index < inserts.length - 1
+        ? inserts[index + 1]
+        : null;
 
     previousInsert?.output = followingInsert ?? host;
     followingInsert?.input = previousInsert ?? host;
@@ -130,7 +127,6 @@ class Insert<T> extends Node<T> {
       // The product of the newly last insert needs to be written to the host
       host.insertResult = previousInsert?.originalProduct;
     }
-
     // If this insert is not the last insert, the following insert needs to be
     // nominated
     else {

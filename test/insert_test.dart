@@ -28,11 +28,13 @@ void main() {
       final scope = host.scope;
       final scm = host.scope.scm;
 
-      final customer0 =
-          host.bluePrint.forwardTo('customer0').instantiate(scope: scope);
+      final customer0 = host.bluePrint
+          .forwardTo('customer0')
+          .instantiate(scope: scope);
 
-      final customer1 =
-          host.bluePrint.forwardTo('customer1').instantiate(scope: scope);
+      final customer1 = host.bluePrint
+          .forwardTo('customer1')
+          .instantiate(scope: scope);
 
       // Check the initial product
       scm.testFlushTasks();
@@ -171,8 +173,10 @@ void main() {
         final scope = Scope.example();
         final scm = scope.scm;
 
-        final host = const NodeBluePrint(key: 'host', initialProduct: 1)
-            .instantiate(scope: scope);
+        final host = const NodeBluePrint(
+          key: 'host',
+          initialProduct: 1,
+        ).instantiate(scope: scope);
 
         final insert = NodeBluePrint(
           key: 'insert0',
@@ -199,8 +203,10 @@ void main() {
       test('with two inserts', () {
         final scope = Scope.example();
         final scm = scope.scm;
-        final host = const NodeBluePrint(key: 'host', initialProduct: 1)
-            .instantiate(scope: scope);
+        final host = const NodeBluePrint(
+          key: 'host',
+          initialProduct: 1,
+        ).instantiate(scope: scope);
 
         final insert0 = NodeBluePrint(
           key: 'insert0',
@@ -239,16 +245,21 @@ void main() {
         final scm = scope.scm;
 
         // Create a host node
-        final host = const NodeBluePrint(key: 'host', initialProduct: 1)
-            .instantiate(scope: scope);
+        final host = const NodeBluePrint(
+          key: 'host',
+          initialProduct: 1,
+        ).instantiate(scope: scope);
 
         // Add a customer to the host node
-        final customer =
-            host.bluePrint.forwardTo('customer').instantiate(scope: scope);
+        final customer = host.bluePrint
+            .forwardTo('customer')
+            .instantiate(scope: scope);
 
         // Create a supplier that delivers a factor
-        final factor = const NodeBluePrint(key: 'factor', initialProduct: 10)
-            .instantiate(scope: scope);
+        final factor = const NodeBluePrint(
+          key: 'factor',
+          initialProduct: 10,
+        ).instantiate(scope: scope);
 
         // Create a insert that multiplies the product with the factor
         final insert0 = NodeBluePrint(
@@ -291,15 +302,12 @@ void main() {
     group('should throw', () {
       test('when index is too big', () {
         final host = Node.example();
-        NodeBluePrint.example(key: 'insert0').instantiateAsInsert(
-          host: host,
-        );
+        NodeBluePrint.example(key: 'insert0').instantiateAsInsert(host: host);
 
         expect(
-          () => NodeBluePrint.example(key: 'insert1').instantiateAsInsert(
-            host: host,
-            index: 2,
-          ),
+          () => NodeBluePrint.example(
+            key: 'insert1',
+          ).instantiateAsInsert(host: host, index: 2),
           throwsA(
             isA<ArgumentError>().having(
               (p0) {
@@ -315,10 +323,9 @@ void main() {
         final host = Node.example();
 
         expect(
-          () => NodeBluePrint.example(key: 'insert0').instantiateAsInsert(
-            host: host,
-            index: -1,
-          ),
+          () => NodeBluePrint.example(
+            key: 'insert0',
+          ).instantiateAsInsert(host: host, index: -1),
           throwsA(
             isA<ArgumentError>().having(
               (p0) {

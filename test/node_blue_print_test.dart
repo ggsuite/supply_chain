@@ -230,10 +230,7 @@ void main() {
         testSetNextKeyCounter(0);
         final bluePrint = NodeBluePrint.example();
         final scope = Scope.example();
-        final node = Node<int>(
-          bluePrint: bluePrint,
-          scope: scope,
-        );
+        final node = Node<int>(bluePrint: bluePrint, scope: scope);
         expect(bluePrint.instantiate(scope: scope), node);
       });
 
@@ -279,8 +276,9 @@ void main() {
         });
 
         test('when smart master list does not change', () {
-          final bluePrint =
-              NodeBluePrint.example().copyWith(smartMaster: ['a', 'b', 'c']);
+          final bluePrint = NodeBluePrint.example().copyWith(
+            smartMaster: ['a', 'b', 'c'],
+          );
           final newBluePrint = bluePrint.copyWith(smartMaster: ['a', 'b', 'c']);
           expect(newBluePrint, same(bluePrint));
         });
@@ -302,19 +300,19 @@ void main() {
           expect(newBluePrint.suppliers, ['supplier2']);
           expect(newBluePrint.produce([], 0), 2);
           expect(newBluePrint.canBeSmart, !bluePrint.canBeSmart);
-          expect(
-            newBluePrint.copyWith(canBeSmart: true).smartMaster,
-            ['other'],
-          );
+          expect(newBluePrint.copyWith(canBeSmart: true).smartMaster, [
+            'other',
+          ]);
         });
       });
 
       test('should apply builders', () {
         final builder = ScBuilder.example();
         final scope = builder.scope;
-        final newNode =
-            const NodeBluePrint<int>(key: 'hostX', initialProduct: 0)
-                .instantiate(scope: scope);
+        final newNode = const NodeBluePrint<int>(
+          key: 'hostX',
+          initialProduct: 0,
+        ).instantiate(scope: scope);
         expect(newNode.inserts, isNotEmpty);
       });
     });
@@ -351,8 +349,10 @@ void main() {
             },
             'c': {
               // Here we are forwarding the value from b.n0 to c.n1
-              'n1': const NodeBluePrint<int>(key: 'n1', initialProduct: 374)
-                  .connectSupplier('b.n0'),
+              'n1': const NodeBluePrint<int>(
+                key: 'n1',
+                initialProduct: 374,
+              ).connectSupplier('b.n0'),
             },
           },
         });
@@ -410,10 +410,7 @@ void main() {
     });
 
     group('smart nodes', () {
-      const node = NodeBluePrint<int>(
-        key: 'node',
-        initialProduct: 0,
-      );
+      const node = NodeBluePrint<int>(key: 'node', initialProduct: 0);
 
       const smartNode = NodeBluePrint<int>(
         key: 'node',

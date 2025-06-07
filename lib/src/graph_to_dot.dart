@@ -78,10 +78,12 @@ class GraphToDot {
 
         // ..................................
         // Convert dot file to target format
-        final process = await Process.run(
-          'dot',
-          ['-T$format', tempPath, '-o$path', '-Gdpi=$dpi'],
-        );
+        final process = await Process.run('dot', [
+          '-T$format',
+          tempPath,
+          '-o$path',
+          '-Gdpi=$dpi',
+        ]);
         assert(process.exitCode == 0, process.stderr);
 
         // ..............
@@ -89,10 +91,12 @@ class GraphToDot {
         if (write2x && ['png', 'webp', 'jpg', 'jpeg'].contains(format)) {
           final path2x = path.replaceAll(RegExp('\\.$format\$'), '_2x.$format');
 
-          final process = await Process.run(
-            'dot',
-            ['-T$format', tempPath, '-o$path2x', '-Gdpi=${dpi * 2}'],
-          );
+          final process = await Process.run('dot', [
+            '-T$format',
+            tempPath,
+            '-o$path2x',
+            '-Gdpi=${dpi * 2}',
+          ]);
           assert(process.exitCode == 0, process.stderr);
         }
 
@@ -127,8 +131,9 @@ class GraphToDot {
       String height = heightMatch.group(1)!;
 
       // Regular expression to replace the viewBox values
-      RegExp viewBoxRegex =
-          RegExp(r'viewBox="\d+\.?\d*\s+\d+\.?\d*\s+\d+\.?\d*\s+\d+\.?\d*"');
+      RegExp viewBoxRegex = RegExp(
+        r'viewBox="\d+\.?\d*\s+\d+\.?\d*\s+\d+\.?\d*\s+\d+\.?\d*"',
+      );
       String newViewBox = 'viewBox="0.00 0.00 $width $height"';
 
       // Replace the viewBox in the SVG content
@@ -144,9 +149,7 @@ class GraphToDot {
 
   // ...........................................................................
   // Graph
-  String _dotNodes(
-    GraphScopeItem scopeItem,
-  ) {
+  String _dotNodes(GraphScopeItem scopeItem) {
     {
       var result = '';
       final scope = scopeItem.scope;
@@ -184,9 +187,7 @@ class GraphToDot {
 
       // Write the child scopes
       for (final childScope in scopeItem.children) {
-        result += _dotNodes(
-          childScope,
-        );
+        result += _dotNodes(childScope);
       }
 
       result += '\n}\n'; // cluster
@@ -196,9 +197,7 @@ class GraphToDot {
   }
 
   // ...........................................................................
-  String _dotEdges(
-    GraphScopeItem scopeItem,
-  ) {
+  String _dotEdges(GraphScopeItem scopeItem) {
     var result = '';
 
     // Write dependencies

@@ -9,9 +9,7 @@ import 'package:supply_chain/supply_chain.dart';
 /// Manages the nodes added by a builder
 class ScBuilderNodeAdder {
   /// The constructor
-  ScBuilderNodeAdder({
-    required this.builder,
-  }) {
+  ScBuilderNodeAdder({required this.builder}) {
     _check();
     _initOwner();
   }
@@ -34,11 +32,7 @@ class ScBuilderNodeAdder {
     scope.mockContent({
       'a': 1,
       'b': 2,
-      'c': {
-        'd': 4,
-        'e': 5,
-        'f': 'f',
-      },
+      'c': {'d': 4, 'e': 5, 'f': 'f'},
     });
 
     final builder = ExampleScBuilderAddingNodes().instantiate(scope: scope);
@@ -63,16 +57,12 @@ class ScBuilderNodeAdder {
 
   // ...........................................................................
   void _initOwner() {
-    _owner = Owner<Node<dynamic>>(
-      willErase: (p0) => managedNodes.remove(p0),
-    );
+    _owner = Owner<Node<dynamic>>(willErase: (p0) => managedNodes.remove(p0));
   }
 
   // ...........................................................................
   void _applyToScope(Scope scope) {
-    final bluePrints = builder.bluePrint.addNodes(
-      hostScope: scope,
-    );
+    final bluePrints = builder.bluePrint.addNodes(hostScope: scope);
 
     // Make sure the node does not already exist.
     for (final bluePrint in bluePrints) {
@@ -86,10 +76,7 @@ class ScBuilderNodeAdder {
     }
 
     // Add the nodes to the scope
-    final addedNodes = scope.findOrCreateNodes(
-      bluePrints,
-      owner: _owner,
-    );
+    final addedNodes = scope.findOrCreateNodes(bluePrints, owner: _owner);
 
     // Remember the managed nodes
     managedNodes.addAll(addedNodes);
@@ -99,8 +86,10 @@ class ScBuilderNodeAdder {
   void _check() {
     final nodes = builder.bluePrint.addNodes(hostScope: ScBuilder.testScope);
     if (nodes.isNotEmpty) {
-      throw Exception('ScScopeBluePrint.addNodes(hostScope) '
-          'must evaluate the hostScope and not add nodes to all scopes.');
+      throw Exception(
+        'ScScopeBluePrint.addNodes(hostScope) '
+        'must evaluate the hostScope and not add nodes to all scopes.',
+      );
     }
   }
 }
@@ -122,33 +111,19 @@ class ExampleScBuilderAddingNodes extends ScBuilderBluePrint {
   }
 
   @override
-  List<NodeBluePrint<dynamic>> addNodes({
-    required Scope hostScope,
-  }) {
+  List<NodeBluePrint<dynamic>> addNodes({required Scope hostScope}) {
     // Add k,j to example scope
     if (hostScope.key == 'example') {
       return const [
-        NodeBluePrint<int>(
-          key: 'k',
-          initialProduct: 12,
-        ),
-        NodeBluePrint<int>(
-          key: 'j',
-          initialProduct: 367,
-        ),
+        NodeBluePrint<int>(key: 'k', initialProduct: 12),
+        NodeBluePrint<int>(key: 'j', initialProduct: 367),
       ];
     }
     // Add x,y to c scope
     if (hostScope.key == 'c') {
       return const [
-        NodeBluePrint<int>(
-          key: 'x',
-          initialProduct: 966,
-        ),
-        NodeBluePrint<int>(
-          key: 'y',
-          initialProduct: 767,
-        ),
+        NodeBluePrint<int>(key: 'x', initialProduct: 966),
+        NodeBluePrint<int>(key: 'y', initialProduct: 767),
       ];
     } else {
       return []; // coverage:ignore-line

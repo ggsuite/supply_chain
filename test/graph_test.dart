@@ -12,11 +12,9 @@ import 'test_graphs.dart';
 void main() {
   late TestGraphs t;
 
-  setUp(
-    () {
-      t = TestGraphs();
-    },
-  );
+  setUp(() {
+    t = TestGraphs();
+  });
 
   group('GraphScopeItem', () {
     group('should throw', () {
@@ -26,10 +24,7 @@ void main() {
             scope: t.x.scope,
             children: [],
             nodeItems: [
-              GraphNodeItem(
-                node: t.x.scm.nodes.first,
-                shownCustomers: [],
-              ),
+              GraphNodeItem(node: t.x.scm.nodes.first, shownCustomers: []),
             ],
           ),
           throwsA(
@@ -57,10 +52,7 @@ void main() {
   group('GraphNodeItem', () {
     group('toString', () {
       test('should return the node.key', () {
-        final item = GraphNodeItem(
-          node: t.x,
-          shownCustomers: [],
-        );
+        final item = GraphNodeItem(node: t.x, shownCustomers: []);
         expect(item.toString(), t.x.key);
       });
     });
@@ -70,28 +62,25 @@ void main() {
     group('tree, dot', () {
       group('treeForNode', () {
         group('should print a node', () {
-          test(
-            'with no suppliers and customers',
-            () async {
-              // Create the tree
-              final tree = t.graph.treeForNode(node: t.x);
+          test('with no suppliers and customers', () async {
+            // Create the tree
+            final tree = t.graph.treeForNode(node: t.x);
 
-              // Create dot & mermaid
-              final dot = t.graph.dot(tree: tree);
-              expect(dot, isNotEmpty); // Is tested in graph_to_dot_test.dart
+            // Create dot & mermaid
+            final dot = t.graph.dot(tree: tree);
+            expect(dot, isNotEmpty); // Is tested in graph_to_dot_test.dart
 
-              final mermaid = t.graph.mermaid(tree: tree);
-              expect(
-                mermaid,
-                isNotEmpty,
-              ); // Is tested in graph_to_mermaid_test.dart
+            final mermaid = t.graph.mermaid(tree: tree);
+            expect(
+              mermaid,
+              isNotEmpty,
+            ); // Is tested in graph_to_mermaid_test.dart
 
-              // Check tree
-              expect(tree.isHighlighted, isFalse);
-              expect(tree.nodeItems.length, 1);
-              expect(tree.nodeItems.first.isHighlighted, false);
-            },
-          );
+            // Check tree
+            expect(tree.isHighlighted, isFalse);
+            expect(tree.nodeItems.length, 1);
+            expect(tree.nodeItems.first.isHighlighted, false);
+          });
 
           group('with direct suppliers', () {
             test('when supplierDepth == 1', () {
@@ -229,10 +218,7 @@ void main() {
               // Check tree
               for (final node in t.allNodes) {
                 final isHighlighted = highlightedNodes.contains(node);
-                expect(
-                  tree.findNodeItem(node)?.isHighlighted,
-                  isHighlighted,
-                );
+                expect(tree.findNodeItem(node)?.isHighlighted, isHighlighted);
               }
 
               // .........
@@ -285,133 +271,115 @@ void main() {
           });
 
           group('with one parent scope', () {
-            test(
-              'when parentScopeDepth == 1',
-              () async {
-                // Create the tree
-                final l1 = t.graph.treeForScope(
-                  scope: t.level0,
-                  parentScopeDepth: 1,
-                );
+            test('when parentScopeDepth == 1', () async {
+              // Create the tree
+              final l1 = t.graph.treeForScope(
+                scope: t.level0,
+                parentScopeDepth: 1,
+              );
 
-                // Check tree
-                expect(l1.scope, t.level1);
-                expect(l1.children, hasLength(1));
-                expect(l1.nodeItems.length, 4);
-                expect(
-                  l1.nodeItems.map((e) => e.node),
-                  [t.s1, t.s0, t.c0, t.c1],
-                );
+              // Check tree
+              expect(l1.scope, t.level1);
+              expect(l1.children, hasLength(1));
+              expect(l1.nodeItems.length, 4);
+              expect(l1.nodeItems.map((e) => e.node), [t.s1, t.s0, t.c0, t.c1]);
 
-                final l0 = l1.children.first;
-                expect(l0.scope, t.level0);
-                expect(l0.children, isEmpty);
-                expect(l0.nodeItems.length, 1);
-                expect(l0.nodeItems.map((e) => e.node), [t.x]);
-              },
-            );
+              final l0 = l1.children.first;
+              expect(l0.scope, t.level0);
+              expect(l0.children, isEmpty);
+              expect(l0.nodeItems.length, 1);
+              expect(l0.nodeItems.map((e) => e.node), [t.x]);
+            });
           });
 
           group('with one child scope', () {
-            test(
-              'when childScopeDepth == 1',
-              () async {
-                // Create the tree
-                final l1 = t.graph.treeForScope(
-                  scope: t.level1,
-                  childScopeDepth: 1,
-                );
+            test('when childScopeDepth == 1', () async {
+              // Create the tree
+              final l1 = t.graph.treeForScope(
+                scope: t.level1,
+                childScopeDepth: 1,
+              );
 
-                // Check tree
-                expect(l1.scope, t.level1);
-                expect(l1.children, hasLength(1));
-                expect(l1.nodeItems.length, 4);
-                expect(
-                  l1.nodeItems.map((e) => e.node),
-                  [t.s1, t.s0, t.c0, t.c1],
-                );
+              // Check tree
+              expect(l1.scope, t.level1);
+              expect(l1.children, hasLength(1));
+              expect(l1.nodeItems.length, 4);
+              expect(l1.nodeItems.map((e) => e.node), [t.s1, t.s0, t.c0, t.c1]);
 
-                final l0 = l1.children.first;
-                expect(l0.scope, t.level0);
-                expect(l0.children, isEmpty);
-                expect(l0.nodeItems.length, 1);
-                expect(l0.nodeItems.map((e) => e.node), [t.x]);
-              },
-            );
+              final l0 = l1.children.first;
+              expect(l0.scope, t.level0);
+              expect(l0.children, isEmpty);
+              expect(l0.nodeItems.length, 1);
+              expect(l0.nodeItems.map((e) => e.node), [t.x]);
+            });
           });
 
           group('with all parent scopes', () {
-            test(
-              'when parentScopeDepth == -1',
-              () async {
-                // Create the tree
-                final root = t.graph.treeForScope(
-                  scope: t.level0,
-                  parentScopeDepth: -1,
-                );
+            test('when parentScopeDepth == -1', () async {
+              // Create the tree
+              final root = t.graph.treeForScope(
+                scope: t.level0,
+                parentScopeDepth: -1,
+              );
 
-                // Check tree
-                expect(root.scope, t.level0.root);
-                expect(root.children, hasLength(1));
-                expect(root.nodeItems, isEmpty);
+              // Check tree
+              expect(root.scope, t.level0.root);
+              expect(root.children, hasLength(1));
+              expect(root.nodeItems, isEmpty);
 
-                final butterFly = root.children.first;
+              final butterFly = root.children.first;
 
-                final l3 = butterFly.children.first;
-                expect(l3.scope, t.level3);
-                expect(l3.children, hasLength(1));
-                expect(l3.nodeItems.length, 2);
-                expect(l3.nodeItems.map((e) => e.node), [t.s111, t.c111]);
+              final l3 = butterFly.children.first;
+              expect(l3.scope, t.level3);
+              expect(l3.children, hasLength(1));
+              expect(l3.nodeItems.length, 2);
+              expect(l3.nodeItems.map((e) => e.node), [t.s111, t.c111]);
 
-                final l2 = l3.children.first;
-                expect(l2.scope, t.level2);
+              final l2 = l3.children.first;
+              expect(l2.scope, t.level2);
 
-                final l1 = l2.children.first;
-                expect(l1.scope, t.level1);
+              final l1 = l2.children.first;
+              expect(l1.scope, t.level1);
 
-                final l0 = l1.children.first;
-                expect(l0.scope, t.level0);
+              final l0 = l1.children.first;
+              expect(l0.scope, t.level0);
 
-                //
-              },
-            );
+              //
+            });
           });
 
           group('with all child scopes', () {
-            test(
-              'when childScopeDepth == -1',
-              () async {
-                final start = t.level0.root.children.first;
+            test('when childScopeDepth == -1', () async {
+              final start = t.level0.root.children.first;
 
-                // Create the tree
-                final root = t.graph.treeForScope(
-                  scope: start,
-                  childScopeDepth: -1,
-                );
+              // Create the tree
+              final root = t.graph.treeForScope(
+                scope: start,
+                childScopeDepth: -1,
+              );
 
-                // Check tree
-                expect(root.scope, start);
-                expect(root.children, hasLength(1));
-                expect(root.nodeItems, isEmpty);
+              // Check tree
+              expect(root.scope, start);
+              expect(root.children, hasLength(1));
+              expect(root.nodeItems, isEmpty);
 
-                final l3 = root.children.first;
-                expect(l3.scope, t.level3);
-                expect(l3.children, hasLength(1));
-                expect(l3.nodeItems.length, 2);
-                expect(l3.nodeItems.map((e) => e.node), [t.s111, t.c111]);
+              final l3 = root.children.first;
+              expect(l3.scope, t.level3);
+              expect(l3.children, hasLength(1));
+              expect(l3.nodeItems.length, 2);
+              expect(l3.nodeItems.map((e) => e.node), [t.s111, t.c111]);
 
-                final l2 = l3.children.first;
-                expect(l2.scope, t.level2);
+              final l2 = l3.children.first;
+              expect(l2.scope, t.level2);
 
-                final l1 = l2.children.first;
-                expect(l1.scope, t.level1);
+              final l1 = l2.children.first;
+              expect(l1.scope, t.level1);
 
-                final l0 = l1.children.first;
-                expect(l0.scope, t.level0);
+              final l0 = l1.children.first;
+              expect(l0.scope, t.level0);
 
-                //
-              },
-            );
+              //
+            });
           });
         });
 
@@ -445,13 +413,11 @@ void main() {
             // Create a scope hierarchy without nodes
 
             final scopesWithoutNodes = Scope.example()
-              ..mockContent(
-                {
-                  'a': {
-                    'b': {'c': <String, dynamic>{}},
-                  },
+              ..mockContent({
+                'a': {
+                  'b': {'c': <String, dynamic>{}},
                 },
-              );
+              });
 
             // Create a graph
             final graphNode = t.graph.treeForScope(
@@ -506,16 +472,6 @@ void main() {
             expect(tree.nodeItems.first.node, topNode);
           });
         });
-      });
-    });
-
-    group('fixViewBox', () {
-      test('should write width and height to the view box width and height',
-          () {
-        const svg =
-            '<svg width="98pt" height="103pt" viewBox="0.00 0.00 94.00 99.00"';
-        final fixed = GraphToDot.fixSvgViewBox(svg);
-        expect(fixed, contains('viewBox="0.00 0.00 98 103"'));
       });
     });
   });

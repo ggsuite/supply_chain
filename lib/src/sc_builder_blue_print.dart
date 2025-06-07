@@ -13,41 +13,38 @@ class ScBuilderBluePrint {
   const ScBuilderBluePrint({
     required this.key,
     this.needsUpdateSuppliers = const [],
-    List<ScopeBluePrint> Function({
-      required Scope hostScope,
-    })? addScopes,
+    List<ScopeBluePrint> Function({required Scope hostScope})? addScopes,
     bool Function(Scope scope)? shouldProcessChildren,
     bool Function(Scope scope)? shouldProcessScope,
     ScopeBluePrint Function({
       required Scope hostScope,
       required ScopeBluePrint scopeToBeReplaced,
-    })? replaceScope,
-    List<NodeBluePrint<dynamic>>? Function({
-      required Scope hostScope,
-    })? addNodes,
+    })?
+    replaceScope,
+    List<NodeBluePrint<dynamic>>? Function({required Scope hostScope})?
+    addNodes,
     NodeBluePrint<dynamic>? Function({
       required Scope hostScope,
       required Node<dynamic> nodeToBeReplaced,
-    })? replaceNode,
-    List<NodeBluePrint<dynamic>> Function({
-      required Node<dynamic> hostNode,
-    })? inserts,
+    })?
+    replaceNode,
+    List<NodeBluePrint<dynamic>> Function({required Node<dynamic> hostNode})?
+    inserts,
     void Function({
       required Scope hostScope,
       required List<dynamic> components,
-    })? needsUpdate,
-    List<ScBuilderBluePrint> Function({
-      required Scope hostScope,
-    })? children,
-  })  : _addScopes = addScopes,
-        _replaceScope = replaceScope,
-        _addNodes = addNodes,
-        _replaceNode = replaceNode,
-        _inserts = inserts,
-        _needsUpdate = needsUpdate,
-        _children = children,
-        _shouldProcessChildren = shouldProcessChildren,
-        _shouldProcessScope = shouldProcessScope;
+    })?
+    needsUpdate,
+    List<ScBuilderBluePrint> Function({required Scope hostScope})? children,
+  }) : _addScopes = addScopes,
+       _replaceScope = replaceScope,
+       _addNodes = addNodes,
+       _replaceNode = replaceNode,
+       _inserts = inserts,
+       _needsUpdate = needsUpdate,
+       _children = children,
+       _shouldProcessChildren = shouldProcessChildren,
+       _shouldProcessScope = shouldProcessScope;
 
   /// Instantiates this builder and it's children within the given hostScope
   ///
@@ -125,9 +122,7 @@ class ScBuilderBluePrint {
   ///
   /// - [hostScope]: The host scope the returned scopes will be added to
   /// - Returns: A list of scopes to be added to the host scope
-  List<ScopeBluePrint> addScopes({
-    required Scope hostScope,
-  }) {
+  List<ScopeBluePrint> addScopes({required Scope hostScope}) {
     return _addScopes?.call(hostScope: hostScope) ?? [];
   }
 
@@ -154,9 +149,7 @@ class ScBuilderBluePrint {
   ///
   /// - [hostScope]: The host scope the returned nodes will be added to
   /// - Returns: A list of nodes to be added to the host scope
-  List<NodeBluePrint<dynamic>> addNodes({
-    required Scope hostScope,
-  }) {
+  List<NodeBluePrint<dynamic>> addNodes({required Scope hostScope}) {
     return _addNodes?.call(hostScope: hostScope) ?? [];
   }
 
@@ -182,9 +175,7 @@ class ScBuilderBluePrint {
   /// Override this method to add inserts into a given node
   ///
   /// - [hostNode]: The host node the returned inserts will be added to
-  List<NodeBluePrint<dynamic>> inserts({
-    required Node<dynamic> hostNode,
-  }) {
+  List<NodeBluePrint<dynamic>> inserts({required Node<dynamic> hostNode}) {
     return _inserts?.call(hostNode: hostNode) ?? [];
   }
 
@@ -235,36 +226,36 @@ class ScBuilderBluePrint {
   // Private
   // ######################
 
-  final List<ScopeBluePrint> Function({
-    required Scope hostScope,
-  })? _addScopes;
+  final List<ScopeBluePrint> Function({required Scope hostScope})? _addScopes;
 
   final ScopeBluePrint Function({
     required Scope hostScope,
     required ScopeBluePrint scopeToBeReplaced,
-  })? _replaceScope;
+  })?
+  _replaceScope;
 
-  final List<NodeBluePrint<dynamic>>? Function({
-    required Scope hostScope,
-  })? _addNodes;
+  final List<NodeBluePrint<dynamic>>? Function({required Scope hostScope})?
+  _addNodes;
 
   final NodeBluePrint<dynamic>? Function({
     required Scope hostScope,
     required Node<dynamic> nodeToBeReplaced,
-  })? _replaceNode;
+  })?
+  _replaceNode;
 
   final List<NodeBluePrint<dynamic>> Function({
     required Node<dynamic> hostNode,
-  })? _inserts;
+  })?
+  _inserts;
 
-  final List<ScBuilderBluePrint> Function({
-    required Scope hostScope,
-  })? _children;
+  final List<ScBuilderBluePrint> Function({required Scope hostScope})?
+  _children;
 
   final void Function({
     required Scope hostScope,
     required List<dynamic> components,
-  })? _needsUpdate;
+  })?
+  _needsUpdate;
 
   final bool Function(Scope scope)? _shouldProcessChildren;
   final bool Function(Scope scope)? _shouldProcessScope;
@@ -325,9 +316,7 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
   /// All scopes with key 'b' will get a child builder
   @override
   List<ScBuilderBluePrint> children({required Scope hostScope}) {
-    return [
-      if (hostScope.key == 'b') const ExampleChildScBuilderBluePrint(),
-    ];
+    return [if (hostScope.key == 'b') const ExampleChildScBuilderBluePrint()];
   }
 
   // ...........................................................................
@@ -340,21 +329,14 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
     // starting with hosts
     final scope = Scope.example(
       builders: [
-        ExampleScBuilderBluePrint(
-          needsUpdateSuppliers: [
-            'a.other',
-          ],
-        ),
+        ExampleScBuilderBluePrint(needsUpdateSuppliers: ['a.other']),
       ],
       children: [
         ScopeBluePrint.fromJson({
           'a': {
             'hostA': 0xA,
             'other': 1,
-            'b': {
-              'hostB': 0xB,
-              'hostC': 0xC,
-            },
+            'b': {'hostB': 0xB, 'hostC': 0xC},
           },
         }),
       ],
@@ -387,10 +369,7 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
 
     // Create a node that counts how often onInstantiate was called
     final didCallOnInstantiate = hostScope.findOrCreateNode<int>(
-      const NodeBluePrint<int>(
-        key: 'didCallOnInstantiate',
-        initialProduct: 0,
-      ),
+      const NodeBluePrint<int>(key: 'didCallOnInstantiate', initialProduct: 0),
     );
 
     didCallOnInstantiate.product++;

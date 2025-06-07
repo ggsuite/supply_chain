@@ -12,11 +12,9 @@ import 'test_graphs.dart';
 void main() {
   late TestGraphs t;
 
-  setUp(
-    () {
-      t = TestGraphs();
-    },
-  );
+  setUp(() {
+    t = TestGraphs();
+  });
 
   void expectNodes(String result, List<Node<dynamic>> nodes) {
     for (final k in t.allNodeKeys) {
@@ -33,15 +31,9 @@ void main() {
     final expectedScopeKeys = scopes.map((s) => s.key);
     for (final k in t.allScopeKeys) {
       if (expectedScopeKeys.contains(k)) {
-        expect(
-          dot,
-          contains('label = "$k"; // scope'),
-        );
+        expect(dot, contains('label = "$k"; // scope'));
       } else {
-        expect(
-          dot,
-          isNot(contains('label = "$k"; // scope')),
-        );
+        expect(dot, isNot(contains('label = "$k"; // scope')));
       }
     }
   }
@@ -66,17 +58,17 @@ void main() {
     final expectedKeys = highlightedNodes.map((n) => n.key);
 
     RegExp regExp(String key) => RegExp(
-          [
-            // t.s0_3 [
-            '\\s+${key}_\\d+ \\[\n',
-            // label = "s01" // node
-            '\\s+label = "$key"; // node\n',
-            // style = filled;
-            '\\s+style = filled;\n',
-            // fillcolor = "#FFFFAA";
-            '\\s+fillcolor = "#FFFFAA";\n',
-          ].join(),
-        );
+      [
+        // t.s0_3 [
+        '\\s+${key}_\\d+ \\[\n',
+        // label = "s01" // node
+        '\\s+label = "$key"; // node\n',
+        // style = filled;
+        '\\s+style = filled;\n',
+        // fillcolor = "#FFFFAA";
+        '\\s+fillcolor = "#FFFFAA";\n',
+      ].join(),
+    );
 
     for (final key in t.allNodeKeys) {
       if (expectedKeys.contains(key)) {
@@ -87,24 +79,21 @@ void main() {
     }
   }
 
-  void expectHighlightedScopes(
-    String dot,
-    List<Scope> highlightedScopes,
-  ) {
+  void expectHighlightedScopes(String dot, List<Scope> highlightedScopes) {
     final expectedKeys = highlightedScopes.map((n) => n.key);
 
     RegExp regExp(String key) => RegExp(
-          [
-            // t.s0_3 [
-            '\\s+subgraph cluster_${key}_\\d+ \\{\n',
-            // label = "s01" // node
-            '\\s+label = "$key"; // scope\n',
-            // style = filled;
-            '\\s+style = filled;\n',
-            // fillcolor = "#AAFFFF88";
-            '\\s+fillcolor = "#AAFFFF88";\n',
-          ].join(),
-        );
+      [
+        // t.s0_3 [
+        '\\s+subgraph cluster_${key}_\\d+ \\{\n',
+        // label = "s01" // node
+        '\\s+label = "$key"; // scope\n',
+        // style = filled;
+        '\\s+style = filled;\n',
+        // fillcolor = "#AAFFFF88";
+        '\\s+fillcolor = "#AAFFFF88";\n',
+      ].join(),
+    );
 
     for (final key in t.allScopeKeys) {
       if (expectedKeys.contains(key)) {
@@ -156,10 +145,7 @@ void main() {
             scope: t.x.scope,
             children: [],
             nodeItems: [
-              GraphNodeItem(
-                node: t.x.scm.nodes.first,
-                shownCustomers: [],
-              ),
+              GraphNodeItem(node: t.x.scm.nodes.first, shownCustomers: []),
             ],
           ),
           throwsA(
@@ -187,10 +173,7 @@ void main() {
   group('GraphNodeItem', () {
     group('toString', () {
       test('should return the node.key', () {
-        final item = GraphNodeItem(
-          node: t.x,
-          shownCustomers: [],
-        );
+        final item = GraphNodeItem(node: t.x, shownCustomers: []);
         expect(item.toString(), t.x.key);
       });
     });
@@ -200,22 +183,19 @@ void main() {
     group('tree, dot', () {
       group('treeForNode', () {
         group('should print a node', () {
-          test(
-            'with no suppliers and customers',
-            () async {
-              // Create the tree
-              final tree = t.graph.treeForNode(node: t.x);
+          test('with no suppliers and customers', () async {
+            // Create the tree
+            final tree = t.graph.treeForNode(node: t.x);
 
-              // Create dot
-              final dot = t.graph.dot(tree: tree);
-              await writeDotFile(dot, '01');
+            // Create dot
+            final dot = t.graph.dot(tree: tree);
+            await writeDotFile(dot, '01');
 
-              // Check dot
-              expectNodes(dot, [t.x]);
-              expectScopes(dot, [t.level0]);
-              expectEdgeCount(dot, 0);
-            },
-          );
+            // Check dot
+            expectNodes(dot, [t.x]);
+            expectScopes(dot, [t.level0]);
+            expectEdgeCount(dot, 0);
+          });
 
           group('with direct suppliers', () {
             test('when supplierDepth == 1', () {
@@ -383,101 +363,89 @@ void main() {
           });
 
           group('with one parent scope', () {
-            test(
-              'when parentScopeDepth == 1',
-              () async {
-                // Create the tree
-                final l1 = t.graph.treeForScope(
-                  scope: t.level0,
-                  parentScopeDepth: 1,
-                );
+            test('when parentScopeDepth == 1', () async {
+              // Create the tree
+              final l1 = t.graph.treeForScope(
+                scope: t.level0,
+                parentScopeDepth: 1,
+              );
 
-                // Create dot
-                final dot = t.graph.dot(tree: l1);
-                await writeDotFile(dot, '09');
+              // Create dot
+              final dot = t.graph.dot(tree: l1);
+              await writeDotFile(dot, '09');
 
-                // Check dot
-                expectNodes(dot, [t.x, t.s1, t.s0, t.c0, t.c1]);
-                expectScopes(dot, [t.level0, t.level1]);
-                expectEdgeCount(dot, 4);
-                expectEdge(dot, t.s1, t.x);
-                expectEdge(dot, t.s0, t.x);
-                expectEdge(dot, t.x, t.c0);
-                expectEdge(dot, t.x, t.c1);
-              },
-            );
+              // Check dot
+              expectNodes(dot, [t.x, t.s1, t.s0, t.c0, t.c1]);
+              expectScopes(dot, [t.level0, t.level1]);
+              expectEdgeCount(dot, 4);
+              expectEdge(dot, t.s1, t.x);
+              expectEdge(dot, t.s0, t.x);
+              expectEdge(dot, t.x, t.c0);
+              expectEdge(dot, t.x, t.c1);
+            });
           });
 
           group('with one child scope', () {
-            test(
-              'when childScopeDepth == 1',
-              () async {
-                // Create the tree
-                final l1 = t.graph.treeForScope(
-                  scope: t.level1,
-                  childScopeDepth: 1,
-                );
+            test('when childScopeDepth == 1', () async {
+              // Create the tree
+              final l1 = t.graph.treeForScope(
+                scope: t.level1,
+                childScopeDepth: 1,
+              );
 
-                // Create dot
-                final dot = t.graph.dot(tree: l1);
-                await writeDotFile(dot, '10');
+              // Create dot
+              final dot = t.graph.dot(tree: l1);
+              await writeDotFile(dot, '10');
 
-                // Check dot
-                expectNodes(dot, [t.x, t.s1, t.s0, t.c0, t.c1]);
-                expectScopes(dot, [t.level0, t.level1]);
-                expectEdgeCount(dot, 4);
-                expectEdge(dot, t.s1, t.x);
-                expectEdge(dot, t.s0, t.x);
-                expectEdge(dot, t.x, t.c0);
-                expectEdge(dot, t.x, t.c1);
-              },
-            );
+              // Check dot
+              expectNodes(dot, [t.x, t.s1, t.s0, t.c0, t.c1]);
+              expectScopes(dot, [t.level0, t.level1]);
+              expectEdgeCount(dot, 4);
+              expectEdge(dot, t.s1, t.x);
+              expectEdge(dot, t.s0, t.x);
+              expectEdge(dot, t.x, t.c0);
+              expectEdge(dot, t.x, t.c1);
+            });
           });
 
           group('with all parent scopes', () {
-            test(
-              'when parentScopeDepth == -1',
-              () async {
-                // Create the tree
-                final root = t.graph.treeForScope(
-                  scope: t.level0,
-                  parentScopeDepth: -1,
-                );
+            test('when parentScopeDepth == -1', () async {
+              // Create the tree
+              final root = t.graph.treeForScope(
+                scope: t.level0,
+                parentScopeDepth: -1,
+              );
 
-                // Create dot
-                final dot = t.graph.dot(tree: root);
-                await writeDotFile(dot, '11');
+              // Create dot
+              final dot = t.graph.dot(tree: root);
+              await writeDotFile(dot, '11');
 
-                //// Check dot
-                expectNodes(dot, t.allNodes);
-                expectScopes(dot, [...t.allScopes, t.level0.root]);
-                expectEdgeCount(dot, 14);
-              },
-            );
+              //// Check dot
+              expectNodes(dot, t.allNodes);
+              expectScopes(dot, [...t.allScopes, t.level0.root]);
+              expectEdgeCount(dot, 14);
+            });
           });
 
           group('with all child scopes', () {
-            test(
-              'when childScopeDepth == -1',
-              () async {
-                final start = t.level0.root.children.first;
+            test('when childScopeDepth == -1', () async {
+              final start = t.level0.root.children.first;
 
-                // Create the tree
-                final root = t.graph.treeForScope(
-                  scope: start,
-                  childScopeDepth: -1,
-                );
+              // Create the tree
+              final root = t.graph.treeForScope(
+                scope: start,
+                childScopeDepth: -1,
+              );
 
-                // Create dot
-                final dot = t.graph.dot(tree: root);
-                await writeDotFile(dot, '12');
+              // Create dot
+              final dot = t.graph.dot(tree: root);
+              await writeDotFile(dot, '12');
 
-                //// Check dot
-                expectNodes(dot, t.allNodes);
-                expectScopes(dot, t.allScopes);
-                expectEdgeCount(dot, 14);
-              },
-            );
+              //// Check dot
+              expectNodes(dot, t.allNodes);
+              expectScopes(dot, t.allScopes);
+              expectEdgeCount(dot, 14);
+            });
           });
         });
 
@@ -515,13 +483,11 @@ void main() {
             // Create a scope hierarchy without nodes
 
             final scopesWithoutNodes = Scope.example()
-              ..mockContent(
-                {
-                  'a': {
-                    'b': {'c': <String, dynamic>{}},
-                  },
+              ..mockContent({
+                'a': {
+                  'b': {'c': <String, dynamic>{}},
                 },
-              );
+              });
 
             // Create a graph
             final graphNode = t.graph.treeForScope(
@@ -548,9 +514,7 @@ void main() {
               scope: emptyScope,
               childScopeDepth: -1,
             );
-            final dot = t.graph.dot(
-              tree: tree,
-            );
+            final dot = t.graph.dot(tree: tree);
             writeDotFile(dot, '13');
             expectEmptyScope(dot, emptyScope);
           });
@@ -558,21 +522,14 @@ void main() {
           test('multiple', () {
             final a = Scope.example(key: 'a');
             a.mockContent({
-              'b': {
-                'c': <String, dynamic>{},
-              },
+              'b': {'c': <String, dynamic>{}},
             });
 
             final b = a.findChildScope('b')!;
             final c = b.findChildScope('c')!;
 
-            final tree = t.graph.treeForScope(
-              scope: a,
-              childScopeDepth: -1,
-            );
-            final dot = t.graph.dot(
-              tree: tree,
-            );
+            final tree = t.graph.treeForScope(scope: a, childScopeDepth: -1);
+            final dot = t.graph.dot(tree: tree);
             writeDotFile(dot, '14');
             expectEmptyScope(dot, a);
             expectEmptyScope(dot, b);
@@ -615,28 +572,18 @@ void main() {
           });
 
           test('sibling node as customer', () {
-            final tree = t.graph.treeForNode(
-              node: leftNode,
-              customerDepth: 1,
-            );
+            final tree = t.graph.treeForNode(node: leftNode, customerDepth: 1);
 
             // Create dot
-            final dot = t.graph.dot(
-              tree: tree,
-            );
+            final dot = t.graph.dot(tree: tree);
             writeDotFile(dot, '16');
           });
 
           test('sibling node as supplier', () {
-            final tree = t.graph.treeForNode(
-              node: rightNode,
-              supplierDepth: 1,
-            );
+            final tree = t.graph.treeForNode(node: rightNode, supplierDepth: 1);
 
             // Create dot
-            final dot = t.graph.dot(
-              tree: tree,
-            );
+            final dot = t.graph.dot(tree: tree);
             writeDotFile(dot, '17');
           });
         });
@@ -644,8 +591,7 @@ void main() {
     });
 
     group('fixViewBox', () {
-      test('should write width and height to the view box width and height',
-          () {
+      test('should write width and height to the view box', () {
         const svg =
             '<svg width="98pt" height="103pt" viewBox="0.00 0.00 94.00 99.00"';
         final fixed = GraphToDot.fixSvgViewBox(svg);

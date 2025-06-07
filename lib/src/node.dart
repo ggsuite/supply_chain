@@ -17,10 +17,7 @@ typedef Customer<T> = Node<T>;
 typedef Worker<T> = Node<T>;
 
 /// Produce delegate
-typedef Produce<T> = T Function(
-  List<dynamic> components,
-  T previousProduct,
-);
+typedef Produce<T> = T Function(List<dynamic> components, T previousProduct);
 
 /// A node in a scope
 class Node<T> {
@@ -40,10 +37,10 @@ class Node<T> {
     required this.scope,
     this.isInsert = false,
     Owner<Node<dynamic>>? owner,
-  })  : scm = scope.scm,
-        _owner = owner,
-        _originalProduct = bluePrint.initialProduct,
-        assert(bluePrint.key.isCamelCase) {
+  }) : scm = scope.scm,
+       _owner = owner,
+       _originalProduct = bluePrint.initialProduct,
+       assert(bluePrint.key.isCamelCase) {
     _bluePrints.add(bluePrint);
     _init();
   }
@@ -83,7 +80,6 @@ class Node<T> {
     if (customers.isNotEmpty) {
       scm.disposedItems.addNode(this);
     }
-
     // Erase the node if it should not have customers relying on it
     else {
       _erase();
@@ -302,8 +298,8 @@ class Node<T> {
   /// The used priority. Is the highest priority of node and its customers
   Priority get priority =>
       (customerPriority != null && customerPriority!.value > ownPriority.value)
-          ? customerPriority!
-          : ownPriority;
+      ? customerPriority!
+      : ownPriority;
 
   // ...........................................................................
   // Production
@@ -330,10 +326,7 @@ class Node<T> {
       i++;
     }
 
-    final newProduct = bluePrint.produce(
-      _products,
-      previousProduct,
-    );
+    final newProduct = bluePrint.produce(_products, previousProduct);
 
     _throwIfNotAllowed(newProduct);
 
@@ -400,9 +393,7 @@ class Node<T> {
     // Make sure the keys match the blue print's suppliers
     final s = bluePrint.suppliers;
     for (var supplierKey in newSuppliers.keys) {
-      assert(
-        s.contains(supplierKey) || s.contains('..$supplierKey'),
-      );
+      assert(s.contains(supplierKey) || s.contains('..$supplierKey'));
     }
 
     // Reset old suppliers
@@ -526,7 +517,6 @@ class Node<T> {
   T get previousProduct => originalProduct;
 
   @protected
-
   /// The last insert will write it's result into this variable
   T? insertResult;
 
@@ -573,10 +563,7 @@ class Node<T> {
     scope ??= Scope.example(scm: Scm.testInstance);
     bluePrint ??= NodeBluePrint.example(key: key);
 
-    final result = Node<int>(
-      bluePrint: bluePrint,
-      scope: scope,
-    );
+    final result = Node<int>(bluePrint: bluePrint, scope: scope);
 
     // Realtime nodes will produce immediately
     result.ownPriority = Priority.realtime;
@@ -828,9 +815,11 @@ class Node<T> {
     // Check, if the new product is allowed
     if (bluePrint.allowedProducts.isNotEmpty) {
       if (!bluePrint.allowedProducts.contains(product)) {
-        throw ArgumentError('The product $product '
-            'is not in the list of allowed products '
-            '[${bluePrint.allowedProducts.join(', ')}].');
+        throw ArgumentError(
+          'The product $product '
+          'is not in the list of allowed products '
+          '[${bluePrint.allowedProducts.join(', ')}].',
+        );
       }
     }
   }
@@ -929,14 +918,10 @@ class Node<T> {
     }
 
     for (final supplier in suppliers) {
-      _detectCircularDependencies(
-        node,
-        supplier.suppliers,
-        [
-          ...visited,
-          supplier,
-        ],
-      );
+      _detectCircularDependencies(node, supplier.suppliers, [
+        ...visited,
+        supplier,
+      ]);
     }
   }
 }
@@ -978,9 +963,7 @@ class ButterFlyExample {
             'level1': {
               's1': s1Bp,
               's0': s0Bp,
-              'level0': {
-                'x': xBp,
-              },
+              'level0': {'x': xBp},
               'c0': c0Bp,
               'c1': c1Bp,
             },

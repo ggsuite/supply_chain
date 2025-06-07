@@ -13,9 +13,7 @@ import 'package:supply_chain/supply_chain.dart';
 /// - Creates the insert nodes for each child
 class ScBuilderInserts {
   /// The constructor
-  ScBuilderInserts({
-    required this.builder,
-  });
+  ScBuilderInserts({required this.builder});
 
   /// The builder this inserts belongs to
   final ScBuilder builder;
@@ -69,14 +67,16 @@ class ScBuilderInserts {
     }
 
     // Create a scope hosting all the inserts of the current builder
-    final Scope scopeForInsertsOfScBuilder =
-        node.scope.findOrCreateChild(builder.bluePrint.key);
+    final Scope scopeForInsertsOfScBuilder = node.scope.findOrCreateChild(
+      builder.bluePrint.key,
+    );
     _scopes.add(scopeForInsertsOfScBuilder);
 
     // Each node can have multiple inserts.
     // Therefore create a scope for each node
-    Scope scopeForInsertsOfNode =
-        scopeForInsertsOfScBuilder.findOrCreateChild('${node.key}Inserts');
+    Scope scopeForInsertsOfNode = scopeForInsertsOfScBuilder.findOrCreateChild(
+      '${node.key}Inserts',
+    );
 
     // Add the inserts to the node
     for (final insertNodeBluePrint in insertsForNode) {
