@@ -1627,7 +1627,7 @@ void main() {
         scope.mockContent({
           'a': {
             'b': {
-              'c': {'d': 0, 'e': 1},
+              'c': {'d': 0, 'e': 1.0},
               'f': 2,
             },
           },
@@ -1876,6 +1876,36 @@ void main() {
             'Exception: Error while applying preset:\n'
             'Node "example.a.b.c.d" could not be set to value "string". '
             'type \'String\' is not a subtype of type \'int\' of \'v\'',
+          );
+        });
+
+        test('but not, when a node has as int and another has double', () {
+          expect(
+            () => scope.setPreset({
+              'example': {
+                'a': {
+                  'b': {
+                    'c': {'d': 1.0, 'e': 2.0},
+                  },
+                },
+              },
+            }),
+            returnsNormally,
+          );
+        });
+
+        test('but not, when a node has as double and another has int', () {
+          expect(
+            () => scope.setPreset({
+              'example': {
+                'a': {
+                  'b': {
+                    'c': {'d': 1, 'e': 2},
+                  },
+                },
+              },
+            }),
+            returnsNormally,
           );
         });
       });

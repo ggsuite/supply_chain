@@ -1751,7 +1751,13 @@ class Scope {
         final n = node<dynamic>(key);
         if (n != null) {
           try {
-            n.product = value;
+            if (n.product is int && value is double) {
+              n.product = value.toInt();
+            } else if (n.product is double && value is int) {
+              n.product = value.toDouble();
+            } else {
+              n.product = value;
+            }
           } catch (e) {
             errors.add(
               'Node "$childPath" could not be set to value "$value". '
