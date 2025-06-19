@@ -9,6 +9,8 @@ import 'dart:io';
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
+import 'my_type.dart';
+
 void main() {
   late Scm scm;
   late Scope chain;
@@ -104,6 +106,21 @@ void main() {
       final productBefore = node.product;
       scm.testFlushTasks();
       expect(node.product, productBefore + 1);
+    });
+
+    group('productAsJson', () {
+      test('returns or sets the product as JSON object', () {
+        NodeBluePrint.addJsonParser(MyType.fromJson);
+        final scope = Scope.example();
+        const bp = NodeBluePrint<MyType>(
+          key: 'test',
+          initialProduct: MyType(42),
+        );
+        final node = bp.instantiate(scope: scope);
+        expect(node.productAsJson, {'x': 42});
+        node.productAsJson = {'x': 100};
+        expect(node.product.x, 100);
+      });
     });
 
     group('mockedProduct', () {

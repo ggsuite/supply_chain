@@ -634,7 +634,6 @@ class Scope {
     int parentDepth = 0,
     int childDepth = -1,
     bool sourceNodesOnly = false,
-    bool simpleTypesOnly = false,
     bool removeEmptyScopes = false,
   }) {
     var start = this;
@@ -668,7 +667,6 @@ class Scope {
       depth: childDepth,
       infinite: childDepth < 0,
       sourceNodesOnly: sourceNodesOnly,
-      simpleTypesOnly: simpleTypesOnly,
     );
 
     if (removeEmptyScopes) {
@@ -688,7 +686,6 @@ class Scope {
       parentDepth: 0,
       childDepth: -1,
       sourceNodesOnly: true,
-      simpleTypesOnly: true,
       removeEmptyScopes: true,
     );
   }
@@ -1672,7 +1669,6 @@ class Scope {
     required int depth,
     required bool infinite,
     required bool sourceNodesOnly,
-    required bool simpleTypesOnly,
   }) {
     if (!infinite && depth < 0) {
       return;
@@ -1689,7 +1685,6 @@ class Scope {
         depth: depth - 1,
         infinite: infinite,
         sourceNodesOnly: sourceNodesOnly,
-        simpleTypesOnly: simpleTypesOnly,
       );
     }
 
@@ -1699,20 +1694,7 @@ class Scope {
         continue;
       }
 
-      if (simpleTypesOnly &&
-          node.product is! int &&
-          node.product is! int &&
-          node.product is! double &&
-          node.product is! String) {
-        continue;
-      }
-
-      final product = node.product;
-      final value = product is int || product is double || product is String
-          ? node.product
-          : '...';
-
-      content[node.key] = value;
+      content[node.key] = node.productAsJson;
     }
   }
 
@@ -1740,29 +1722,37 @@ class Scope {
       final value = preset[key];
       final childPath = '$path.$key';
 
-      if (value is Map<String, dynamic>) {
-        final c = child(key);
+      final isMap = value is Map<String, dynamic>;
+      Scope? c = isMap ? child(key) : null;
+      Node<dynamic>? n = c != null ? null : node<dynamic>(key);
+
+      if (isMap && n == null) {
         if (c != null) {
           c._setPreset(value, childPath, errors);
-        } else {
+        } else if (n == null) {
           errors.add('Scope "$childPath" not found.');
         }
       } else {
-        final n = node<dynamic>(key);
         if (n != null) {
           try {
             if (n.product is int && value is double) {
               n.product = value.toInt();
             } else if (n.product is double && value is int) {
               n.product = value.toDouble();
+            } else if (isMap) {
+              n.productAsJson = value;
             } else {
               n.product = value;
             }
           } catch (e) {
-            errors.add(
-              'Node "$childPath" could not be set to value "$value". '
-              '$e',
-            );
+            var printed = value is Map<String, dynamic> ? 'JSON object' : value;
+            final message =
+                'Node "$childPath" could not be set to value "$printed". '
+                '$e';
+
+            if (!errors.contains(message)) {
+              errors.add(message);
+            }
           }
         } else {
           errors.add('Node "$childPath" not found.');

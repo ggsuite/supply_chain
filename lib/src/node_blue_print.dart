@@ -10,6 +10,9 @@ import 'package:supply_chain/supply_chain.dart';
 /// Produce delegate that does nothing
 T doNothing<T>(List<dynamic> components, T previousProduct) => previousProduct;
 
+/// A function that parses a json map into a product of type T
+typedef ParseJson<T> = T Function(Map<String, dynamic> json);
+
 // .............................................................................
 /// Forwards the node from
 NodeBluePrint<T> nbp<T>({
@@ -45,6 +48,7 @@ class NodeBluePrint<T> {
     Produce<T>? produce,
     List<String> smartMaster = const [],
     this.canBeSmart = true,
+    T Function(Map<String, dynamic> json)? fromJson,
   }) : produce = produce ?? doNothing<T>,
        _smartMaster = smartMaster;
 
@@ -53,12 +57,14 @@ class NodeBluePrint<T> {
     required String supplier,
     required String toKey,
     required T initialProduct,
+    T Function(Map<String, dynamic> json)? fromJson,
   }) {
     return NodeBluePrint(
       key: toKey,
       initialProduct: initialProduct,
       suppliers: [supplier],
       produce: (components, previous) => components.first as T,
+      fromJson: fromJson,
     );
   }
 
@@ -257,9 +263,61 @@ class NodeBluePrint<T> {
   @override
   String toString() => key;
 
+  /// Converts the product into a json value
+  dynamic toJson(T product) {
+    if (product is int ||
+        product is double ||
+        product is String ||
+        product is bool ||
+        product is Map ||
+        product is List) {
+      return product;
+    } else {
+      try {
+        return (product as dynamic).toJson();
+      } on NoSuchMethodError catch (_) {
+        throw Exception('Please implement $T.toJson.');
+      } catch (e) {
+        rethrow;
+      }
+    }
+  }
+
+  /// Set a json converter here to be able to convert json into the product
+  static void addJsonParser<T>(T Function(Map<String, dynamic> json) fromJson) {
+    if (!_jsonParsers.containsKey(T)) {
+      _jsonParsers[T] = fromJson;
+    }
+  }
+
+  /// Converts json into the product
+  T fromJson(dynamic value) {
+    if (value is T) {
+      return value;
+    } else {
+      if (value is! Map<String, dynamic>) {
+        throw Exception(
+          'Value "$value" is of type ${value.runtimeType}. '
+          'But it must be either a primitive or a map.',
+        );
+      } else {
+        final parseJson = _jsonParsers[T];
+        if (parseJson != null) {
+          return parseJson(value) as T;
+        } else {
+          throw Exception(
+            'Please register a json parser using NodeBluePrint.addJsonParser. '
+            'No json parser registered for $T.',
+          );
+        }
+      }
+    }
+  }
+
   // ######################
   // Private
   // ######################
+  static final Map<Type, ParseJson<dynamic>> _jsonParsers = {};
 
   final List<String> _smartMaster;
 

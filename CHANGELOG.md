@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3] - 2025-06-19
+
+### Changed
+
+- `Scope.preset` and `Scope.setPreset` will output and input custom types as JSON
+- `Scope.dumpSupplyChain` and `Scope.dumpSupplyChain` will output and input custom types as JSON
+
 ## [1.1.2] - 2025-06-12
 
 ### Fixed
@@ -411,6 +418,7 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
+[1.1.3]: https://github.com/ggsuite/supply_chain/compare/1.1.2...1.1.3
 [1.1.2]: https://github.com/ggsuite/supply_chain/compare/1.1.1...1.1.2
 [1.1.1]: https://github.com/ggsuite/supply_chain/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/ggsuite/supply_chain/compare/1.0.15...1.1.0

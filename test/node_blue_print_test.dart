@@ -7,6 +7,8 @@
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
+import 'my_type.dart';
+
 void main() {
   group('NodeBluePrint', () {
     group('nbp', () {
@@ -225,6 +227,212 @@ void main() {
         expect(bluePrint.toString(), 'aaliyah');
       });
     });
+
+    group('toJson(val)', () {
+      group('returns the value, if it has a trivial type', () {
+        group('with type', () {
+          test('int', () {
+            expect(
+              const NodeBluePrint<int>(key: 'k', initialProduct: 0).toJson(10),
+              10,
+            );
+          });
+
+          test('double', () {
+            expect(
+              const NodeBluePrint<double>(
+                key: 'k',
+                initialProduct: 0.0,
+              ).toJson(5.1),
+              5.1,
+            );
+          });
+
+          test('String', () {
+            expect(
+              const NodeBluePrint<String>(
+                key: 'k',
+                initialProduct: 'Hello',
+              ).toJson('World'),
+              'World',
+            );
+          });
+
+          test('bool', () {
+            expect(
+              const NodeBluePrint<bool>(
+                key: 'k',
+                initialProduct: true,
+              ).toJson(false),
+              false,
+            );
+          });
+
+          test('Map', () {
+            expect(
+              const NodeBluePrint<Map<String, dynamic>>(
+                key: 'k',
+                initialProduct: {'hello': 'world'},
+              ).toJson({'hello': 'berlin'}),
+              {'hello': 'berlin'},
+            );
+          });
+
+          test('List', () {
+            expect(
+              const NodeBluePrint<List<int>>(
+                key: 'k',
+                initialProduct: [5, 6],
+              ).toJson([7, 8]),
+              [7, 8],
+            );
+          });
+
+          group('MyType', () {
+            group('throws', () {
+              test('when MyType has no toJson(...) method', () {
+                expect(
+                  () => const NodeBluePrint<MyTypeWithoutJson>(
+                    key: 'k',
+                    initialProduct: MyTypeWithoutJson(10),
+                  ).toJson(const MyTypeWithoutJson(11)),
+                  throwsA(
+                    isA<Exception>().having(
+                      (p0) {
+                        return p0.toString();
+                      },
+                      'message',
+                      'Exception: Please implement MyTypeWithoutJson.toJson.',
+                    ),
+                  ),
+                );
+              });
+            });
+
+            test('converts to json when toJson() method is provided', () {
+              expect(
+                const NodeBluePrint<MyType>(
+                  key: 'k',
+                  initialProduct: MyType(0),
+                ).toJson(const MyType(13)),
+                {'x': 13},
+              );
+            });
+          });
+        });
+      });
+    });
+
+    group('fromJson(val)', () {
+      group('returns value itself if the type of the value matches T', () {
+        test('int', () {
+          expect(
+            const NodeBluePrint<int>(key: 'k', initialProduct: 0).fromJson(10),
+            10,
+          );
+        });
+        test('double', () {
+          expect(
+            const NodeBluePrint<double>(
+              key: 'k',
+              initialProduct: 0.0,
+            ).fromJson(5.1),
+            5.1,
+          );
+        });
+        test('String', () {
+          expect(
+            const NodeBluePrint<String>(
+              key: 'k',
+              initialProduct: 'Hello',
+            ).fromJson('World'),
+            'World',
+          );
+        });
+        test('bool', () {
+          expect(
+            const NodeBluePrint<bool>(
+              key: 'k',
+              initialProduct: true,
+            ).fromJson(false),
+            false,
+          );
+        });
+        test('T', () {
+          const val = MyType(13);
+          expect(
+            const NodeBluePrint<MyType>(
+              key: 'k',
+              initialProduct: MyType(0),
+            ).fromJson(val),
+            same(val),
+          );
+        });
+
+        test('List', () {
+          expect(
+            const NodeBluePrint<List<int>>(
+              key: 'k',
+              initialProduct: [5, 6],
+            ).fromJson([7, 8]),
+            [7, 8],
+          );
+        });
+      });
+
+      group('parses json on custom classes', () {
+        test('Map', () {
+          NodeBluePrint.addJsonParser(MyType.fromJson);
+
+          expect(
+            const NodeBluePrint<MyType>(
+              key: 'k',
+              initialProduct: MyType(0),
+            ).fromJson({'x': 11}).x,
+            11,
+          );
+        });
+      });
+
+      group('throws', () {
+        test('when the value is not either a primitive type or a Map', () {
+          expect(
+            () => const NodeBluePrint<MyTypeWithoutJson>(
+              key: 'k',
+              initialProduct: MyTypeWithoutJson(0),
+            ).fromJson(DateTime(0)),
+            throwsA(
+              isA<Exception>().having(
+                (p0) => p0.toString(),
+                'message',
+                'Exception: Value "0000-01-01 00:00:00.000" '
+                    'is of type DateTime. '
+                    'But it must be either a primitive or a map.',
+              ),
+            ),
+          );
+        });
+
+        test('when no json parser is registered for the type', () {
+          expect(
+            () => const NodeBluePrint<MyTypeWithoutJson>(
+              key: 'k',
+              initialProduct: MyTypeWithoutJson(0),
+            ).fromJson({'x': 11}),
+            throwsA(
+              isA<Exception>().having(
+                (p0) => p0.toString(),
+                'message',
+                'Exception: Please register a json parser using '
+                    'NodeBluePrint.addJsonParser. '
+                    'No json parser registered for MyTypeWithoutJson.',
+              ),
+            ),
+          );
+        });
+      });
+    });
+
     group('instantiate(scope)', () {
       test('returns existing node', () {
         testSetNextKeyCounter(0);

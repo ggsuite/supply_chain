@@ -205,6 +205,9 @@ class Node<T> {
   /// The product of the node
   T get product => mockedProduct ?? insertResult ?? _originalProduct;
 
+  /// Returns the product converted to a JSON value
+  dynamic get productAsJson => bluePrint.toJson(product);
+
   /// Returns the original product not processed by inserts
   T get originalProduct => mockedProduct ?? _originalProduct;
 
@@ -217,6 +220,11 @@ class Node<T> {
     _throwIfNotAllowed(v);
     _originalProduct = v;
     scm.nominate(this);
+  }
+
+  /// Sets the product from a JSON value
+  set productAsJson(dynamic json) {
+    product = bluePrint.fromJson(json);
   }
 
   /// If mocked product is set, this product is returned

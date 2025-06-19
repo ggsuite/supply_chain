@@ -10,6 +10,8 @@ import 'package:gg_is_github/gg_is_github.dart';
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
+import 'my_type.dart';
+
 enum TestEnum { a, b, c }
 
 void main() {
@@ -1361,7 +1363,7 @@ void main() {
               'b': {
                 'c': {'d': 0, 'e': 1},
                 'f': 2,
-                'g': const NodeBluePrint(key: 'g', initialProduct: Object()),
+                'g': const NodeBluePrint(key: 'g', initialProduct: MyType(2)),
               },
             },
           });
@@ -1388,7 +1390,7 @@ void main() {
                 'b': {
                   'c': {'d': 0, 'e': 1},
                   'f': 2,
-                  'g': '...',
+                  'g': {'x': 2},
                 },
               },
             },
@@ -1401,6 +1403,7 @@ void main() {
                 'b': {
                   'c': {'d': 0, 'e': 1},
                   'f': 2,
+                  'g': {'x': 2},
                 },
               },
             },
@@ -1414,7 +1417,7 @@ void main() {
             'b': {
               'c': {'d': 0, 'e': 1},
               'f': 2,
-              'g': '...',
+              'g': {'x': 2},
             },
           });
 
@@ -1423,6 +1426,7 @@ void main() {
             'b': {
               'c': {'d': 0, 'e': 1},
               'f': 2,
+              'g': {'x': 2},
             },
           });
         });
@@ -1449,7 +1453,7 @@ void main() {
                     'b': {
                       'c': {'d': 0, 'e': 1},
                       'f': 2,
-                      'g': '...',
+                      'g': {'x': 2},
                     },
                   },
                 },
@@ -1474,7 +1478,7 @@ void main() {
                 'b': {
                   'c': {'d': 0, 'e': 1},
                   'f': 2,
-                  'g': '...',
+                  'g': {'x': 2},
                 },
               },
             });
@@ -1497,7 +1501,7 @@ void main() {
                 'b': {
                   'c': {'d': 0, 'e': 1},
                   'f': 2,
-                  'g': '...',
+                  'g': {'x': 2},
                 },
               },
             });
@@ -1514,7 +1518,7 @@ void main() {
               'b': {
                 'c': {'d': 0, 'e': 1},
                 'f': 2,
-                'g': '...',
+                'g': {'x': 2},
               },
             });
           });
@@ -1528,7 +1532,7 @@ void main() {
               'b': {
                 'c': {'d': 0, 'e': 1},
                 'f': 2,
-                'g': '...',
+                'g': {'x': 2},
               },
             });
           });
@@ -1542,7 +1546,7 @@ void main() {
               'b': {
                 'c': {'d': 0, 'e': 1},
                 'f': 2,
-                'g': '...',
+                'g': {'x': 2},
               },
             });
           });
@@ -1615,6 +1619,37 @@ void main() {
             });
           });
         });
+
+        group('with a non basic type as input', () {
+          test('converts the non basic type to JSON', () {
+            scope = Scope.example();
+            scope.mockContent({
+              'a': {
+                'b': {
+                  'c': {'d': 0, 'e': 1},
+                  'f': 2,
+                  'g': const NodeBluePrint<MyType>(
+                    initialProduct: MyType(1),
+                    key: 'g',
+                  ),
+                },
+              },
+            });
+            scope.scm.testFlushTasks();
+            final dump = scope.jsonDump();
+            expect(dump, {
+              'example': {
+                'a': {
+                  'b': {
+                    'c': {'d': 0, 'e': 1},
+                    'f': 2,
+                    'g': {'x': 1},
+                  },
+                },
+              },
+            });
+          });
+        });
       });
     });
 
@@ -1667,6 +1702,55 @@ void main() {
         // Apply a preset
         scope.setPreset(preset1);
         expect(scope.preset(), preset1);
+      });
+
+      test('parses json data into custom classes', () {
+        // Create a node hierarchy with a custom type
+        NodeBluePrint.addJsonParser(MyType.fromJson);
+        final scope = Scope.example();
+        scope.mockContent({
+          'a': {
+            'b': {
+              'c': {'d': 0, 'e': 1.0},
+            },
+            'custom': const NodeBluePrint<MyType>(
+              initialProduct: MyType(1),
+              key: 'custom',
+            ),
+          },
+        });
+        scope.scm.testFlushTasks();
+        final node = scope.findNode<MyType>('custom')!;
+        expect(node.product.x, 1);
+
+        // Get the preset
+        final preset = scope.preset();
+        expect(preset, {
+          'example': {
+            'a': {
+              'b': {
+                'c': {'d': 0, 'e': 1.0},
+              },
+              'custom': {'x': 1},
+            },
+          },
+        });
+
+        // Set the preset
+        scope.setPreset({
+          'example': {
+            'a': {
+              'b': {
+                'c': {'d': 0, 'e': 1.0},
+              },
+              'custom': {'x': 5},
+            },
+          },
+        });
+        scope.scm.testFlushTasks();
+
+        // The blue print should have an update value
+        expect(node.product.x, 5);
       });
 
       test(
