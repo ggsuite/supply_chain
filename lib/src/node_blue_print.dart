@@ -301,9 +301,24 @@ class NodeBluePrint<T> {
 
   /// Set a json converter here to be able to convert json into the product
   static void addJsonParser<T>(FromJson<T> parseJson) {
-    if (!_jsonParsers.containsKey(T)) {
-      _jsonParsers[T] = parseJson;
+    final existing = _jsonParsers[T];
+    if (existing != null && existing != parseJson) {
+      throw Exception(
+        'A different json parser for type $T is already registered.',
+      );
     }
+
+    _jsonParsers[T] = parseJson;
+  }
+
+  /// Removes a json parser for the given type
+  static void removeJsonParser<T>() {
+    _jsonParsers.remove(T);
+  }
+
+  /// Clears all json parsers. Useful for testing purposes.
+  static void clearJsonParsers() {
+    _jsonParsers.clear();
   }
 
   /// Set a json converter here to be able to convert json into the product

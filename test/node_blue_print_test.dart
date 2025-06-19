@@ -701,6 +701,35 @@ void main() {
         });
       });
     });
+
+    group('addJsonParser, removeJsonParser, clearJsonParsers', () {
+      test('should add a json parser for a type', () {
+        NodeBluePrint.addJsonParser<MyType>(MyType.fromJson);
+        const n = NodeBluePrint<MyType>(key: 'n', initialProduct: MyType(0));
+        expect(n.fromJson({'x': 42}).x, 42);
+        NodeBluePrint.clearJsonParsers();
+        NodeBluePrint.removeJsonParser<MyType>();
+      });
+
+      test('should throw if a parser for the type is already registered', () {
+        NodeBluePrint.addJsonParser<MyType>((json) => MyType.fromJson(json));
+        expect(
+          () => NodeBluePrint.addJsonParser<MyType>(
+            (json) => MyType.fromJson(json),
+          ),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              'Exception: A different json parser for type '
+                  'MyType is already registered.',
+            ),
+          ),
+        );
+
+        NodeBluePrint.clearJsonParsers();
+      });
+    });
   });
 
   group('doNothing', () {

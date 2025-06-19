@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.2.0] - 2025-06-19
 
 ### Changed
 
@@ -424,7 +424,7 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
-[Unreleased]: https://github.com/ggsuite/supply_chain/compare/1.1.3...HEAD
+[1.2.0]: https://github.com/ggsuite/supply_chain/compare/1.1.3...1.2.0
 [1.1.3]: https://github.com/ggsuite/supply_chain/compare/1.1.2...1.1.3
 [1.1.2]: https://github.com/ggsuite/supply_chain/compare/1.1.1...1.1.2
 [1.1.1]: https://github.com/ggsuite/supply_chain/compare/1.1.0...1.1.1
