@@ -5,8 +5,8 @@
 // found in the LICENSE file in the root of this package.
 
 // .............................................................................
-class MyTypeWithoutJson {
-  const MyTypeWithoutJson(this.x);
+class MyTypNoJson {
+  const MyTypNoJson(this.x);
   final int x;
 }
 

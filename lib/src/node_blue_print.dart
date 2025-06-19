@@ -11,7 +11,10 @@ import 'package:supply_chain/supply_chain.dart';
 T doNothing<T>(List<dynamic> components, T previousProduct) => previousProduct;
 
 /// A function that parses a json map into a product of type T
-typedef ParseJson<T> = T Function(Map<String, dynamic> json);
+typedef FromJson<T> = T Function(Map<String, dynamic> json);
+
+/// A function that serializes a product of type T into a json value
+typedef ToJson<T> = dynamic Function(T data);
 
 // .............................................................................
 /// Forwards the node from
@@ -276,7 +279,20 @@ class NodeBluePrint<T> {
       try {
         return (product as dynamic).toJson();
       } on NoSuchMethodError catch (_) {
-        throw Exception('Please implement $T.toJson.');
+        final serializer = _jsonSerializers[T];
+        if (serializer != null) {
+          return serializer(product);
+        } else {
+          throw Exception(
+            [
+              'No serializer registered for type $T.',
+              'Either:',
+              ' - implement $T.toJson or',
+              ' - register a json serializer using '
+                  'NodeBluePrint.addJsonSerializer<$T>(serializer)',
+            ].join('\n'),
+          );
+        }
       } catch (e) {
         rethrow;
       }
@@ -284,9 +300,16 @@ class NodeBluePrint<T> {
   }
 
   /// Set a json converter here to be able to convert json into the product
-  static void addJsonParser<T>(T Function(Map<String, dynamic> json) fromJson) {
+  static void addJsonParser<T>(FromJson<T> parseJson) {
     if (!_jsonParsers.containsKey(T)) {
-      _jsonParsers[T] = fromJson;
+      _jsonParsers[T] = parseJson;
+    }
+  }
+
+  /// Set a json converter here to be able to convert json into the product
+  static void addJsonSerializer<T>(ToJson<T> toJson) {
+    if (!_jsonSerializers.containsKey(T)) {
+      _jsonSerializers[T] = toJson;
     }
   }
 
@@ -297,7 +320,7 @@ class NodeBluePrint<T> {
     } else {
       if (value is! Map<String, dynamic>) {
         throw Exception(
-          'Value "$value" is of type ${value.runtimeType}. '
+          'Value "$value" is of type ${value.runtimeType}.\n'
           'But it must be either a primitive or a map.',
         );
       } else {
@@ -306,8 +329,8 @@ class NodeBluePrint<T> {
           return parseJson(value) as T;
         } else {
           throw Exception(
-            'Please register a json parser using NodeBluePrint.addJsonParser. '
-            'No json parser registered for $T.',
+            'Please register a json parser using '
+            'NodeBluePrint.addJsonParser<$T>(parser).',
           );
         }
       }
@@ -317,7 +340,8 @@ class NodeBluePrint<T> {
   // ######################
   // Private
   // ######################
-  static final Map<Type, ParseJson<dynamic>> _jsonParsers = {};
+  static final Map<Type, FromJson<dynamic>> _jsonParsers = {};
+  static final Map<Type, dynamic> _jsonSerializers = {};
 
   final List<String> _smartMaster;
 

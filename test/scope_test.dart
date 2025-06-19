@@ -1649,6 +1649,80 @@ void main() {
               },
             });
           });
+
+          group('throws', () {
+            group('when type cannot converted to json', () {
+              test('and throwOnNonSerializableTypes is true', () {
+                scope = Scope.example();
+                scope.mockContent({
+                  'a': {
+                    'b': {
+                      'c': {'d': 0, 'e': 1},
+                      'f': 2,
+                      'g': const NodeBluePrint<MyTypNoJson>(
+                        initialProduct: MyTypNoJson(1),
+                        key: 'g',
+                      ),
+                    },
+                  },
+                });
+                scope.scm.testFlushTasks();
+                late List<String> message;
+                try {
+                  scope.jsonDump(throwOnNonSerializableTypes: true);
+                } catch (e) {
+                  message = e.toString().split('\n');
+                }
+
+                expect(message, <String>[
+                  'Exception: No serializer registered for type MyTypNoJson.',
+                  'Either:',
+                  ' - implement MyTypNoJson.toJson or',
+                  ' - register a json serializer using '
+                      'NodeBluePrint.addJsonSerializer'
+                      '<MyTypNoJson>(serializer)',
+                ]);
+              });
+            });
+
+            test('not, when throwOnNonSerializableTypes is false', () {
+              scope = Scope.example();
+              scope.mockContent({
+                'a': {
+                  'b': {
+                    'c': {'d': 0, 'e': 1},
+                    'f': 2,
+                    'g': const NodeBluePrint<MyTypNoJson>(
+                      initialProduct: MyTypNoJson(1),
+                      key: 'g',
+                    ),
+                  },
+                },
+              });
+              scope.scm.testFlushTasks();
+
+              final dump = scope.jsonDump(throwOnNonSerializableTypes: false);
+              expect(dump, {
+                'example': {
+                  'a': {
+                    'b': {
+                      'c': {'d': 0, 'e': 1},
+                      'f': 2,
+
+                      'g':
+                          'Exception: No serializer registered for type '
+                          'MyTypNoJson. '
+                          'Either:  '
+                          '- implement MyTypNoJson.toJson or  '
+                          '- register a json serializer using '
+                          'NodeBluePrint.addJsonSerializer'
+                          '<MyTypNoJson>(serializer)',
+                    },
+                  },
+                },
+              });
+            });
+          });
         });
       });
     });
@@ -1939,7 +2013,7 @@ void main() {
         });
 
         test('when a node has wrong data type', () {
-          late final String message;
+          var message = <String>[];
 
           try {
             scope.setPreset({
@@ -1952,15 +2026,14 @@ void main() {
               },
             });
           } on Exception catch (e) {
-            message = e.toString();
+            message = e.toString().split('\n');
           }
 
-          expect(
-            message,
-            'Exception: Error while applying preset:\n'
-            'Node "example.a.b.c.d" could not be set to value "string". '
-            'type \'String\' is not a subtype of type \'int\' of \'v\'',
-          );
+          expect(message, [
+            'Exception: Error while applying preset:',
+            'Node "example.a.b.c.d" could not be set to value "string".',
+            'type "String" is not a subtype of type "int" of "v"',
+          ]);
         });
 
         test('but not, when a node has as int and another has double', () {

@@ -635,6 +635,7 @@ class Scope {
     int childDepth = -1,
     bool sourceNodesOnly = false,
     bool removeEmptyScopes = false,
+    bool throwOnNonSerializableTypes = false,
   }) {
     var start = this;
 
@@ -667,6 +668,7 @@ class Scope {
       depth: childDepth,
       infinite: childDepth < 0,
       sourceNodesOnly: sourceNodesOnly,
+      throwOnNonSerializableTypes: throwOnNonSerializableTypes,
     );
 
     if (removeEmptyScopes) {
@@ -687,6 +689,7 @@ class Scope {
       childDepth: -1,
       sourceNodesOnly: true,
       removeEmptyScopes: true,
+      throwOnNonSerializableTypes: true,
     );
   }
 
@@ -1669,6 +1672,7 @@ class Scope {
     required int depth,
     required bool infinite,
     required bool sourceNodesOnly,
+    required bool throwOnNonSerializableTypes,
   }) {
     if (!infinite && depth < 0) {
       return;
@@ -1685,6 +1689,7 @@ class Scope {
         depth: depth - 1,
         infinite: infinite,
         sourceNodesOnly: sourceNodesOnly,
+        throwOnNonSerializableTypes: throwOnNonSerializableTypes,
       );
     }
 
@@ -1694,7 +1699,18 @@ class Scope {
         continue;
       }
 
-      content[node.key] = node.productAsJson;
+      try {
+        content[node.key] = node.productAsJson;
+      } catch (e) {
+        content[node.key] = e
+            .toString()
+            .replaceAll('"', r'\"')
+            .replaceAll('\n', r' ');
+
+        if (throwOnNonSerializableTypes) {
+          rethrow;
+        }
+      }
     }
   }
 
@@ -1739,16 +1755,17 @@ class Scope {
               n.product = value.toInt();
             } else if (n.product is double && value is int) {
               n.product = value.toDouble();
-            } else if (isMap) {
-              n.productAsJson = value;
-            } else {
+            } else if (value is String || value is bool || value is List) {
               n.product = value;
+            } else {
+              n.productAsJson = value;
             }
           } catch (e) {
             var printed = value is Map<String, dynamic> ? 'JSON object' : value;
-            final message =
-                'Node "$childPath" could not be set to value "$printed". '
-                '$e';
+            final message = [
+              'Node "$childPath" could not be set to value "$printed".',
+              e.toString().replaceAll('\'', '"'),
+            ].join('\n');
 
             if (!errors.contains(message)) {
               errors.add(message);

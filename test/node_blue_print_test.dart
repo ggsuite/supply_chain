@@ -291,32 +291,65 @@ void main() {
           group('MyType', () {
             group('throws', () {
               test('when MyType has no toJson(...) method', () {
-                expect(
-                  () => const NodeBluePrint<MyTypeWithoutJson>(
+                var message = <String>[];
+
+                try {
+                  const NodeBluePrint<MyTypNoJson>(
                     key: 'k',
-                    initialProduct: MyTypeWithoutJson(10),
-                  ).toJson(const MyTypeWithoutJson(11)),
-                  throwsA(
-                    isA<Exception>().having(
-                      (p0) {
-                        return p0.toString();
-                      },
-                      'message',
-                      'Exception: Please implement MyTypeWithoutJson.toJson.',
-                    ),
-                  ),
-                );
+                    initialProduct: MyTypNoJson(10),
+                  ).toJson(const MyTypNoJson(11));
+                } catch (e) {
+                  message = e.toString().split('\n');
+                }
+
+                expect(message, [
+                  'Exception: No serializer registered for type '
+                      'MyTypNoJson.',
+                  'Either:',
+                  ' - implement MyTypNoJson.toJson or',
+                  ' - register a json serializer using '
+                      'NodeBluePrint.addJsonSerializer'
+                      '<MyTypNoJson>(serializer)',
+                ]);
               });
             });
 
-            test('converts to json when toJson() method is provided', () {
-              expect(
-                const NodeBluePrint<MyType>(
-                  key: 'k',
-                  initialProduct: MyType(0),
-                ).toJson(const MyType(13)),
-                {'x': 13},
-              );
+            group('converts to json', () {
+              group('via toJson()', () {
+                test('with Map<String, dynamic>', () {
+                  expect(
+                    const NodeBluePrint<MyType>(
+                      key: 'k',
+                      initialProduct: MyType(0),
+                    ).toJson(const MyType(13)),
+                    {'x': 13},
+                  );
+                });
+
+                test('with List<int>', () {
+                  expect(
+                    const NodeBluePrint<List<int>>(
+                      key: 'k',
+                      initialProduct: [0],
+                    ).toJson([1, 2, 3]),
+                    [1, 2, 3],
+                  );
+                });
+              });
+
+              test('registered json parser', () {
+                NodeBluePrint.addJsonSerializer<MyTypNoJson>((data) {
+                  return {'k': data.x};
+                });
+
+                expect(
+                  const NodeBluePrint<MyTypNoJson>(
+                    key: 'k',
+                    initialProduct: MyTypNoJson(0),
+                  ).toJson(const MyTypNoJson(13)),
+                  {'k': 13},
+                );
+              });
             });
           });
         });
@@ -396,36 +429,35 @@ void main() {
 
       group('throws', () {
         test('when the value is not either a primitive type or a Map', () {
-          expect(
-            () => const NodeBluePrint<MyTypeWithoutJson>(
+          var message = <String>[];
+
+          try {
+            const NodeBluePrint<MyTypNoJson>(
               key: 'k',
-              initialProduct: MyTypeWithoutJson(0),
-            ).fromJson(DateTime(0)),
-            throwsA(
-              isA<Exception>().having(
-                (p0) => p0.toString(),
-                'message',
-                'Exception: Value "0000-01-01 00:00:00.000" '
-                    'is of type DateTime. '
-                    'But it must be either a primitive or a map.',
-              ),
-            ),
-          );
+              initialProduct: MyTypNoJson(0),
+            ).fromJson(DateTime(0));
+          } catch (e) {
+            message = e.toString().split('\n');
+          }
+
+          expect(message, [
+            'Exception: Value "0000-01-01 00:00:00.000" is of type DateTime.',
+            'But it must be either a primitive or a map.',
+          ]);
         });
 
         test('when no json parser is registered for the type', () {
           expect(
-            () => const NodeBluePrint<MyTypeWithoutJson>(
+            () => const NodeBluePrint<MyTypNoJson>(
               key: 'k',
-              initialProduct: MyTypeWithoutJson(0),
+              initialProduct: MyTypNoJson(0),
             ).fromJson({'x': 11}),
             throwsA(
               isA<Exception>().having(
                 (p0) => p0.toString(),
                 'message',
                 'Exception: Please register a json parser using '
-                    'NodeBluePrint.addJsonParser. '
-                    'No json parser registered for MyTypeWithoutJson.',
+                    'NodeBluePrint.addJsonParser<MyTypNoJson>(parser).',
               ),
             ),
           );
