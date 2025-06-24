@@ -9,7 +9,30 @@ import 'package:test/test.dart';
 
 import 'my_type.dart';
 
+enum TestEnum {
+  a,
+  b,
+  c;
+
+  factory TestEnum.fromString(String str) {
+    switch (str) {
+      case 'a':
+        return TestEnum.a;
+      case 'b':
+        return TestEnum.b;
+      case 'c':
+        return TestEnum.c;
+      default:
+        throw Exception('Unknown TestEnum value: $str');
+    }
+  }
+}
+
 void main() {
+  setUp(() {
+    NodeBluePrint.clearParsers();
+  });
+
   group('NodeBluePrint', () {
     group('nbp', () {
       test('should create a node blue print', () {
@@ -411,6 +434,32 @@ void main() {
             [7, 8],
           );
         });
+
+        group('Map', () {
+          test('with map matching node type', () {
+            final Map<String, dynamic> map = {'hello': 'berlin'};
+
+            expect(
+              const NodeBluePrint<Map<String, dynamic>>(
+                key: 'k',
+                initialProduct: {'hello': 'world'},
+              ).fromJson(map),
+              {'hello': 'berlin'},
+            );
+          });
+
+          test('with a map to be casted', () {
+            final Map<String, int> map = {'a': 1, 'b': 2};
+
+            expect(
+              const NodeBluePrint<Map<String, double>>(
+                key: 'k',
+                initialProduct: {'a': 0},
+              ).fromJson(map),
+              {'a': 1.0, 'b': 2.0},
+            );
+          });
+        });
       });
 
       group('parses json on custom classes', () {
@@ -423,6 +472,20 @@ void main() {
               initialProduct: MyType(0),
             ).fromJson({'x': 11}).x,
             11,
+          );
+        });
+      });
+
+      group('parses enum strings on custom classes', () {
+        test('Map', () {
+          NodeBluePrint.addStringParser<TestEnum>(TestEnum.fromString);
+
+          expect(
+            const NodeBluePrint<TestEnum>(
+              key: 'k',
+              initialProduct: TestEnum.a,
+            ).fromJson('b'),
+            TestEnum.b,
           );
         });
       });
@@ -461,6 +524,23 @@ void main() {
               ),
             ),
           );
+        });
+
+        test('when no string parser is registered for the type', () {
+          var message = <String>[];
+          try {
+            const NodeBluePrint<TestEnum>(
+              key: 'k',
+              initialProduct: TestEnum.a,
+            ).fromJson('c');
+          } catch (e) {
+            message = (e as dynamic).message.toString().split('\n');
+          }
+
+          expect(message, [
+            'Please register a string parser '
+                'using NodeBluePrint.addStringParser<TestEnum>(parser).',
+          ]);
         });
       });
     });
@@ -707,7 +787,7 @@ void main() {
         NodeBluePrint.addJsonParser<MyType>(MyType.fromJson);
         const n = NodeBluePrint<MyType>(key: 'n', initialProduct: MyType(0));
         expect(n.fromJson({'x': 42}).x, 42);
-        NodeBluePrint.clearJsonParsers();
+        NodeBluePrint.clearParsers();
         NodeBluePrint.removeJsonParser<MyType>();
       });
 
@@ -727,7 +807,34 @@ void main() {
           ),
         );
 
-        NodeBluePrint.clearJsonParsers();
+        NodeBluePrint.clearParsers();
+      });
+    });
+
+    group('addStringParser, removeStringParser, clearStringParsers', () {
+      test('should add a json parser for a type', () {
+        NodeBluePrint.addStringParser<TestEnum>(TestEnum.fromString);
+        const n = NodeBluePrint<TestEnum>(key: 'n', initialProduct: TestEnum.a);
+        expect(n.fromJson('a'), TestEnum.a);
+      });
+
+      test('should throw if a parser for the type is already registered', () {
+        NodeBluePrint.addStringParser<TestEnum>(TestEnum.fromString);
+        expect(
+          () => NodeBluePrint.addStringParser<TestEnum>(
+            (x) => TestEnum.fromString(x),
+          ),
+          throwsA(
+            isA<dynamic>().having(
+              (e) => e.message,
+              'message',
+              'A different string parser '
+                  'for type TestEnum is already registered.',
+            ),
+          ),
+        );
+
+        NodeBluePrint.clearParsers();
       });
     });
   });
@@ -735,6 +842,309 @@ void main() {
   group('doNothing', () {
     test('returns previousProduct', () {
       expect(doNothing([], 11), 11);
+    });
+  });
+
+  group('castMap(map)', () {
+    const doubleMap = <String, double>{'a': 1.1};
+    const doubleNode = NodeBluePrint(
+      initialProduct: doubleMap,
+      key: 'doubleNode',
+    );
+
+    const intMap = <String, int>{'a': 1};
+    const intNode = NodeBluePrint(initialProduct: intMap, key: 'intNode');
+
+    const stringMap = <String, String>{'a': 'str'};
+    const stringNode = NodeBluePrint(
+      initialProduct: stringMap,
+      key: 'stringNode',
+    );
+
+    const dynamicMap = <String, dynamic>{'a': 1, 's': 'str'};
+    const dynamicNode = NodeBluePrint(
+      initialProduct: dynamicMap,
+      key: 'dynamicMap',
+    );
+
+    group('removes _hashes on casting', () {
+      test('from a map with _hashes', () {
+        final mapWithHashes = <String, dynamic>{'a': 1, '_hash': '#HASH'};
+        final casted = doubleNode.castMap(mapWithHashes);
+        expect(casted, isA<Map<String, dynamic>>());
+        expect(casted, {'a': 1.0});
+      });
+    });
+
+    group('casts into a node of type ', () {
+      group('dynamic', () {
+        test('should simply cast all kinds of maps to dynamic', () {
+          var casted = dynamicNode.castMap(intMap);
+          expect(casted, intMap);
+          expect(dynamicNode.castMap(casted), isA<Map<String, dynamic>>());
+
+          casted = dynamicNode.castMap(doubleMap);
+          expect(casted, doubleMap);
+          expect(dynamicNode.castMap(casted), isA<Map<String, dynamic>>());
+        });
+      });
+      group('int', () {
+        group('from', () {
+          group('dynamic', () {
+            group('returns the casted map', () {
+              test('if it has only int values', () {
+                final casted = intNode.castMap(intMap.cast<String, dynamic>());
+                expect(casted, intMap);
+                expect(casted, isA<Map<String, int>>());
+              });
+            });
+
+            group('throws', () {
+              test('when a dynamic map contains int and other values', () {
+                var message = <String>[];
+                try {
+                  intNode.castMap(dynamicMap);
+                } catch (e) {
+                  message = (e as dynamic).message.toString().split('\n');
+                }
+
+                expect(message, [
+                  'Cannot cast _ConstMap<String, dynamic> to int.',
+                  '  - Make sure NodeBluePrint with key "intNode" becomes '
+                      'either a Node of type',
+                  '    - Map<String, int> or of type',
+                  '    - Map<String, dynamic> containing only int values',
+                ]);
+              });
+            });
+          });
+
+          group('int', () {
+            test('returns the same map back', () {
+              expect(intNode.castMap(intMap), same(intMap));
+            });
+          });
+
+          group('double', () {
+            group('throws an exception', () {
+              test('when the map has a different type', () {
+                var message = <String>[];
+                try {
+                  intNode.castMap(doubleMap);
+                } catch (e) {
+                  message = (e as dynamic).message.toString().split('\n');
+                }
+
+                expect(message, [
+                  'Cannot cast _ConstMap<String, double> to int.',
+                  '  - Make sure NodeBluePrint with key "intNode" becomes '
+                      'either a Node of type',
+                  '    - Map<String, int> or of type',
+                  '    - Map<String, dynamic> containing only int values',
+                ]);
+              });
+            });
+          });
+        });
+      });
+
+      group('bool', () {
+        group('from', () {
+          group('dynamic', () {
+            group('returns the casted map', () {
+              test('if it has only bool values', () {
+                const boolMap = <String, bool>{'a': true, 'b': false};
+                const boolNode = NodeBluePrint(
+                  initialProduct: boolMap,
+                  key: 'boolNode',
+                );
+                final casted = boolNode.castMap(
+                  boolMap.cast<String, dynamic>(),
+                );
+                expect(casted, boolMap);
+                expect(casted, isA<Map<String, bool>>());
+              });
+            });
+
+            group('throws', () {
+              test('when a dynamic map contains bool and other values', () {
+                const boolNode = NodeBluePrint(
+                  initialProduct: <String, bool>{'a': true},
+                  key: 'boolNode',
+                );
+                const mixedMap = <String, dynamic>{'a': true, 'b': 1};
+                var message = <String>[];
+                try {
+                  boolNode.castMap(mixedMap);
+                } catch (e) {
+                  message = (e as dynamic).message.toString().split('\n');
+                }
+
+                expect(message, [
+                  'Cannot cast _ConstMap<String, dynamic> to bool.',
+                  '  - Make sure NodeBluePrint with key "boolNode" becomes '
+                      'either a Node of type',
+                  '    - Map<String, bool> or of type',
+                  '    - Map<String, dynamic> containing only bool values',
+                ]);
+              });
+            });
+          });
+
+          group('bool', () {
+            test('returns the same map back', () {
+              const boolMap = <String, bool>{'a': true, 'b': false};
+              const boolNode = NodeBluePrint(
+                initialProduct: boolMap,
+                key: 'boolNode',
+              );
+              expect(boolNode.castMap(boolMap), same(boolMap));
+            });
+          });
+
+          group('int', () {
+            test('throws an exception', () {
+              const boolNode = NodeBluePrint(
+                initialProduct: <String, bool>{'a': true},
+                key: 'boolNode',
+              );
+              const intMap = <String, int>{'a': 1};
+              var message = <String>[];
+              try {
+                boolNode.castMap(intMap);
+              } catch (e) {
+                message = (e as dynamic).message.toString().split('\n');
+              }
+
+              expect(message, [
+                'Cannot cast _ConstMap<String, int> to bool.',
+                '  - Make sure NodeBluePrint with key "boolNode" becomes '
+                    'either a Node of type',
+                '    - Map<String, bool> or of type',
+                '    - Map<String, dynamic> containing only bool values',
+              ]);
+            });
+          });
+
+          group('double', () {
+            test('throws an exception', () {
+              const boolNode = NodeBluePrint(
+                initialProduct: <String, bool>{'a': true},
+                key: 'boolNode',
+              );
+              const doubleMap = <String, double>{'a': 1.1};
+              var message = <String>[];
+              try {
+                boolNode.castMap(doubleMap);
+              } catch (e) {
+                message = (e as dynamic).message.toString().split('\n');
+              }
+
+              expect(message, [
+                'Cannot cast _ConstMap<String, double> to bool.',
+                '  - Make sure NodeBluePrint with key "boolNode" becomes '
+                    'either a Node of type',
+                '    - Map<String, bool> or of type',
+                '    - Map<String, dynamic> containing only bool values',
+              ]);
+            });
+          });
+        });
+      });
+
+      group('double', () {
+        group('from', () {
+          group('dynamic', () {
+            group('returns the casted map', () {
+              test('if it has only double values', () {
+                final casted = doubleNode.castMap(
+                  doubleMap.cast<String, dynamic>(),
+                );
+                expect(casted, doubleMap);
+                expect(casted, isA<Map<String, double>>());
+              });
+            });
+
+            group('throws', () {
+              test('when a dynamic map contains double and other values', () {
+                var message = <String>[];
+                try {
+                  doubleNode.castMap(dynamicMap);
+                } catch (e) {
+                  message = (e as dynamic).message.toString().split('\n');
+                }
+
+                expect(message, [
+                  'Cannot cast _ConstMap<String, dynamic> to double.',
+                  '  - Make sure NodeBluePrint with key "doubleNode" becomes '
+                      'either a Node of type',
+                  '    - Map<String, double> or of type',
+                  '    - Map<String, dynamic> containing only double values',
+                ]);
+              });
+            });
+          });
+
+          group('int', () {
+            test('converts into to double values', () {
+              final casted = doubleNode.castMap(intMap);
+              expect(casted, isA<Map<String, double>>());
+              expect(casted['a'], 1.0);
+            });
+          });
+
+          group('double', () {
+            test('returns the same map back', () {
+              expect(doubleNode.castMap(doubleMap), same(doubleMap));
+            });
+          });
+        });
+      });
+
+      group('string', () {
+        group('dynamic', () {
+          test('returns the casted map if it has only string values', () {
+            final casted = stringNode.castMap(stringMap);
+            expect(casted, stringMap);
+            expect(casted, isA<Map<String, String>>());
+          });
+
+          test(
+            'throws when a dynamic map contains string and other values',
+            () {
+              const stringNode = NodeBluePrint(
+                initialProduct: <String, String>{'a': 'foo'},
+                key: 'stringNode',
+              );
+              const mixedMap = <String, dynamic>{'a': 'foo', 'b': 1};
+              var message = <String>[];
+              try {
+                stringNode.castMap(mixedMap);
+              } catch (e) {
+                message = (e as dynamic).message.toString().split('\n');
+              }
+              expect(message, [
+                'Cannot cast _ConstMap<String, dynamic> to bool.',
+                '  - Make sure NodeBluePrint with key "stringNode" becomes '
+                    'either a Node of type',
+                '    - Map<String, bool> or of type',
+                '    - Map<String, dynamic> containing only bool values',
+              ]);
+            },
+          );
+        });
+
+        group('string', () {
+          test('returns the same map back', () {
+            const stringMap = <String, String>{'a': 'foo', 'b': 'bar'};
+            const stringNode = NodeBluePrint(
+              initialProduct: stringMap,
+              key: 'stringNode',
+            );
+            expect(stringNode.castMap(stringMap), same(stringMap));
+          });
+        });
+      });
     });
   });
 }

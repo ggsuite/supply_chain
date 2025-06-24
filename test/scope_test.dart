@@ -1738,6 +1738,10 @@ void main() {
             'b': {
               'c': {'d': 0, 'e': 1.0},
               'f': 2,
+              'e': const NodeBluePrint<Map<String, dynamic>>(
+                initialProduct: {'hello': 'world'},
+                key: 'e',
+              ),
             },
           },
         });
@@ -1748,8 +1752,9 @@ void main() {
           'example': {
             'a': {
               'b': {
-                'c': {'d': 0, 'e': 1},
+                'c': {'d': 0, 'e': 1.0},
                 'f': 2,
+                'e': {'hello': 'world'},
               },
             },
           },
@@ -1761,6 +1766,7 @@ void main() {
               'b': {
                 'c': {'d': 10, 'e': 11},
                 'f': 12,
+                'e': {'hello': 'berlin'},
               },
             },
           },
@@ -1836,8 +1842,9 @@ void main() {
             'example': {
               'a': {
                 'b': {
-                  'c': {'d': 10, 'e': 11},
+                  'c': {'d': 10, 'e': 11.0},
                   'f': 12,
+                  'e': {'hello': 'berlin'},
                 },
               },
             },
@@ -1848,7 +1855,9 @@ void main() {
             'example': {
               'a': {
                 'b': {
-                  'c': {'d': 20},
+                  'c': {'d': 20, 'e': 1.0},
+                  'f': 2,
+                  'e': {'hello': 'world'},
                 },
               },
             },
@@ -1860,11 +1869,9 @@ void main() {
             'example': {
               'a': {
                 'b': {
-                  'c': {
-                    'd': 20, // overridden by the preset
-                    'e': 1, // Reset to initial value
-                  },
-                  'f': 2, //  Reset to initial value
+                  'c': {'d': 20, 'e': 1.0},
+                  'f': 2,
+                  'e': {'hello': 'world'},
                 },
               },
             },
@@ -1883,6 +1890,7 @@ void main() {
                 'b': {
                   'c': {'d': 10, 'e': 11},
                   'f': 12,
+                  'e': {'hello': 'berlin'},
                 },
               },
             },
@@ -1894,6 +1902,7 @@ void main() {
               'a': {
                 'b': {
                   'c': {'d': 20},
+                  'e': {'hello': 'munich'},
                 },
               },
             },
@@ -1909,6 +1918,7 @@ void main() {
                     'd': 20, // overridden by the preset
                     'e': 11, // Not reset to initial value
                   },
+                  'e': {'hello': 'munich'},
                   'f': 12, //  Not reset to initial value
                 },
               },
@@ -2058,6 +2068,7 @@ void main() {
                 'a': {
                   'b': {
                     'c': {'d': 1, 'e': 2},
+                    'e': {'hello': 'munich'},
                   },
                 },
               },
@@ -2079,6 +2090,7 @@ void main() {
               'a': {
                 'b': {
                   'c': {'d': 0, 'e': 1},
+                  'e': {'hello': 'munich'},
                   'f': 2,
                   'g': 'ERROR. Must be an integer.',
                 },

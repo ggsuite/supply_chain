@@ -13,6 +13,9 @@ T doNothing<T>(List<dynamic> components, T previousProduct) => previousProduct;
 /// A function that parses a json map into a product of type T
 typedef FromJson<T> = T Function(Map<String, dynamic> json);
 
+/// A function that parses a string into a product of type T
+typedef FromString<T> = T Function(String str);
+
 /// A function that serializes a product of type T into a json value
 typedef ToJson<T> = dynamic Function(T data);
 
@@ -316,9 +319,22 @@ class NodeBluePrint<T> {
     _jsonParsers.remove(T);
   }
 
+  /// Set a string converter here to be able to convert json into the product
+  static void addStringParser<T>(FromString<T> parseString) {
+    final existing = _stringParsers[T];
+    if (existing != null && existing != parseString) {
+      throw Exception(
+        'A different string parser for type $T is already registered.',
+      );
+    }
+
+    _stringParsers[T] = parseString;
+  }
+
   /// Clears all json parsers. Useful for testing purposes.
-  static void clearJsonParsers() {
+  static void clearParsers() {
     _jsonParsers.clear();
+    _stringParsers.clear();
   }
 
   /// Set a json converter here to be able to convert json into the product
@@ -330,31 +346,105 @@ class NodeBluePrint<T> {
 
   /// Converts json into the product
   T fromJson(dynamic value) {
+    // value matches the type T
     if (value is T) {
       return value;
-    } else {
-      if (value is! Map<String, dynamic>) {
-        throw Exception(
-          'Value "$value" is of type ${value.runtimeType}.\n'
-          'But it must be either a primitive or a map.',
-        );
+    }
+    // Value is a map
+    else if (value is Map<String, dynamic> && initialProduct is Map) {
+      return castMap(value);
+    }
+
+    if (value is Map<String, dynamic>) {
+      final parseJson = _jsonParsers[T];
+      if (parseJson != null) {
+        return parseJson(value) as T;
       } else {
-        final parseJson = _jsonParsers[T];
-        if (parseJson != null) {
-          return parseJson(value) as T;
-        } else {
-          throw Exception(
-            'Please register a json parser using '
-            'NodeBluePrint.addJsonParser<$T>(parser).',
-          );
-        }
+        throw Exception(
+          'Please register a json parser using '
+          'NodeBluePrint.addJsonParser<$T>(parser).',
+        );
       }
+    }
+    // Value is a string
+    else if (value is String) {
+      final parseString = _stringParsers[T];
+      if (parseString != null) {
+        return parseString(value) as T;
+      } else {
+        throw Exception(
+          'Please register a string parser using '
+          'NodeBluePrint.addStringParser<$T>(parser).',
+        );
+      }
+    }
+    // Otherwise throw
+    else {
+      throw Exception(
+        'Value "$value" is of type ${value.runtimeType}.\n'
+        'But it must be either a primitive or a map.',
+      );
+    }
+  }
+
+  /// Casts a map to a specific map type T
+  T castMap(Map<String, dynamic> map) {
+    assert(initialProduct is Map);
+
+    // Remove hash
+    if (map.containsKey('_hash')) {
+      map = {...map}..remove('_hash');
+    }
+
+    // If map has the same type as T, return it
+    if (map is T) {
+      return map as T;
+    }
+
+    // Handle maps of various types
+    if (T == Map<String, int>) {
+      return _cast<int>(map) as T;
+    } else if (T == Map<String, double>) {
+      return _cast<double>(map) as T;
+    } else if (T == Map<String, bool>) {
+      return _cast<bool>(map) as T;
+    } else if (T == Map<String, String>) {
+      return _cast<bool>(map) as T;
+    }
+
+    return map as T;
+  }
+
+  Map<String, S> _cast<S>(Map<String, dynamic> map) {
+    try {
+      if (S == double) {
+        map = map.map<String, double>(
+          (key, value) => MapEntry(key, (value as num).toDouble()),
+        );
+        return map as Map<String, S>;
+      }
+
+      final casted = map.cast<String, S>();
+      casted.values.toList();
+      return casted;
+    } catch (_) {
+      throw Exception(
+        [
+          'Cannot cast ${map.runtimeType} to $S.',
+          '  - Make sure NodeBluePrint with key "$key" becomes '
+              'either a Node of type',
+          '    - Map<String, $S> or of type',
+          '    - Map<String, dynamic> containing only $S values',
+        ].join('\n'),
+      );
     }
   }
 
   // ######################
   // Private
   // ######################
+
+  static final Map<Type, FromString<dynamic>> _stringParsers = {};
   static final Map<Type, FromJson<dynamic>> _jsonParsers = {};
   static final Map<Type, dynamic> _jsonSerializers = {};
 
