@@ -282,7 +282,7 @@ class NodeBluePrint<T> {
       try {
         return (product as dynamic).toJson();
       } on NoSuchMethodError catch (_) {
-        final serializer = _jsonSerializers[T];
+        final serializer = _jsonSerializers[T.runtimeType];
         if (serializer != null) {
           return serializer(product);
         } else {
@@ -304,19 +304,20 @@ class NodeBluePrint<T> {
 
   /// Set a json converter here to be able to convert json into the product
   static void addJsonParser<T>(FromJson<T> parseJson) {
-    final existing = _jsonParsers[T];
+    final rtt = T.runtimeType;
+    final existing = _jsonParsers[rtt];
     if (existing != null && existing != parseJson) {
       throw Exception(
         'A different json parser for type $T is already registered.',
       );
     }
 
-    _jsonParsers[T] = parseJson;
+    _jsonParsers[rtt] = parseJson;
   }
 
   /// Removes a json parser for the given type
   static void removeJsonParser<T>() {
-    _jsonParsers.remove(T);
+    _jsonParsers.remove(T.runtimeType);
   }
 
   /// Set a string converter here to be able to convert json into the product
@@ -339,8 +340,9 @@ class NodeBluePrint<T> {
 
   /// Set a json converter here to be able to convert json into the product
   static void addJsonSerializer<T>(ToJson<T> toJson) {
-    if (!_jsonSerializers.containsKey(T)) {
-      _jsonSerializers[T] = toJson;
+    final rtt = T.runtimeType;
+    if (!_jsonSerializers.containsKey(rtt)) {
+      _jsonSerializers[rtt] = toJson;
     }
   }
 
@@ -356,7 +358,7 @@ class NodeBluePrint<T> {
     }
 
     if (value is Map<String, dynamic>) {
-      final parseJson = _jsonParsers[T];
+      final parseJson = _jsonParsers[T.runtimeType];
       if (parseJson != null) {
         return parseJson(value) as T;
       } else {
