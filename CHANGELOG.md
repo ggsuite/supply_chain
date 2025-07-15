@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.2] - 2025-07-15
+
+### Fixed
+
+- Fix an error while adding JSON parsers
+
 ## [1.3.1] - 2025-06-25
 
 ### Fixed
@@ -443,6 +449,7 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
+[1.3.2]: https://github.com/ggsuite/supply_chain/compare/1.3.1...1.3.2
 [1.3.1]: https://github.com/ggsuite/supply_chain/compare/1.3.0...1.3.1
 [1.3.0]: https://github.com/ggsuite/supply_chain/compare/1.2.0...1.3.0
 [1.2.0]: https://github.com/ggsuite/supply_chain/compare/1.1.3...1.2.0

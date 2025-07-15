@@ -304,15 +304,14 @@ class NodeBluePrint<T> {
 
   /// Set a json converter here to be able to convert json into the product
   static void addJsonParser<T>(FromJson<T> parseJson) {
-    final rtt = T.runtimeType;
-    final existing = _jsonParsers[rtt];
+    final existing = _jsonParsers[T];
     if (existing != null && existing != parseJson) {
       throw Exception(
         'A different json parser for type $T is already registered.',
       );
     }
 
-    _jsonParsers[rtt] = parseJson;
+    _jsonParsers[T] = parseJson;
   }
 
   /// Removes a json parser for the given type
@@ -358,7 +357,7 @@ class NodeBluePrint<T> {
     }
 
     if (value is Map<String, dynamic>) {
-      final parseJson = _jsonParsers[T.runtimeType];
+      final parseJson = _jsonParsers[T];
       if (parseJson != null) {
         return parseJson(value) as T;
       } else {
