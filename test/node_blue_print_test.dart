@@ -271,6 +271,24 @@ void main() {
             );
           });
 
+          group('num', () {
+            test('with double', () {
+              expect(
+                const NodeBluePrint<num>(
+                  key: 'k',
+                  initialProduct: 0.0,
+                ).toJson(5.1),
+                5.1,
+              );
+            });
+            test('with int', () {
+              expect(
+                const NodeBluePrint<num>(key: 'k', initialProduct: 0).toJson(5),
+                5,
+              );
+            });
+          });
+
           test('String', () {
             expect(
               const NodeBluePrint<String>(
@@ -387,6 +405,26 @@ void main() {
             10,
           );
         });
+
+        group('num', () {
+          test('with double', () {
+            expect(
+              const NodeBluePrint<num>(
+                key: 'k',
+                initialProduct: 0.0,
+              ).fromJson(5.1),
+              5.1,
+            );
+          });
+
+          test('with int', () {
+            expect(
+              const NodeBluePrint<num>(key: 'k', initialProduct: 0).fromJson(5),
+              5,
+            );
+          });
+        });
+
         test('double', () {
           expect(
             const NodeBluePrint<double>(
@@ -457,6 +495,14 @@ void main() {
                 initialProduct: {'a': 0},
               ).fromJson(map),
               {'a': 1.0, 'b': 2.0},
+            );
+
+            expect(
+              const NodeBluePrint<Map<String, num>>(
+                key: 'k',
+                initialProduct: {'a': 0},
+              ).fromJson(map),
+              {'a': 1, 'b': 2},
             );
           });
         });
@@ -846,6 +892,9 @@ void main() {
   });
 
   group('castMap(map)', () {
+    const numMap = <String, num>{'a': 1.1};
+    const numNode = NodeBluePrint(initialProduct: numMap, key: 'numNode');
+
     const doubleMap = <String, double>{'a': 1.1};
     const doubleNode = NodeBluePrint(
       initialProduct: doubleMap,
@@ -922,6 +971,14 @@ void main() {
           group('int', () {
             test('returns the same map back', () {
               expect(intNode.castMap(intMap), same(intMap));
+            });
+          });
+
+          group('num', () {
+            group('returns normally', () {
+              test('when the map has a different type', () {
+                numNode.castMap(numMap);
+              });
             });
           });
 
@@ -1096,6 +1153,69 @@ void main() {
           group('double', () {
             test('returns the same map back', () {
               expect(doubleNode.castMap(doubleMap), same(doubleMap));
+            });
+          });
+
+          group('num', () {
+            test('converts into to double values', () {
+              final casted = doubleNode.castMap(numMap);
+              expect(casted, isA<Map<String, double>>());
+              expect(casted['a'], 1.1);
+            });
+          });
+        });
+      });
+
+      group('num', () {
+        group('from', () {
+          group('dynamic', () {
+            group('returns the casted map', () {
+              test('if it has only num values', () {
+                final casted = numNode.castMap(numMap.cast<String, dynamic>());
+                expect(casted, numMap);
+                expect(casted, isA<Map<String, num>>());
+              });
+            });
+
+            group('throws', () {
+              test('when a dynamic map contains num and other values', () {
+                var message = <String>[];
+                try {
+                  numNode.castMap(dynamicMap);
+                } catch (e) {
+                  message = (e as dynamic).message.toString().split('\n');
+                }
+
+                expect(message, [
+                  'Cannot cast _ConstMap<String, dynamic> to num.',
+                  '  - Make sure NodeBluePrint with key "numNode" becomes '
+                      'either a Node of type',
+                  '    - Map<String, num> or of type',
+                  '    - Map<String, dynamic> containing only num values',
+                ]);
+              });
+            });
+          });
+
+          group('int', () {
+            test('converts into to num values', () {
+              final casted = numNode.castMap(intMap);
+              expect(casted, isA<Map<String, num>>());
+              expect(casted['a'], 1);
+            });
+          });
+
+          group('num', () {
+            test('returns the same map back', () {
+              expect(numNode.castMap(numMap), same(numMap));
+            });
+          });
+
+          group('double', () {
+            test('converts into to num values', () {
+              final casted = numNode.castMap(doubleMap);
+              expect(casted, isA<Map<String, num>>());
+              expect(casted['a'], 1.1);
             });
           });
         });

@@ -103,6 +103,10 @@ class ScopeBluePrint {
           initialProduct: subValue as double,
           key: subKey,
         ),
+        const (num) => NodeBluePrint<num>(
+          initialProduct: subValue as num,
+          key: subKey,
+        ),
         const (String) => NodeBluePrint<String>(
           initialProduct: subValue as String,
           key: subKey,

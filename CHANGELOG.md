@@ -6,6 +6,10 @@
 
 - Add .gitattributes file
 
+### Changed
+
+- BREAKING CHANGE: Switch from double to num
+
 ## [1.3.2] - 2025-07-15
 
 ### Fixed

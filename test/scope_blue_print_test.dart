@@ -45,6 +45,8 @@ void main() {
               'c': {'x': 123},
             },
             'c': const ScopeBluePrint(key: 'c'),
+            'numInt': 7 as num,
+            'numDouble': 7.0 as num,
           },
         };
 
@@ -61,6 +63,8 @@ void main() {
         expectNode(2, 'string', 'Hello');
         expectNode(3, 'bool', true);
         expectNode(4, 'bluePrint', 8);
+        expectNode(5, 'numInt', 7);
+        expectNode(6, 'numDouble', 7.0);
 
         expect(scopeBluePrint.children.length, 2);
         expect(scopeBluePrint.children.first.key, 'b');

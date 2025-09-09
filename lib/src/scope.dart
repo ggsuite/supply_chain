@@ -943,6 +943,10 @@ class Scope {
             initialProduct: value as double,
             key: key,
           ),
+          const (num) => NodeBluePrint<num>(
+            initialProduct: value as num,
+            key: key,
+          ),
           const (String) => NodeBluePrint<String>(
             initialProduct: value as String,
             key: key,
@@ -1657,7 +1661,11 @@ class Scope {
       }
 
       final product = node.product;
-      final value = product is int || product is double || product is String
+      final value =
+          product is int ||
+              product is double ||
+              product is num ||
+              product is String
           ? ' (${node.product})'
           : '';
 

@@ -273,6 +273,7 @@ class NodeBluePrint<T> {
   dynamic toJson(T product) {
     if (product is int ||
         product is double ||
+        product is num ||
         product is String ||
         product is bool ||
         product is Map ||
@@ -407,6 +408,8 @@ class NodeBluePrint<T> {
       return _cast<int>(map) as T;
     } else if (T == Map<String, double>) {
       return _cast<double>(map) as T;
+    } else if (T == Map<String, num>) {
+      return _cast<num>(map) as T;
     } else if (T == Map<String, bool>) {
       return _cast<bool>(map) as T;
     } else if (T == Map<String, String>) {
