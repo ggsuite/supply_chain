@@ -288,12 +288,12 @@ void main() {
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
           scm.testFlushTasks();
-          final wh0Width = wh0.node<int>('w')!;
-          final wh0Height = wh0.node<int>('h')!;
-          final wh0Depth = wh0.node<int>('d')!;
-          final wh1Width = wh1.node<int>('w')!;
-          final wh1Height = wh1.node<int>('h')!;
-          final wh1Depth = wh1.node<int>('d')!;
+          final wh0Width = wh0.node<num>('w')!;
+          final wh0Height = wh0.node<num>('h')!;
+          final wh0Depth = wh0.node<num>('d')!;
+          final wh1Width = wh1.node<num>('w')!;
+          final wh1Height = wh1.node<num>('h')!;
+          final wh1Depth = wh1.node<num>('d')!;
 
           expect(wh0Width.product, 100);
           expect(wh0Height.product, 200);
@@ -348,12 +348,12 @@ void main() {
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
           scm.testFlushTasks();
-          final wh0Width = wh0.findNode<int>('child.w')!;
-          final wh0Height = wh0.findNode<int>('child.h')!;
-          final wh0Depth = wh0.findNode<int>('child.d')!;
-          final wh1Width = wh1.findNode<int>('w')!;
-          final wh1Height = wh1.findNode<int>('h')!;
-          final wh1Depth = wh1.findNode<int>('d')!;
+          final wh0Width = wh0.findNode<num>('child.w')!;
+          final wh0Height = wh0.findNode<num>('child.h')!;
+          final wh0Depth = wh0.findNode<num>('child.d')!;
+          final wh1Width = wh1.findNode<num>('w')!;
+          final wh1Height = wh1.findNode<num>('h')!;
+          final wh1Depth = wh1.findNode<num>('d')!;
 
           expect(wh0Width.product, 100);
           expect(wh0Height.product, 200);
@@ -408,10 +408,10 @@ void main() {
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
           scm.testFlushTasks();
-          final wh0Width = wh0.findNode<int>('child.w')!;
-          final wh0Height = wh0.findNode<int>('child.h')!;
-          final wh1Width = wh1.findNode<int>('child.w')!;
-          final wh1Height = wh1.findNode<int>('child.h')!;
+          final wh0Width = wh0.findNode<num>('child.w')!;
+          final wh0Height = wh0.findNode<num>('child.h')!;
+          final wh1Width = wh1.findNode<num>('child.w')!;
+          final wh1Height = wh1.findNode<num>('child.h')!;
 
           expect(wh0Width.product, 300);
           expect(wh0Height.product, 400);
@@ -457,10 +457,10 @@ void main() {
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
           scm.testFlushTasks();
-          final wh0Width = wh0.findNode<int>('child.w')!;
-          final wh0Height = wh0.findNode<int>('child.h')!;
-          final wh1Width = wh1.findNode<int>('child.w')!;
-          final wh1Height = wh1.findNode<int>('child.h')!;
+          final wh0Width = wh0.findNode<num>('child.w')!;
+          final wh0Height = wh0.findNode<num>('child.h')!;
+          final wh1Width = wh1.findNode<num>('child.w')!;
+          final wh1Height = wh1.findNode<num>('child.h')!;
 
           expect(wh0Width.product, 300);
           expect(wh0Height.product, 400);
@@ -509,10 +509,10 @@ void main() {
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
           scm.testFlushTasks();
-          final wh0Width = wh0.findNode<int>('child.w')!;
-          final wh0Height = wh0.findNode<int>('child.h')!;
-          final wh1Width = wh1.findNode<int>('child.w')!;
-          final wh1Height = wh1.findNode<int>('child.h')!;
+          final wh0Width = wh0.findNode<num>('child.w')!;
+          final wh0Height = wh0.findNode<num>('child.h')!;
+          final wh1Width = wh1.findNode<num>('child.w')!;
+          final wh1Height = wh1.findNode<num>('child.h')!;
 
           expect(wh0Width.product, 300);
           expect(wh0Height.product, 400);
@@ -654,7 +654,7 @@ void main() {
             expect(node?.key, 'n');
             expect(path, 'a.n');
 
-            node = bluePrint.findNode<int>('n');
+            node = bluePrint.findNode<num>('n');
             path = bluePrint.absoluteNodePath('n');
             expect(node?.key, 'n');
             expect(path, 'a.n');
@@ -664,7 +664,7 @@ void main() {
             expect(node?.key, 'd');
             expect(path, 'a.b.c.d');
 
-            node = bluePrint.findNode<int>('d');
+            node = bluePrint.findNode<num>('d');
             path = bluePrint.absoluteNodePath('d');
             expect(node?.key, 'd');
             expect(path, 'a.b.c.d');
@@ -713,7 +713,7 @@ void main() {
             );
 
             expect(
-              () => bluePrint.findNode<int>('n'),
+              () => bluePrint.findNode<num>('n'),
               throwsA(
                 isA<ArgumentError>().having(
                   (e) => e.toString(),
@@ -752,7 +752,7 @@ void main() {
             expect(node, isNotNull);
             expect(path, 'a.b.c.d');
 
-            node = bluePrint.findNode<int>('b.c.d');
+            node = bluePrint.findNode<num>('b.c.d');
             path = bluePrint.absoluteNodePath('b.c.d');
             expect(node, isNotNull);
             expect(path, 'a.b.c.d');
@@ -763,7 +763,7 @@ void main() {
             expect(node, isNotNull);
             expect(path, 'a.b.c.d');
 
-            node = bluePrint.findNode<int>('a.b.c.d');
+            node = bluePrint.findNode<num>('a.b.c.d');
             path = bluePrint.absoluteNodePath('a.b.c.d');
             expect(node, isNotNull);
             expect(path, 'a.b.c.d');

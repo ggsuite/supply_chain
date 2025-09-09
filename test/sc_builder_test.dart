@@ -24,12 +24,12 @@ void main() {
         expect(scope.builders.first, builder);
 
         // onInstantiate should be called
-        expect(builder.scope.node<int>('didCallOnInstantiate')?.product, 1);
+        expect(builder.scope.node<num>('didCallOnInstantiate')?.product, 1);
 
         // The builder applied inserts
-        final hostA = scope.findNode<int>('hostA')!;
-        final hostB = scope.findNode<int>('hostB')!;
-        final hostC = scope.findNode<int>('hostC')!;
+        final hostA = scope.findNode<num>('hostA')!;
+        final hostB = scope.findNode<num>('hostB')!;
+        final hostC = scope.findNode<num>('hostC')!;
 
         expect(hostA.inserts, hasLength(2));
         expect(hostB.inserts, hasLength(3));
@@ -39,12 +39,12 @@ void main() {
         final scopeA = scope.findChildScope('a')!;
         final scopeB = scope.findChildScope('b')!;
 
-        final hostA1 = const NodeBluePrint<int>(
+        final hostA1 = const NodeBluePrint<num>(
           key: 'hostA1',
           initialProduct: 11,
         ).instantiate(scope: scopeA);
 
-        final hostB1 = const NodeBluePrint<int>(
+        final hostB1 = const NodeBluePrint<num>(
           key: 'hostB1',
           initialProduct: 12,
         ).instantiate(scope: scopeB);
@@ -299,7 +299,7 @@ void main() {
         ExampleScBuilderBluePrint().instantiate(scope: scope);
 
         // The onInstantiate method should have been called
-        expect(scope.node<int>('didCallOnInstantiate')?.product, 1);
+        expect(scope.node<num>('didCallOnInstantiate')?.product, 1);
 
         // Add a child scope
         final child = const ScopeBluePrint(

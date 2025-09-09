@@ -2502,7 +2502,7 @@ void main() {
         test('should return inserts when skipInserts is false ', () {
           final builder = ScBuilder.example();
           final scope = builder.scope;
-          final hostB = scope.findNode<int>('hostB')!;
+          final hostB = scope.findNode<num>('hostB')!;
 
           expect(hostB.inserts.map((e) => e.key), [
             // Currently we instantiate the root builders first
@@ -2515,7 +2515,7 @@ void main() {
 
           // skipInserts is false. The insert node will be found.
           expect(
-            scope.findNode<int>('hostBInserts.p0Add111', skipInserts: false),
+            scope.findNode<num>('hostBInserts.p0Add111', skipInserts: false),
             isNotNull,
           );
 

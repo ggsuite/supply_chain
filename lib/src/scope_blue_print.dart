@@ -95,17 +95,13 @@ class ScopeBluePrint {
 
       // Parse nodes
       final nodeBluePrint = switch (subValue.runtimeType) {
-        const (int) => NodeBluePrint<int>(
+        const (int) => NodeBluePrint<num>(
           key: subKey,
-          initialProduct: subValue as int,
-        ),
-        const (double) => NodeBluePrint<double>(
-          initialProduct: subValue as double,
-          key: subKey,
-        ),
-        const (num) => NodeBluePrint<num>(
           initialProduct: subValue as num,
+        ),
+        const (double) => NodeBluePrint<num>(
           key: subKey,
+          initialProduct: subValue as num,
         ),
         const (String) => NodeBluePrint<String>(
           initialProduct: subValue as String,

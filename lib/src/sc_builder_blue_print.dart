@@ -290,16 +290,16 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
   @override
   List<NodeBluePrint<dynamic>> inserts({required Node<dynamic> hostNode}) {
     // Add an insert to all nodes which keys start with "host"
-    if (hostNode.key.startsWith('host') && hostNode is Node<int>) {
+    if (hostNode.key.startsWith('host') && hostNode is Node<num>) {
       return [
-        NodeBluePrint<int>(
+        NodeBluePrint<num>(
           key: 'p0Add111',
           initialProduct: 0,
           produce: (components, previousProduct) {
             return previousProduct + 111;
           },
         ),
-        NodeBluePrint<int>(
+        NodeBluePrint<num>(
           key: 'p1MultiplyByTen',
           initialProduct: 0,
           produce: (components, previousProduct) {
@@ -368,8 +368,8 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
     super.onInstantiate(hostScope: hostScope);
 
     // Create a node that counts how often onInstantiate was called
-    final didCallOnInstantiate = hostScope.findOrCreateNode<int>(
-      const NodeBluePrint<int>(key: 'didCallOnInstantiate', initialProduct: 0),
+    final didCallOnInstantiate = hostScope.findOrCreateNode<num>(
+      const NodeBluePrint<num>(key: 'didCallOnInstantiate', initialProduct: 0),
     );
 
     didCallOnInstantiate.product++;
@@ -401,9 +401,9 @@ class ExampleChildScBuilderBluePrint extends ScBuilderBluePrint {
   @override
   List<NodeBluePrint<dynamic>> inserts({required Node<dynamic> hostNode}) {
     // Add an insert to all nodes which keys start with "host"
-    if (hostNode.key.startsWith('host') && hostNode is Node<int>) {
+    if (hostNode.key.startsWith('host') && hostNode is Node<num>) {
       return [
-        NodeBluePrint<int>(
+        NodeBluePrint<num>(
           key: 'c0MultiplyByTwo',
           initialProduct: 0,
           produce: (components, previousProduct) {

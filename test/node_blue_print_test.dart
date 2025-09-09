@@ -675,7 +675,7 @@ void main() {
       test('should apply builders', () {
         final builder = ScBuilder.example();
         final scope = builder.scope;
-        final newNode = const NodeBluePrint<int>(
+        final newNode = const NodeBluePrint<num>(
           key: 'hostX',
           initialProduct: 0,
         ).instantiate(scope: scope);

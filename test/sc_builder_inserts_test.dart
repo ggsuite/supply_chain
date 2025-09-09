@@ -18,10 +18,10 @@ void main() {
         final scope = builder.scope;
 
         // Get the nodes out of the example hierarchy
-        final hostA = scope.findNode<int>('hostA')!;
-        final hostB = scope.findNode<int>('hostB')!;
-        final hostC = scope.findNode<int>('hostC')!;
-        final other = scope.findNode<int>('other')!;
+        final hostA = scope.findNode<num>('hostA')!;
+        final hostB = scope.findNode<num>('hostB')!;
+        final hostC = scope.findNode<num>('hostC')!;
+        final other = scope.findNode<num>('other')!;
 
         // All nodes having a key starting with "host" should have two inserts
         // added by ExampleScBuilderBluePrint
@@ -56,7 +56,7 @@ void main() {
         expect(productC, (initialC + 111) * 10 * 2);
 
         // Add another node to the scope
-        final hostD = const NodeBluePrint<int>(
+        final hostD = const NodeBluePrint<num>(
           key: 'hostD',
           initialProduct: 0,
         ).instantiate(scope: scope);

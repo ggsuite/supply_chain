@@ -70,21 +70,21 @@ void main() {
         // Did ExampleScBuilderAddingScopes add scope k and j to the
         // example scope?
         final k = scope.child('k')!;
-        final kv = k.node<int>('kv')!;
+        final kv = k.node<num>('kv')!;
         expect(kv.product, 767);
 
         final j = scope.child('j')!;
-        final jv = j.node<int>('jv')!;
+        final jv = j.node<num>('jv')!;
         expect(jv.product, 171);
 
         // Did ExampleScBuilderAddingScopes add scope x and y to scope c?
         final scopeC = scope.findChildScope('c')!;
         final x = scopeC.child('x')!;
-        final xv = x.node<int>('xv')!;
+        final xv = x.node<num>('xv')!;
         expect(xv.product, 530);
 
         final y = scopeC.child('y')!;
-        final yv = y.node<int>('yv')!;
+        final yv = y.node<num>('yv')!;
         expect(yv.product, 543);
 
         // Try to apply the builder to one of the scopes created by the builder.
