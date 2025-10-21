@@ -401,7 +401,7 @@ class Node<T> {
     // Make sure the keys match the blue print's suppliers
     final s = bluePrint.suppliers;
     for (var supplierKey in newSuppliers.keys) {
-      assert(s.contains(supplierKey) || s.contains('..$supplierKey'));
+      assert(s.contains(supplierKey) || s.contains('../$supplierKey'));
     }
 
     // Reset old suppliers

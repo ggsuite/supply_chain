@@ -393,7 +393,7 @@ class Scm {
       }
 
       final supplierPathWithoutDots = supplierPath.startsWith('../')
-          ? supplierPath.substring(2)
+          ? supplierPath.substring(3)
           : supplierPath;
 
       suppliers[supplierPathWithoutDots] = supplier;
