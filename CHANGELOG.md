@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.1] - 2025-10-21
+
+### Changed
+
+- Update dart SDK to 3.9.2
+
 ## [3.0.0] - 2025-10-21
 
 ### Changed
@@ -471,6 +477,7 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
+[3.0.1]: https://github.com/ggsuite/supply_chain/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/ggsuite/supply_chain/compare/2.0.0...3.0.0
 [2.0.0]: https://github.com/ggsuite/supply_chain/compare/1.3.3...2.0.0
 [1.3.3]: https://github.com/ggsuite/supply_chain/compare/1.3.2...1.3.3

@@ -96,7 +96,7 @@ class Node<T> {
     assert(isDisposed);
 
     assert(scope.node<T>(key) == this || scope.node<T>(key) == null);
-    scope.removeNode(this.key);
+    scope.removeNode(key);
     scm.removeNode(this);
     scm.disposedItems.removeNode(this);
 
@@ -268,7 +268,7 @@ class Node<T> {
 
   /// Prepares the node for production with a given priority
   void prepare() {
-    this.isStaged = true;
+    isStaged = true;
   }
 
   /// Returns true, if node is not staged
@@ -342,7 +342,7 @@ class Node<T> {
 
     // If this node is the last insert in the chain,
     // write the product into the host's insertResult
-    if (this.isInsert) {
+    if (isInsert) {
       final insert = this as Insert<T>;
       if (insert.isLastInsert) {
         insert.host.insertResult = newProduct;
@@ -364,7 +364,7 @@ class Node<T> {
 
   /// Finalizes production
   void finalizeProduction() {
-    this.isStaged = false;
+    isStaged = false;
   }
 
   // ...........................................................................
@@ -444,14 +444,14 @@ class Node<T> {
   /// Returns the master node for the smart node
   Node<T>? findSmartMaster() {
     assert(isSmartNode);
-    final masterPath = this.smartMaster;
+    final masterPath = smartMaster;
     Scope? parent = scope;
     while (parent != null) {
       final foundMaster = parent.findDirectChildNode<T>(masterPath);
       if (foundMaster != null &&
           !foundMaster.isDisposed &&
           foundMaster != this &&
-          foundMaster.scope != this.scope) {
+          foundMaster.scope != scope) {
         return foundMaster;
       }
       parent = parent.parent;
@@ -582,7 +582,7 @@ class Node<T> {
   // ...........................................................................
   /// Returns the all onChange meta nodes depending on this node
   Iterable<Node<dynamic>> get _onChangeNodes {
-    if (this.isMetaNode) {
+    if (isMetaNode) {
       return const [];
     }
 
@@ -595,7 +595,7 @@ class Node<T> {
 
     // Add onChangeRecursive of this node and it's parents
     if (onRecursiveChangeEnabled) {
-      Scope? parent = this.scope;
+      Scope? parent = scope;
       while (parent != null) {
         result.add(parent.onChangeRecursive!);
         parent = parent.parent;
@@ -897,7 +897,7 @@ class Node<T> {
     assert(bluePrint.key == this.bluePrint.key);
 
     // Update the bluePrint
-    this._bluePrints.add(bluePrint);
+    _bluePrints.add(bluePrint);
 
     // Trigger a re-initialization of suppliers
     needsInitSuppliers();

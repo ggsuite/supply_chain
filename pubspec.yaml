@@ -4,7 +4,7 @@ version: 3.0.1
 repository: https://github.com/ggsuite/supply_chain
 
 environment:
-  sdk: ">=3.8.0 <4.0.0"
+  sdk: ">=3.9.2 <4.0.0"
 
 # Add regular dependencies here.
 dependencies:

@@ -118,7 +118,7 @@ class Insert<T> extends Node<T> {
     followingInsert?.input = previousInsert ?? host;
 
     // If this insert is the last insert
-    if (this.isLastInsert) {
+    if (isLastInsert) {
       // customers need to be nominated
       for (final customer in host.customers) {
         scm.nominate(customer);
