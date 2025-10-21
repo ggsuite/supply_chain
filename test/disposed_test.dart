@@ -52,7 +52,7 @@ void main() {
       // Single connection a -> b
       'sA': {'a': 0},
       'sB': {
-        'b': NodeBluePrint.map(supplier: 'sA.a', toKey: 'b', initialProduct: 0),
+        'b': NodeBluePrint.map(supplier: 'sA/a', toKey: 'b', initialProduct: 0),
       },
 
       // ...............................................
@@ -70,7 +70,7 @@ void main() {
         'i1': {
           'i2': {
             'intermediate': NodeBluePrint.map(
-              supplier: 's0.s1.s2.supplier',
+              supplier: 's0/s1/s2/supplier',
               toKey: 'intermediate',
               initialProduct: 0,
             ),
@@ -84,7 +84,7 @@ void main() {
         'c1': {
           'c2': {
             'customer': NodeBluePrint.map(
-              supplier: 'i0.i1.i2.intermediate',
+              supplier: 'i0/i1/i2/intermediate',
               toKey: 'customer',
               initialProduct: 0,
             ),
@@ -110,8 +110,8 @@ void main() {
     c2 = scope.findScope('c2')!;
 
     single = scope.findNode<int>('single')!;
-    a = scope.findNode('sA.a')!;
-    b = scope.findNode('sB.b')!;
+    a = scope.findNode('sA/a')!;
+    b = scope.findNode('sB/b')!;
 
     supplier = s2.findNode('supplier')!;
     intermediate = i2.findNode('intermediate')!;
@@ -451,7 +451,7 @@ void main() {
                   key: 'face$i',
                 ).instantiate(scope: facesScope);
                 NodeBluePrint<int>.map(
-                  supplier: 'corners.corner$i.cValue',
+                  supplier: 'corners/corner$i/cValue',
                   toKey: 'fValue',
                   initialProduct: 0,
                 ).instantiate(scope: faceScope);
@@ -465,22 +465,22 @@ void main() {
         test('should work', () {
           // Check the initial configuration
           expect(
-            panel.findNode<int>('panel.corners.corner0.cValue')!.product,
+            panel.findNode<int>('panel/corners/corner0/cValue')!.product,
             0,
           );
           expect(
-            panel.findNode<int>('panel.corners.corner1.cValue')!.product,
+            panel.findNode<int>('panel/corners/corner1/cValue')!.product,
             1,
           );
 
-          expect(panel.findNode<int>('panel.faces.face0.fValue')!.product, 0);
-          expect(panel.findNode<int>('panel.faces.face1.fValue')!.product, 1);
+          expect(panel.findNode<int>('panel/faces/face0/fValue')!.product, 0);
+          expect(panel.findNode<int>('panel/faces/face1/fValue')!.product, 1);
 
           // Decrease the number of corners.
           cornerCount.product = 1;
           panel.scm.testFlushTasks();
           expect(
-            panel.findNode<int>('panel.corners.corner0.cValue'),
+            panel.findNode<int>('panel/corners/corner0/cValue'),
             isNotNull,
           );
         });

@@ -174,8 +174,8 @@ void main() {
           },
         });
 
-        final n0 = scope.findNode<int>('a.b.n0')!;
-        final n1 = scope.findNode<int>('a.b.c.n1')!;
+        final n0 = scope.findNode<int>('a/b/n0')!;
+        final n1 = scope.findNode<int>('a/b/c/n1')!;
 
         // Initally we have the following products
         scope.scm.testFlushTasks();
@@ -212,7 +212,7 @@ void main() {
             },
           },
         });
-        final c = root.findChildScope('a.b.c')!;
+        final c = root.findChildScope('a/b/c')!;
         expect(c.root, root);
       });
     });
@@ -278,13 +278,13 @@ void main() {
         scope = Scope.example();
         scm = scope.scm;
 
-        // Define a supplier a.b.c that has a customer a.d.e;
+        // Define a supplier a/b/c that has a customer a.d.e;
         scope.mockContent({
           'a': {
             'b': {'supplier': 0},
             'd': {
               'customer': NodeBluePrint.map(
-                supplier: 'b.supplier',
+                supplier: 'b/supplier',
                 toKey: 'customer',
                 initialProduct: 0,
               ),
@@ -293,10 +293,10 @@ void main() {
         });
 
         a = scope.findScope('a')!;
-        b = scope.findScope('a.b')!;
-        supplier = scope.findNode<int>('a.b.supplier')!;
-        d = scope.findScope('a.d')!;
-        customer = scope.findNode<int>('a.d.customer')!;
+        b = scope.findScope('a/b')!;
+        supplier = scope.findNode<int>('a/b/supplier')!;
+        d = scope.findScope('a/d')!;
+        customer = scope.findNode<int>('a/d/customer')!;
         ExampleScBuilderBluePrint().instantiate(scope: a);
       }
 
@@ -385,7 +385,7 @@ void main() {
             const NodeBluePrint<int>(
               key: 'customer',
               suppliers: [
-                'a.b.on.change', // This is a meta scope node
+                'a/b/on/change', // This is a meta scope node
               ],
               initialProduct: 5,
             ),
@@ -393,7 +393,7 @@ void main() {
           scope.scm.testFlushTasks();
 
           // The customer should be connected to the meta scope node
-          final onChange = scope.findNode<Scope>('a.b.on.change')!;
+          final onChange = scope.findNode<Scope>('a/b/on/change')!;
           expect(onChange.customers, contains(customer));
           expect(b.isErased, isFalse);
 
@@ -475,7 +475,7 @@ void main() {
             // Create another node observing chil.a
             final observer = NodeBluePrint<int>(
               key: 'observer',
-              suppliers: ['scope.child.node'],
+              suppliers: ['scope/child/node'],
               initialProduct: 5,
               produce: (components, previousProduct) => components.first as int,
             );
@@ -533,7 +533,7 @@ void main() {
             // Create two meta scope observers
             final onChangeObserver = NodeBluePrint<Scope?>(
               key: 'onChangeObserver',
-              suppliers: ['scope.on.change'],
+              suppliers: ['scope/on/change'],
               initialProduct: null,
               produce: (components, previousProduct) =>
                   components.first as Scope?,
@@ -541,7 +541,7 @@ void main() {
 
             final helloMetaScopeObserver = NodeBluePrint<int>(
               key: 'helloMetaScopeObserver',
-              suppliers: ['scope.hello.node'],
+              suppliers: ['scope/hello/node'],
               initialProduct: 8,
               produce: (components, previousProduct) => components.first as int,
             );
@@ -596,9 +596,9 @@ void main() {
         final childScopeA = root.child('childScopeA')!;
         final grandChildScope = childScopeA.child('grandChildScope')!;
         expect(root.path, 'exampleRoot');
-        expect(childScopeA.path, 'exampleRoot.childScopeA');
+        expect(childScopeA.path, 'exampleRoot/childScopeA');
         expect(childScopeA.pathArray, ['exampleRoot', 'childScopeA']);
-        expect(grandChildScope.path, 'exampleRoot.childScopeA.grandChildScope');
+        expect(grandChildScope.path, 'exampleRoot/childScopeA/grandChildScope');
         expect(grandChildScope.pathArray, [
           'exampleRoot',
           'childScopeA',
@@ -620,13 +620,13 @@ void main() {
             },
           });
 
-          final c = scope.findChildScope('a.b.c0')!;
-          expect(c.matchesPath('a.b.c0'), isTrue);
-          expect(c.matchesPath('a.b.c1'), isTrue);
-          expect(c.matchesPath('a.b.c2'), isTrue);
-          expect(c.matchesPath('a.b.c3'), isFalse);
+          final c = scope.findChildScope('a/b/c0')!;
+          expect(c.matchesPath('a/b/c0'), isTrue);
+          expect(c.matchesPath('a/b/c1'), isTrue);
+          expect(c.matchesPath('a/b/c2'), isTrue);
+          expect(c.matchesPath('a/b/c3'), isFalse);
 
-          final b = scope.findChildScope('a.b')!;
+          final b = scope.findChildScope('a/b')!;
           expect(b.matchesPath('c0'), isFalse);
         });
       });
@@ -641,10 +641,10 @@ void main() {
           },
         });
 
-        final c = scope.findChildScope('a.b.c')!;
-        expect(c.matchesPath('..c'), isTrue);
-        expect(c.matchesPath('..a.b.c'), isTrue);
-        expect(c.matchesPath('..a.b.x'), isFalse);
+        final c = scope.findChildScope('a/b/c')!;
+        expect(c.matchesPath('../c'), isTrue);
+        expect(c.matchesPath('../a/b/c'), isTrue);
+        expect(c.matchesPath('../a/b/x'), isFalse);
       });
     });
 
@@ -682,7 +682,7 @@ void main() {
               // Define a customer within scopes a.c
               'c': {
                 'customer': NodeBluePrint.map(
-                  supplier: 's0.s1.supplier',
+                  supplier: 's0/s1/supplier',
                   toKey: 'customer',
                   initialProduct: 0,
                 ),
@@ -692,9 +692,9 @@ void main() {
 
           scope.scm.testFlushTasks();
 
-          s0 = scope.findScope('a.s0')!;
-          s1 = scope.findScope('a.s0.s1')!;
-          supplier = scope.findNode<int>('a.s0.s1.supplier')!;
+          s0 = scope.findScope('a/s0')!;
+          s1 = scope.findScope('a/s0/s1')!;
+          supplier = scope.findNode<int>('a/s0/s1/supplier')!;
         });
 
         test('when a fresh node is added to the disposed scope', () {
@@ -832,9 +832,9 @@ void main() {
               },
             },
           });
-          expect(scope.findChildScope('a.b')?.key, 'b');
-          expect(scope.findChildScope('a.b.c')?.key, 'c');
-          expect(scope.findChildScope('a.b.c.d'), isNull);
+          expect(scope.findChildScope('a/b')?.key, 'b');
+          expect(scope.findChildScope('a/b/c')?.key, 'c');
+          expect(scope.findChildScope('a/b/c/d'), isNull);
         });
 
         test('when the scope name is repated down the hiearchy', () {
@@ -857,8 +857,8 @@ void main() {
           });
 
           final corpus = scope.findChildScope('corpus')!;
-          final right = corpus.findChildScope('corpus.panels.right')!;
-          expect(right.path, 'root.example.corpus.panels.right');
+          final right = corpus.findChildScope('corpus/panels/right')!;
+          expect(right.path, 'root/example/corpus/panels/right');
         });
       });
       group('should return null', () {
@@ -1168,8 +1168,8 @@ void main() {
         expect(childA.nodes.map((n) => n.key), ['childNodeA', 'childNodeB']);
         expect(childB.nodes.map((n) => n.key), ['childNodeA', 'childNodeB']);
 
-        expect(childA.path, 'exampleRoot.childScopeA');
-        expect(childB.path, 'exampleRoot.childScopeB');
+        expect(childA.path, 'exampleRoot/childScopeA');
+        expect(childB.path, 'exampleRoot/childScopeB');
 
         for (var element in childA.nodes) {
           scm.nominate(element);
@@ -1183,10 +1183,10 @@ void main() {
         for (final element in grandChild.nodes) {
           scm.nominate(element);
         }
-        expect(grandChild.path, 'exampleRoot.childScopeA.grandChildScope');
+        expect(grandChild.path, 'exampleRoot/childScopeA/grandChildScope');
         expect(
           grandChild.nodes.first.path,
-          'exampleRoot.childScopeA.grandChildScope.grandChildNodeA',
+          'exampleRoot/childScopeA/grandChildScope/grandChildNodeA',
         );
 
         scm.testFlushTasks();
@@ -1375,12 +1375,12 @@ void main() {
           final ls = scope.ls();
           expect(ls, [
             'a',
-            'a.b',
-            'a.b.c',
-            'a.b.c.d (0)',
-            'a.b.c.e (1)',
-            'a.b.f (2)',
-            'a.b.g',
+            'a/b',
+            'a/b/c',
+            'a/b/c/d (0)',
+            'a/b/c/e (1)',
+            'a/b/f (2)',
+            'a/b/g',
           ]);
 
           final json = scope.jsonDump();
@@ -1410,7 +1410,7 @@ void main() {
           });
 
           final lsb = b.ls();
-          expect(lsb, ['c', 'c.d (0)', 'c.e (1)', 'f (2)', 'g']);
+          expect(lsb, ['c', 'c/d (0)', 'c/e (1)', 'f (2)', 'g']);
 
           final jsonB = b.jsonDump();
           expect(jsonB, {
@@ -1436,13 +1436,13 @@ void main() {
             final ls = b.ls(parentDepth: -1);
             expect(ls, [
               'example',
-              'example.a',
-              'example.a.b',
-              'example.a.b.c',
-              'example.a.b.c.d (0)',
-              'example.a.b.c.e (1)',
-              'example.a.b.f (2)',
-              'example.a.b.g',
+              'example/a',
+              'example/a/b',
+              'example/a/b/c',
+              'example/a/b/c/d (0)',
+              'example/a/b/c/e (1)',
+              'example/a/b/f (2)',
+              'example/a/b/g',
             ]);
 
             final jsonDump = b.jsonDump(parentDepth: -1);
@@ -1465,11 +1465,11 @@ void main() {
             final ls = b.ls(parentDepth: 1);
             expect(ls, [
               'b',
-              'b.c',
-              'b.c.d (0)',
-              'b.c.e (1)',
-              'b.f (2)',
-              'b.g',
+              'b/c',
+              'b/c/d (0)',
+              'b/c/e (1)',
+              'b/f (2)',
+              'b/g',
             ]);
 
             final jsonDump = b.jsonDump(parentDepth: 1);
@@ -1488,11 +1488,11 @@ void main() {
             final ls = b.ls(parentDepth: 1);
             expect(ls, [
               'b',
-              'b.c',
-              'b.c.d (0)',
-              'b.c.e (1)',
-              'b.f (2)',
-              'b.g',
+              'b/c',
+              'b/c/d (0)',
+              'b/c/e (1)',
+              'b/f (2)',
+              'b/g',
             ]);
 
             final jsonDump = b.jsonDump(parentDepth: 1);
@@ -1511,7 +1511,7 @@ void main() {
         group('with childDepth', () {
           test('-1', () {
             final ls = b.ls(childDepth: -1);
-            expect(ls, ['c', 'c.d (0)', 'c.e (1)', 'f (2)', 'g']);
+            expect(ls, ['c', 'c/d (0)', 'c/e (1)', 'f (2)', 'g']);
 
             final jsonDump = b.jsonDump(childDepth: -1);
             expect(jsonDump, {
@@ -1525,7 +1525,7 @@ void main() {
 
           test('1', () {
             final ls = b.ls(childDepth: 1);
-            expect(ls, ['c', 'c.d (0)', 'c.e (1)', 'f (2)', 'g']);
+            expect(ls, ['c', 'c/d (0)', 'c/e (1)', 'f (2)', 'g']);
 
             final jsonDump = b.jsonDump(childDepth: 1);
             expect(jsonDump, {
@@ -1539,7 +1539,7 @@ void main() {
 
           test('1000', () {
             final ls = b.ls(childDepth: 1000);
-            expect(ls, ['c', 'c.d (0)', 'c.e (1)', 'f (2)', 'g']);
+            expect(ls, ['c', 'c/d (0)', 'c/e (1)', 'f (2)', 'g']);
 
             final jsonDump = b.jsonDump(childDepth: 1000);
             expect(jsonDump, {
@@ -1564,7 +1564,7 @@ void main() {
                   'f': 2,
 
                   // G has suppliers and is therefore not a source node
-                  'g': nbp(from: ['a.b.c.d'], to: 'g', init: 5),
+                  'g': nbp(from: ['a/b/c/d'], to: 'g', init: 5),
                 },
               },
             });
@@ -1574,7 +1574,7 @@ void main() {
           group('true', () {
             test('returns only nodes that have no suppliers', () {
               final ls = scope.ls(sourceNodesOnly: true);
-              expect(ls, ['a.b.c.d (0)', 'a.b.c.e (1)', 'a.b.f (2)']);
+              expect(ls, ['a/b/c/d (0)', 'a/b/c/e (1)', 'a/b/f (2)']);
 
               final jsonDump = scope.jsonDump(sourceNodesOnly: true);
               const expected = {
@@ -1596,12 +1596,12 @@ void main() {
               final ls = scope.ls(sourceNodesOnly: false);
               expect(ls, [
                 'a',
-                'a.b',
-                'a.b.c',
-                'a.b.c.d (0)',
-                'a.b.c.e (1)',
-                'a.b.f (2)',
-                'a.b.g (5)',
+                'a/b',
+                'a/b/c',
+                'a/b/c/d (0)',
+                'a/b/c/e (1)',
+                'a/b/f (2)',
+                'a/b/g (5)',
               ]);
 
               final jsonDump = scope.jsonDump(sourceNodesOnly: false);
@@ -1994,7 +1994,7 @@ void main() {
           expect(
             message,
             'Exception: Error while applying preset:\n'
-            'Scope "example.a.b.UNKNOWN" not found.',
+            'Scope "example/a/b/UNKNOWN" not found.',
           );
         });
 
@@ -2018,7 +2018,7 @@ void main() {
           expect(
             message,
             'Exception: Error while applying preset:\n'
-            'Node "example.a.b.c.UNKNOWN" not found.',
+            'Node "example/a/b/c/UNKNOWN" not found.',
           );
         });
 
@@ -2041,7 +2041,7 @@ void main() {
 
           expect(message, [
             'Exception: Error while applying preset:',
-            'Node "example.a.b.c.d" could not be set to value "string".',
+            'Node "example/a/b/c/d" could not be set to value "string".',
             'type "String" is not a subtype of type "int" of "v"',
           ]);
         });
@@ -2128,8 +2128,8 @@ void main() {
           );
 
           expect(errors, [
-            'Node "example.a.b.c.UNKNOWN_NODE" not found.',
-            'Scope "example.UNKNOWN_SCOPE" not found.',
+            'Node "example/a/b/c/UNKNOWN_NODE" not found.',
+            'Scope "example/UNKNOWN_SCOPE" not found.',
           ]);
         });
       });
@@ -2201,10 +2201,10 @@ void main() {
               });
 
               // Find the node c
-              expect(scope.findNode<int>('a.b.c0.d')?.key, 'd');
-              expect(scope.findNode<int>('a.b.c1.d')?.key, 'd');
-              expect(scope.findNode<int>('a.b.c2.d')?.key, 'd');
-              expect(scope.findNode<int>('a.b.c3.d')?.key, isNull);
+              expect(scope.findNode<int>('a/b/c0/d')?.key, 'd');
+              expect(scope.findNode<int>('a/b/c1/d')?.key, 'd');
+              expect(scope.findNode<int>('a/b/c2/d')?.key, 'd');
+              expect(scope.findNode<int>('a/b/c3/d')?.key, isNull);
             });
 
             group('when the node is contained in parent chain', () {
@@ -2237,7 +2237,7 @@ void main() {
                 });
 
                 final panel = corpus.findChildScope('bottomPanel')!;
-                final corpusWidth = panel.findNode<double>('corpus.width');
+                final corpusWidth = panel.findNode<double>('corpus/width');
                 expect(corpusWidth, isNotNull);
               });
             });
@@ -2260,7 +2260,7 @@ void main() {
 
                 // Add a NodeA to ChildScopeA
                 final nodeA = root
-                    .findChildScope('a.childScope')!
+                    .findChildScope('a/childScope')!
                     .findOrCreateNode<int>(
                       NodeBluePrint(
                         key: 'node',
@@ -2271,7 +2271,7 @@ void main() {
 
                 // Add a NodeA to ChildScopeA
                 final nodeB = root
-                    .findChildScope('b.childScope')!
+                    .findChildScope('b/childScope')!
                     .findOrCreateNode<int>(
                       NodeBluePrint(
                         key: 'node',
@@ -2323,16 +2323,16 @@ void main() {
                 final startScope = scope.findChildScope('backTopRight')!;
                 expect(
                   startScope.findNode<int>('frontTopRightMiterCut')!.path,
-                  endsWith('yInserts.frontTopRightMiterCut'),
+                  endsWith('yInserts/frontTopRightMiterCut'),
                 );
 
                 final startScope1 = scope.findChildScope(
-                  'backTopRight.leftPanelMiterCut.yInserts',
+                  'backTopRight/leftPanelMiterCut/yInserts',
                 )!;
 
                 expect(
                   startScope1.findNode<int>('frontTopRightMiterCut')!.path,
-                  endsWith('yInserts.frontTopRightMiterCut'),
+                  endsWith('yInserts/frontTopRightMiterCut'),
                 );
               });
             });
@@ -2356,10 +2356,10 @@ void main() {
               });
 
               final frontBottomLeft = scope.findChildScope(
-                'corners.frontBottomLeft',
+                'corners/frontBottomLeft',
               )!;
-              final xLeft = frontBottomLeft.findNode<dynamic>('bounds.xLeft')!;
-              expect(xLeft.path, endsWith('corpus.bounds.xLeft'));
+              final xLeft = frontBottomLeft.findNode<dynamic>('bounds/xLeft')!;
+              expect(xLeft.path, endsWith('corpus/bounds/xLeft'));
             });
 
             test('when the node is contained somewhere else', () {
@@ -2416,7 +2416,7 @@ void main() {
               );
 
               final grandChildNodeReal = grandChildScope.findNode<int>(
-                'childScopeA.grandChildScope.grandChildNodeA',
+                'childScopeA/grandChildScope/grandChildNodeA',
               );
               expect(grandChildNodeReal, grandChildNodeAExpected);
             });
@@ -2431,7 +2431,7 @@ void main() {
                 );
 
                 final childNodeAReal = grandChildScope.findNode<int>(
-                  'childScopeA.childNodeA',
+                  'childScopeA/childNodeA',
                 );
                 expect(childNodeAReal, childNodeAExpected);
               });
@@ -2475,7 +2475,7 @@ void main() {
                 final scAChild0 = scope.findChildScope('scAChild0')!;
 
                 // Search for a node in the parent scope using the alias
-                final scANode = scAChild0.findNode<int>('x.scANode');
+                final scANode = scAChild0.findNode<int>('x/scANode');
 
                 expect(scANode, isNotNull);
               });
@@ -2515,13 +2515,13 @@ void main() {
 
           // skipInserts is false. The insert node will be found.
           expect(
-            scope.findNode<num>('hostBInserts.p0Add111', skipInserts: false),
+            scope.findNode<num>('hostBInserts/p0Add111', skipInserts: false),
             isNotNull,
           );
 
           // skipInserts is true. The insert node will not be found.
           expect(
-            scope.findNode<int>('hostBInserts.p0Add111', skipInserts: true),
+            scope.findNode<int>('hostBInserts/p0Add111', skipInserts: true),
             isNull,
           );
         });
@@ -2536,16 +2536,16 @@ void main() {
             },
           });
 
-          final c = scope.findNode<int>('a.b.c')!;
-          final d = scope.findNode<int>('a.b.d')!;
+          final c = scope.findNode<int>('a/b/c')!;
+          final d = scope.findNode<int>('a/b/d')!;
 
           // Search without excludeNodes
-          expect(scope.findNode<int>('a.b.c', excludedNodes: []), c);
+          expect(scope.findNode<int>('a/b/c', excludedNodes: []), c);
 
           // Search with excludeNodes
-          expect(scope.findNode<int>('a.b.c', excludedNodes: [c]), isNull);
+          expect(scope.findNode<int>('a/b/c', excludedNodes: [c]), isNull);
 
-          expect(scope.findNode<int>('a.b.d', excludedNodes: [c]), d);
+          expect(scope.findNode<int>('a/b/d', excludedNodes: [c]), d);
         });
       });
 
@@ -2607,9 +2607,9 @@ void main() {
             },
           });
 
-          final c = scope.findScope('a.b.c')!;
-          final a = c.findNode<int>('..n0')!;
-          expect(a.path, 'root.example.a.n0');
+          final c = scope.findScope('a/b/c')!;
+          final a = c.findNode<int>('../n0')!;
+          expect(a.path, 'root/example/a/n0');
         });
 
         test('must not find the scope itself', () {
@@ -2627,9 +2627,9 @@ void main() {
             },
           });
 
-          final c0 = scope.findScope('a.b.c')!;
-          final c1 = c0.findNode<int>('..c.n0')!;
-          expect(c1.path, 'root.example.a.c.n0');
+          final c0 = scope.findScope('a/b/c')!;
+          final c1 = c0.findNode<int>('../c/n0')!;
+          expect(c1.path, 'root/example/a/c/n0');
         });
       });
     });
@@ -2652,7 +2652,7 @@ void main() {
         scope.scm.testFlushTasks();
 
         // Find direct child
-        final d = scope.findScope('a.d')!;
+        final d = scope.findScope('a/d')!;
         expect(d.findDirectChildNode<int>(['n'])!.product, 6);
 
         final a = scope.findScope('a')!;
@@ -2686,19 +2686,19 @@ void main() {
 
       group('should return', () {
         test('null', () {
-          expect(scope.findScope('a.b.c.d'), isNull);
+          expect(scope.findScope('a/b/c/d'), isNull);
         });
 
         group('the scope,', () {
           test('if the address matches the full path', () {
-            final c = scope.findScope('a.b.c')!;
+            final c = scope.findScope('a/b/c')!;
             expect(c.key, 'c');
           });
 
           test(
             'if the address matches a scope with a sub part of the path',
             () {
-              final b = scope.findScope('a.b')!;
+              final b = scope.findScope('a/b')!;
               expect(b.key, 'b');
             },
           );
@@ -2711,12 +2711,12 @@ void main() {
 
           group('if the address starts ..', () {
             test('find the parent scope', () {
-              final f0 = scope.findScope('a.f')!;
-              final f1 = scope.findScope('a.e.f')!;
-              final f2 = scope.findScope('a.e.f.f')!;
+              final f0 = scope.findScope('a/f')!;
+              final f1 = scope.findScope('a/e/f')!;
+              final f2 = scope.findScope('a/e/f/f')!;
 
               expect(f1.findScope('f'), f2);
-              expect(f1.findScope('..f'), f0);
+              expect(f1.findScope('../f'), f0);
             });
 
             test('must not find the scope itself', () {
@@ -2731,8 +2731,8 @@ void main() {
                 },
               });
 
-              final c0 = scope.findScope('a.b.c')!;
-              final c1 = c0.findScope('..c');
+              final c0 = scope.findScope('a/b/c')!;
+              final c1 = c0.findScope('../c');
               expect(c1, isNull);
             });
           });
@@ -2742,11 +2742,11 @@ void main() {
       group('should throw', () {
         test('when throwIfNotFound is true and the scope is not found', () {
           expect(
-            () => scope.findScope('a.b.c.d', throwIfNotFound: true),
+            () => scope.findScope('a/b/c/d', throwIfNotFound: true),
             throwsA(
               predicate<ArgumentError>(
                 (e) => e.toString().contains(
-                  'Scope with path "a.b.c.d" not found.',
+                  'Scope with path "a/b/c/d" not found.',
                 ),
               ),
             ),
@@ -2795,16 +2795,16 @@ void main() {
           },
         });
 
-        expect(scope.findNode<int>('a.int')?.product, 5);
-        expect(scope.findNode<int>('a.b.int')?.product, 10);
-        expect(scope.findNode<double>('a.b.double')?.product, 3.14);
-        expect(scope.findNode<bool>('a.b.bool')?.product, true);
-        expect(scope.findNode<TestEnum>('a.b.enum')?.product, TestEnum.a);
+        expect(scope.findNode<int>('a/int')?.product, 5);
+        expect(scope.findNode<int>('a/b/int')?.product, 10);
+        expect(scope.findNode<double>('a/b/double')?.product, 3.14);
+        expect(scope.findNode<bool>('a/b/bool')?.product, true);
+        expect(scope.findNode<TestEnum>('a/b/enum')?.product, TestEnum.a);
 
-        expect(scope.findChildScope('a.b.c.d')!.key, 'd');
-        expect(scope.findChildScope('a.b.c.e')!.key, 'e');
-        expect(scope.findChildScope('a.b.c.f')!.key, 'f');
-        expect(scope.findChildScope('a.b.g')!.key, 'g');
+        expect(scope.findChildScope('a/b/c/d')!.key, 'd');
+        expect(scope.findChildScope('a/b/c/e')!.key, 'e');
+        expect(scope.findChildScope('a/b/c/f')!.key, 'f');
+        expect(scope.findChildScope('a/b/g')!.key, 'g');
       });
 
       group('should throw', () {
@@ -2887,7 +2887,7 @@ void main() {
         test('should return the scope providing event suppliers', () {
           final onScopeA = scope.metaScope('on')!;
           expect(onScopeA.key, 'on');
-          final onScopeB = scope.findChildScope('a.b')!.metaScope('on')!;
+          final onScopeB = scope.findChildScope('a/b')!.metaScope('on')!;
           expect(onScopeB.key, 'on');
         });
         test('should not be part of the on scope itself', () {
@@ -2901,19 +2901,19 @@ void main() {
 
             // Try to find the node
             final onScopeA = scope.metaScope('on')!;
-            final onChange = onScopeA.findNode<void>('on.change');
+            final onChange = onScopeA.findNode<void>('on/change');
             expect(onChange, isNotNull);
             expect(onChange?.key, 'change');
           });
           test('via findScope()', () {
             expect(scope.findScope('on'), isNotNull);
-            expect(scope.findScope('a.on'), isNotNull);
-            expect(scope.findScope('a.b.on'), isNotNull);
+            expect(scope.findScope('a/on'), isNotNull);
+            expect(scope.findScope('a/b/on'), isNotNull);
           });
           test('via findChildScope()', () {
             expect(scope.findChildScope('on'), isNotNull);
-            expect(scope.findChildScope('a.on'), isNotNull);
-            expect(scope.findChildScope('a.b.on'), isNotNull);
+            expect(scope.findChildScope('a/on'), isNotNull);
+            expect(scope.findChildScope('a/b/on'), isNotNull);
           });
         });
 
@@ -2921,19 +2921,19 @@ void main() {
           test('should return true if a scope is a meta scope '
               'and false otherwise', () {
             expect(scope.findChildScope('on')!.isMetaScope, isTrue);
-            expect(scope.findChildScope('a.on')!.isMetaScope, isTrue);
-            expect(scope.findChildScope('a.b.on')!.isMetaScope, isTrue);
+            expect(scope.findChildScope('a/on')!.isMetaScope, isTrue);
+            expect(scope.findChildScope('a/b/on')!.isMetaScope, isTrue);
 
             expect(scope.findChildScope('a')!.isMetaScope, isFalse);
-            expect(scope.findChildScope('a.b')!.isMetaScope, isFalse);
+            expect(scope.findChildScope('a/b')!.isMetaScope, isFalse);
           });
         });
 
         test('should find other suppliers in the hierarchy', () {
-          final onScopeB = scope.findScope('a.b.on')!;
-          final nodeC = onScopeB.findNode<int>('b.c');
+          final onScopeB = scope.findScope('a/b/on')!;
+          final nodeC = onScopeB.findNode<int>('b/c')!;
           expect(nodeC, isNotNull);
-          expect(nodeC?.key, 'c');
+          expect(nodeC.key, 'c');
         });
       });
     });
@@ -2967,7 +2967,7 @@ void main() {
         scm = scope.scm;
 
         a = scope.findScope('a')!;
-        a0 = scope.findNode<int>('a.a0')!;
+        a0 = scope.findNode<int>('a/a0')!;
         b = scope.findScope('b')!;
         b0 = scope.findNode<int>('b0')!;
         b1 = scope.findNode<int>('b1')!;
@@ -2984,7 +2984,7 @@ void main() {
 
       group('change', () {
         test('should exist', () {
-          final onChange = scope.findNode<void>('on.change')!;
+          final onChange = scope.findNode<void>('on/change')!;
           expect(onChange.key, 'change');
         });
 
@@ -2997,7 +2997,7 @@ void main() {
           NodeBluePrint<void>(
             key: 'aObserver',
             initialProduct: null,
-            suppliers: ['a.on.change'],
+            suppliers: ['a/on/change'],
             produce: (components, _) => aChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
@@ -3006,7 +3006,7 @@ void main() {
           NodeBluePrint<void>(
             key: 'bObserver',
             initialProduct: null,
-            suppliers: ['a.b.on.change'],
+            suppliers: ['a/b/on/change'],
             produce: (components, _) => bChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
@@ -3015,7 +3015,7 @@ void main() {
           NodeBluePrint<void>(
             key: 'cObserver',
             initialProduct: null,
-            suppliers: ['a.b.c.on.change'],
+            suppliers: ['a/b/c/on/change'],
             produce: (components, _) => cChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
@@ -3074,7 +3074,7 @@ void main() {
 
       group('changeRecursive', () {
         test('should exist', () {
-          final onChange = scope.findNode<void>('on.changeRecursive')!;
+          final onChange = scope.findNode<void>('on/changeRecursive')!;
           expect(onChange.key, 'changeRecursive');
         });
 
@@ -3088,7 +3088,7 @@ void main() {
           NodeBluePrint<void>(
             key: 'aObserverRecursive',
             initialProduct: null,
-            suppliers: ['a.on.changeRecursive'],
+            suppliers: ['a/on/changeRecursive'],
             produce: (components, _) => aChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
@@ -3097,7 +3097,7 @@ void main() {
           NodeBluePrint<void>(
             key: 'bObserverRecursive',
             initialProduct: null,
-            suppliers: ['a.b.on.changeRecursive'],
+            suppliers: ['a/b/on/changeRecursive'],
             produce: (components, _) => bChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
@@ -3106,7 +3106,7 @@ void main() {
           NodeBluePrint<void>(
             key: 'cObserverRecursive',
             initialProduct: null,
-            suppliers: ['a.b.c.on.changeRecursive'],
+            suppliers: ['a/b/c/on/changeRecursive'],
             produce: (components, _) => cChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
@@ -3191,39 +3191,39 @@ void main() {
         });
 
         test('with findNode', () {
-          expect(scope.findNode<int>('a.d.e.f')?.key, 'f');
-          expect(scope.findNode<int>('b.d.e.f')?.key, 'f');
-          expect(scope.findNode<int>('c.d.e.f')?.key, 'f');
+          expect(scope.findNode<int>('a/d/e/f')?.key, 'f');
+          expect(scope.findNode<int>('b/d/e/f')?.key, 'f');
+          expect(scope.findNode<int>('c/d/e/f')?.key, 'f');
         });
 
         test('with findScope', () {
           expect(scope.findScope('a')?.key, 'a');
           expect(scope.findScope('b')?.key, 'a');
           expect(scope.findScope('c')?.key, 'a');
-          expect(scope.findScope('a.d')?.key, 'd');
-          expect(scope.findScope('b.d')?.key, 'd');
-          expect(scope.findScope('c.d')?.key, 'd');
-          expect(scope.findScope('a.d.e')?.key, 'e');
-          expect(scope.findScope('b.d.e')?.key, 'e');
-          expect(scope.findScope('c.d.e')?.key, 'e');
+          expect(scope.findScope('a/d')?.key, 'd');
+          expect(scope.findScope('b/d')?.key, 'd');
+          expect(scope.findScope('c/d')?.key, 'd');
+          expect(scope.findScope('a/d/e')?.key, 'e');
+          expect(scope.findScope('b/d/e')?.key, 'e');
+          expect(scope.findScope('c/d/e')?.key, 'e');
         });
 
         test('with findChildScope()', () {
           expect(scope.findChildScope('a')?.key, 'a');
           expect(scope.findChildScope('b')?.key, 'a');
           expect(scope.findChildScope('c')?.key, 'a');
-          expect(scope.findChildScope('a.d')?.key, 'd');
-          expect(scope.findChildScope('b.d')?.key, 'd');
-          expect(scope.findChildScope('c.d')?.key, 'd');
-          expect(scope.findChildScope('a.d.e')?.key, 'e');
-          expect(scope.findChildScope('b.d.e')?.key, 'e');
-          expect(scope.findChildScope('c.d.e')?.key, 'e');
+          expect(scope.findChildScope('a/d')?.key, 'd');
+          expect(scope.findChildScope('b/d')?.key, 'd');
+          expect(scope.findChildScope('c/d')?.key, 'd');
+          expect(scope.findChildScope('a/d/e')?.key, 'e');
+          expect(scope.findChildScope('b/d/e')?.key, 'e');
+          expect(scope.findChildScope('c/d/e')?.key, 'e');
         });
 
         test('with suppliers', () {
           // Use original key "a" in supplier address
           final g0 = NodeBluePrint.map(
-            supplier: 'a.d.e.f',
+            supplier: 'a/d/e/f',
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
@@ -3232,7 +3232,7 @@ void main() {
 
           // Use alias "b" in supplier address
           final g1 = NodeBluePrint.map(
-            supplier: 'b.d.e.f',
+            supplier: 'b/d/e/f',
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
@@ -3241,7 +3241,7 @@ void main() {
 
           // Use alias "c" in supplier address
           final g2 = NodeBluePrint.map(
-            supplier: 'c.d.e.f',
+            supplier: 'c/d/e/f',
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
@@ -3268,23 +3268,23 @@ void main() {
         });
 
         test('with findNode', () {
-          expect(scope.findNode<int>('a.b.e.f')?.key, 'f');
-          expect(scope.findNode<int>('a.c.e.f')?.key, 'f');
-          expect(scope.findNode<int>('a.d.e.f')?.key, 'f');
+          expect(scope.findNode<int>('a/b/e/f')?.key, 'f');
+          expect(scope.findNode<int>('a/c/e/f')?.key, 'f');
+          expect(scope.findNode<int>('a/d/e/f')?.key, 'f');
         });
 
         test('with findScope', () {
           expect(scope.findScope('b')?.key, 'b');
           expect(scope.findScope('c')?.key, 'b');
           expect(scope.findScope('d')?.key, 'b');
-          expect(scope.findScope('b.e')?.key, 'e');
-          expect(scope.findScope('c.e')?.key, 'e');
-          expect(scope.findScope('d.e')?.key, 'e');
-          expect(scope.findScope('a.b.e')?.key, 'e');
-          expect(scope.findScope('a.c.e')?.key, 'e');
-          expect(scope.findScope('a.d.e')?.key, 'e');
+          expect(scope.findScope('b/e')?.key, 'e');
+          expect(scope.findScope('c/e')?.key, 'e');
+          expect(scope.findScope('d/e')?.key, 'e');
+          expect(scope.findScope('a/b/e')?.key, 'e');
+          expect(scope.findScope('a/c/e')?.key, 'e');
+          expect(scope.findScope('a/d/e')?.key, 'e');
 
-          final e = scope.findScope('a.b.e')!;
+          final e = scope.findScope('a/b/e')!;
           expect(e.findScope('b')?.key, 'b');
           expect(e.findScope('c')?.key, 'b');
           expect(e.findScope('d')?.key, 'b');
@@ -3294,18 +3294,18 @@ void main() {
           expect(scope.findChildScope('b')?.key, 'b');
           expect(scope.findChildScope('c')?.key, 'b');
           expect(scope.findChildScope('d')?.key, 'b');
-          expect(scope.findChildScope('b.e')?.key, 'e');
-          expect(scope.findChildScope('c.e')?.key, 'e');
-          expect(scope.findChildScope('d.e')?.key, 'e');
-          expect(scope.findChildScope('a.b.e')?.key, 'e');
-          expect(scope.findChildScope('a.c.e')?.key, 'e');
-          expect(scope.findChildScope('a.d.e')?.key, 'e');
+          expect(scope.findChildScope('b/e')?.key, 'e');
+          expect(scope.findChildScope('c/e')?.key, 'e');
+          expect(scope.findChildScope('d/e')?.key, 'e');
+          expect(scope.findChildScope('a/b/e')?.key, 'e');
+          expect(scope.findChildScope('a/c/e')?.key, 'e');
+          expect(scope.findChildScope('a/d/e')?.key, 'e');
         });
 
         test('with suppliers', () {
           // Use original key "a" in supplier address
           final g0 = NodeBluePrint.map(
-            supplier: 'a.b.e.f',
+            supplier: 'a/b/e/f',
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
@@ -3314,7 +3314,7 @@ void main() {
 
           // Use alias "b" in supplier address
           final g1 = NodeBluePrint.map(
-            supplier: 'a.c.e.f',
+            supplier: 'a/c/e/f',
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
@@ -3323,7 +3323,7 @@ void main() {
 
           // Use alias "c" in supplier address
           final g2 = NodeBluePrint.map(
-            supplier: 'a.d.e.f',
+            supplier: 'a/d/e/f',
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
@@ -3350,9 +3350,9 @@ void main() {
         });
 
         test('with findNode', () {
-          expect(scope.findNode<int>('a.b.e.f')?.key, 'f');
-          expect(scope.findNode<int>('a.c.e1.f')?.key, 'f');
-          expect(scope.findNode<int>('a.d.e2.f')?.key, 'f');
+          expect(scope.findNode<int>('a/b/e/f')?.key, 'f');
+          expect(scope.findNode<int>('a/c/e1/f')?.key, 'f');
+          expect(scope.findNode<int>('a/d/e2/f')?.key, 'f');
         });
 
         test('with findScope', () {
@@ -3362,17 +3362,17 @@ void main() {
           expect(scope.findScope('e')?.key, 'e');
           expect(scope.findScope('e1')?.key, 'e');
           expect(scope.findScope('e2')?.key, 'e');
-          expect(scope.findScope('b.e')?.key, 'e');
-          expect(scope.findScope('c.e1')?.key, 'e');
-          expect(scope.findScope('d.e')?.key, 'e');
-          expect(scope.findScope('a.b.e')?.key, 'e');
-          expect(scope.findScope('a.c.e1')?.key, 'e');
-          expect(scope.findScope('a.d.e2')?.key, 'e');
+          expect(scope.findScope('b/e')?.key, 'e');
+          expect(scope.findScope('c/e1')?.key, 'e');
+          expect(scope.findScope('d/e')?.key, 'e');
+          expect(scope.findScope('a/b/e')?.key, 'e');
+          expect(scope.findScope('a/c/e1')?.key, 'e');
+          expect(scope.findScope('a/d/e2')?.key, 'e');
 
-          final e = scope.findScope('a.b.e')!;
-          expect(e.findScope('b.e')?.key, 'e');
-          expect(e.findScope('c.e1')?.key, 'e');
-          expect(e.findScope('d.e2')?.key, 'e');
+          final e = scope.findScope('a/b/e')!;
+          expect(e.findScope('b/e')?.key, 'e');
+          expect(e.findScope('c/e1')?.key, 'e');
+          expect(e.findScope('d/e2')?.key, 'e');
         });
 
         test('with findChildScope()', () {
@@ -3382,18 +3382,18 @@ void main() {
           expect(scope.findChildScope('e')?.key, 'e');
           expect(scope.findChildScope('e1')?.key, 'e');
           expect(scope.findChildScope('e2')?.key, 'e');
-          expect(scope.findChildScope('b.e')?.key, 'e');
-          expect(scope.findChildScope('c.e1')?.key, 'e');
-          expect(scope.findChildScope('d.e')?.key, 'e');
-          expect(scope.findChildScope('a.b.e')?.key, 'e');
-          expect(scope.findChildScope('a.c.e1')?.key, 'e');
-          expect(scope.findChildScope('a.d.e2')?.key, 'e');
+          expect(scope.findChildScope('b/e')?.key, 'e');
+          expect(scope.findChildScope('c/e1')?.key, 'e');
+          expect(scope.findChildScope('d/e')?.key, 'e');
+          expect(scope.findChildScope('a/b/e')?.key, 'e');
+          expect(scope.findChildScope('a/c/e1')?.key, 'e');
+          expect(scope.findChildScope('a/d/e2')?.key, 'e');
         });
 
         test('with suppliers', () {
           // Use original key "a" in supplier address
           final g0 = NodeBluePrint.map(
-            supplier: 'a.b.e1.f',
+            supplier: 'a/b/e1/f',
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
@@ -3402,7 +3402,7 @@ void main() {
 
           // Use alias "b" in supplier address
           final g1 = NodeBluePrint.map(
-            supplier: 'a.c.e2.f',
+            supplier: 'a/c/e2/f',
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
@@ -3411,7 +3411,7 @@ void main() {
 
           // Use alias "c" in supplier address
           final g2 = NodeBluePrint.map(
-            supplier: 'a.d.e.f',
+            supplier: 'a/d/e/f',
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);

@@ -166,7 +166,7 @@ class Scope {
   List<String> get pathArray => _pathArray;
 
   /// Returns true if node matches the path
-  bool matchesPath(String path) => _matchesPathArray(path.split('.'));
+  bool matchesPath(String path) => _matchesPathArray(path.split('/'));
 
   /// Returns true if node matches the path
   bool matchesPathArray(List<String> pathArray) => _matchesPathArray(pathArray);
@@ -541,7 +541,7 @@ class Scope {
   /// Returns the first scope with the given path.
   /// Throws if multiple scopes with the same path exist.
   Scope? findChildScope(String path) {
-    return _findChildScope(path.split('.'));
+    return _findChildScope(path.split('/'));
   }
 
   /// Returns the node of key in this or any parent nodes
@@ -1022,7 +1022,7 @@ class Scope {
 
   void _initPath() {
     _pathArray = parent == null ? [key] : [...parent!._pathArray, key];
-    _path = parent == null ? key : '${parent!.path}.$key';
+    _path = parent == null ? key : '${parent!.path}/$key';
   }
 
   void _initAliases() {
@@ -1198,8 +1198,8 @@ class Scope {
     var excludedScopes = const <Scope>[];
 
     // Handle the case that we must only search in parent scopes
-    if (key.startsWith('..')) {
-      key = key.substring(2);
+    if (key.startsWith('../')) {
+      key = key.substring(3);
 
       if (parent == null) {
         return null;
@@ -1215,7 +1215,7 @@ class Scope {
     }
 
     // Continue processing
-    final keyParts = key.split('.');
+    final keyParts = key.split('/');
     final nodeKey = keyParts.last;
     final scopePath = findNodes
         ? keyParts.sublist(0, keyParts.length - 1)
@@ -1603,7 +1603,7 @@ class Scope {
 
     while (i >= 0 && parent != null) {
       final segment = path[i];
-      if (segment.isEmpty) {
+      if (segment == '..') {
         i--;
         continue;
       }
@@ -1635,7 +1635,7 @@ class Scope {
       return;
     }
 
-    final dot = currentPath.isEmpty ? '' : '.';
+    final dot = currentPath.isEmpty ? '' : '/';
 
     // Write children
     for (final child in scope.children) {
@@ -1744,7 +1744,7 @@ class Scope {
   ) {
     for (final key in preset.keys) {
       final value = preset[key];
-      final childPath = '$path.$key';
+      final childPath = '$path/$key';
 
       final isMap = value is Map<String, dynamic>;
       Scope? c = isMap ? child(key) : null;
@@ -1852,7 +1852,7 @@ class ExampleChildScope extends Scope {
         documentation: '<code>result = previous + 1</code>',
         produce: (components, previous) => previous + 1,
         key: 'childNodeA',
-        suppliers: ['rootA', 'rootB', 'childScopeA.childNodeB'],
+        suppliers: ['rootA', 'rootB', 'childScopeA/childNodeB'],
       ),
     );
 

@@ -26,7 +26,7 @@ void main() {
             'b': {
               'c': const NodeBluePrint<int>(
                 key: 'c',
-                suppliers: ['a.b.d', 'a.b.e'],
+                suppliers: ['a/b/d', 'a/b/e'],
                 initialProduct: 0,
                 documentation: 'Documentation of node c.',
               ),
@@ -66,8 +66,8 @@ void main() {
         expect(html, contains('<h2>d</h2>'));
 
         // Document suppliers
-        expect(html, contains('<li><code>a.b.d</code></li>'));
-        expect(html, contains('<li><code>a.b.e</code></li>'));
+        expect(html, contains('<li><code>a/b/d</code></li>'));
+        expect(html, contains('<li><code>a/b/e</code></li>'));
 
         // Document blue print documentation
         expect(html, contains('Documentation of node c.'));

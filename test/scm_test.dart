@@ -251,7 +251,7 @@ void main() {
             isA<ArgumentError>().having(
               (e) => e.message,
               'message',
-              'Node "root.example.a": Supplier with key "unknown" not found.',
+              'Node "root/example/a": Supplier with key "unknown" not found.',
             ),
           ),
         );
@@ -976,7 +976,7 @@ void main() {
             isA<ArgumentError>().having(
               (e) => e.message,
               'message',
-              'Node "root.example.a": Supplier with key "unknown" not found.',
+              'Node "root/example/a": Supplier with key "unknown" not found.',
             ),
           ),
         );
@@ -1133,8 +1133,8 @@ void main() {
         ),
       });
 
-      master = example.findNode<int>('master.node')!;
-      follower = example.findNode<int>('follower.node')!;
+      master = example.findNode<int>('master/node')!;
+      follower = example.findNode<int>('follower/node')!;
 
       flush();
     });
@@ -1165,7 +1165,7 @@ void main() {
       });
 
       group('should connect suppliers of parent nodes', () {
-        test('when the supplier path starts with ..', () {
+        test('when the supplier path starts with ../', () {
           final scope = Scope.example();
           final scm = scope.scm;
           scope.mockContent({
@@ -1175,7 +1175,7 @@ void main() {
                 'supplier': 1,
                 'customer': NodeBluePrint<int>(
                   key: 'customer',
-                  suppliers: ['..supplier'],
+                  suppliers: ['../supplier'],
                   initialProduct: 0,
                   produce: (c, p) => 1,
                 ),
@@ -1183,8 +1183,8 @@ void main() {
             },
           });
           scm.testFlushTasks();
-          final customer = scope.findNode<int>('a.b.customer')!;
-          final supplier = scope.findNode<int>('a.supplier')!;
+          final customer = scope.findNode<int>('a/b/customer')!;
+          final supplier = scope.findNode<int>('a/supplier')!;
           expect(customer.suppliers, [supplier]);
         });
       });

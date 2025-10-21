@@ -20,7 +20,7 @@ void main() {
         expect(builderBluePrint.needsUpdateCalls, hasLength(1));
 
         // Change a.other which is set as "needsUpdateSuppliers"
-        final a = scope.findNode<num>('a.other')!;
+        final a = scope.findNode<num>('a/other')!;
         a.product = 2;
         scope.scm.testFlushTasks();
 

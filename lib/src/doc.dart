@@ -134,7 +134,7 @@ class Doc {
     }
 
     // coverage:ignore-start
-    final fileName = '${node.path}.png';
+    final fileName = '${node.path.replaceAll('/', '.')}.png';
     final path = '$targetDirectory/$fileName';
     await node.writeImageFile(path, supplierDepth: -1, customerDepth: 0);
 

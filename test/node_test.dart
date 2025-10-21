@@ -51,7 +51,7 @@ void main() {
 
     group('path', () {
       test('should return the path of the node', () {
-        expect(node.path, 'root.example.aaliyah');
+        expect(node.path, 'root/example/aaliyah');
       });
     });
 
@@ -66,11 +66,11 @@ void main() {
           },
         });
 
-        final d = scope.findNode<int>('a.b.c1.d')!;
-        expect(d.matchesPath('a.b.c0.d'), isTrue);
-        expect(d.matchesPath('a.b.c1.d'), isTrue);
-        expect(d.matchesPath('a.b.c2.d'), isTrue);
-        expect(d.matchesPath('a.b.c3.d'), isFalse);
+        final d = scope.findNode<int>('a/b/c1/d')!;
+        expect(d.matchesPath('a/b/c0/d'), isTrue);
+        expect(d.matchesPath('a/b/c1/d'), isTrue);
+        expect(d.matchesPath('a/b/c2/d'), isTrue);
+        expect(d.matchesPath('a/b/c3/d'), isFalse);
       });
     });
 
@@ -869,10 +869,10 @@ void main() {
               'a': {
                 'b': {
                   'c': {
-                    'a': nbp(from: ['d.b'], to: 'a', init: 0),
+                    'a': nbp(from: ['d/b'], to: 'a', init: 0),
                   },
                   'd': {
-                    'b': nbp(from: ['c.a'], to: 'b', init: 1),
+                    'b': nbp(from: ['c/a'], to: 'b', init: 1),
                   },
                 },
               },
@@ -966,7 +966,7 @@ void main() {
           // Therefore changing the master node's value
           // should change the follower node's
           expect(followerNode.product, 0);
-          final masterNode = scope.findNode<int>('master.node')!;
+          final masterNode = scope.findNode<int>('master/node')!;
           masterNode.product = 1;
           scope.scm.testFlushTasks();
           expect(followerNode.product, 1);
@@ -1011,11 +1011,11 @@ void main() {
           },
         });
 
-        final smartNode = scope.findNode<int>('c.height')!;
+        final smartNode = scope.findNode<int>('c/height')!;
         expect(smartNode.bluePrint.isSmartNode, true);
         final a = scope.findScope('a')!;
         final b = scope.findScope('b')!;
-        final customer = scope.findNode<int>('d.customer')!;
+        final customer = scope.findNode<int>('d/customer')!;
         scm.testFlushTasks();
 
         // ..............................................
@@ -1035,7 +1035,7 @@ void main() {
         a.mockContent({
           'x': {'height': master0Value},
         });
-        final master0 = scope.findNode<int>('x.height')!;
+        final master0 = scope.findNode<int>('x/height')!;
         scm.testFlushTasks();
 
         // Now master0 should deliver the value of the smartNode
@@ -1058,7 +1058,7 @@ void main() {
         b.mockContent({
           'x': {'height': master1Value},
         });
-        final master1 = scope.findNode<int>('b.x.height')!;
+        final master1 = scope.findNode<int>('b/x/height')!;
         scm.testFlushTasks();
 
         // Now the smartNode should deliver the value of the new smartNode
@@ -1151,7 +1151,7 @@ void main() {
               'b': {'x': 0},
               'c': {'x': 0},
             },
-            'n': nbp(from: ['a.x', 'b.x', 'c.x'], to: 'n', init: 0),
+            'n': nbp(from: ['a/x', 'b/x', 'c/x'], to: 'n', init: 0),
           });
 
           scope.scm.testFlushTasks();
@@ -1199,8 +1199,8 @@ void main() {
         scope.scm.testFlushTasks();
 
         // Find the first master node in the hierarchy
-        final nodeB = scope.findNode<int>('a.b.node')!;
-        final nodeC = scope.findNode<int>('c.node')!;
+        final nodeB = scope.findNode<int>('a/b/node')!;
+        final nodeC = scope.findNode<int>('c/node')!;
         final masterOfNodeC = nodeC.findSmartMaster();
         expect(masterOfNodeC, nodeB);
 
@@ -1209,7 +1209,7 @@ void main() {
         scope.scm.testFlushTasks();
 
         // The next master node should be found
-        final nodeA = scope.findNode<int>('a.node')!;
+        final nodeA = scope.findNode<int>('a/node')!;
         final masterOfNodeA = nodeC.findSmartMaster();
         expect(masterOfNodeA, nodeA);
 
@@ -1245,14 +1245,14 @@ void main() {
             },
           });
 
-          final masterNode = scope.findNode<int>('a.node')!;
+          final masterNode = scope.findNode<int>('a/node')!;
 
           scope.scm.testFlushTasks();
-          final nodeB = scope.findNode<int>('b.node')!;
+          final nodeB = scope.findNode<int>('b/node')!;
           final masterNodeB = nodeB.findSmartMaster();
           expect(masterNodeB, masterNode);
 
-          final nodeC = scope.findNode<int>('c.node')!;
+          final nodeC = scope.findNode<int>('c/node')!;
           final masterNodeOfC = nodeC.findSmartMaster();
           expect(masterNodeOfC, masterNode);
 
@@ -1287,11 +1287,11 @@ void main() {
           });
 
           scope.scm.testFlushTasks();
-          final input = scope.findNode<int>('parent.child.input')!;
+          final input = scope.findNode<int>('parent/child/input')!;
           final output = scope.findNode<int>('output')!;
 
           // Because input is already a supplier of output
-          // input will not connect to parent.child.output.
+          // input will not connect to parent/child/output.
           // If it would do so, a circular dependency would be created.
           expect(input.customers, [output]);
           expect(input.suppliers, isEmpty);
@@ -1334,12 +1334,12 @@ void main() {
           });
 
           scope.scm.testFlushTasks();
-          final input = scope.findNode<int>('parent.child.input')!;
+          final input = scope.findNode<int>('parent/child/input')!;
           final output = scope.findNode<int>('output')!;
           final between = scope.findNode<int>('between')!;
 
           // Because input is already a supplier of output
-          // input will not connect to parent.child.output.
+          // input will not connect to parent/child/output.
           // If it would do so, a circular dependency would be created.
           expect(input.suppliers, isEmpty);
           expect(input.customers, [between]);
@@ -1368,7 +1368,7 @@ void main() {
                     initialProduct: 0,
                     key: 'input',
 
-                    // This will connect to the outer parent.child.input
+                    // This will connect to the outer parent/child/input
                     // because the inner one would create a circular
                     // dependency.
                     smartMaster: ['parent', 'child', 'output'],
@@ -1395,10 +1395,10 @@ void main() {
           });
 
           scope.scm.testFlushTasks();
-          final outerOutput = scope.findNode<int>('parent.child.output')!;
-          final innerInput = scope.findNode<int>('parent.parent.child.input')!;
+          final outerOutput = scope.findNode<int>('parent/child/output')!;
+          final innerInput = scope.findNode<int>('parent/parent/child/input')!;
           final innerOutput = scope.findNode<int>(
-            'parent.parent.child.output',
+            'parent/parent/child/output',
           )!;
           final between = scope.findNode<int>('between')!;
 
@@ -1418,16 +1418,16 @@ void main() {
         Node.onChangeEnabled = true;
         Node.onRecursiveChangeEnabled = true;
         final scope = Scope.example();
-        expect(scope.findNode<Scope>('on.change'), isNotNull);
-        expect(scope.findNode<Scope>('on.changeRecursive'), isNotNull);
+        expect(scope.findNode<Scope>('on/change'), isNotNull);
+        expect(scope.findNode<Scope>('on/changeRecursive'), isNotNull);
       });
 
       test('false', () {
         Node.onChangeEnabled = false;
         Node.onRecursiveChangeEnabled = false;
         final scope = Scope.example();
-        expect(scope.findNode<Scope>('on.change'), isNull);
-        expect(scope.findNode<Scope>('on.changeRecursive'), isNull);
+        expect(scope.findNode<Scope>('on/change'), isNull);
+        expect(scope.findNode<Scope>('on/changeRecursive'), isNull);
       });
     });
   });

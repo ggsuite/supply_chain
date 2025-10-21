@@ -329,7 +329,7 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
     // starting with hosts
     final scope = Scope.example(
       builders: [
-        ExampleScBuilderBluePrint(needsUpdateSuppliers: ['a.other']),
+        ExampleScBuilderBluePrint(needsUpdateSuppliers: ['a/other']),
       ],
       children: [
         ScopeBluePrint.fromJson({

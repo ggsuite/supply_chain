@@ -718,7 +718,7 @@ void main() {
               'n1': const NodeBluePrint<int>(
                 key: 'n1',
                 initialProduct: 374,
-              ).connectSupplier('b.n0'),
+              ).connectSupplier('b/n0'),
             },
           },
         });
@@ -750,7 +750,7 @@ void main() {
           },
           'c': {
             'n1': nbp<int>(
-              from: ['b.n0', 'b.n2'],
+              from: ['b/n0', 'b/n2'],
               to: 'n1',
               init: 0,
               produce: (c, p) {

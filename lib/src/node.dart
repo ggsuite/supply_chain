@@ -45,7 +45,7 @@ class Node<T> {
     _init();
   }
 
-  /// Allows to listen to 'on.change'
+  /// Allows to listen to 'on/change'
   static bool onChangeEnabled = false;
 
   /// Allows to listen to 'on.recursiveChange'
@@ -185,10 +185,10 @@ class Node<T> {
   String get key => bluePrint.key;
 
   /// The key of the node
-  String get path => '${scope.path}.$key';
+  String get path => '${scope.path}/$key';
 
   /// Returns true, if this path matches the given path
-  bool matchesPath(String path) => _matchesPath(path.split('.'));
+  bool matchesPath(String path) => _matchesPath(path.split('/'));
 
   /// The unique id of the node
   final int id = _idCounter++;

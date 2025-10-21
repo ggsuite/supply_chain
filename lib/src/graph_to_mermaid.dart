@@ -79,8 +79,15 @@ class GraphToMermaid {
       if (!Platform.environment.containsKey('GITHUB_ACTIONS') &&
           !Platform.environment.containsKey('TF_BUILD')) {
         // Check if mmdc is installed
-        final mmdcProcess = await Process.run('mmdc', ['--version']);
-        if (mmdcProcess.exitCode != 0) {
+        var error = 0;
+        try {
+          final mmdcProcess = await Process.run('mmdc', ['--version']);
+          error = mmdcProcess.exitCode;
+        } catch (e) {
+          error = 1;
+        }
+
+        if (error != 0) {
           throw Exception(
             [
               'Mermaid CLI (mmdc) is not installed. ',

@@ -305,24 +305,24 @@ class ScopeBluePrint {
   /// and its absolute path for a given search path
   (dynamic, String?) findItem(String searchPath) {
     final absolutePath = <String>[];
-    final item = _findItem<dynamic>(searchPath.split('.'), absolutePath);
-    return (item, item != null ? absolutePath.join('.') : null);
+    final item = _findItem<dynamic>(searchPath.split('/'), absolutePath);
+    return (item, item != null ? absolutePath.join('/') : null);
   }
 
   /// Returns the node for a given path
   NodeBluePrint<T>? findNode<T>(String path) {
-    final item = _findItem<T>(path.split('.'), [], matchAlsoScopes: false);
+    final item = _findItem<T>(path.split('/'), [], matchAlsoScopes: false);
     return item is NodeBluePrint<T> ? item : null;
   }
 
   /// Returns the absolute path of the node with path or null if not found
   String? absoluteNodePath(String path) {
     final absolutePath = <String>[];
-    final node = _findItem<dynamic>(path.split('.'), absolutePath);
+    final node = _findItem<dynamic>(path.split('/'), absolutePath);
     if (node == null) {
       return null;
     }
-    return absolutePath.join('.');
+    return absolutePath.join('/');
   }
 
   /// Returns the pathes of all nodes belonging to this scope
@@ -612,7 +612,7 @@ class ScopeBluePrint {
   }) {
     final pathes = <String>[];
     final firstSegmentName = isFirstSegment && appendRootScopeKey
-        ? '${scope.key}.'
+        ? '${scope.key}/'
         : '';
 
     for (final node in scope.nodes) {
@@ -628,7 +628,7 @@ class ScopeBluePrint {
 
       pathes.addAll(
         childPathes.map(
-          (childPath) => '$firstSegmentName${child.key}.$childPath',
+          (childPath) => '$firstSegmentName${child.key}/$childPath',
         ),
       );
     }
@@ -673,7 +673,7 @@ class ScopeBluePrint {
         missingConnections.remove(path);
         final nodePathes = _allNodePathes(item);
         for (final nodePath in nodePathes) {
-          processedConnections['${item.key}.$nodePath'] = '$supplier.$nodePath';
+          processedConnections['${item.key}/$nodePath'] = '$supplier/$nodePath';
         }
       }
     }
@@ -705,7 +705,7 @@ class ScopeBluePrint {
 
       final absolutePath = scope.absoluteNodePath(key);
       if (absolutePath != null) {
-        final segments = absolutePath.split('.');
+        final segments = absolutePath.split('/');
         modifiedSelf = _connectNodeToSupplier(
           modifiedSelf,
           segments.sublist(1),
@@ -818,7 +818,7 @@ class ScopeBluePrint {
 
     if (foundItems.length > 1) {
       throw ArgumentError(
-        'Multiple nodes with path "${path.join('.')}" found.',
+        'Multiple nodes with path "${path.join('/')}" found.',
       );
     }
 

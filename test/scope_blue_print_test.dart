@@ -174,7 +174,7 @@ void main() {
 
             // Check if all nodes were instantiated
             expect(
-              scope.findNode<int>('parentScope.nodeBuiltByParent'),
+              scope.findNode<int>('parentScope/nodeBuiltByParent'),
               isNotNull,
             );
 
@@ -184,14 +184,14 @@ void main() {
             );
 
             expect(
-              scope.findNode<int>('parentScope.nodeConstructedByParent'),
+              scope.findNode<int>('parentScope/nodeConstructedByParent'),
               isNotNull,
             );
 
             // Find nodeBuiltByChildScope
             expect(
               scope.findNode<int>(
-                'parentScope.childScopeBuiltByParent.nodeBuiltByChildScope',
+                'parentScope/childScopeBuiltByParent/nodeBuiltByChildScope',
               ),
               isNotNull,
             );
@@ -199,7 +199,7 @@ void main() {
             // Find childScopeConstructedByParent
             expect(
               scope.findNode<int>(
-                'parentScope.childScopeConstructedByParent.'
+                'parentScope/childScopeConstructedByParent/'
                 'nodeConstructedByChildScope',
               ),
               isNotNull,
@@ -224,7 +224,7 @@ void main() {
           ).instantiate(scope: rootScope);
 
           expect(
-            scope.findNode<int>('parentScope.nodeBuiltByParent')!.bluePrint,
+            scope.findNode<int>('parentScope/nodeBuiltByParent')!.bluePrint,
             replacedBluePrint,
           );
         });
@@ -279,9 +279,9 @@ void main() {
           final wh1 = wh1Bp.instantiate(
             scope: root,
             connect: {
-              'w': 'wh0.w',
-              'h': 'wh0.h',
-              // 'd': 'wh0.d', // Not connected
+              'w': 'wh0/w',
+              'h': 'wh0/h',
+              // 'd': 'wh0/d', // Not connected
             },
           );
 
@@ -339,18 +339,18 @@ void main() {
           final wh1 = wh1Bp.instantiate(
             scope: root,
             connect: {
-              'w': 'wh0.child.w',
-              'h': 'wh0.child.h',
-              // 'child.d': 'wh0.child.d', // Not connected
+              'w': 'wh0/child/w',
+              'h': 'wh0/child/h',
+              // 'child/d': 'wh0/child/d', // Not connected
             },
           );
 
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
           scm.testFlushTasks();
-          final wh0Width = wh0.findNode<num>('child.w')!;
-          final wh0Height = wh0.findNode<num>('child.h')!;
-          final wh0Depth = wh0.findNode<num>('child.d')!;
+          final wh0Width = wh0.findNode<num>('child/w')!;
+          final wh0Height = wh0.findNode<num>('child/h')!;
+          final wh0Depth = wh0.findNode<num>('child/d')!;
           final wh1Width = wh1.findNode<num>('w')!;
           final wh1Height = wh1.findNode<num>('h')!;
           final wh1Depth = wh1.findNode<num>('d')!;
@@ -400,7 +400,7 @@ void main() {
           final wh1 = wh1Bp.instantiate(
             scope: root,
             connect: {
-              'wh1': 'parent.wh0', // The complete scope is connected
+              'wh1': 'parent/wh0', // The complete scope is connected
             },
           );
           final wh0 = parent.findChildScope('wh0')!;
@@ -408,10 +408,10 @@ void main() {
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
           scm.testFlushTasks();
-          final wh0Width = wh0.findNode<num>('child.w')!;
-          final wh0Height = wh0.findNode<num>('child.h')!;
-          final wh1Width = wh1.findNode<num>('child.w')!;
-          final wh1Height = wh1.findNode<num>('child.h')!;
+          final wh0Width = wh0.findNode<num>('child/w')!;
+          final wh0Height = wh0.findNode<num>('child/h')!;
+          final wh1Width = wh1.findNode<num>('child/w')!;
+          final wh1Height = wh1.findNode<num>('child/h')!;
 
           expect(wh0Width.product, 300);
           expect(wh0Height.product, 400);
@@ -451,16 +451,16 @@ void main() {
 
           final wh1 = wh1Bp.instantiate(
             scope: root,
-            connect: {'child': 'wh0.child'},
+            connect: {'child': 'wh0/child'},
           );
 
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
           scm.testFlushTasks();
-          final wh0Width = wh0.findNode<num>('child.w')!;
-          final wh0Height = wh0.findNode<num>('child.h')!;
-          final wh1Width = wh1.findNode<num>('child.w')!;
-          final wh1Height = wh1.findNode<num>('child.h')!;
+          final wh0Width = wh0.findNode<num>('child/w')!;
+          final wh0Height = wh0.findNode<num>('child/h')!;
+          final wh1Width = wh1.findNode<num>('child/w')!;
+          final wh1Height = wh1.findNode<num>('child/h')!;
 
           expect(wh0Width.product, 300);
           expect(wh0Height.product, 400);
@@ -503,16 +503,16 @@ void main() {
           final wh0 = wh0Bp.instantiate(scope: root);
           final wh1 = wh1Bp.instantiate(
             scope: root,
-            connect: {'child.w': 'wh0.child.w', 'child.h': 'wh0.child.h'},
+            connect: {'child/w': 'wh0/child/w', 'child/h': 'wh0/child/h'},
           );
 
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
           scm.testFlushTasks();
-          final wh0Width = wh0.findNode<num>('child.w')!;
-          final wh0Height = wh0.findNode<num>('child.h')!;
-          final wh1Width = wh1.findNode<num>('child.w')!;
-          final wh1Height = wh1.findNode<num>('child.h')!;
+          final wh0Width = wh0.findNode<num>('child/w')!;
+          final wh0Height = wh0.findNode<num>('child/h')!;
+          final wh1Width = wh1.findNode<num>('child/w')!;
+          final wh1Height = wh1.findNode<num>('child/h')!;
 
           expect(wh0Width.product, 300);
           expect(wh0Height.product, 400);
@@ -652,22 +652,22 @@ void main() {
           test('when it exists directly in the root', () {
             var (node, path) = bluePrint.findItem('n');
             expect(node?.key, 'n');
-            expect(path, 'a.n');
+            expect(path, 'a/n');
 
             node = bluePrint.findNode<num>('n');
             path = bluePrint.absoluteNodePath('n');
             expect(node?.key, 'n');
-            expect(path, 'a.n');
+            expect(path, 'a/n');
           });
           test('when it exists somewhere deeper', () {
             var (node, path) = bluePrint.findItem('d');
             expect(node?.key, 'd');
-            expect(path, 'a.b.c.d');
+            expect(path, 'a/b/c/d');
 
             node = bluePrint.findNode<num>('d');
             path = bluePrint.absoluteNodePath('d');
             expect(node?.key, 'd');
-            expect(path, 'a.b.c.d');
+            expect(path, 'a/b/c/d');
           });
         });
 
@@ -680,12 +680,12 @@ void main() {
             expect(item.key, 'a');
 
             (item, path) = bluePrint.findItem('b');
-            expect(path, 'a.b');
+            expect(path, 'a/b');
             expect(item, isA<ScopeBluePrint>());
             expect(item.key, 'b');
 
             (item, path) = bluePrint.findItem('c');
-            expect(path, 'a.b.c');
+            expect(path, 'a/b/c');
             expect(item, isA<ScopeBluePrint>());
             expect(item.key, 'c');
           });
@@ -729,44 +729,44 @@ void main() {
       group('with path containing multiple segments', () {
         group('should return null', () {
           test('when no node matches the given path', () {
-            var (node, path) = bluePrint.findItem('b.c.x');
+            var (node, path) = bluePrint.findItem('b/c/x');
             expect(node, isNull);
             expect(path, isNull);
 
-            node = bluePrint.findNode<int>('b.c.x');
+            node = bluePrint.findNode<int>('b/c/x');
             expect(node, isNull);
           });
 
           test('when a path segment is missed', () {
-            var (node, path) = bluePrint.findItem('b.d');
+            var (node, path) = bluePrint.findItem('b/d');
             expect(node, isNull);
             expect(path, isNull);
 
-            node = bluePrint.findNode<int>('b.d');
+            node = bluePrint.findNode<int>('b/d');
             expect(node, isNull);
           });
         });
         group('should return the node', () {
           test('when the path matches', () {
-            var (node, path) = bluePrint.findItem('b.c.d');
+            var (node, path) = bluePrint.findItem('b/c/d');
             expect(node, isNotNull);
-            expect(path, 'a.b.c.d');
+            expect(path, 'a/b/c/d');
 
-            node = bluePrint.findNode<num>('b.c.d');
-            path = bluePrint.absoluteNodePath('b.c.d');
+            node = bluePrint.findNode<num>('b/c/d');
+            path = bluePrint.absoluteNodePath('b/c/d');
             expect(node, isNotNull);
-            expect(path, 'a.b.c.d');
+            expect(path, 'a/b/c/d');
           });
 
           test('when the path contains the name of the root node', () {
-            var (node, path) = bluePrint.findItem('a.b.c.d');
+            var (node, path) = bluePrint.findItem('a/b/c/d');
             expect(node, isNotNull);
-            expect(path, 'a.b.c.d');
+            expect(path, 'a/b/c/d');
 
-            node = bluePrint.findNode<num>('a.b.c.d');
-            path = bluePrint.absoluteNodePath('a.b.c.d');
+            node = bluePrint.findNode<num>('a/b/c/d');
+            path = bluePrint.absoluteNodePath('a/b/c/d');
             expect(node, isNotNull);
-            expect(path, 'a.b.c.d');
+            expect(path, 'a/b/c/d');
           });
         });
       });
@@ -785,14 +785,14 @@ void main() {
       group('with appendRootScopeKey == true', () {
         test('should return all node pathes', () {
           final pathes = bluePrint.allNodePathes(appendRootScopeKey: true);
-          expect(pathes, ['a.n', 'a.b.c.d']);
+          expect(pathes, ['a/n', 'a/b/c/d']);
         });
       });
 
       group('with appendRootScopeKey == fale', () {
         test('should return all node pathes without root scope', () {
           final pathes = bluePrint.allNodePathes(appendRootScopeKey: false);
-          expect(pathes, ['n', 'b.c.d']);
+          expect(pathes, ['n', 'b/c/d']);
         });
       });
     });
