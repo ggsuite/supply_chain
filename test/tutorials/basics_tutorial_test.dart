@@ -68,5 +68,22 @@ void main() {
     // The customer value is also changed
     expect(supplier.product, 5);
     expect(customer.product, 5 * 2);
+
+    // Search a node
+    final foundCustomer0 = rootScope.findNode<int>('customer');
+    expect(foundCustomer0, customer);
+
+    final foundCustomer1 = rootScope.findNode<int>('main/customer');
+    expect(foundCustomer1, customer);
+
+    final foundCustomer2 = rootScope.findNode<int>('root/main/customer');
+    expect(foundCustomer2, customer);
+
+    final foundCustomer3 = rootScope.findNode<int>('xyz');
+    expect(foundCustomer3, isNull);
+
+    // Search a scope
+    final foundMain = customer.scope.findScope('main');
+    expect(foundMain, mainScope);
   });
 }
