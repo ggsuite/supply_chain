@@ -207,6 +207,10 @@ class Scm {
     while (_testFastTasks.isNotEmpty ||
         _testNormalTasks.isNotEmpty ||
         _nodesNeedingSupplierUpdate.isNotEmpty) {
+      if (_nodesNeedingSupplierUpdate.isNotEmpty) {
+        initSuppliers();
+      }
+
       testRunNormalTasks();
       testRunFastTasks();
 
