@@ -1,0 +1,11 @@
+flowchart TD
+  subgraph root_2["root"]
+    subgraph main_4["main"]
+      supplier_0["supplier"]
+      customer_1["customer"]
+    end
+  end
+
+  supplier_0 --> customer_1;
+
+  classDef highlight fill:#FFFFAA,stroke:#333;

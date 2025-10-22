@@ -4,29 +4,29 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'package:gg_golden/gg_golden.dart';
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Basic Tutorial', () {
+  test('Basic Tutorial', () async {
     // ................................
     // Create a supply chain manager
-    final scm = Scm();
+    // Setting isTest to true will apply all changes
+    // once testFlushTasks is called
+    final scm = Scm(isTest: true);
 
     // ................................
     // Create a root scope
     final rootScope = Scope.root(key: 'root', scm: scm);
 
     // Create a main scope
-    const mainScopeBp = ScopeBluePrint(key: 'mainScope');
+    const mainScopeBp = ScopeBluePrint(key: 'main');
     final mainScope = mainScopeBp.instantiate(scope: rootScope);
 
     // ................................
     // Create a suppler node blue print
-    const supplierBp = NodeBluePrint<int>(
-      initialProduct: 0,
-      key: 'supplierNode',
-    );
+    const supplierBp = NodeBluePrint<int>(initialProduct: 0, key: 'supplier');
 
     // Create an instance of the blue print
     final supplier = supplierBp.instantiate(scope: mainScope);
@@ -37,11 +37,12 @@ void main() {
     // ................................
     // Create a customer node
     final customerBp = NodeBluePrint<int>(
-      key: 'customerNode',
+      key: 'customer',
       initialProduct: 1,
-      suppliers: ['supplierNodeX'],
+      suppliers: ['supplier'],
       produce: (components, previousProduct) {
-        return 2;
+        final supplier = components[0] as int;
+        return supplier * 2;
       },
     );
 
@@ -52,6 +53,20 @@ void main() {
 
     // Print the graph
     final graph = rootScope.mermaid();
-    expect(graph, '''''');
+    await writeGolden(fileName: 'basic_01.mmd', data: graph);
+
+    // Get the customer value
+    expect(supplier.product, 0);
+    expect(customer.product, 0);
+
+    // Change the supplier value
+    supplier.product = 5;
+
+    // Apply the changes
+    scm.testFlushTasks();
+
+    // The customer value is also changed
+    expect(supplier.product, 5);
+    expect(customer.product, 5 * 2);
   });
 }
