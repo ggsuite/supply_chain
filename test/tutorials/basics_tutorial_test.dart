@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('Basic Tutorial', () async {
-    // ................................
+    // .............................
     // Create a supply chain manager
     // Setting isTest to true will apply all changes
     // once flush is called
@@ -33,14 +33,9 @@ void main() {
     // Instantiate the blue print
     final supplier = supplierBp.instantiate(scope: scope);
 
-    // .............
-    // Flush changes
-
-    // Instruct supply chain manager to process the supply chain
-    scm.flush();
-
     // ......................
     // Create a customer node
+    // doubling the product of the supplier
     final customerBp = NodeBluePrint<int>(
       key: 'customer',
       initialProduct: 1,
@@ -57,25 +52,8 @@ void main() {
     // Apply all changes
     scm.flush();
 
-    // ..........................
-    // Print node and scope graph
-    final graph = scope.mermaid();
-
-    // Write graph into basic_01.mmd
-    await writeGolden(fileName: 'basic_01.mmd', data: graph);
-
-    // ...............................
-    // Show all node pathes of a scope
-    final allNodePathes = rootScope.ls();
-    await writeGolden(fileName: 'all_node_pathes.json', data: allNodePathes);
-    expect(allNodePathes, [
-      'scope',
-      'scope/supplier (1)',
-      'scope/customer (2)',
-    ]);
-
     // ......................
-    // Get the customer value
+    // The customer has doubled the product of the supplier
     expect(supplier.product, 1);
     expect(customer.product, 1 * 2);
 
@@ -109,9 +87,23 @@ void main() {
     final foundCustomer3 = rootScope.findNode<int>('xyz');
     expect(foundCustomer3, isNull);
 
-    // ..............
     // In the same way scopes can be searched
     final foundScope = customer.scope.findScope('scope');
     expect(foundScope, scope);
+
+    // ..........................
+    // Print node and scope graph
+    final graph = scope.mermaid();
+    await writeGolden(fileName: 'basic_01.mmd', data: graph);
+
+    // ...............................
+    // Show all node pathes of a scope
+    final allNodePathes = rootScope.ls();
+    await writeGolden(fileName: 'all_node_pathes.json', data: allNodePathes);
+    expect(allNodePathes, [
+      'scope',
+      'scope/supplier (5)',
+      'scope/customer (10)',
+    ]);
   });
 }
