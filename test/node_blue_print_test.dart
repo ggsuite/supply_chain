@@ -709,7 +709,7 @@ void main() {
         final scope = Scope.example();
         final nodeA = a.instantiate(scope: scope);
         final nodeB = b.instantiate(scope: scope);
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         expect(b.key, 'b');
         expect(b.initialProduct, a.initialProduct);
@@ -718,7 +718,7 @@ void main() {
 
         // A change of a should be forwarded to be
         nodeA.product = 12;
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
         expect(nodeB.product, 12);
       });
     });
@@ -745,7 +745,7 @@ void main() {
         final n0 = scope.findNode<int>('n0')!;
         final n1 = scope.findNode<int>('n1')!;
 
-        scm.testFlushTasks();
+        scm.flush();
 
         // The value of n0 should be forwarded to n1
         expect(n0.product, 618);
@@ -753,7 +753,7 @@ void main() {
 
         // Change value of n0
         n0.product = 123;
-        scm.testFlushTasks();
+        scm.flush();
         expect(n1.product, 123);
       });
     });
@@ -779,7 +779,7 @@ void main() {
           },
         },
       });
-      scm.testFlushTasks();
+      scm.flush();
 
       final n1 = scope.findNode<int>('n1')!;
       final suppliers = n1.suppliers;

@@ -13,7 +13,7 @@ void main() {
     // ................................
     // Create a supply chain manager
     // Setting isTest to true will apply all changes
-    // once testFlushTasks is called
+    // once flush is called
     final scm = Scm(isTest: true);
 
     // ................................
@@ -32,7 +32,7 @@ void main() {
     final supplier = supplierBp.instantiate(scope: mainScope);
 
     // Instruct supply chain manager to process the supply chain
-    scm.testFlushTasks();
+    scm.flush();
 
     // ................................
     // Create a customer node
@@ -49,7 +49,7 @@ void main() {
     final customer = customerBp.instantiate(scope: mainScope);
 
     // Instruct supply chain manager to process the supply chain
-    scm.testFlushTasks();
+    scm.flush();
 
     // Print the graph
     final graph = rootScope.mermaid();
@@ -63,7 +63,7 @@ void main() {
     supplier.product = 5;
 
     // Apply the changes
-    scm.testFlushTasks();
+    scm.flush();
 
     // The customer value is also changed
     expect(supplier.product, 5);

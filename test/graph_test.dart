@@ -457,7 +457,7 @@ void main() {
           ) = triangle;
 
           test('complete', () {
-            triangle.triangle.scm.testFlushTasks();
+            triangle.triangle.scm.flush();
 
             final tree = t.graph.treeForScope(
               scope: triangle.triangle,

@@ -343,7 +343,7 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
     );
 
     // Apply the builder to the scope
-    scope.scm.testFlushTasks();
+    scope.scm.flush();
     return scope.builders.first;
   }
 

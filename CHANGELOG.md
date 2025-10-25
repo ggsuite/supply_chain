@@ -5,6 +5,7 @@
 ### Changed
 
 - BREAKING CHANGE: produce function will require a node param
+- BREAKING CHANGE: testFlushTasks is renamed into flush
 
 ## [3.0.2] - 2025-10-21
 
@@ -181,7 +182,7 @@
 - ScopeBluePrints will alwas create a scope
 - Rename subScope to childScope
 - Breaking change: Use . instead / for scope notation
-- Ignore code not executed on GitHub
+- Ignoflushecuted on GitHub
 - Allow to embedd real ScopeBluePrints into mockContent
 - Rework example
 - Allow to embed ScopeBluePrints directly in mocked content
@@ -317,7 +318,7 @@ Modifications can only be done via builders.
 - Point to parent suppliers by adding ..
 - Improve searching things in parent scopes
 - Update gg\_cache
-- Allow to return an error array without throwing when setting presets
+- Allow to return an eflushhout throwing when setting presets
 - Setting an empty preset will reset the supply chain
 - Presets do not export empty scopes
 

@@ -14,7 +14,7 @@ void main() {
         final builderNodeReplacer = ScBuilderNodeReplacer.example;
         final builder = builderNodeReplacer.builder;
         final scope = builder.scope;
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         // Get the nodes a,b and d, e out of the hierarchy
         final a = scope.findNode<int>('a')!;
@@ -46,14 +46,14 @@ void main() {
           initialProduct: 8,
         ).instantiate(scope: c);
 
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
         expect(g.product, 42);
         expect(h.product, 42);
 
         // Lets dispose the builder.
         // The nodes a, b, d, and e should be deliver 1, 2, 4, and 5 again
         builder.dispose();
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         expect(a.product, 1);
         expect(b.product, 2);

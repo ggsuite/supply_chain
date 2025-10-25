@@ -186,14 +186,14 @@ void main() {
 
           // Apply panelMarker to the scope
           panelMarker.instantiate(scope: scope);
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
 
           // Add a panel to the scope
           ScopeBluePrint.fromJson({
             'panel': {'height': 100},
           }).instantiate(scope: scope);
 
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
 
           // The panelMarker should have marked the panel node
           final panel = scope.findScope('panel')!;
@@ -204,7 +204,7 @@ void main() {
 
           // Instantiate the panelCreateor which adds a panel to the container
           panelCreator.instantiate(scope: scope);
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
 
           // No panel is created yet
           expect(scope.findScope('container.panel'), isNull);
@@ -212,7 +212,7 @@ void main() {
           // Trigger the panel creation
           final createPanelTrigger = scope.findNode<bool>('addOrRemovePanel')!;
           createPanelTrigger.product = true;
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
 
           // A panel should be added to the container
           final container = scope.findScope('container')!;
@@ -260,14 +260,14 @@ void main() {
 
           // Apply panelMarker to the scope
           panelMarker.instantiate(scope: scope);
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
 
           // Add a panel to the scope
           ScopeBluePrint.fromJson({
             'panel': {'height': 100},
           }).instantiate(scope: scope);
 
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
 
           // The panelMarker should have marked the panel node
           final panel = scope.findScope('panel')!;
@@ -278,7 +278,7 @@ void main() {
 
           // Instantiate the panelCreateor which adds a panel to the container
           panelCreator.instantiate(scope: scope);
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
 
           // A panel should be added to the container
           final container = scope.findScope('container')!;

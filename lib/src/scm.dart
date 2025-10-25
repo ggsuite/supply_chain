@@ -199,7 +199,7 @@ class Scm {
   Iterable<Task> get testNormalTasks => _testNormalTasks;
 
   ///  Runs alls tasks until they are done
-  void testFlushTasks({bool tick = true}) {
+  void flush({bool tick = true}) {
     if (tick) {
       _tick();
     }

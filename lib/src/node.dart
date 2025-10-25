@@ -1082,7 +1082,7 @@ class ButterFlyExample {
       allScopes = [];
     }
 
-    scope.scm.testFlushTasks();
+    scope.scm.flush();
   }
 
   // ...........................................................................
@@ -1180,7 +1180,7 @@ class TriangleExample {
     allNodes = [topNode, leftNode, rightNode];
     allScopes = [topScope, leftScope, rightScope];
 
-    triangle.scm.testFlushTasks();
+    triangle.scm.flush();
   }
 
   /// The house scope

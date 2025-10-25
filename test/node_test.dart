@@ -37,7 +37,7 @@ void main() {
       scm.nominate(node);
 
       // Flushing tasks will produce
-      scm.testFlushTasks();
+      scm.flush();
 
       // Production should be done
       expect(node.product, 2);
@@ -104,7 +104,7 @@ void main() {
 
       // Call produce method
       final productBefore = node.product;
-      scm.testFlushTasks();
+      scm.flush();
       expect(node.product, productBefore + 1);
     });
 
@@ -158,11 +158,11 @@ void main() {
           initialProduct: 0,
         ).instantiate(scope: scope);
 
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
         expect(customer.product, 5);
 
         supplier.mockedProduct = 2;
-        scm.testFlushTasks();
+        scm.flush();
         expect(customer.product, 2);
       });
     });
@@ -234,7 +234,7 @@ void main() {
         final scm = host.scope.scm;
 
         // Check the initial product
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.product, 1);
 
         // Insert a first insert 2, adding 2 to the original product
@@ -244,7 +244,7 @@ void main() {
           host: host,
         );
 
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, [insert2]);
         expect(insert2.input, host);
         expect(insert2.output, host);
@@ -259,7 +259,7 @@ void main() {
           host: host,
           index: 0,
         );
-        scm.testFlushTasks();
+        scm.flush();
 
         expect(host.inserts, [insert0, insert2]);
         expect(insert0.input, host);
@@ -275,7 +275,7 @@ void main() {
           host: host,
           index: 1,
         );
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, [insert0, insert1, insert2]);
         expect(insert0.input, host);
         expect(insert0.output, insert1);
@@ -293,7 +293,7 @@ void main() {
           host: host,
           index: 3,
         );
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, [insert0, insert1, insert2, insert3]);
         expect(insert0.input, host);
         expect(insert0.output, insert1);
@@ -308,7 +308,7 @@ void main() {
 
         // Remove insert node in the middle
         insert1.dispose();
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, [insert0, insert2, insert3]);
         expect(insert0.input, host);
         expect(insert0.output, insert2);
@@ -321,7 +321,7 @@ void main() {
 
         // Remove first insert node
         insert0.dispose();
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, [insert2, insert3]);
         expect(insert2.input, host);
         expect(insert2.output, insert3);
@@ -332,7 +332,7 @@ void main() {
 
         // Remove last insert node
         insert3.dispose();
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, [insert2]);
         expect(insert2.input, host);
         expect(insert2.output, host);
@@ -341,7 +341,7 @@ void main() {
 
         // Remove last remaining insert node
         insert2.dispose();
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, <Insert<dynamic>>[]);
         expect(host.originalProduct, 1);
         expect(host.product, 1);
@@ -366,11 +366,11 @@ void main() {
             host: host,
           );
 
-          scm.testFlushTasks();
+          scm.flush();
           expect(host.inserts, [insert0, insert1]);
 
           host.clearInserts();
-          scm.testFlushTasks();
+          scm.flush();
           expect(host.inserts, <Insert<dynamic>>[]);
 
           expect(insert0.isDisposed, true);
@@ -413,7 +413,7 @@ void main() {
             initialProduct: 0,
           ),
         });
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
         supplier = scope.findNode<int>('supplier')!;
         customer = scope.findNode<int>('customer')!;
         scm = scope.scm;
@@ -486,7 +486,7 @@ void main() {
 
         // Replace the node by another node with the same key
         supplier.bluePrint.instantiate(scope: supplier.scope);
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         expect(supplier.isErased, isTrue);
         final replacedSuppliers = scope.findNode<int>('supplier');
@@ -504,14 +504,14 @@ void main() {
         initialProduct: 6,
       ).instantiate(scope: scope);
 
-      scope.scm.testFlushTasks();
+      scope.scm.flush();
       expect(node2.product, 5);
 
       node.product = 11;
-      scope.scm.testFlushTasks();
+      scope.scm.flush();
       expect(node2.product, 11);
       node.reset();
-      scope.scm.testFlushTasks();
+      scope.scm.flush();
       expect(node2.product, 5);
     });
 
@@ -541,7 +541,7 @@ void main() {
           suppliers: ['supplier'],
           initialProduct: 0,
         ).instantiate(scope: scope, owner: owner);
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         // Dispose the node
         supplier.dispose();
@@ -632,7 +632,7 @@ void main() {
           expect(node.product, 1);
 
           // Let the chain run
-          chain.scm.testFlushTasks();
+          chain.scm.flush();
 
           // Check if customer got the new component
           expect(customer.product, 10);
@@ -705,7 +705,7 @@ void main() {
 
         expect(node.bluePrint, otherBluePrint);
 
-        node.scm.testFlushTasks();
+        node.scm.flush();
 
         expect(node.product, 12);
       });
@@ -761,7 +761,7 @@ void main() {
 
           expect(node.bluePrint, otherBluePrint);
 
-          scm.testFlushTasks();
+          scm.flush();
 
           node.removeBluePrint(otherBluePrint);
 
@@ -880,7 +880,7 @@ void main() {
             });
 
             expect(
-              () => scope.scm.testFlushTasks(),
+              () => scope.scm.flush(),
               throwsA(
                 isA<Exception>().having(
                   (e) => e.toString(),
@@ -908,7 +908,7 @@ void main() {
             });
 
             expect(
-              () => scope.scm.testFlushTasks(),
+              () => scope.scm.flush(),
               throwsA(
                 isA<Exception>().having(
                   (e) => e.toString(),
@@ -969,7 +969,7 @@ void main() {
           expect(followerNode.product, 0);
           final masterNode = scope.findNode<int>('master/node')!;
           masterNode.product = 1;
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
           expect(followerNode.product, 1);
 
           // Anyway, meta nodes should not be smart nodes
@@ -1017,7 +1017,7 @@ void main() {
         final a = scope.findScope('a')!;
         final b = scope.findScope('b')!;
         final customer = scope.findNode<int>('d/customer')!;
-        scm.testFlushTasks();
+        scm.flush();
 
         // ..............................................
         // Use smartNode itself when no smartNode is available
@@ -1037,7 +1037,7 @@ void main() {
           'x': {'height': master0Value},
         });
         final master0 = scope.findNode<int>('x/height')!;
-        scm.testFlushTasks();
+        scm.flush();
 
         // Now master0 should deliver the value of the smartNode
         expect(master0.product, master0Value);
@@ -1048,7 +1048,7 @@ void main() {
         // SmartNode value should be updated
         master0Value *= 10;
         master0.product = master0Value;
-        scm.testFlushTasks();
+        scm.flush();
 
         expect(master0.product, master0Value);
         expect(smartNode.product, master0Value);
@@ -1060,7 +1060,7 @@ void main() {
           'x': {'height': master1Value},
         });
         final master1 = scope.findNode<int>('b/x/height')!;
-        scm.testFlushTasks();
+        scm.flush();
 
         // Now the smartNode should deliver the value of the new smartNode
         expect(master0.product, master0Value);
@@ -1071,7 +1071,7 @@ void main() {
         // .........................................................
         // Remove the master1 between  smartNode and master0
         master1.dispose();
-        scm.testFlushTasks();
+        scm.flush();
 
         // Now master0 should take over again
         expect(master0.product, master0Value);
@@ -1082,7 +1082,7 @@ void main() {
         // Remove the master0.
         // SmartNode should take over again
         master0.dispose();
-        scm.testFlushTasks();
+        scm.flush();
 
         expect(smartNode.suppliers, isEmpty);
         smartNode.product = smartNodeValue;
@@ -1101,7 +1101,7 @@ void main() {
             smartMaster: ['a'],
           ),
         });
-        scm.testFlushTasks();
+        scm.flush();
         final a = scope.findNode<int>('a')!;
         final b = scope.findNode<int>('b')!;
         expect(a.customers, isEmpty);
@@ -1128,7 +1128,7 @@ void main() {
           },
         });
 
-        scm.testFlushTasks();
+        scm.flush();
 
         final master = scope.findNode<int>('master')!;
         final smartNode = scope.findNode<int>('smartNode')!;
@@ -1155,7 +1155,7 @@ void main() {
             'n': nbp(from: ['a/x', 'b/x', 'c/x'], to: 'n', init: 0),
           });
 
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
           final n = scope.findNode<int>('n')!;
           expect(n.suppliers, hasLength(3));
 
@@ -1197,7 +1197,7 @@ void main() {
             'f': {'node': 6},
           },
         });
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         // Find the first master node in the hierarchy
         final nodeB = scope.findNode<int>('a/b/node')!;
@@ -1207,7 +1207,7 @@ void main() {
 
         // Dispose the master node
         nodeB.dispose();
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         // The next master node should be found
         final nodeA = scope.findNode<int>('a/node')!;
@@ -1216,7 +1216,7 @@ void main() {
 
         // Dispose the master node
         nodeA.dispose();
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         // No master node is found
         final masterOfNodeX = nodeC.findSmartMaster();
@@ -1248,7 +1248,7 @@ void main() {
 
           final masterNode = scope.findNode<int>('a/node')!;
 
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
           final nodeB = scope.findNode<int>('b/node')!;
           final masterNodeB = nodeB.findSmartMaster();
           expect(masterNodeB, masterNode);
@@ -1258,7 +1258,7 @@ void main() {
           expect(masterNodeOfC, masterNode);
 
           masterNode.dispose();
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
           expect(nodeB.findSmartMaster(), isNull);
           expect(nodeC.findSmartMaster(), isNull);
         });
@@ -1287,7 +1287,7 @@ void main() {
             },
           });
 
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
           final input = scope.findNode<int>('parent/child/input')!;
           final output = scope.findNode<int>('output')!;
 
@@ -1334,7 +1334,7 @@ void main() {
             },
           });
 
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
           final input = scope.findNode<int>('parent/child/input')!;
           final output = scope.findNode<int>('output')!;
           final between = scope.findNode<int>('between')!;
@@ -1395,7 +1395,7 @@ void main() {
             },
           });
 
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
           final outerOutput = scope.findNode<int>('parent/child/output')!;
           final innerInput = scope.findNode<int>('parent/parent/child/input')!;
           final innerOutput = scope.findNode<int>(

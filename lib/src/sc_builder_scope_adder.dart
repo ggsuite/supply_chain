@@ -36,7 +36,7 @@ class ScBuilderScopeAdder {
     });
 
     final builder = ExampleScBuilderAddingScopes().instantiate(scope: scope);
-    scope.scm.testFlushTasks();
+    scope.scm.flush();
     return builder.scopeAdder;
   }
 

@@ -64,7 +64,7 @@ void main() {
 
         // Finally let's dispose the builder
         builder.dispose();
-        builder.scope.scm.testFlushTasks();
+        builder.scope.scm.flush();
 
         // Now the inserts should be removed from all nodes
         expect(hostA.inserts, hasLength(0));

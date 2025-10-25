@@ -246,7 +246,7 @@ void main() {
         scope.scm.tick();
 
         expect(
-          () => scope.scm.testFlushTasks(),
+          () => scope.scm.flush(),
           throwsA(
             isA<ArgumentError>().having(
               (e) => e.message,
@@ -283,7 +283,7 @@ void main() {
 
       final supplier = scope.findNode<int>('supplier')!;
       final producer = scope.findNode<int>('producer')!;
-      scm.testFlushTasks();
+      scm.flush();
       expect(supplier.product, 1);
       expect(producer.product, 11);
 
@@ -315,19 +315,19 @@ void main() {
       expect(scm.nominatedNodes, [supplier]);
 
       // Finish production by flushing all tasks
-      scm.testFlushTasks();
+      scm.flush();
       expect(supplier.product, 2);
       expect(producer.product, 12);
 
       // Each time tick() is called, the production starts again
-      scm.testFlushTasks();
+      scm.flush();
       expect(supplier.product, 3);
       expect(producer.product, 13);
 
       // Don't animate supplier anymore
       // Tick will not have an effect anymore.
       supplier.isAnimated = false;
-      scm.testFlushTasks();
+      scm.flush();
       expect(supplier.product, 3);
       expect(producer.product, 13);
     });
@@ -388,7 +388,7 @@ void main() {
       });
 
       // .............................
-      scm.testFlushTasks(tick: false);
+      scm.flush(tick: false);
 
       final key = scope.findNode<int>('key')!;
       final synth = scope.findNode<int>('synth')!;
@@ -406,7 +406,7 @@ void main() {
 
       // Trigger the first frame to let all nodes produce
       scm.tick();
-      scm.testFlushTasks(tick: false);
+      scm.flush(tick: false);
       expect(key.product, 1);
       expect(synth.product, 10);
       expect(audio.product, 11);
@@ -475,7 +475,7 @@ void main() {
       ]);
 
       // Lets flush all tasks
-      scm.testFlushTasks(tick: false);
+      scm.flush(tick: false);
 
       // screen and grid are not still ready
       // because minimum production priority is set to realtime
@@ -564,7 +564,7 @@ void main() {
         producer.ownPriority = Priority.realtime;
 
         // Flush all micro tasks -> Nodes should produce
-        scm.testFlushTasks(tick: false);
+        scm.flush(tick: false);
 
         // SupplierA is not ready
         expect(supplierA.isReady, isTrue);
@@ -580,7 +580,7 @@ void main() {
 
         // Now assume producer b is ready
         scm.hasNewProduct(supplierB);
-        scm.testFlushTasks(tick: false);
+        scm.flush(tick: false);
 
         // Now everybody is ready
         expect(supplierA.isReady, isTrue);
@@ -600,7 +600,7 @@ void main() {
         scm.testStopwatch.elapse(elapsedTime);
 
         // Flush all micro tasks -> Nodes should produce
-        scm.testFlushTasks();
+        scm.flush();
 
         // SupplierA is ready
         expect(supplierA.isReady, isTrue);
@@ -725,7 +725,7 @@ void main() {
             .instantiate(scope: scope);
 
         // Check the initial product
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.product, 1);
         expect(customer0.product, 1);
         expect(customer1.product, 1);
@@ -737,7 +737,7 @@ void main() {
           host: host,
         );
 
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, [insert2]);
         expect(insert2.input, host);
         expect(insert2.output, host);
@@ -754,7 +754,7 @@ void main() {
           host: host,
           index: 0,
         );
-        scm.testFlushTasks();
+        scm.flush();
 
         expect(host.inserts, [insert0, insert2]);
         expect(insert0.input, host);
@@ -772,7 +772,7 @@ void main() {
           host: host,
           index: 1,
         );
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, [insert0, insert1, insert2]);
         expect(insert0.input, host);
         expect(insert0.output, insert1);
@@ -792,7 +792,7 @@ void main() {
           host: host,
           index: 3,
         );
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, [insert0, insert1, insert2, insert3]);
         expect(insert0.input, host);
         expect(insert0.output, insert1);
@@ -809,7 +809,7 @@ void main() {
 
         // Remove insert node in the middle
         insert1.dispose();
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, [insert0, insert2, insert3]);
         expect(insert0.input, host);
         expect(insert0.output, insert2);
@@ -824,7 +824,7 @@ void main() {
 
         // Remove first insert node
         insert0.dispose();
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, [insert2, insert3]);
         expect(insert2.input, host);
         expect(insert2.output, insert3);
@@ -837,7 +837,7 @@ void main() {
 
         // Remove last insert node
         insert3.dispose();
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, [insert2]);
         expect(insert2.input, host);
         expect(insert2.output, host);
@@ -848,7 +848,7 @@ void main() {
 
         // Remove last remaining insert node
         insert2.dispose();
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.inserts, <Insert<dynamic>>[]);
         expect(host.originalProduct, 1);
         expect(host.product, 1);
@@ -886,7 +886,7 @@ void main() {
         ).instantiateAsInsert(host: host);
 
         // Check state before
-        scm.testFlushTasks();
+        scm.flush();
         expect(hostCalls, 1);
         expect(p0Calls, 1);
         expect(p1Calls, 1);
@@ -895,7 +895,7 @@ void main() {
         scm.nominate(host);
 
         // Product
-        scm.testFlushTasks();
+        scm.flush();
 
         // The host as well the inserts should have been produced
         expect(host.product, 2);
@@ -955,7 +955,7 @@ void main() {
 
         // The missed supplier should be found
         // also if it is created later
-        scm.testFlushTasks();
+        scm.flush();
         expect(customer.product, 6);
       });
 
@@ -964,14 +964,14 @@ void main() {
         final scope = Scope.example();
         final scm = scope.scm;
         nbp(from: [], to: 'a', init: 0).instantiate(scope: scope);
-        scm.testFlushTasks();
+        scm.flush();
 
         // Replace the node with a node that has invalid suppliers
         final invalidNode = nbp(from: ['unknown'], to: 'a', init: 0);
         scope.addOrReplaceNode(invalidNode);
 
         expect(
-          () => scm.testFlushTasks(),
+          () => scm.flush(),
           throwsA(
             isA<ArgumentError>().having(
               (e) => e.message,
@@ -992,7 +992,7 @@ void main() {
     test('should be provided during testing', () {
       // Create some variables
       final scm = Scm.example();
-      scm.testFlushTasks();
+      scm.flush();
       expect(scm.isTest, isTrue);
       var fastTaskCounter = 0;
       var normalTaskCounter = 0;
@@ -1121,7 +1121,7 @@ void main() {
     setUp(() {
       example = Scope.example();
       scm = example.scm;
-      flush = example.scm.testFlushTasks;
+      flush = example.scm.flush;
 
       // Create a master scope and a follower scope both having a node
       example.mockContent({
@@ -1182,7 +1182,7 @@ void main() {
               },
             },
           });
-          scm.testFlushTasks();
+          scm.flush();
           final customer = scope.findNode<int>('a/b/customer')!;
           final supplier = scope.findNode<int>('a/supplier')!;
           expect(customer.suppliers, [supplier]);

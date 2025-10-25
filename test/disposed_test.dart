@@ -93,7 +93,7 @@ void main() {
       },
     });
 
-    scm.testFlushTasks();
+    scm.flush();
     s0 = scope.findScope('s0')!;
     s1 = scope.findScope('s1')!;
     s2 = scope.findScope('s2')!;
@@ -368,7 +368,7 @@ void main() {
             intermediate.dispose();
             expect(customer.suppliers.first, intermediate);
             final newIntermediate = bluePrint.instantiate(scope: i2);
-            scm.testFlushTasks();
+            scm.flush();
             expect(customer.suppliers.first, newIntermediate);
             expect(newIntermediate.suppliers.first, supplier);
           });
@@ -459,7 +459,7 @@ void main() {
             },
           )..instantiate(scope: panel);
 
-          panel.scm.testFlushTasks();
+          panel.scm.flush();
         });
 
         test('should work', () {
@@ -478,7 +478,7 @@ void main() {
 
           // Decrease the number of corners.
           cornerCount.product = 1;
-          panel.scm.testFlushTasks();
+          panel.scm.flush();
           expect(
             panel.findNode<int>('panel/corners/corner0/cValue'),
             isNotNull,

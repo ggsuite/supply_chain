@@ -40,7 +40,7 @@ class TestGraphs {
 
     graph = const Graph();
 
-    x.scm.testFlushTasks();
+    x.scm.flush();
   }
 
   // ...........................................................................
