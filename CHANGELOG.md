@@ -8,6 +8,10 @@
 - BREAKING CHANGE: testFlushTasks is renamed into flush
 - Rework README
 
+### Removed
+
+- Remove doc.dart
+
 ## [3.0.2] - 2025-10-21
 
 ### Fixed
