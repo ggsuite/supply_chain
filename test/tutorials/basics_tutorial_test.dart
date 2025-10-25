@@ -1,5 +1,5 @@
 // @license
-// Copyright (c) 2025 Dr. Gabriel Gatzsche
+// Copyright (c) ggsuite
 //
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
@@ -16,25 +16,30 @@ void main() {
     // once flush is called
     final scm = Scm(isTest: true);
 
-    // ................................
+    // ...................
     // Create a root scope
     final rootScope = Scope.root(key: 'root', scm: scm);
 
     // Create a main scope
-    const mainScopeBp = ScopeBluePrint(key: 'main');
-    final mainScope = mainScopeBp.instantiate(scope: rootScope);
+    const scopeBp = ScopeBluePrint(key: 'scope');
+    final scope = scopeBp.instantiate(scope: rootScope);
 
-    // ................................
-    // Create a suppler node blue print
-    const supplierBp = NodeBluePrint<int>(initialProduct: 0, key: 'supplier');
+    // ......................
+    // Create a supplier node
 
-    // Create an instance of the blue print
-    final supplier = supplierBp.instantiate(scope: mainScope);
+    // First create a blue print
+    const supplierBp = NodeBluePrint<int>(initialProduct: 1, key: 'supplier');
+
+    // Instantiate the blue print
+    final supplier = supplierBp.instantiate(scope: scope);
+
+    // .............
+    // Flush changes
 
     // Instruct supply chain manager to process the supply chain
     scm.flush();
 
-    // ................................
+    // ......................
     // Create a customer node
     final customerBp = NodeBluePrint<int>(
       key: 'customer',
@@ -46,18 +51,36 @@ void main() {
       },
     );
 
-    final customer = customerBp.instantiate(scope: mainScope);
+    final customer = customerBp.instantiate(scope: scope);
 
-    // Instruct supply chain manager to process the supply chain
+    // .................
+    // Apply all changes
     scm.flush();
 
-    // Print the graph
-    final graph = rootScope.mermaid();
+    // ..........................
+    // Print node and scope graph
+    final graph = scope.mermaid();
+
+    // Write graph into basic_01.mmd
     await writeGolden(fileName: 'basic_01.mmd', data: graph);
 
+    // ...............................
+    // Show all node pathes of a scope
+    final allNodePathes = rootScope.ls();
+    await writeGolden(fileName: 'all_node_pathes.json', data: allNodePathes);
+    expect(allNodePathes, [
+      'scope',
+      'scope/supplier (1)',
+      'scope/customer (2)',
+    ]);
+
+    // ......................
     // Get the customer value
-    expect(supplier.product, 0);
-    expect(customer.product, 0);
+    expect(supplier.product, 1);
+    expect(customer.product, 1 * 2);
+
+    // ........................
+    // Change and apply changes
 
     // Change the supplier value
     supplier.product = 5;
@@ -69,21 +92,26 @@ void main() {
     expect(supplier.product, 5);
     expect(customer.product, 5 * 2);
 
-    // Search a node
-    final foundCustomer0 = rootScope.findNode<int>('customer');
-    expect(foundCustomer0, customer);
+    // .............
+    // Search a node just using the key. The first found scope is returned.
+    final foundCustomer = rootScope.findNode<int>('customer');
+    expect(foundCustomer, customer);
 
-    final foundCustomer1 = rootScope.findNode<int>('main/customer');
+    // Add more context to be more precise
+    final foundCustomer1 = rootScope.findNode<int>('scope/customer');
     expect(foundCustomer1, customer);
 
-    final foundCustomer2 = rootScope.findNode<int>('root/main/customer');
+    // Use the complete path to find a very special node
+    final foundCustomer2 = rootScope.findNode<int>('root/scope/customer');
     expect(foundCustomer2, customer);
 
+    // If a node cannot be found, findNode returns null
     final foundCustomer3 = rootScope.findNode<int>('xyz');
     expect(foundCustomer3, isNull);
 
-    // Search a scope
-    final foundMain = customer.scope.findScope('main');
-    expect(foundMain, mainScope);
+    // ..............
+    // In the same way scopes can be searched
+    final foundScope = customer.scope.findScope('scope');
+    expect(foundScope, scope);
   });
 }

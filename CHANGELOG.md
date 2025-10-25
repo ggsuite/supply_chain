@@ -6,6 +6,7 @@
 
 - BREAKING CHANGE: produce function will require a node param
 - BREAKING CHANGE: testFlushTasks is renamed into flush
+- Rework README
 
 ## [3.0.2] - 2025-10-21
 
