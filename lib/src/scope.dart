@@ -1150,7 +1150,7 @@ class Scope {
     final bluePrint = NodeBluePrint<Scope>(
       key: 'change',
       initialProduct: this,
-      produce: (components, previous) => this,
+      produce: (components, previous, node) => this,
     );
 
     onChange = bluePrint.instantiate(scope: onScope);
@@ -1168,7 +1168,7 @@ class Scope {
     final bluePrint = NodeBluePrint<Scope>(
       key: 'changeRecursive',
       initialProduct: this,
-      produce: (components, previous) => this,
+      produce: (components, previous, node) => this,
     );
 
     onChangeRecursive = bluePrint.instantiate(scope: onScope);
@@ -1821,7 +1821,8 @@ class ExampleScopeRoot extends Scope {
     findOrCreateNode(
       NodeBluePrint(
         initialProduct: 0,
-        produce: (components, previous) => previous + 1, // coverage:ignore-line
+        produce: (components, previous, node) =>
+            previous + 1, // coverage:ignore-line
         key: 'rootA',
       ),
     );
@@ -1829,7 +1830,8 @@ class ExampleScopeRoot extends Scope {
     findOrCreateNode(
       NodeBluePrint(
         initialProduct: 0,
-        produce: (components, previous) => previous + 1, // coverage:ignore-line
+        produce: (components, previous, node) =>
+            previous + 1, // coverage:ignore-line
         key: 'rootB',
       ),
     );
@@ -1850,7 +1852,7 @@ class ExampleChildScope extends Scope {
       NodeBluePrint<int>(
         initialProduct: 0,
         documentation: '<code>result = previous + 1</code>',
-        produce: (components, previous) => previous + 1,
+        produce: (components, previous, node) => previous + 1,
         key: 'childNodeA',
         suppliers: ['rootA', 'rootB', 'childScopeA/childNodeB'],
       ),
@@ -1860,7 +1862,7 @@ class ExampleChildScope extends Scope {
       NodeBluePrint(
         initialProduct: 0,
         documentation: '<code>result = previous + 1</code>',
-        produce: (components, previous) => previous + 1,
+        produce: (components, previous, node) => previous + 1,
         key: 'childNodeB',
       ),
     );
@@ -1879,7 +1881,7 @@ class ExampleGrandChildScope extends Scope {
     findOrCreateNode(
       NodeBluePrint(
         initialProduct: 0,
-        produce: (components, previous) => previous + 1,
+        produce: (components, previous, node) => previous + 1,
         key: 'grandChildNodeA',
         suppliers: ['rootA'],
       ),

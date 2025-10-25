@@ -240,7 +240,7 @@ void main() {
         // Insert a first insert 2, adding 2 to the original product
         final insert2 = Insert.example(
           key: 'insert2',
-          produce: (components, previousProduct) => previousProduct + 2,
+          produce: (components, previousProduct, node) => previousProduct + 2,
           host: host,
         );
 
@@ -255,7 +255,7 @@ void main() {
         // Add insert0 before insert2, multiplying by 3
         final insert0 = Insert.example(
           key: 'insert0',
-          produce: (components, previousProduct) => previousProduct * 3,
+          produce: (components, previousProduct, node) => previousProduct * 3,
           host: host,
           index: 0,
         );
@@ -271,7 +271,7 @@ void main() {
         // The insert multiplies the previous result by 4
         final insert1 = Insert.example(
           key: 'insert1',
-          produce: (components, previousProduct) => previousProduct * 4,
+          produce: (components, previousProduct, node) => previousProduct * 4,
           host: host,
           index: 1,
         );
@@ -289,7 +289,7 @@ void main() {
         // Add insert3 after insert2 adding ten
         final insert3 = Insert.example(
           key: 'insert3',
-          produce: (components, previousProduct) => previousProduct + 10,
+          produce: (components, previousProduct, node) => previousProduct + 10,
           host: host,
           index: 3,
         );
@@ -355,14 +355,14 @@ void main() {
           // Add insert0 before insert2, multiplying by 3
           final insert0 = Insert.example(
             key: 'insert0',
-            produce: (components, previousProduct) => previousProduct * 3,
+            produce: (components, previousProduct, node) => previousProduct * 3,
             host: host,
           );
 
           // Insert a first insert 2, adding 2 to the original product
           final insert1 = Insert.example(
             key: 'insert1',
-            produce: (components, previousProduct) => previousProduct + 2,
+            produce: (components, previousProduct, node) => previousProduct + 2,
             host: host,
           );
 
@@ -388,7 +388,7 @@ void main() {
           final host = Node.example(key: 'host');
           final insert = Insert.example(
             key: 'insert',
-            produce: (components, previousProduct) => previousProduct + 2,
+            produce: (components, previousProduct, node) => previousProduct + 2,
             host: host,
           );
 
@@ -619,7 +619,7 @@ void main() {
               key: 'customer',
               initialProduct: 0,
               suppliers: ['node'],
-              produce: (components, previousProduct) =>
+              produce: (components, previousProduct, node) =>
                   (components[0] as int) * 10,
             ),
           );
@@ -648,7 +648,7 @@ void main() {
           bluePrint: NodeBluePrint<int>(
             key: 'node',
             initialProduct: 0,
-            produce: (components, previousProduct) => 1,
+            produce: (components, previousProduct, node) => 1,
           ),
         );
 
@@ -697,7 +697,8 @@ void main() {
         final otherBluePrint = node.bluePrint.copyWith(
           initialProduct: 6,
           suppliers: ['supplier'],
-          produce: (components, previousProduct) => (components.first as int),
+          produce: (components, previousProduct, node) =>
+              (components.first as int),
         );
 
         node.addBluePrint(otherBluePrint);
@@ -753,7 +754,7 @@ void main() {
 
           final otherBluePrint = node.bluePrint.copyWith(
             initialProduct: 6,
-            produce: (components, previousProduct) => 7,
+            produce: (components, previousProduct, node) => 7,
           );
 
           node.addBluePrint(otherBluePrint);
@@ -842,7 +843,7 @@ void main() {
                 key: 'node',
                 initialProduct: 0,
                 allowedProducts: [0, 1, 2],
-                produce: (List<dynamic> components, previousProduct) => 3,
+                produce: (List<dynamic> components, previousProduct, node) => 3,
               ),
             );
 
@@ -1278,7 +1279,7 @@ void main() {
                   initialProduct: 0,
                   key: 'output',
                   suppliers: ['input'],
-                  produce: (components, previousProduct) {
+                  produce: (components, previousProduct, node) {
                     return (components[0] as int) + 1;
                   },
                 ),
@@ -1317,7 +1318,7 @@ void main() {
                   initialProduct: 0,
                   key: 'between',
                   suppliers: ['input'],
-                  produce: (components, previousProduct) {
+                  produce: (components, previousProduct, node) {
                     return (components[0] as int) + 1;
                   },
                 ),
@@ -1325,7 +1326,7 @@ void main() {
                   initialProduct: 0,
                   key: 'output',
                   suppliers: ['between'],
-                  produce: (components, previousProduct) {
+                  produce: (components, previousProduct, node) {
                     return (components[0] as int) + 1;
                   },
                 ),
@@ -1377,7 +1378,7 @@ void main() {
                     initialProduct: 0,
                     key: 'between',
                     suppliers: ['input'],
-                    produce: (components, previousProduct) {
+                    produce: (components, previousProduct, node) {
                       return (components[0] as int) + 1;
                     },
                   ),
@@ -1385,7 +1386,7 @@ void main() {
                     initialProduct: 0,
                     key: 'output',
                     suppliers: ['between'],
-                    produce: (components, previousProduct) {
+                    produce: (components, previousProduct, node) {
                       return (components[0] as int) + 1;
                     },
                   ),

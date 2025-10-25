@@ -11,21 +11,25 @@ void main() {
   group('ScopeBluePrint', () {
     group('example', () {
       test('should provide a blue print with to nodes and one dependency', () {
+        final rootScope = Scope.root(key: 'root', scm: Scm.example());
         final scopeBluePrint = ScopeBluePrint.example();
+        final scope = scopeBluePrint.instantiate(scope: rootScope);
         final builtNode = scopeBluePrint.nodes[0];
         final dependency = scopeBluePrint.nodes[1];
         final builtScope = scopeBluePrint.children.first;
         final subScope = scopeBluePrint.children.last;
         final node = subScope.nodes.first as NodeBluePrint<int>;
+        final nodeInstance = scope.findNode<int>('node')!;
         final customer = subScope.nodes.last as NodeBluePrint<int>;
+        final customerNode = scope.findNode<int>('customer')!;
         expect(scopeBluePrint.toString(), scopeBluePrint.key);
         expect(builtNode.key, 'builtNode');
         expect(dependency.key, 'dependency');
         expect(builtScope.key, 'builtScope');
         expect(node.key, 'node');
         expect(customer.key, 'customer');
-        expect(node.produce(<dynamic>[5], 0), 6);
-        expect(customer.produce(<dynamic>[6], 0), 7);
+        expect(node.produce(<dynamic>[5], 0, nodeInstance), 6);
+        expect(customer.produce(<dynamic>[6], 0, customerNode), 7);
       });
     });
 

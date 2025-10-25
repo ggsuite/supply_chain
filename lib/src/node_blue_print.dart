@@ -8,7 +8,8 @@ import 'package:collection/collection.dart';
 import 'package:supply_chain/supply_chain.dart';
 
 /// Produce delegate that does nothing
-T doNothing<T>(List<dynamic> components, T previousProduct) => previousProduct;
+T doNothing<T>(List<dynamic> components, T previousProduct, Node<T> context) =>
+    previousProduct;
 
 /// A function that parses a json map into a product of type T
 typedef FromJson<T> = T Function(Map<String, dynamic> json);
@@ -69,7 +70,7 @@ class NodeBluePrint<T> {
       key: toKey,
       initialProduct: initialProduct,
       suppliers: [supplier],
-      produce: (components, previous) => components.first as T,
+      produce: (components, previous, node) => components.first as T,
       fromJson: fromJson,
     );
   }
@@ -124,7 +125,8 @@ class NodeBluePrint<T> {
         initialProduct: 0,
         suppliers: [],
         produce:
-            produce ?? (components, previousProduct) => previousProduct + 1,
+            produce ??
+            (components, previousProduct, node) => previousProduct + 1,
       );
 
   // ...........................................................................

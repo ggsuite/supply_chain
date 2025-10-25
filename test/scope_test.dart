@@ -19,7 +19,8 @@ void main() {
   late Scm scm;
   late Scope scope;
 
-  int produce(List<dynamic> components, int previousProduct) => previousProduct;
+  int produce(List<dynamic> components, int previousProduct, Node<int> node) =>
+      previousProduct;
 
   void init({bool enableOnChange = false}) {
     Node.onChangeEnabled = enableOnChange;
@@ -477,7 +478,8 @@ void main() {
               key: 'observer',
               suppliers: ['scope/child/node'],
               initialProduct: 5,
-              produce: (components, previousProduct) => components.first as int,
+              produce: (components, previousProduct, node) =>
+                  components.first as int,
             );
 
             // ...........
@@ -535,7 +537,7 @@ void main() {
               key: 'onChangeObserver',
               suppliers: ['scope/on/change'],
               initialProduct: null,
-              produce: (components, previousProduct) =>
+              produce: (components, previousProduct, node) =>
                   components.first as Scope?,
             );
 
@@ -543,7 +545,8 @@ void main() {
               key: 'helloMetaScopeObserver',
               suppliers: ['scope/hello/node'],
               initialProduct: 8,
-              produce: (components, previousProduct) => components.first as int,
+              produce: (components, previousProduct, node) =>
+                  components.first as int,
             );
 
             // ...........
@@ -897,7 +900,7 @@ void main() {
               () => scope.findOrCreateNode<int>(
                 NodeBluePrint(
                   initialProduct: 0,
-                  produce: (components, previousProduct) => 0,
+                  produce: (components, previousProduct, node) => 0,
                   key: 'node',
                 ),
               ),
@@ -917,7 +920,7 @@ void main() {
               () => scope.findOrCreateNode<String>(
                 NodeBluePrint(
                   initialProduct: 'hello',
-                  produce: (components, previousProduct) => 'world',
+                  produce: (components, previousProduct, node) => 'world',
                   key: 'node',
                 ),
               ),
@@ -993,7 +996,7 @@ void main() {
             Node<int>(
               bluePrint: NodeBluePrint<int>(
                 initialProduct: 0,
-                produce: (components, previousProduct) => previousProduct,
+                produce: (components, previousProduct, node) => previousProduct,
                 key: 'node',
               ),
               scope: scope,
@@ -1037,7 +1040,7 @@ void main() {
         () {
           final newBluePrint = NodeBluePrint<int>(
             initialProduct: 0,
-            produce: (components, previousProduct) => previousProduct,
+            produce: (components, previousProduct, node) => previousProduct,
             key: 'node',
           );
 
@@ -1053,7 +1056,7 @@ void main() {
       test('should throw if the node does not exist', () {
         final newNode = NodeBluePrint<int>(
           initialProduct: 0,
-          produce: (components, previousProduct) => previousProduct,
+          produce: (components, previousProduct, node) => previousProduct,
           key: 'unknown',
         );
 
@@ -1099,7 +1102,7 @@ void main() {
         final host = scope.findOrCreateNode<int>(
           NodeBluePrint(
             initialProduct: 0,
-            produce: (components, previousProduct) => previousProduct,
+            produce: (components, previousProduct, node) => previousProduct,
             key: 'node',
           ),
         );
@@ -1203,7 +1206,7 @@ void main() {
           bluePrint: NodeBluePrint<int>(
             initialProduct: 0,
             key: 'supplier',
-            produce: (components, previousProduct) => previousProduct + 1,
+            produce: (components, previousProduct, node) => previousProduct + 1,
           ),
           scope: scope,
         );
@@ -1212,9 +1215,14 @@ void main() {
           bluePrint: NodeBluePrint<int>(
             initialProduct: 0,
             key: 'producer',
-            produce: (List<dynamic> components, int previousProduct) {
-              return (components.first as int) * 10;
-            },
+            produce:
+                (
+                  List<dynamic> components,
+                  int previousProduct,
+                  Node<int> node,
+                ) {
+                  return (components.first as int) * 10;
+                },
           ),
           scope: scope,
         );
@@ -1223,9 +1231,14 @@ void main() {
           bluePrint: NodeBluePrint<int>(
             initialProduct: 0,
             key: 'customer',
-            produce: (List<dynamic> components, int previousProduct) {
-              return (components.first as int) + 1;
-            },
+            produce:
+                (
+                  List<dynamic> components,
+                  int previousProduct,
+                  Node<int> node,
+                ) {
+                  return (components.first as int) + 1;
+                },
           ),
           scope: scope,
         );
@@ -1275,7 +1288,7 @@ void main() {
             from: [],
             to: 'key',
             init: 0,
-            produce: (c, p) {
+            produce: (c, p, n) {
               return (p) + 1;
             },
           ),
@@ -1283,7 +1296,7 @@ void main() {
             from: ['key'],
             to: 'synth',
             init: 0,
-            produce: (c, p) {
+            produce: (c, p, n) {
               return (c.first as int) * 10;
             },
           ),
@@ -1291,7 +1304,7 @@ void main() {
             from: ['synth'],
             to: 'audio',
             init: 0,
-            produce: (c, p) {
+            produce: (c, p, n) {
               return (c.first as int) + 1;
             },
           ),
@@ -1299,7 +1312,7 @@ void main() {
             from: ['key'],
             to: 'screen',
             init: 0,
-            produce: (c, p) {
+            produce: (c, p, n) {
               return (c.first as int) * 100;
             },
           ),
@@ -1307,7 +1320,7 @@ void main() {
             from: ['screen'],
             to: 'grid',
             init: 0,
-            produce: (c, p) {
+            produce: (c, p, n) {
               return (c.first as int) + 2;
             },
           ),
@@ -2229,7 +2242,7 @@ void main() {
                         NodeBluePrint<double>(
                           key: 'thickness',
                           initialProduct: 19.0,
-                          produce: (components, previousProduct) => 19.0,
+                          produce: (components, previousProduct, node) => 19.0,
                         ),
                       ],
                     ),
@@ -2265,7 +2278,7 @@ void main() {
                       NodeBluePrint(
                         key: 'node',
                         initialProduct: 0,
-                        produce: (components, previous) => previous,
+                        produce: (components, previous, node) => previous,
                       ),
                     );
 
@@ -2276,7 +2289,7 @@ void main() {
                       NodeBluePrint(
                         key: 'node',
                         initialProduct: 0,
-                        produce: (components, previous) => previous,
+                        produce: (components, previous, node) => previous,
                       ),
                     );
 
@@ -2374,7 +2387,7 @@ void main() {
                 bluePrint: NodeBluePrint<int>(
                   key: 'grandChildNodeX',
                   initialProduct: 0,
-                  produce: (components, previousProduct) => 0,
+                  produce: (components, previousProduct, node) => 0,
                 ),
                 scope: grandChildScope,
               );
@@ -2998,7 +3011,8 @@ void main() {
             key: 'aObserver',
             initialProduct: null,
             suppliers: ['a/on/change'],
-            produce: (components, _) => aChanges.add(components.first as Scope),
+            produce: (components, _, _) =>
+                aChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
           // Observere changes on b
@@ -3007,7 +3021,8 @@ void main() {
             key: 'bObserver',
             initialProduct: null,
             suppliers: ['a/b/on/change'],
-            produce: (components, _) => bChanges.add(components.first as Scope),
+            produce: (components, _, _) =>
+                bChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
           // Observere changes on c
@@ -3016,7 +3031,8 @@ void main() {
             key: 'cObserver',
             initialProduct: null,
             suppliers: ['a/b/c/on/change'],
-            produce: (components, _) => cChanges.add(components.first as Scope),
+            produce: (components, _, _) =>
+                cChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
           scm.testFlushTasks();
@@ -3089,7 +3105,8 @@ void main() {
             key: 'aObserverRecursive',
             initialProduct: null,
             suppliers: ['a/on/changeRecursive'],
-            produce: (components, _) => aChanges.add(components.first as Scope),
+            produce: (components, _, _) =>
+                aChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
           // Observere changes on b
@@ -3098,7 +3115,8 @@ void main() {
             key: 'bObserverRecursive',
             initialProduct: null,
             suppliers: ['a/b/on/changeRecursive'],
-            produce: (components, _) => bChanges.add(components.first as Scope),
+            produce: (components, _, _) =>
+                bChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
           // Observere changes on c
@@ -3107,7 +3125,8 @@ void main() {
             key: 'cObserverRecursive',
             initialProduct: null,
             suppliers: ['a/b/c/on/changeRecursive'],
-            produce: (components, _) => cChanges.add(components.first as Scope),
+            produce: (components, _, _) =>
+                cChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
           scm.testFlushTasks();

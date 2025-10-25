@@ -112,7 +112,7 @@ class ExampleScBuilderReplacingIntNodes extends ScBuilderBluePrint {
   }) {
     if (nodeToBeReplaced is Node<int>) {
       return nodeToBeReplaced.bluePrint.copyWith(
-        produce: (components, previous) => 42,
+        produce: (components, previous, node) => 42,
       );
     }
 

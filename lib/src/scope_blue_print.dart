@@ -405,7 +405,7 @@ class ScopeBluePrint {
       key: 'node',
       initialProduct: 1,
       suppliers: ['dependency'],
-      produce: (components, previousProduct) {
+      produce: (components, previousProduct, node) {
         final [int dependency] = components;
         return dependency + 1;
       },
@@ -416,7 +416,7 @@ class ScopeBluePrint {
       key: 'customer',
       initialProduct: 1,
       suppliers: ['node'],
-      produce: (components, previousProduct) {
+      produce: (components, previousProduct, node) {
         final [int node0] = components;
         return node0 + 1;
       },

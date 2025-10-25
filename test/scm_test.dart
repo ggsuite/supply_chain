@@ -62,20 +62,20 @@ void main() {
           from: [],
           to: 'supplier',
           init: 1,
-          produce: (components, previousProduct) => ++previousProduct,
+          produce: (components, previousProduct, node) => ++previousProduct,
         ),
         'producer': nbp(
           from: ['supplier'],
           to: 'producer',
           init: 2,
-          produce: (components, previousProduct) =>
+          produce: (components, previousProduct, node) =>
               (components.first as int) * 5,
         ),
         'customer': nbp(
           from: ['producer'],
           to: 'customer',
           init: 3,
-          produce: (components, previousProduct) =>
+          produce: (components, previousProduct, node) =>
               (components.first as int) + 1,
         ),
       });
@@ -233,13 +233,13 @@ void main() {
             key: 'a',
             initialProduct: 0,
             suppliers: ['b', 'unknown'],
-            produce: (c, p) => 1,
+            produce: (c, p, n) => 1,
           ),
           'b': NodeBluePrint<int>(
             key: 'b',
             initialProduct: 0,
             suppliers: [],
-            produce: (c, p) => 1,
+            produce: (c, p, n) => 1,
           ),
         });
 
@@ -267,7 +267,7 @@ void main() {
           from: [],
           to: 'supplier',
           init: 0,
-          produce: (c, p) {
+          produce: (c, p, n) {
             return (p) + 1;
           },
         ),
@@ -275,7 +275,7 @@ void main() {
           from: ['supplier'],
           to: 'producer',
           init: 0,
-          produce: (c, p) {
+          produce: (c, p, n) {
             return (c.first as int) + 10;
           },
         ),
@@ -349,7 +349,7 @@ void main() {
           from: [],
           to: 'key',
           init: 0,
-          produce: (c, p) {
+          produce: (c, p, n) {
             return (p) + 1;
           },
         ),
@@ -357,7 +357,7 @@ void main() {
           from: ['key'],
           to: 'synth',
           init: 0,
-          produce: (c, p) {
+          produce: (c, p, n) {
             return (c.first as int) * 10;
           },
         ),
@@ -365,7 +365,7 @@ void main() {
           from: ['synth'],
           to: 'audio',
           init: 0,
-          produce: (c, p) {
+          produce: (c, p, n) {
             return (c.first as int) + 1;
           },
         ),
@@ -373,7 +373,7 @@ void main() {
           from: ['key'],
           to: 'screen',
           init: 0,
-          produce: (c, p) {
+          produce: (c, p, n) {
             return (c.first as int) * 100;
           },
         ),
@@ -381,7 +381,7 @@ void main() {
           from: ['screen'],
           to: 'grid',
           init: 0,
-          produce: (c, p) {
+          produce: (c, p, n) {
             return (c.first as int) + 2;
           },
         ),
@@ -538,21 +538,21 @@ void main() {
 
         supplierB = _NodeThatTimesOut(
           scope: scope,
-          bluePrint: nbp(from: [], to: 'b', init: 0, produce: (c, p) => p++),
+          bluePrint: nbp(from: [], to: 'b', init: 0, produce: (c, p, n) => p++),
         );
 
         supplierA = nbp(
           from: [],
           to: 'a',
           init: 0,
-          produce: (c, p) => p++,
+          produce: (c, p, n) => p++,
         ).instantiate(scope: scope);
 
         producer = nbp(
           from: ['a', 'b'],
           to: 'produce',
           init: 0,
-          produce: (c, p) => (c.first as int) + (c.last as int),
+          produce: (c, p, n) => (c.first as int) + (c.last as int),
         ).instantiate(scope: scope);
       });
 
@@ -665,7 +665,7 @@ void main() {
         final intNodeA0 = Node<int>(
           bluePrint: NodeBluePrint(
             key: 'a',
-            produce: (c, p) => 1,
+            produce: (c, p, n) => 1,
             initialProduct: 1,
           ),
           scope: chain0,
@@ -674,7 +674,7 @@ void main() {
         final intNodeA1 = Node<int>(
           bluePrint: NodeBluePrint(
             key: 'a',
-            produce: (c, p) => 1,
+            produce: (c, p, n) => 1,
             initialProduct: 1,
           ),
           scope: chain1,
@@ -683,7 +683,7 @@ void main() {
         final stringNodeA = Node<String>(
           bluePrint: NodeBluePrint(
             key: 'a',
-            produce: (c, p) => 'a',
+            produce: (c, p, n) => 'a',
             initialProduct: 'a',
           ),
           scope: chain2,
@@ -692,7 +692,7 @@ void main() {
         final stringNodeB = Node<String>(
           bluePrint: NodeBluePrint(
             key: 'b',
-            produce: (c, p) => 'b',
+            produce: (c, p, n) => 'b',
             initialProduct: 'b',
           ),
           scope: chain2,
@@ -733,7 +733,7 @@ void main() {
         // Insert a first insert 2, adding 2 to the original product
         final insert2 = Insert.example(
           key: 'insert2',
-          produce: (components, previousProduct) => previousProduct + 2,
+          produce: (components, previousProduct, node) => previousProduct + 2,
           host: host,
         );
 
@@ -750,7 +750,7 @@ void main() {
         // Add insert0 before insert2, multiplying by 3
         final insert0 = Insert.example(
           key: 'insert0',
-          produce: (components, previousProduct) => previousProduct * 3,
+          produce: (components, previousProduct, node) => previousProduct * 3,
           host: host,
           index: 0,
         );
@@ -768,7 +768,7 @@ void main() {
         // The insert multiplies the previous result by 4
         final insert1 = Insert.example(
           key: 'insert1',
-          produce: (components, previousProduct) => previousProduct * 4,
+          produce: (components, previousProduct, node) => previousProduct * 4,
           host: host,
           index: 1,
         );
@@ -788,7 +788,7 @@ void main() {
         // Add insert3 after insert2 adding ten
         final insert3 = Insert.example(
           key: 'insert3',
-          produce: (components, previousProduct) => previousProduct + 10,
+          produce: (components, previousProduct, node) => previousProduct + 10,
           host: host,
           index: 3,
         );
@@ -862,7 +862,7 @@ void main() {
           bluePrint: NodeBluePrint<int>(
             key: 'host',
             initialProduct: 0,
-            produce: (components, previousProduct) => ++hostCalls,
+            produce: (components, previousProduct, node) => ++hostCalls,
           ),
         );
 
@@ -876,13 +876,13 @@ void main() {
         var p0Calls = 0;
         final insert0 = NodeBluePrint.example(
           key: 'insert0',
-          produce: (components, previousProduct) => ++p0Calls,
+          produce: (components, previousProduct, node) => ++p0Calls,
         ).instantiateAsInsert(host: host);
 
         var p1Calls = 0;
         final insert1 = NodeBluePrint.example(
           key: 'insert1',
-          produce: (components, previousProduct) => ++p1Calls,
+          produce: (components, previousProduct, node) => ++p1Calls,
         ).instantiateAsInsert(host: host);
 
         // Check state before
@@ -920,7 +920,7 @@ void main() {
           key: 'customer',
           initialProduct: 0,
           suppliers: ['supplier'],
-          produce: (components, previousProduct) {
+          produce: (components, previousProduct, node) {
             return (components[0] as int) + 1;
           },
         ).instantiate(scope: scope);
@@ -931,7 +931,7 @@ void main() {
         NodeBluePrint(
           key: 'builderInstaller',
           initialProduct: 0,
-          produce: (components, previousProduct) {
+          produce: (components, previousProduct, node) {
             ScBuilderBluePrint(
               key: 'builder',
               shouldProcessChildren: (scope) => scope.key != 'example',
@@ -1177,7 +1177,7 @@ void main() {
                   key: 'customer',
                   suppliers: ['../supplier'],
                   initialProduct: 0,
-                  produce: (c, p) => 1,
+                  produce: (c, p, n) => 1,
                 ),
               },
             },

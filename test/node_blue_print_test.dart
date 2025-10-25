@@ -36,7 +36,8 @@ void main() {
   group('NodeBluePrint', () {
     group('nbp', () {
       test('should create a node blue print', () {
-        int produce(List<dynamic> components, int previous) => 0;
+        int produce(List<dynamic> components, int previous, Node<int> node) =>
+            0;
         final bp = nbp<int>(from: ['a'], to: 'b', init: 0, produce: produce);
         expect(bp.key, 'b');
         expect(bp.initialProduct, 0);
@@ -50,7 +51,7 @@ void main() {
         expect(bluePrint.key, 'node');
         expect(bluePrint.initialProduct, 0);
         expect(bluePrint.suppliers, <NodeBluePrint<dynamic>>[]);
-        expect(bluePrint.produce([], 0), 1);
+        expect(bluePrint.produce([], 0, Node.example(key: 'dummy')), 1);
       });
 
       test('without key', () {
@@ -58,7 +59,7 @@ void main() {
         expect(bluePrint.key, 'aaliyah');
         expect(bluePrint.initialProduct, 0);
         expect(bluePrint.suppliers, <NodeBluePrint<dynamic>>[]);
-        expect(bluePrint.produce([], 0), 1);
+        expect(bluePrint.produce([], 0, Node.example(key: 'dummy')), 1);
       });
     });
 
@@ -75,7 +76,7 @@ void main() {
         expect(bluePrint.suppliers, ['supplier']);
 
         /// Should just forward the original supplier's value
-        expect(bluePrint.produce([456], 0), 456);
+        expect(bluePrint.produce([456], 0, Node.example(key: 'dummy')), 456);
       });
     });
 
@@ -119,7 +120,7 @@ void main() {
           key: 'node',
           initialProduct: 0,
           suppliers: ['supplier', 'supplier'],
-          produce: (components, previousProduct) {
+          produce: (components, previousProduct, node) {
             return 0;
           },
         );
@@ -139,8 +140,11 @@ void main() {
     group('equals, hashCode', () {
       group('should return true', () {
         test('with same suppliers', () {
-          int produce(List<dynamic> components, int previousProduct) =>
-              previousProduct + 1;
+          int produce(
+            List<dynamic> components,
+            int previousProduct,
+            Node<int> node,
+          ) => previousProduct + 1;
 
           final bluePrint1 = NodeBluePrint<int>(
             key: 'node',
@@ -161,8 +165,11 @@ void main() {
 
       group('should return false', () {
         test('when key is different', () {
-          int produce(List<dynamic> components, int previousProduct) =>
-              previousProduct + 1;
+          int produce(
+            List<dynamic> components,
+            int previousProduct,
+            Node<int> node,
+          ) => previousProduct + 1;
 
           final bluePrint1 = NodeBluePrint<int>(
             key: 'node',
@@ -181,8 +188,11 @@ void main() {
         });
 
         test('when initialProduct is different', () {
-          int produce(List<dynamic> components, int previousProduct) =>
-              previousProduct + 1;
+          int produce(
+            List<dynamic> components,
+            int previousProduct,
+            Node<int> node,
+          ) => previousProduct + 1;
 
           final bluePrint1 = NodeBluePrint<int>(
             key: 'node',
@@ -201,8 +211,11 @@ void main() {
         });
 
         test('when suppliers are different', () {
-          int produce(List<dynamic> components, int previousProduct) =>
-              previousProduct + 1;
+          int produce(
+            List<dynamic> components,
+            int previousProduct,
+            Node<int> node,
+          ) => previousProduct + 1;
 
           final bluePrint1 = NodeBluePrint<int>(
             key: 'node',
@@ -221,10 +234,16 @@ void main() {
         });
 
         test('when produce is different', () {
-          int produce1(List<dynamic> components, int previousProduct) =>
-              previousProduct + 1;
-          int produce2(List<dynamic> components, int previousProduct) =>
-              previousProduct + 2;
+          int produce1(
+            List<dynamic> components,
+            int previousProduct,
+            Node<int> node,
+          ) => previousProduct + 1;
+          int produce2(
+            List<dynamic> components,
+            int previousProduct,
+            Node<int> node,
+          ) => previousProduct + 2;
 
           final bluePrint1 = NodeBluePrint<int>(
             key: 'node',
@@ -657,14 +676,14 @@ void main() {
             initialProduct: 1,
             key: 'node2',
             suppliers: ['supplier2'],
-            produce: (components, previousProduct) => 2,
+            produce: (components, previousProduct, node) => 2,
             canBeSmart: !bluePrint.canBeSmart,
             smartMaster: ['other'],
           );
           expect(newBluePrint.initialProduct, 1);
           expect(newBluePrint.key, 'node2');
           expect(newBluePrint.suppliers, ['supplier2']);
-          expect(newBluePrint.produce([], 0), 2);
+          expect(newBluePrint.produce([], 0, Node.example(key: 'dummy')), 2);
           expect(newBluePrint.canBeSmart, !bluePrint.canBeSmart);
           expect(newBluePrint.copyWith(canBeSmart: true).smartMaster, [
             'other',
@@ -753,7 +772,7 @@ void main() {
               from: ['b/n0', 'b/n2'],
               to: 'n1',
               init: 0,
-              produce: (c, p) {
+              produce: (c, p, n) {
                 return 0;
               },
             ),
@@ -887,7 +906,7 @@ void main() {
 
   group('doNothing', () {
     test('returns previousProduct', () {
-      expect(doNothing([], 11), 11);
+      expect(doNothing([], 11, Node.example(key: 'dummy')), 11);
     });
   });
 

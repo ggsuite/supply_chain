@@ -40,7 +40,7 @@ void main() {
       key: 'customer',
       initialProduct: 1,
       suppliers: ['supplier'],
-      produce: (components, previousProduct) {
+      produce: (components, previousProduct, node) {
         final supplier = components[0] as int;
         return supplier * 2;
       },
