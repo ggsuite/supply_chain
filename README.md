@@ -21,7 +21,7 @@ creates a `product`, that is delivered to customer nodes. The application state
 is modelled as an supply chain. Nodes again are put into nested `scopes`. A
 `supply chain manager` (SCM) coordinates the process.
 
-<img src="test/goldens/tutorials/basics_tutorial/basic_01.png"
+<img src="https://raw.githubusercontent.com/ggsuite/supply_chain/refs/heads/main/test/goldens/tutorials/basics_tutorial/basic_01.png"
      alt="Simple Supply Chain"
      width="400" />
 
