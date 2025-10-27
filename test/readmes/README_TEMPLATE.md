@@ -24,12 +24,16 @@ is modelled as an supply chain. Nodes again are put into nested `scopes`. A
 INSERT test/goldens/tutorials/basics_tutorial/basic_01.mmd
 ```
 
-## Getting started
-
-The following test demonstrates important supply chain features.
+## Basics
 
 ```dart
 INSERT test/tutorials/basics_tutorial_test.dart
+```
+
+## Debugging
+
+```dart
+INSERT test/tutorials/debugging_tutorial_test.dart
 ```
 
 ## Features and bugs

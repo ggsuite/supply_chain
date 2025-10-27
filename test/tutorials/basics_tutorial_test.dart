@@ -100,10 +100,6 @@ void main() {
     // Show all node pathes of a scope
     final allNodePathes = rootScope.ls();
     await writeGolden(fileName: 'all_node_pathes.json', data: allNodePathes);
-    expect(allNodePathes, [
-      'scope',
-      'scope/supplier (5)',
-      'scope/customer (10)',
-    ]);
+    expect(allNodePathes, ['scope', 'scope/supplier', 'scope/customer']);
   });
 }

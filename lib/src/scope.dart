@@ -587,6 +587,7 @@ class Scope {
     int parentDepth = 0,
     int childDepth = -1,
     bool sourceNodesOnly = false,
+    bool printProducts = false,
   }) {
     var start = this;
 
@@ -620,6 +621,7 @@ class Scope {
       currentPath: '',
       infinite: childDepth < 0,
       sourceNodesOnly: sourceNodesOnly,
+      printProducts: printProducts,
     );
 
     return result;
@@ -1630,6 +1632,7 @@ class Scope {
     required int depth,
     required bool infinite,
     required bool sourceNodesOnly,
+    required bool printProducts,
   }) {
     if (!infinite && depth < 0) {
       return;
@@ -1651,6 +1654,7 @@ class Scope {
         currentPath: childPath,
         infinite: infinite,
         sourceNodesOnly: sourceNodesOnly,
+        printProducts: printProducts,
       );
     }
 
@@ -1662,10 +1666,11 @@ class Scope {
 
       final product = node.product;
       final value =
-          product is int ||
-              product is double ||
-              product is num ||
-              product is String
+          printProducts &&
+              (product is int ||
+                  product is double ||
+                  product is num ||
+                  product is String)
           ? ' (${node.product})'
           : '';
 

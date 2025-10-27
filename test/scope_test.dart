@@ -1390,9 +1390,9 @@ void main() {
             'a',
             'a/b',
             'a/b/c',
-            'a/b/c/d (0)',
-            'a/b/c/e (1)',
-            'a/b/f (2)',
+            'a/b/c/d',
+            'a/b/c/e',
+            'a/b/f',
             'a/b/g',
           ]);
 
@@ -1423,7 +1423,7 @@ void main() {
           });
 
           final lsb = b.ls();
-          expect(lsb, ['c', 'c/d (0)', 'c/e (1)', 'f (2)', 'g']);
+          expect(lsb, ['c', 'c/d', 'c/e', 'f', 'g']);
 
           final jsonB = b.jsonDump();
           expect(jsonB, {
@@ -1452,9 +1452,9 @@ void main() {
               'example/a',
               'example/a/b',
               'example/a/b/c',
-              'example/a/b/c/d (0)',
-              'example/a/b/c/e (1)',
-              'example/a/b/f (2)',
+              'example/a/b/c/d',
+              'example/a/b/c/e',
+              'example/a/b/f',
               'example/a/b/g',
             ]);
 
@@ -1476,14 +1476,7 @@ void main() {
 
           test(' = 1', () {
             final ls = b.ls(parentDepth: 1);
-            expect(ls, [
-              'b',
-              'b/c',
-              'b/c/d (0)',
-              'b/c/e (1)',
-              'b/f (2)',
-              'b/g',
-            ]);
+            expect(ls, ['b', 'b/c', 'b/c/d', 'b/c/e', 'b/f', 'b/g']);
 
             final jsonDump = b.jsonDump(parentDepth: 1);
             expect(jsonDump, {
@@ -1499,14 +1492,7 @@ void main() {
 
           test(' = 1000', () {
             final ls = b.ls(parentDepth: 1);
-            expect(ls, [
-              'b',
-              'b/c',
-              'b/c/d (0)',
-              'b/c/e (1)',
-              'b/f (2)',
-              'b/g',
-            ]);
+            expect(ls, ['b', 'b/c', 'b/c/d', 'b/c/e', 'b/f', 'b/g']);
 
             final jsonDump = b.jsonDump(parentDepth: 1);
             expect(jsonDump, {
@@ -1524,7 +1510,7 @@ void main() {
         group('with childDepth', () {
           test('-1', () {
             final ls = b.ls(childDepth: -1);
-            expect(ls, ['c', 'c/d (0)', 'c/e (1)', 'f (2)', 'g']);
+            expect(ls, ['c', 'c/d', 'c/e', 'f', 'g']);
 
             final jsonDump = b.jsonDump(childDepth: -1);
             expect(jsonDump, {
@@ -1538,7 +1524,7 @@ void main() {
 
           test('1', () {
             final ls = b.ls(childDepth: 1);
-            expect(ls, ['c', 'c/d (0)', 'c/e (1)', 'f (2)', 'g']);
+            expect(ls, ['c', 'c/d', 'c/e', 'f', 'g']);
 
             final jsonDump = b.jsonDump(childDepth: 1);
             expect(jsonDump, {
@@ -1552,7 +1538,7 @@ void main() {
 
           test('1000', () {
             final ls = b.ls(childDepth: 1000);
-            expect(ls, ['c', 'c/d (0)', 'c/e (1)', 'f (2)', 'g']);
+            expect(ls, ['c', 'c/d', 'c/e', 'f', 'g']);
 
             final jsonDump = b.jsonDump(childDepth: 1000);
             expect(jsonDump, {
@@ -1587,7 +1573,7 @@ void main() {
           group('true', () {
             test('returns only nodes that have no suppliers', () {
               final ls = scope.ls(sourceNodesOnly: true);
-              expect(ls, ['a/b/c/d (0)', 'a/b/c/e (1)', 'a/b/f (2)']);
+              expect(ls, ['a/b/c/d', 'a/b/c/e', 'a/b/f']);
 
               final jsonDump = scope.jsonDump(sourceNodesOnly: true);
               const expected = {
@@ -1611,10 +1597,10 @@ void main() {
                 'a',
                 'a/b',
                 'a/b/c',
-                'a/b/c/d (0)',
-                'a/b/c/e (1)',
-                'a/b/f (2)',
-                'a/b/g (5)',
+                'a/b/c/d',
+                'a/b/c/e',
+                'a/b/f',
+                'a/b/g',
               ]);
 
               final jsonDump = scope.jsonDump(sourceNodesOnly: false);
@@ -1735,6 +1721,33 @@ void main() {
                 },
               });
             });
+          });
+        });
+
+        group('with printProducts', () {
+          test('true', () {
+            final ls = scope.ls(printProducts: true);
+            expect(ls, [
+              'a',
+              'a/b',
+              'a/b/c',
+              'a/b/c/d (0)',
+              'a/b/c/e (1)',
+              'a/b/f (2)',
+              'a/b/g',
+            ]);
+          });
+          test('false', () {
+            final ls = scope.ls(printProducts: false);
+            expect(ls, [
+              'a',
+              'a/b',
+              'a/b/c',
+              'a/b/c/d',
+              'a/b/c/e',
+              'a/b/f',
+              'a/b/g',
+            ]);
           });
         });
       });
