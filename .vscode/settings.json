@@ -40,7 +40,7 @@
   // ##############
 
   "github.copilot.enable": {
-    "*": true,
+    "*": false,
     "plaintext": false,
     "markdown": false,
     "scminput": false
@@ -286,7 +286,7 @@
   // PSI Header
   // #############
 
-  "psi-header.variables": [["author", "Dr. Gabriel Gatzsche"]],
+  "psi-header.variables": [["author", "ggsuite"]],
 
   "markdown.extension.toc.levels": "2..3",
   // ###########

@@ -7,7 +7,6 @@
 library;
 
 export 'src/disposed.dart';
-export 'src/doc.dart';
 export 'src/graph.dart';
 export 'src/graph_to_dot.dart';
 export 'src/graph_to_mermaid.dart';

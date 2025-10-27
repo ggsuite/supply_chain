@@ -4,54 +4,54 @@ digraph unix {
   fontname="Arial"
   node [fontname="Arial"]
   edge [fontname="Arial"]
-  subgraph cluster_parentScope_4 {
+  subgraph cluster_parentScope_14 {
     label = "parentScope"; // scope
-    nodeBuiltByParent_0 [
+    nodeBuiltByParent_5 [
       label = "nodeBuiltByParent"; // node
     ];
-    nodeToBeReplaced_1 [
+    nodeToBeReplaced_6 [
       label = "nodeToBeReplaced"; // node
     ];
-    nodeConstructedByParent_2 [
+    nodeConstructedByParent_7 [
       label = "nodeConstructedByParent"; // node
     ];
-    subgraph cluster_childScopeBuiltByParent_6 {
+    subgraph cluster_childScopeBuiltByParent_16 {
       label = "childScopeBuiltByParent"; // scope
-      nodeBuiltByChildScope_3 [
+      nodeBuiltByChildScope_8 [
         label = "nodeBuiltByChildScope"; // node
       ];
       
     }
-    subgraph cluster_scopeToBeReplaced_8 {
+    subgraph cluster_scopeToBeReplaced_18 {
       label = "scopeToBeReplaced"; // scope
-      builtNode_4 [
+      builtNode_9 [
         label = "builtNode"; // node
       ];
-      dependency_5 [
+      dependency_10 [
         label = "dependency"; // node
       ];
-      subgraph cluster_builtScope_10 {
+      subgraph cluster_builtScope_20 {
         label = "builtScope"; // scope
-        builtNodeInScope_6 [
+        builtNodeInScope_11 [
           label = "builtNodeInScope"; // node
         ];
         
       }
-      subgraph cluster_childScope_12 {
+      subgraph cluster_childScope_22 {
         label = "childScope"; // scope
-        node_7 [
+        node_12 [
           label = "node"; // node
         ];
-        customer_8 [
+        customer_13 [
           label = "customer"; // node
         ];
         
       }
       
     }
-    subgraph cluster_childScopeConstructedByParent_14 {
+    subgraph cluster_childScopeConstructedByParent_24 {
       label = "childScopeConstructedByParent"; // scope
-      nodeConstructedByChildScope_9 [
+      nodeConstructedByChildScope_14 [
         label = "nodeConstructedByChildScope"; // node
       ];
       

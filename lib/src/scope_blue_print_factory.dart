@@ -25,7 +25,7 @@ class ScopeBluePrintFactory extends NodeBluePrint<List<ScopeBluePrint>> {
     final rowScopeBluePrintFactory = ScopeBluePrintFactory(
       key: 'scopeFactory',
       suppliers: ['rowHeights'],
-      produce: (List<dynamic> components, _) {
+      produce: (List<dynamic> components, _, _) {
         // Get the rowHeights from the suppliers
         final [List<int> rowHeights] = components;
 
@@ -42,7 +42,7 @@ class ScopeBluePrintFactory extends NodeBluePrint<List<ScopeBluePrint>> {
             key: 'rowHeight',
             initialProduct: rowHeight,
             suppliers: ['rowHeights'],
-            produce: (components, previousProduct) {
+            produce: (components, previousProduct, node) {
               final [List<int> rowHeights] = components;
               return rowHeights[iCopy];
             },

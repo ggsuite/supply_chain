@@ -11,21 +11,25 @@ void main() {
   group('ScopeBluePrint', () {
     group('example', () {
       test('should provide a blue print with to nodes and one dependency', () {
+        final rootScope = Scope.root(key: 'root', scm: Scm.example());
         final scopeBluePrint = ScopeBluePrint.example();
+        final scope = scopeBluePrint.instantiate(scope: rootScope);
         final builtNode = scopeBluePrint.nodes[0];
         final dependency = scopeBluePrint.nodes[1];
         final builtScope = scopeBluePrint.children.first;
         final subScope = scopeBluePrint.children.last;
         final node = subScope.nodes.first as NodeBluePrint<int>;
+        final nodeInstance = scope.findNode<int>('node')!;
         final customer = subScope.nodes.last as NodeBluePrint<int>;
+        final customerNode = scope.findNode<int>('customer')!;
         expect(scopeBluePrint.toString(), scopeBluePrint.key);
         expect(builtNode.key, 'builtNode');
         expect(dependency.key, 'dependency');
         expect(builtScope.key, 'builtScope');
         expect(node.key, 'node');
         expect(customer.key, 'customer');
-        expect(node.produce(<dynamic>[5], 0), 6);
-        expect(customer.produce(<dynamic>[6], 0), 7);
+        expect(node.produce(<dynamic>[5], 0, nodeInstance), 6);
+        expect(customer.produce(<dynamic>[6], 0, customerNode), 7);
       });
     });
 
@@ -287,7 +291,7 @@ void main() {
 
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
-          scm.testFlushTasks();
+          scm.flush();
           final wh0Width = wh0.node<num>('w')!;
           final wh0Height = wh0.node<num>('h')!;
           final wh0Depth = wh0.node<num>('d')!;
@@ -308,7 +312,7 @@ void main() {
           // Change the width and height of the first scope
           wh0Width.product = 101;
           wh0Height.product = 201;
-          scm.testFlushTasks();
+          scm.flush();
 
           // Check if the width and height of the second scope changed
           expect(wh1Width.product, 101);
@@ -347,7 +351,7 @@ void main() {
 
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
-          scm.testFlushTasks();
+          scm.flush();
           final wh0Width = wh0.findNode<num>('child/w')!;
           final wh0Height = wh0.findNode<num>('child/h')!;
           final wh0Depth = wh0.findNode<num>('child/d')!;
@@ -368,7 +372,7 @@ void main() {
           // Change the width and height of the first scope
           wh0Width.product = 101;
           wh0Height.product = 201;
-          scm.testFlushTasks();
+          scm.flush();
 
           // Check if the width and height of the second scope changed
           expect(wh1Width.product, 101);
@@ -407,7 +411,7 @@ void main() {
 
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
-          scm.testFlushTasks();
+          scm.flush();
           final wh0Width = wh0.findNode<num>('child/w')!;
           final wh0Height = wh0.findNode<num>('child/h')!;
           final wh1Width = wh1.findNode<num>('child/w')!;
@@ -422,7 +426,7 @@ void main() {
           // Change the width and height of the first scope
           wh0Width.product = 101;
           wh0Height.product = 201;
-          scm.testFlushTasks();
+          scm.flush();
 
           // Check if the width and height of the second scope changed
           expect(wh1Width.product, 101);
@@ -456,7 +460,7 @@ void main() {
 
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
-          scm.testFlushTasks();
+          scm.flush();
           final wh0Width = wh0.findNode<num>('child/w')!;
           final wh0Height = wh0.findNode<num>('child/h')!;
           final wh1Width = wh1.findNode<num>('child/w')!;
@@ -471,7 +475,7 @@ void main() {
           // Change the width and height of the first scope
           wh0Width.product = 101;
           wh0Height.product = 201;
-          scm.testFlushTasks();
+          scm.flush();
 
           // Check if the width and height of the second scope changed
           expect(wh1Width.product, 101);
@@ -508,7 +512,7 @@ void main() {
 
           // Changing width and height should change width2 and height2 too
           final scm = root.scm;
-          scm.testFlushTasks();
+          scm.flush();
           final wh0Width = wh0.findNode<num>('child/w')!;
           final wh0Height = wh0.findNode<num>('child/h')!;
           final wh1Width = wh1.findNode<num>('child/w')!;
@@ -523,7 +527,7 @@ void main() {
           // Change the width and height of the first scope
           wh0Width.product = 101;
           wh0Height.product = 201;
-          scm.testFlushTasks();
+          scm.flush();
 
           // Check if the width and height of the second scope changed
           expect(wh1Width.product, 101);

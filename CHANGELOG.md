@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.0.0] - 2025-10-27
+
+### Changed
+
+- BREAKING CHANGE: produce function will require a node param
+- BREAKING CHANGE: testFlushTasks is renamed into flush
+- Rework README
+
+### Removed
+
+- Remove doc.dart
+
 ## [3.0.2] - 2025-10-21
 
 ### Fixed
@@ -175,7 +187,7 @@
 - ScopeBluePrints will alwas create a scope
 - Rename subScope to childScope
 - Breaking change: Use . instead / for scope notation
-- Ignore code not executed on GitHub
+- Ignoflushecuted on GitHub
 - Allow to embedd real ScopeBluePrints into mockContent
 - Rework example
 - Allow to embed ScopeBluePrints directly in mocked content
@@ -311,7 +323,7 @@ Modifications can only be done via builders.
 - Point to parent suppliers by adding ..
 - Improve searching things in parent scopes
 - Update gg\_cache
-- Allow to return an error array without throwing when setting presets
+- Allow to return an eflushhout throwing when setting presets
 - Setting an empty preset will reset the supply chain
 - Presets do not export empty scopes
 
@@ -483,6 +495,7 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
+[4.0.0]: https://github.com/ggsuite/supply_chain/compare/3.0.2...4.0.0
 [3.0.2]: https://github.com/ggsuite/supply_chain/compare/3.0.1...3.0.2
 [3.0.1]: https://github.com/ggsuite/supply_chain/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/ggsuite/supply_chain/compare/2.0.0...3.0.0

@@ -37,7 +37,7 @@ void main() {
           .instantiate(scope: scope);
 
       // Check the initial product
-      scm.testFlushTasks();
+      scm.flush();
       expect(host.product, 1);
       expect(customer0.product, 1);
       expect(customer1.product, 1);
@@ -45,11 +45,11 @@ void main() {
       // Insert a first insert 2, adding 2 to the original product
       final insert2 = Insert.example(
         key: 'insert2',
-        produce: (components, previousProduct) => previousProduct + 2,
+        produce: (components, previousProduct, node) => previousProduct + 2,
         host: host,
       );
 
-      scm.testFlushTasks();
+      scm.flush();
       expect(host.inserts, [insert2]);
       expect(insert2.input, host);
       expect(insert2.output, host);
@@ -62,11 +62,11 @@ void main() {
       // Add insert0 before insert2, multiplying by 3
       final insert0 = Insert.example(
         key: 'insert0',
-        produce: (components, previousProduct) => previousProduct * 3,
+        produce: (components, previousProduct, node) => previousProduct * 3,
         host: host,
         index: 0,
       );
-      scm.testFlushTasks();
+      scm.flush();
 
       expect(host.inserts, [insert0, insert2]);
       expect(insert0.input, host);
@@ -80,11 +80,11 @@ void main() {
       // The insert multiplies the previous result by 4
       final insert1 = Insert.example(
         key: 'insert1',
-        produce: (components, previousProduct) => previousProduct * 4,
+        produce: (components, previousProduct, node) => previousProduct * 4,
         host: host,
         index: 1,
       );
-      scm.testFlushTasks();
+      scm.flush();
       expect(host.inserts, [insert0, insert1, insert2]);
       expect(insert0.input, host);
       expect(insert0.output, insert1);
@@ -100,11 +100,11 @@ void main() {
       // Add insert3 after insert2 adding ten
       final insert3 = Insert.example(
         key: 'insert3',
-        produce: (components, previousProduct) => previousProduct + 10,
+        produce: (components, previousProduct, node) => previousProduct + 10,
         host: host,
         index: 3,
       );
-      scm.testFlushTasks();
+      scm.flush();
       expect(host.inserts, [insert0, insert1, insert2, insert3]);
       expect(insert0.input, host);
       expect(insert0.output, insert1);
@@ -121,7 +121,7 @@ void main() {
 
       // Remove insert node in the middle
       insert1.dispose();
-      scm.testFlushTasks();
+      scm.flush();
       expect(host.inserts, [insert0, insert2, insert3]);
       expect(insert0.input, host);
       expect(insert0.output, insert2);
@@ -136,7 +136,7 @@ void main() {
 
       // Remove first insert node
       insert0.dispose();
-      scm.testFlushTasks();
+      scm.flush();
       expect(host.inserts, [insert2, insert3]);
       expect(insert2.input, host);
       expect(insert2.output, insert3);
@@ -149,7 +149,7 @@ void main() {
 
       // Remove last insert node
       insert3.dispose();
-      scm.testFlushTasks();
+      scm.flush();
       expect(host.inserts, [insert2]);
       expect(insert2.input, host);
       expect(insert2.output, host);
@@ -160,7 +160,7 @@ void main() {
 
       // Remove last remaining insert node
       insert2.dispose();
-      scm.testFlushTasks();
+      scm.flush();
       expect(host.inserts, <Insert<dynamic>>[]);
       expect(host.originalProduct, 1);
       expect(host.product, 1);
@@ -181,20 +181,20 @@ void main() {
         final insert = NodeBluePrint(
           key: 'insert0',
           initialProduct: 0,
-          produce: (components, previousProduct) {
+          produce: (components, previousProduct, node) {
             return previousProduct * 10;
           },
         ).instantiateAsInsert(host: host);
 
         // The product of the host should be multiplied by 10
-        scm.testFlushTasks();
+        scm.flush();
         expect(insert.product, 10);
         expect(host.originalProduct, 1);
         expect(host.product, 10);
 
         // Change the host product
         host.product = 2;
-        scm.testFlushTasks();
+        scm.flush();
         expect(insert.product, 20);
         expect(host.originalProduct, 2);
         expect(host.product, 20);
@@ -211,7 +211,7 @@ void main() {
         final insert0 = NodeBluePrint(
           key: 'insert0',
           initialProduct: 0,
-          produce: (components, previousProduct) {
+          produce: (components, previousProduct, node) {
             return previousProduct * 10;
           },
         ).instantiateAsInsert(host: host);
@@ -219,13 +219,13 @@ void main() {
         final insert1 = NodeBluePrint(
           key: 'insert1',
           initialProduct: 0,
-          produce: (components, previousProduct) {
+          produce: (components, previousProduct, node) {
             return previousProduct * 10;
           },
         ).instantiateAsInsert(host: host);
 
         // The product of the host should be multiplied by 10
-        scm.testFlushTasks();
+        scm.flush();
         expect(insert0.product, 10);
         expect(insert1.product, 100);
         expect(host.originalProduct, 1);
@@ -233,7 +233,7 @@ void main() {
 
         // Change the host product
         host.product = 2;
-        scm.testFlushTasks();
+        scm.flush();
         expect(insert0.product, 20);
         expect(insert1.product, 200);
         expect(host.originalProduct, 2);
@@ -266,7 +266,7 @@ void main() {
           key: 'insert0',
           initialProduct: 0,
           suppliers: ['factor'],
-          produce: (components, previousProduct) {
+          produce: (components, previousProduct, node) {
             final factor = components.first as int;
             return previousProduct * factor;
           },
@@ -274,7 +274,7 @@ void main() {
 
         // Initially the product of the host should be multiplied by 10
         // because the factor is 10
-        scm.testFlushTasks();
+        scm.flush();
         expect(host.customers, [customer]);
         expect(insert0.product, 10);
         expect(host.originalProduct, 1);
@@ -283,7 +283,7 @@ void main() {
 
         // Change the host's original product
         host.product = 2;
-        scm.testFlushTasks();
+        scm.flush();
         expect(insert0.product, 20);
         expect(host.originalProduct, 2);
         expect(host.product, 20);
@@ -291,7 +291,7 @@ void main() {
 
         // Change the factor which will modify the way, the insert calculates
         factor.product = 100;
-        scm.testFlushTasks();
+        scm.flush();
         expect(insert0.product, 200);
         expect(host.originalProduct, 2);
         expect(host.product, 200);

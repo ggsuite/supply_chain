@@ -17,7 +17,8 @@ typedef Customer<T> = Node<T>;
 typedef Worker<T> = Node<T>;
 
 /// Produce delegate
-typedef Produce<T> = T Function(List<dynamic> components, T previousProduct);
+typedef Produce<T> =
+    T Function(List<dynamic> components, T previousProduct, Node<T> node);
 
 /// A node in a scope
 class Node<T> {
@@ -334,7 +335,7 @@ class Node<T> {
       i++;
     }
 
-    final newProduct = bluePrint.produce(_products, previousProduct);
+    final newProduct = bluePrint.produce(_products, previousProduct, this);
 
     _throwIfNotAllowed(newProduct);
 
@@ -1081,7 +1082,7 @@ class ButterFlyExample {
       allScopes = [];
     }
 
-    scope.scm.testFlushTasks();
+    scope.scm.flush();
   }
 
   // ...........................................................................
@@ -1179,7 +1180,7 @@ class TriangleExample {
     allNodes = [topNode, leftNode, rightNode];
     allScopes = [topScope, leftScope, rightScope];
 
-    triangle.scm.testFlushTasks();
+    triangle.scm.flush();
   }
 
   /// The house scope

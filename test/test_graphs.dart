@@ -1,5 +1,5 @@
 // @license
-// Copyright (c) 2025 Dr. Gabriel Gatzsche
+// Copyright (c) ggsuite
 //
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
@@ -40,7 +40,7 @@ class TestGraphs {
 
     graph = const Graph();
 
-    x.scm.testFlushTasks();
+    x.scm.flush();
   }
 
   // ...........................................................................

@@ -295,14 +295,14 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
         NodeBluePrint<num>(
           key: 'p0Add111',
           initialProduct: 0,
-          produce: (components, previousProduct) {
+          produce: (components, previousProduct, node) {
             return previousProduct + 111;
           },
         ),
         NodeBluePrint<num>(
           key: 'p1MultiplyByTen',
           initialProduct: 0,
-          produce: (components, previousProduct) {
+          produce: (components, previousProduct, node) {
             return previousProduct * 10;
           },
         ),
@@ -343,7 +343,7 @@ class ExampleScBuilderBluePrint extends ScBuilderBluePrint {
     );
 
     // Apply the builder to the scope
-    scope.scm.testFlushTasks();
+    scope.scm.flush();
     return scope.builders.first;
   }
 
@@ -406,7 +406,7 @@ class ExampleChildScBuilderBluePrint extends ScBuilderBluePrint {
         NodeBluePrint<num>(
           key: 'c0MultiplyByTwo',
           initialProduct: 0,
-          produce: (components, previousProduct) {
+          produce: (components, previousProduct, node) {
             return previousProduct * 2;
           },
         ),

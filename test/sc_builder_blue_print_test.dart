@@ -22,7 +22,7 @@ void main() {
         // Change a.other which is set as "needsUpdateSuppliers"
         final a = scope.findNode<num>('a/other')!;
         a.product = 2;
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         // Check state after
         expect(builderBluePrint.needsUpdateCalls, hasLength(2));
@@ -385,7 +385,7 @@ void main() {
             },
           ).instantiate(scope: scope);
 
-          builder.scope.scm.testFlushTasks();
+          builder.scope.scm.flush();
         }
 
         group(

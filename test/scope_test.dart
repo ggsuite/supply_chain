@@ -19,7 +19,8 @@ void main() {
   late Scm scm;
   late Scope scope;
 
-  int produce(List<dynamic> components, int previousProduct) => previousProduct;
+  int produce(List<dynamic> components, int previousProduct, Node<int> node) =>
+      previousProduct;
 
   void init({bool enableOnChange = false}) {
     Node.onChangeEnabled = enableOnChange;
@@ -34,7 +35,7 @@ void main() {
       NodeBluePrint(initialProduct: 0, produce: produce, key: 'node'),
     );
 
-    scm.testFlushTasks();
+    scm.flush();
   }
 
   setUp(() {
@@ -178,18 +179,18 @@ void main() {
         final n1 = scope.findNode<int>('a/b/c/n1')!;
 
         // Initally we have the following products
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
         expect(n0.product, 10);
         expect(n1.product, 11);
 
         // Let's change the products
         n0.product = 20;
         n1.product = 21;
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         // Reset
         scope.reset();
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         // The products should be reset to their initial values
         expect(n0.product, 10);
@@ -340,7 +341,7 @@ void main() {
         });
 
         test('when the last customer is removed from a scope', () {
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
 
           // Dispose the supplier scope.
           // The supplier will not be erased, because it has a customer
@@ -358,7 +359,7 @@ void main() {
 
       group('should not erase the scope', () {
         test('until the last child scope or node is erased', () {
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
 
           // Dispose the supplier scope.
           b.dispose();
@@ -390,7 +391,7 @@ void main() {
               initialProduct: 5,
             ),
           );
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
 
           // The customer should be connected to the meta scope node
           final onChange = scope.findNode<Scope>('a/b/on/change')!;
@@ -446,7 +447,7 @@ void main() {
           test('from normal scopes', () {
             // Create a root scope
             final root = Scope.example(key: 'root');
-            final testFlushTasks = root.scm.testFlushTasks;
+            final flush = root.scm.flush;
 
             // Create two blueprints a0 and a1 with the same key but
             // different produce methods
@@ -477,7 +478,8 @@ void main() {
               key: 'observer',
               suppliers: ['scope/child/node'],
               initialProduct: 5,
-              produce: (components, previousProduct) => components.first as int,
+              produce: (components, previousProduct, node) =>
+                  components.first as int,
             );
 
             // ...........
@@ -485,7 +487,7 @@ void main() {
             var scopeInstance = scope5.instantiate(scope: root);
             final observerInstance = observer.instantiate(scope: root);
 
-            testFlushTasks();
+            flush();
 
             // observer should have the value of node5
             expect(observerInstance.product, 5);
@@ -493,7 +495,7 @@ void main() {
             // ..............
             // Dispose scope5
             scopeInstance.dispose();
-            testFlushTasks();
+            flush();
 
             // observer should still have the value of node5
             expect(observerInstance.product, 5);
@@ -501,7 +503,7 @@ void main() {
             // ..................
             // Instantiate scope6
             scopeInstance = scope6.instantiate(scope: root);
-            testFlushTasks();
+            flush();
 
             // scope6.node should take over the customers of scope5.node
             // Thus observer should have the value of node6
@@ -513,7 +515,7 @@ void main() {
 
             // Create a root scope
             final root = Scope.example(key: 'root');
-            final testFlushTasks = root.scm.testFlushTasks;
+            final flush = root.scm.flush;
 
             // .................
             // Create blueprints
@@ -535,7 +537,7 @@ void main() {
               key: 'onChangeObserver',
               suppliers: ['scope/on/change'],
               initialProduct: null,
-              produce: (components, previousProduct) =>
+              produce: (components, previousProduct, node) =>
                   components.first as Scope?,
             );
 
@@ -543,7 +545,8 @@ void main() {
               key: 'helloMetaScopeObserver',
               suppliers: ['scope/hello/node'],
               initialProduct: 8,
-              produce: (components, previousProduct) => components.first as int,
+              produce: (components, previousProduct, node) =>
+                  components.first as int,
             );
 
             // ...........
@@ -561,7 +564,7 @@ void main() {
               initialProduct: 9,
             ).instantiate(scope: helloMetaScope);
 
-            testFlushTasks();
+            flush();
 
             // observer should have the value of node5
             expect(onChangeObserverInstance.product, scopeInstance);
@@ -570,20 +573,20 @@ void main() {
             // ..............
             // Dispose scope5
             scopeInstance.dispose();
-            testFlushTasks();
+            flush();
 
             // ..................
             // Instantiate scope6
             scopeInstance = scope6.instantiate(scope: root);
             expect(scopeInstance.metaScope('hello')!.key, 'hello');
-            testFlushTasks();
+            flush();
 
             // Also the metaScopes should have been taken over
             expect(onChangeObserverInstance.product, scopeInstance);
 
             // Change the helloMetaScopeNodeInstance
             helloMetaScopeNodeInstance.product = 10;
-            testFlushTasks();
+            flush();
             expect(helloMetaScopeNodeInstance.product, 10);
           });
         });
@@ -690,7 +693,7 @@ void main() {
             },
           });
 
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
 
           s0 = scope.findScope('a/s0')!;
           s1 = scope.findScope('a/s0/s1')!;
@@ -897,7 +900,7 @@ void main() {
               () => scope.findOrCreateNode<int>(
                 NodeBluePrint(
                   initialProduct: 0,
-                  produce: (components, previousProduct) => 0,
+                  produce: (components, previousProduct, node) => 0,
                   key: 'node',
                 ),
               ),
@@ -917,7 +920,7 @@ void main() {
               () => scope.findOrCreateNode<String>(
                 NodeBluePrint(
                   initialProduct: 'hello',
-                  produce: (components, previousProduct) => 'world',
+                  produce: (components, previousProduct, node) => 'world',
                   key: 'node',
                 ),
               ),
@@ -993,7 +996,7 @@ void main() {
             Node<int>(
               bluePrint: NodeBluePrint<int>(
                 initialProduct: 0,
-                produce: (components, previousProduct) => previousProduct,
+                produce: (components, previousProduct, node) => previousProduct,
                 key: 'node',
               ),
               scope: scope,
@@ -1017,7 +1020,7 @@ void main() {
           'a': 0,
           'b': NodeBluePrint.map(supplier: 'a', toKey: 'b', initialProduct: 1),
         });
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         final a = scope.findNode<int>('a')!;
         a.dispose();
@@ -1037,7 +1040,7 @@ void main() {
         () {
           final newBluePrint = NodeBluePrint<int>(
             initialProduct: 0,
-            produce: (components, previousProduct) => previousProduct,
+            produce: (components, previousProduct, node) => previousProduct,
             key: 'node',
           );
 
@@ -1053,7 +1056,7 @@ void main() {
       test('should throw if the node does not exist', () {
         final newNode = NodeBluePrint<int>(
           initialProduct: 0,
-          produce: (components, previousProduct) => previousProduct,
+          produce: (components, previousProduct, node) => previousProduct,
           key: 'unknown',
         );
 
@@ -1099,7 +1102,7 @@ void main() {
         final host = scope.findOrCreateNode<int>(
           NodeBluePrint(
             initialProduct: 0,
-            produce: (components, previousProduct) => previousProduct,
+            produce: (components, previousProduct, node) => previousProduct,
             key: 'node',
           ),
         );
@@ -1189,7 +1192,7 @@ void main() {
           'exampleRoot/childScopeA/grandChildScope/grandChildNodeA',
         );
 
-        scm.testFlushTasks();
+        scm.flush();
       });
     });
 
@@ -1203,7 +1206,7 @@ void main() {
           bluePrint: NodeBluePrint<int>(
             initialProduct: 0,
             key: 'supplier',
-            produce: (components, previousProduct) => previousProduct + 1,
+            produce: (components, previousProduct, node) => previousProduct + 1,
           ),
           scope: scope,
         );
@@ -1212,9 +1215,14 @@ void main() {
           bluePrint: NodeBluePrint<int>(
             initialProduct: 0,
             key: 'producer',
-            produce: (List<dynamic> components, int previousProduct) {
-              return (components.first as int) * 10;
-            },
+            produce:
+                (
+                  List<dynamic> components,
+                  int previousProduct,
+                  Node<int> node,
+                ) {
+                  return (components.first as int) * 10;
+                },
           ),
           scope: scope,
         );
@@ -1223,9 +1231,14 @@ void main() {
           bluePrint: NodeBluePrint<int>(
             initialProduct: 0,
             key: 'customer',
-            produce: (List<dynamic> components, int previousProduct) {
-              return (components.first as int) + 1;
-            },
+            produce:
+                (
+                  List<dynamic> components,
+                  int previousProduct,
+                  Node<int> node,
+                ) {
+                  return (components.first as int) + 1;
+                },
           ),
           scope: scope,
         );
@@ -1275,7 +1288,7 @@ void main() {
             from: [],
             to: 'key',
             init: 0,
-            produce: (c, p) {
+            produce: (c, p, n) {
               return (p) + 1;
             },
           ),
@@ -1283,7 +1296,7 @@ void main() {
             from: ['key'],
             to: 'synth',
             init: 0,
-            produce: (c, p) {
+            produce: (c, p, n) {
               return (c.first as int) * 10;
             },
           ),
@@ -1291,7 +1304,7 @@ void main() {
             from: ['synth'],
             to: 'audio',
             init: 0,
-            produce: (c, p) {
+            produce: (c, p, n) {
               return (c.first as int) + 1;
             },
           ),
@@ -1299,7 +1312,7 @@ void main() {
             from: ['key'],
             to: 'screen',
             init: 0,
-            produce: (c, p) {
+            produce: (c, p, n) {
               return (c.first as int) * 100;
             },
           ),
@@ -1307,13 +1320,13 @@ void main() {
             from: ['screen'],
             to: 'grid',
             init: 0,
-            produce: (c, p) {
+            produce: (c, p, n) {
               return (c.first as int) + 2;
             },
           ),
         });
 
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         await updateGraphFile(scope, 'advanced_graph.dot');
       });
@@ -1367,7 +1380,7 @@ void main() {
               },
             },
           });
-          scope.scm.testFlushTasks();
+          scope.scm.flush();
           b = scope.findChildScope('b')!;
         });
 
@@ -1568,7 +1581,7 @@ void main() {
                 },
               },
             });
-            scope.scm.testFlushTasks();
+            scope.scm.flush();
           });
 
           group('true', () {
@@ -1635,7 +1648,7 @@ void main() {
                 },
               },
             });
-            scope.scm.testFlushTasks();
+            scope.scm.flush();
             final dump = scope.jsonDump();
             expect(dump, {
               'example': {
@@ -1666,7 +1679,7 @@ void main() {
                     },
                   },
                 });
-                scope.scm.testFlushTasks();
+                scope.scm.flush();
                 late List<String> message;
                 try {
                   scope.jsonDump(throwOnNonSerializableTypes: true);
@@ -1699,7 +1712,7 @@ void main() {
                   },
                 },
               });
-              scope.scm.testFlushTasks();
+              scope.scm.flush();
 
               final dump = scope.jsonDump(throwOnNonSerializableTypes: false);
               expect(dump, {
@@ -1746,7 +1759,7 @@ void main() {
           },
         });
         initialPreset = scope.preset();
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         expect(initialPreset, {
           'example': {
@@ -1799,7 +1812,7 @@ void main() {
             ),
           },
         });
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
         final node = scope.findNode<MyType>('custom')!;
         expect(node.product.x, 1);
 
@@ -1827,7 +1840,7 @@ void main() {
             },
           },
         });
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         // The blue print should have an update value
         expect(node.product.x, 5);
@@ -2229,7 +2242,7 @@ void main() {
                         NodeBluePrint<double>(
                           key: 'thickness',
                           initialProduct: 19.0,
-                          produce: (components, previousProduct) => 19.0,
+                          produce: (components, previousProduct, node) => 19.0,
                         ),
                       ],
                     ),
@@ -2265,7 +2278,7 @@ void main() {
                       NodeBluePrint(
                         key: 'node',
                         initialProduct: 0,
-                        produce: (components, previous) => previous,
+                        produce: (components, previous, node) => previous,
                       ),
                     );
 
@@ -2276,7 +2289,7 @@ void main() {
                       NodeBluePrint(
                         key: 'node',
                         initialProduct: 0,
-                        produce: (components, previous) => previous,
+                        produce: (components, previous, node) => previous,
                       ),
                     );
 
@@ -2374,7 +2387,7 @@ void main() {
                 bluePrint: NodeBluePrint<int>(
                   key: 'grandChildNodeX',
                   initialProduct: 0,
-                  produce: (components, previousProduct) => 0,
+                  produce: (components, previousProduct, node) => 0,
                 ),
                 scope: grandChildScope,
               );
@@ -2649,7 +2662,7 @@ void main() {
           'e': {'n': 6},
         });
 
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         // Find direct child
         final d = scope.findScope('a/d')!;
@@ -2998,7 +3011,8 @@ void main() {
             key: 'aObserver',
             initialProduct: null,
             suppliers: ['a/on/change'],
-            produce: (components, _) => aChanges.add(components.first as Scope),
+            produce: (components, _, _) =>
+                aChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
           // Observere changes on b
@@ -3007,7 +3021,8 @@ void main() {
             key: 'bObserver',
             initialProduct: null,
             suppliers: ['a/b/on/change'],
-            produce: (components, _) => bChanges.add(components.first as Scope),
+            produce: (components, _, _) =>
+                bChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
           // Observere changes on c
@@ -3016,10 +3031,11 @@ void main() {
             key: 'cObserver',
             initialProduct: null,
             suppliers: ['a/b/c/on/change'],
-            produce: (components, _) => cChanges.add(components.first as Scope),
+            produce: (components, _, _) =>
+                cChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
-          scm.testFlushTasks();
+          scm.flush();
           aChanges.clear();
           bChanges.clear();
           cChanges.clear();
@@ -3028,7 +3044,7 @@ void main() {
           // Change something in a
           // and check if the changes were observed only by a
           a0.product = 1;
-          scm.testFlushTasks();
+          scm.flush();
 
           expect(aChanges, [a]);
           expect(bChanges, isEmpty);
@@ -3039,14 +3055,14 @@ void main() {
           // Change something in b
           // and check if the changes were observed only by b
           b0.product = 2;
-          scm.testFlushTasks();
+          scm.flush();
 
           expect(aChanges, isEmpty);
           expect(bChanges, [b]);
           expect(cChanges, isEmpty);
 
           b1.product = 3;
-          scm.testFlushTasks();
+          scm.flush();
 
           expect(aChanges, isEmpty);
           expect(bChanges, [b, b]);
@@ -3057,14 +3073,14 @@ void main() {
           // Change something in c
           // and check if the changes were observed only by c
           c0.product = 2;
-          scm.testFlushTasks();
+          scm.flush();
 
           expect(aChanges, isEmpty);
           expect(bChanges, isEmpty);
           expect(cChanges, [c]);
 
           c1.product = 3;
-          scm.testFlushTasks();
+          scm.flush();
 
           expect(aChanges, isEmpty);
           expect(bChanges, isEmpty);
@@ -3089,7 +3105,8 @@ void main() {
             key: 'aObserverRecursive',
             initialProduct: null,
             suppliers: ['a/on/changeRecursive'],
-            produce: (components, _) => aChanges.add(components.first as Scope),
+            produce: (components, _, _) =>
+                aChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
           // Observere changes on b
@@ -3098,7 +3115,8 @@ void main() {
             key: 'bObserverRecursive',
             initialProduct: null,
             suppliers: ['a/b/on/changeRecursive'],
-            produce: (components, _) => bChanges.add(components.first as Scope),
+            produce: (components, _, _) =>
+                bChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
           // Observere changes on c
@@ -3107,10 +3125,11 @@ void main() {
             key: 'cObserverRecursive',
             initialProduct: null,
             suppliers: ['a/b/c/on/changeRecursive'],
-            produce: (components, _) => cChanges.add(components.first as Scope),
+            produce: (components, _, _) =>
+                cChanges.add(components.first as Scope),
           ).instantiate(scope: scope);
 
-          scm.testFlushTasks();
+          scm.flush();
           aChanges.clear();
           bChanges.clear();
           cChanges.clear();
@@ -3119,7 +3138,7 @@ void main() {
           // Change something in a
           // and check if the changes were observed only by a
           a0.product = 1;
-          scm.testFlushTasks();
+          scm.flush();
 
           expect(aChanges, [a]);
           expect(bChanges, isEmpty);
@@ -3130,14 +3149,14 @@ void main() {
           // Change something in b
           // and check if the changes were observed by b and its parent a
           b0.product = 2;
-          scm.testFlushTasks();
+          scm.flush();
 
           expect(aChanges, [a]);
           expect(bChanges, [b]);
           expect(cChanges, isEmpty);
 
           b1.product = 3;
-          scm.testFlushTasks();
+          scm.flush();
 
           expect(aChanges, [a, a]);
           expect(bChanges, [b, b]);
@@ -3150,14 +3169,14 @@ void main() {
           // and check if the changes were observed by c
           // and its ancestors b and a
           c0.product = 2;
-          scm.testFlushTasks();
+          scm.flush();
 
           expect(aChanges, [a]);
           expect(bChanges, [b]);
           expect(cChanges, [c]);
 
           c1.product = 3;
-          scm.testFlushTasks();
+          scm.flush();
 
           expect(aChanges, [a, a]);
           expect(bChanges, [b, b]);
@@ -3227,7 +3246,7 @@ void main() {
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
-          scm.testFlushTasks();
+          scm.flush();
           expect(g0.suppliers.first.key, 'f');
 
           // Use alias "b" in supplier address
@@ -3236,7 +3255,7 @@ void main() {
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
-          scm.testFlushTasks();
+          scm.flush();
           expect(g1.suppliers.first.key, 'f');
 
           // Use alias "c" in supplier address
@@ -3245,7 +3264,7 @@ void main() {
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
-          scm.testFlushTasks();
+          scm.flush();
           expect(g2.suppliers.first.key, 'f');
         });
       });
@@ -3309,7 +3328,7 @@ void main() {
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
-          scm.testFlushTasks();
+          scm.flush();
           expect(g0.suppliers.first.key, 'f');
 
           // Use alias "b" in supplier address
@@ -3318,7 +3337,7 @@ void main() {
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
-          scm.testFlushTasks();
+          scm.flush();
           expect(g1.suppliers.first.key, 'f');
 
           // Use alias "c" in supplier address
@@ -3327,7 +3346,7 @@ void main() {
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
-          scm.testFlushTasks();
+          scm.flush();
           expect(g2.suppliers.first.key, 'f');
         });
       });
@@ -3397,7 +3416,7 @@ void main() {
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
-          scm.testFlushTasks();
+          scm.flush();
           expect(g0.suppliers.first.key, 'f');
 
           // Use alias "b" in supplier address
@@ -3406,7 +3425,7 @@ void main() {
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
-          scm.testFlushTasks();
+          scm.flush();
           expect(g1.suppliers.first.key, 'f');
 
           // Use alias "c" in supplier address
@@ -3415,7 +3434,7 @@ void main() {
             toKey: 'g0',
             initialProduct: 0,
           ).instantiate(scope: scope);
-          scm.testFlushTasks();
+          scm.flush();
           expect(g2.suppliers.first.key, 'f');
         });
       });
@@ -3458,7 +3477,7 @@ void main() {
           initialProduct: 0,
           suppliers: ['supplier'],
         ).instantiate(scope: c);
-        scope.scm.testFlushTasks();
+        scope.scm.flush();
 
         // Dispose the supplierScope s
         s.dispose();

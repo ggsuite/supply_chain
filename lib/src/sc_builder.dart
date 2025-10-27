@@ -167,7 +167,7 @@ class ScBuilder {
       key: '${bluePrint.key}NeedsUpdate',
       suppliers: bluePrint.needsUpdateSuppliers,
       initialProduct: null,
-      produce: (components, previousProduct) =>
+      produce: (components, previousProduct, node) =>
           bluePrint.needsUpdate(hostScope: scope, components: components),
     );
 
