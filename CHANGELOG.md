@@ -1,6 +1,12 @@
 # Changelog
 
-## \[5.0.0\] - 2026-06-04
+## [5.0.1] - 2026-06-04
+
+### Changed
+
+- Fix CHANGELOG.md
+
+## [5.0.0] - 2026-06-04
 
 ### Added
 
@@ -24,12 +30,6 @@ when the result is known to be synchronous.
 (`Scm.timeout`, 5ms) is finalized with the previous product so the frame is
 never blocked; the real result is applied as a follow-up update once the
 future resolves. Set a longer `productionTimeout` for a single-update result.
-
-## [5.0.0] - 2026-06-04
-
-### Added
-
-- Add async support
 
 ## [4.0.3] - 2025-10-27
 
@@ -548,6 +548,7 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
+[5.0.1]: https://github.com/ggsuite/supply_chain/compare/5.0.0...5.0.1
 [5.0.0]: https://github.com/ggsuite/supply_chain/compare/4.0.3...5.0.0
 [4.0.3]: https://github.com/ggsuite/supply_chain/compare/4.0.2...4.0.3
 [4.0.2]: https://github.com/ggsuite/supply_chain/compare/4.0.1...4.0.2
