@@ -4,6 +4,8 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'dart:async' show FutureOr;
+
 import 'package:meta/meta.dart';
 import 'package:supply_chain/supply_chain.dart';
 
@@ -17,8 +19,17 @@ typedef Customer<T> = Node<T>;
 typedef Worker<T> = Node<T>;
 
 /// Produce delegate
+///
+/// May return a product synchronously ([T]) or asynchronously ([Future<T>]).
+/// Synchronous producers behave exactly as before. Asynchronous producers
+/// keep the node in production until their [Future] resolves or the node's
+/// [Node.productionTimeout] elapses.
 typedef Produce<T> =
-    T Function(List<dynamic> components, T previousProduct, Node<T> node);
+    FutureOr<T> Function(
+      List<dynamic> components,
+      T previousProduct,
+      Node<T> node,
+    );
 
 /// A node in a scope
 class Node<T> {
@@ -62,6 +73,11 @@ class Node<T> {
   void dispose() {
     _owner?.willDispose?.call(this);
     _isDisposed = true;
+
+    // Supersede any in-flight asynchronous production so its late result is
+    // discarded by [_onAsyncResult].
+    _produceGeneration++;
+    _isProducingAsync = false;
 
     // Remove all suppliers
     for (final supplier in [...suppliers]) {
@@ -318,11 +334,38 @@ class Node<T> {
   /// The product produced by this node
   T _originalProduct;
 
+  /// Monotonic production generation.
+  ///
+  /// Incremented on every [produce] call. An asynchronous production captures
+  /// the generation it started with; when its future resolves with a different
+  /// current generation (e.g. because the node was re-nominated, mocked or
+  /// disposed in the meantime) the result is discarded as superseded.
+  int _produceGeneration = 0;
+
+  bool _isProducingAsync = false;
+
+  /// Returns true while an asynchronous production is in flight.
+  bool get isProducingAsync => _isProducingAsync;
+
   /// Produces the product.
+  ///
+  /// The produce function may return its product synchronously ([T]) or
+  /// asynchronously ([Future<T>]). Synchronous products are applied
+  /// immediately (unchanged behavior). Asynchronous products keep the node in
+  /// production until the future resolves or the node's [productionTimeout]
+  /// elapses (see [Scm]).
   void produce({bool announce = true, bool triggerOnChange = true}) {
     assert(!isDisposed);
     assert(_suppliersAreInitialized);
+
+    // Each production gets a unique generation. This supersedes any in-flight
+    // asynchronous production from a previous call (including the mocked case
+    // below), so its late result will be discarded by [_onAsyncResult].
+    final generation = ++_produceGeneration;
+
     if (_mockedProduct != null) {
+      _isProducingAsync = false;
+      scm.unregisterAsyncProduction(this);
       if (announce) {
         scm.hasNewProduct(this);
       }
@@ -335,8 +378,30 @@ class Node<T> {
       i++;
     }
 
-    final newProduct = bluePrint.produce(_products, previousProduct, this);
+    final result = bluePrint.produce(_products, previousProduct, this);
 
+    // Asynchronous production: keep the node in production. The result is
+    // applied when the future resolves (see [_onAsyncResult]). Until then the
+    // node stays in scm.producingNodes - or until its productionTimeout
+    // elapses, in which case it is finalized with the previous product.
+    if (result is Future<T>) {
+      _isProducingAsync = true;
+      scm.registerAsyncProduction(this, result);
+      result.then(
+        (value) => _onAsyncResult(value, generation, announce, triggerOnChange),
+        onError: (Object error, StackTrace stack) =>
+            _onAsyncError(error, stack, generation, announce, triggerOnChange),
+      );
+      return;
+    }
+
+    // Synchronous production.
+    _applyProduct(result, announce, triggerOnChange);
+  }
+
+  // ...........................................................................
+  /// Applies a freshly produced [newProduct] and announces it via the SCM.
+  void _applyProduct(T newProduct, bool announce, bool triggerOnChange) {
     _throwIfNotAllowed(newProduct);
 
     _originalProduct = newProduct;
@@ -357,6 +422,74 @@ class Node<T> {
 
     if (triggerOnChange) {
       _triggerOnChange();
+    }
+  }
+
+  // ...........................................................................
+  /// Handles the result of an asynchronous production.
+  void _onAsyncResult(
+    T value,
+    int generation,
+    bool announce,
+    bool triggerOnChange,
+  ) {
+    // Superseded by a newer production, or the node is gone: discard. Do not
+    // touch the registry here - a newer production may own the current entry.
+    if (generation != _produceGeneration || isDisposed || isErased) {
+      return;
+    }
+
+    _isProducingAsync = false;
+    scm.unregisterAsyncProduction(this);
+
+    // Resolved within the production timeout and still producing: announce the
+    // new product through the regular path (single update).
+    if (scm.producingNodes.contains(this)) {
+      _applyProduct(value, announce, triggerOnChange);
+      return;
+    }
+
+    // The production timeout already finalized this node with the previous
+    // product. Apply the fresh product now and propagate it as a follow-up
+    // update. We must not call scm.hasNewProduct here because the node already
+    // left scm.producingNodes.
+    _throwIfNotAllowed(value);
+    _originalProduct = value;
+    if (isInsert) {
+      final insert = this as Insert<T>;
+      if (insert.isLastInsert) {
+        insert.host.insertResult = value;
+      }
+    }
+    if (triggerOnChange) {
+      _triggerOnChange();
+    }
+    scm.applyLateAsyncResult(this);
+  }
+
+  // ...........................................................................
+  /// Handles a rejected asynchronous production.
+  void _onAsyncError(
+    Object error,
+    StackTrace stack,
+    int generation,
+    bool announce,
+    bool triggerOnChange,
+  ) {
+    if (generation != _produceGeneration || isDisposed || isErased) {
+      return;
+    }
+
+    _isProducingAsync = false;
+    scm.unregisterAsyncProduction(this);
+
+    // Keep the previous product. Surface the error through the SCM hook.
+    scm.reportProductionError(this, error, stack);
+
+    // Free the node from production. If the timeout already finalized it, the
+    // previous product is already in place and there is nothing to propagate.
+    if (scm.producingNodes.contains(this)) {
+      scm.hasNewProduct(this);
     }
   }
 
@@ -557,6 +690,12 @@ class Node<T> {
 
   /// Milliseconds showing the production start time.
   Duration productionStartTime = Duration.zero;
+
+  /// The production timeout for this node.
+  ///
+  /// Uses the node's blue print [NodeBluePrint.productionTimeout] when set,
+  /// otherwise falls back to the SCM's global [Scm.timeout].
+  Duration get productionTimeout => bluePrint.productionTimeout ?? scm.timeout;
 
   // ...........................................................................
   /// Returns true if the node is a meta node

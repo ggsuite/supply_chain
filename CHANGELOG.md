@@ -1,5 +1,36 @@
 # Changelog
 
+## \[5.0.0\] - 2026-06-04
+
+### Added
+
+- Asynchronous producers: a produce function may now return a `Future`. The
+node stays in production until the future resolves and its customers wait for
+the result.
+- `Scm.settle()` (alias `Scm.flushAsync()`) awaits in-flight asynchronous
+productions until the supply chain is quiescent.
+- `NodeBluePrint.productionTimeout` and `Node.productionTimeout` to override the
+SCM's default production timeout per node.
+- `Scm.onProductionError` hook invoked when an asynchronous production fails.
+
+### Changed
+
+- BREAKING CHANGE: `Produce<T>` now returns `FutureOr<T>` instead of `T`.
+Providing synchronous producers is unchanged, but code that calls a produce
+function directly (e.g. `NodeBluePrint.produce` or
+`ScopeBluePrintFactory.produce`) now receives a `FutureOr<T>` and must cast
+when the result is known to be synchronous.
+- By default an asynchronous production that exceeds the frame budget
+(`Scm.timeout`, 5ms) is finalized with the previous product so the frame is
+never blocked; the real result is applied as a follow-up update once the
+future resolves. Set a longer `productionTimeout` for a single-update result.
+
+## [5.0.0] - 2026-06-04
+
+### Added
+
+- Add async support
+
 ## [4.0.3] - 2025-10-27
 
 ### Fixed
@@ -517,6 +548,7 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
+[5.0.0]: https://github.com/ggsuite/supply_chain/compare/4.0.3...5.0.0
 [4.0.3]: https://github.com/ggsuite/supply_chain/compare/4.0.2...4.0.3
 [4.0.2]: https://github.com/ggsuite/supply_chain/compare/4.0.1...4.0.2
 [4.0.1]: https://github.com/ggsuite/supply_chain/compare/4.0.0...4.0.1

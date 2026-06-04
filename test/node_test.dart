@@ -4,6 +4,7 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:supply_chain/supply_chain.dart';
@@ -1440,5 +1441,234 @@ void main() {
     test('TriangleExample', () {
       expect(TriangleExample(), isNotNull);
     });
+  });
+
+  // ###########################################################################
+  group('asynchronous production', () {
+    test('lets customers wait for the future and then updates them', () async {
+      final scope = Scope.example();
+      final scm = scope.scm;
+      final completer = Completer<int>();
+
+      nbp(from: [], to: 'source', init: 1).instantiate(scope: scope);
+
+      final asyncMid = NodeBluePrint<int>(
+        key: 'asyncMid',
+        initialProduct: 0,
+        suppliers: ['source'],
+        produce: (c, p, n) => completer.future,
+      ).instantiate(scope: scope);
+
+      final customer = NodeBluePrint<int>(
+        key: 'customer',
+        initialProduct: 0,
+        suppliers: ['asyncMid'],
+        produce: (c, p, n) => (c.first as int) * 2,
+      ).instantiate(scope: scope);
+
+      scm.flush();
+      expect(asyncMid.isProducingAsync, isTrue);
+      expect(asyncMid.product, 0);
+      expect(customer.product, 0);
+
+      completer.complete(21);
+      await scm.settle();
+
+      expect(asyncMid.product, 21);
+      expect(customer.product, 42);
+    });
+
+    test('finalizes with the previous product on timeout, then applies the '
+        'real result', () async {
+      final scope = Scope.example();
+      final scm = scope.scm;
+      final completer = Completer<int>();
+
+      nbp(from: [], to: 'source', init: 5).instantiate(scope: scope);
+
+      final asyncMid = NodeBluePrint<int>(
+        key: 'asyncMid',
+        initialProduct: 99,
+        suppliers: ['source'],
+        produce: (c, p, n) => completer.future,
+      ).instantiate(scope: scope);
+
+      final customer = NodeBluePrint<int>(
+        key: 'customer',
+        initialProduct: 0,
+        suppliers: ['asyncMid'],
+        produce: (c, p, n) => (c.first as int) + 1,
+      ).instantiate(scope: scope);
+
+      scm.flush();
+      expect(asyncMid.productionTimeout, scm.timeout);
+
+      scm.testStopwatch.elapse(scm.timeout);
+      scm.testTimer!.fire();
+      expect(asyncMid.isTimedOut, isTrue);
+      scm.flush(tick: false);
+      expect(customer.product, 100);
+
+      completer.complete(7);
+      await scm.settle();
+      expect(asyncMid.product, 7);
+      expect(customer.product, 8);
+    });
+
+    test('respects a longer per-node productionTimeout', () async {
+      final scope = Scope.example();
+      final scm = scope.scm;
+      final completer = Completer<int>();
+
+      nbp(from: [], to: 'source', init: 5).instantiate(scope: scope);
+
+      final asyncMid = NodeBluePrint<int>(
+        key: 'asyncMid',
+        initialProduct: 99,
+        suppliers: ['source'],
+        productionTimeout: const Duration(seconds: 10),
+        produce: (c, p, n) => completer.future,
+      ).instantiate(scope: scope);
+
+      scm.flush();
+      expect(asyncMid.productionTimeout, const Duration(seconds: 10));
+
+      scm.testStopwatch.elapse(scm.timeout);
+      scm.testTimer?.fire();
+      scm.testRunFastTasks();
+      expect(asyncMid.isTimedOut, isFalse);
+
+      completer.complete(7);
+      await scm.settle();
+      expect(asyncMid.product, 7);
+    });
+
+    test('discards a superseded in-flight result', () async {
+      final scope = Scope.example();
+      final scm = scope.scm;
+      final first = Completer<int>();
+      final second = Completer<int>();
+      var call = 0;
+
+      nbp(from: [], to: 'source', init: 0).instantiate(scope: scope);
+
+      final asyncMid = NodeBluePrint<int>(
+        key: 'asyncMid',
+        initialProduct: -1,
+        suppliers: ['source'],
+        produce: (c, p, n) => (call++ == 0) ? first.future : second.future,
+      ).instantiate(scope: scope);
+
+      scm.flush();
+      scm.nominate(asyncMid);
+      scm.flush();
+
+      first.complete(111);
+      second.complete(222);
+      await scm.settle();
+
+      expect(asyncMid.product, 222);
+    });
+
+    test('discards an async result resolving after dispose', () async {
+      final scope = Scope.example();
+      final scm = scope.scm;
+      final completer = Completer<int>();
+
+      nbp(from: [], to: 'source', init: 0).instantiate(scope: scope);
+
+      final asyncMid = NodeBluePrint<int>(
+        key: 'asyncMid',
+        initialProduct: 7,
+        suppliers: ['source'],
+        produce: (c, p, n) => completer.future,
+      ).instantiate(scope: scope);
+
+      scm.flush();
+      expect(asyncMid.isProducingAsync, isTrue);
+
+      asyncMid.dispose();
+      completer.complete(123);
+      await scm.settle();
+      expect(asyncMid.product, 7);
+    });
+
+    test('lets a set mockedProduct supersede an in-flight result', () async {
+      final scope = Scope.example();
+      final scm = scope.scm;
+      final completer = Completer<int>();
+
+      nbp(from: [], to: 'source', init: 0).instantiate(scope: scope);
+
+      final asyncMid = NodeBluePrint<int>(
+        key: 'asyncMid',
+        initialProduct: 1,
+        suppliers: ['source'],
+        produce: (c, p, n) => completer.future,
+      ).instantiate(scope: scope);
+
+      scm.flush();
+      asyncMid.mockedProduct = 500;
+      completer.complete(123);
+      await scm.settle();
+      expect(asyncMid.product, 500);
+    });
+
+    test('keeps the previous product when the future rejects', () async {
+      final scope = Scope.example();
+      final scm = scope.scm;
+      final completer = Completer<int>();
+      scm.onProductionError = (node, error, stack) {};
+
+      nbp(from: [], to: 'source', init: 0).instantiate(scope: scope);
+
+      final asyncMid = NodeBluePrint<int>(
+        key: 'asyncMid',
+        initialProduct: 42,
+        suppliers: ['source'],
+        produce: (c, p, n) => completer.future,
+      ).instantiate(scope: scope);
+
+      scm.flush();
+      completer.completeError(StateError('boom'));
+      await scm.settle();
+      expect(asyncMid.product, 42);
+    });
+
+    test(
+      'supports an async insert that times out and resolves later',
+      () async {
+        final scope = Scope.example();
+        final scm = scope.scm;
+        final completer = Completer<int>();
+
+        final host = const NodeBluePrint<int>(
+          key: 'host',
+          initialProduct: 1,
+        ).instantiate(scope: scope);
+        final customer = host.bluePrint
+            .forwardTo('customer')
+            .instantiate(scope: scope);
+        scm.flush();
+
+        Insert.example(
+          key: 'asyncInsert',
+          produce: (c, prev, n) => completer.future,
+          host: host,
+        );
+        scm.flush();
+        expect(host.product, 1);
+
+        // Time out the insert, then resolve it.
+        scm.testStopwatch.elapse(scm.timeout);
+        scm.testTimer!.fire();
+        scm.flush(tick: false);
+
+        completer.complete(777);
+        await scm.settle();
+        expect(host.product, 777);
+        expect(customer.product, 777);
+      },
+    );
   });
 }

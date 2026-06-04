@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fake_async/fake_async.dart';
 import 'package:supply_chain/src/schedule_task.dart';
 import 'package:supply_chain/supply_chain.dart';
@@ -1187,6 +1189,256 @@ void main() {
           final supplier = scope.findNode<int>('a/supplier')!;
           expect(customer.suppliers, [supplier]);
         });
+      });
+    });
+
+    // #########################################################################
+    group('asynchronous production', () {
+      test('awaits in-flight productions in settle() and tracks them in '
+          'pendingAsyncProductions', () async {
+        final scope = Scope.example();
+        final scm = scope.scm;
+        final completer = Completer<int>();
+
+        nbp(from: [], to: 'source', init: 1).instantiate(scope: scope);
+        final asyncMid = NodeBluePrint<int>(
+          key: 'asyncMid',
+          initialProduct: 0,
+          suppliers: ['source'],
+          produce: (c, p, n) => completer.future,
+        ).instantiate(scope: scope);
+        final customer = NodeBluePrint<int>(
+          key: 'customer',
+          initialProduct: 0,
+          suppliers: ['asyncMid'],
+          produce: (c, p, n) => (c.first as int) * 2,
+        ).instantiate(scope: scope);
+
+        scm.flush();
+        expect(scm.pendingAsyncProductions, isNotEmpty);
+        expect(scm.producingNodes, contains(asyncMid));
+
+        completer.complete(21);
+        await scm.settle();
+
+        expect(asyncMid.product, 21);
+        expect(customer.product, 42);
+        expect(scm.pendingAsyncProductions, isEmpty);
+        expect(scm.producingNodes, isEmpty);
+      });
+
+      test('flushAsync() is an alias for settle()', () async {
+        final scope = Scope.example();
+        final scm = scope.scm;
+
+        nbp(from: [], to: 'source', init: 2).instantiate(scope: scope);
+        final customer = NodeBluePrint<int>(
+          key: 'customer',
+          initialProduct: 0,
+          suppliers: ['source'],
+          produce: (c, p, n) => (c.first as int) * 3,
+        ).instantiate(scope: scope);
+
+        await scm.flushAsync();
+        expect(customer.product, 6);
+      });
+
+      test('finalizes with the previous product on timeout and applies the '
+          'real result via a follow-up update', () async {
+        final scope = Scope.example();
+        final scm = scope.scm;
+        final completer = Completer<int>();
+
+        nbp(from: [], to: 'source', init: 5).instantiate(scope: scope);
+        final asyncMid = NodeBluePrint<int>(
+          key: 'asyncMid',
+          initialProduct: 99,
+          suppliers: ['source'],
+          produce: (c, p, n) => completer.future,
+        ).instantiate(scope: scope);
+        final customer = NodeBluePrint<int>(
+          key: 'customer',
+          initialProduct: 0,
+          suppliers: ['asyncMid'],
+          produce: (c, p, n) => (c.first as int) + 1,
+        ).instantiate(scope: scope);
+
+        scm.flush();
+        expect(scm.producingNodes, contains(asyncMid));
+
+        scm.testStopwatch.elapse(scm.timeout);
+        scm.testTimer!.fire();
+        expect(asyncMid.isTimedOut, isTrue);
+        expect(scm.producingNodes, isEmpty);
+        scm.flush(tick: false);
+        expect(customer.product, 100);
+
+        completer.complete(7);
+        await scm.settle();
+        expect(asyncMid.product, 7);
+        expect(customer.product, 8);
+      });
+
+      test('uses a longer per-node productionTimeout when set', () async {
+        final scope = Scope.example();
+        final scm = scope.scm;
+        final completer = Completer<int>();
+
+        nbp(from: [], to: 'source', init: 5).instantiate(scope: scope);
+        final asyncMid = NodeBluePrint<int>(
+          key: 'asyncMid',
+          initialProduct: 99,
+          suppliers: ['source'],
+          productionTimeout: const Duration(seconds: 10),
+          produce: (c, p, n) => completer.future,
+        ).instantiate(scope: scope);
+
+        scm.flush();
+        scm.testStopwatch.elapse(scm.timeout);
+        scm.testTimer?.fire();
+        scm.testRunFastTasks();
+        expect(asyncMid.isTimedOut, isFalse);
+        expect(scm.producingNodes, contains(asyncMid));
+
+        completer.complete(7);
+        await scm.settle();
+        expect(asyncMid.product, 7);
+      });
+
+      test(
+        'finalizes a fast-path async node once its future resolves',
+        () async {
+          final scope = Scope.example();
+          final scm = scope.scm;
+          final first = Completer<int>();
+          final second = Completer<int>();
+          var call = 0;
+
+          final lonely = NodeBluePrint<int>(
+            key: 'lonely',
+            initialProduct: 0,
+            produce: (c, p, n) => (call++ == 0) ? first.future : second.future,
+          ).instantiate(scope: scope);
+
+          scm.flush();
+          first.complete(10);
+          await scm.settle();
+          expect(lonely.product, 10);
+
+          // Re-nominating an initialized, supplier-less, customer-less
+          // node hits the nominate fast path.
+          scm.nominate(lonely);
+          expect(lonely.isProducingAsync, isTrue);
+          expect(scm.producingNodes, isEmpty);
+
+          second.complete(20);
+          await scm.settle();
+          expect(lonely.product, 20);
+          expect(scm.pendingAsyncProductions, isEmpty);
+        },
+      );
+
+      test('reports a rejected production via onProductionError', () async {
+        final scope = Scope.example();
+        final scm = scope.scm;
+        final completer = Completer<int>();
+        Object? reportedError;
+        Node<dynamic>? reportedNode;
+        scm.onProductionError = (node, error, stack) {
+          reportedNode = node;
+          reportedError = error;
+        };
+
+        nbp(from: [], to: 'source', init: 0).instantiate(scope: scope);
+        final asyncMid = NodeBluePrint<int>(
+          key: 'asyncMid',
+          initialProduct: 42,
+          suppliers: ['source'],
+          produce: (c, p, n) => completer.future,
+        ).instantiate(scope: scope);
+
+        scm.flush();
+        completer.completeError(StateError('boom'));
+        await scm.settle();
+
+        expect(reportedNode, asyncMid);
+        expect(reportedError, isA<StateError>());
+        expect(asyncMid.product, 42);
+        expect(scm.producingNodes, isEmpty);
+      });
+
+      test(
+        'forwards a rejected production to the zone when no hook is set',
+        () async {
+          Object? zoneError;
+          await runZonedGuarded(
+            () async {
+              final scope = Scope.example();
+              final scm = scope.scm;
+              final completer = Completer<int>();
+
+              nbp(from: [], to: 'source', init: 0).instantiate(scope: scope);
+              NodeBluePrint<int>(
+                key: 'asyncMid',
+                initialProduct: 0,
+                suppliers: ['source'],
+                produce: (c, p, n) => completer.future,
+              ).instantiate(scope: scope);
+
+              scm.flush();
+              completer.completeError(StateError('boom'));
+              await scm.settle();
+            },
+            (error, stack) {
+              zoneError = error;
+            },
+          );
+
+          expect(zoneError, isA<StateError>());
+        },
+      );
+
+      test('clears pending productions on clear()', () async {
+        final scope = Scope.example();
+        final scm = scope.scm;
+        final completer = Completer<int>();
+
+        nbp(from: [], to: 'source', init: 0).instantiate(scope: scope);
+        NodeBluePrint<int>(
+          key: 'asyncMid',
+          initialProduct: 0,
+          suppliers: ['source'],
+          produce: (c, p, n) => completer.future,
+        ).instantiate(scope: scope);
+
+        scm.flush();
+        expect(scm.pendingAsyncProductions, isNotEmpty);
+
+        scm.clear();
+        expect(scm.pendingAsyncProductions, isEmpty);
+      });
+
+      test('removes a disposed node from pending productions', () async {
+        final scope = Scope.example();
+        final scm = scope.scm;
+        final completer = Completer<int>();
+
+        nbp(from: [], to: 'source', init: 0).instantiate(scope: scope);
+        final asyncMid = NodeBluePrint<int>(
+          key: 'asyncMid',
+          initialProduct: 7,
+          suppliers: ['source'],
+          produce: (c, p, n) => completer.future,
+        ).instantiate(scope: scope);
+
+        scm.flush();
+        expect(scm.pendingAsyncProductions, isNotEmpty);
+
+        asyncMid.dispose();
+        expect(scm.pendingAsyncProductions, isEmpty);
+
+        completer.complete(123);
+        await scm.settle();
       });
     });
   });

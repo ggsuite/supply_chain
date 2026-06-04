@@ -667,6 +667,16 @@ void main() {
           final newBluePrint = bluePrint.copyWith(smartMaster: ['a', 'b', 'c']);
           expect(newBluePrint, same(bluePrint));
         });
+
+        test('when production timeout does not change', () {
+          final bluePrint = NodeBluePrint.example().copyWith(
+            productionTimeout: const Duration(seconds: 1),
+          );
+          final newBluePrint = bluePrint.copyWith(
+            productionTimeout: const Duration(seconds: 1),
+          );
+          expect(newBluePrint, same(bluePrint));
+        });
       });
 
       group('returns a modified instance', () {
@@ -688,6 +698,14 @@ void main() {
           expect(newBluePrint.copyWith(canBeSmart: true).smartMaster, [
             'other',
           ]);
+        });
+
+        test('when the production timeout changes', () {
+          final bluePrint = NodeBluePrint.example();
+          final newBluePrint = bluePrint.copyWith(
+            productionTimeout: const Duration(seconds: 5),
+          );
+          expect(newBluePrint.productionTimeout, const Duration(seconds: 5));
         });
       });
 

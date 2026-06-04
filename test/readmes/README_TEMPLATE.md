@@ -12,6 +12,7 @@ Supply Chain (SC) is a data flow and state management framework.
 - ✅ Query nodes and scopes
 - ✅ Modify supply chains using plugins
 - ✅ Create auto connecting smart nodes
+- ✅ Support asynchronous producers
 
 ## Concept
 
@@ -34,6 +35,16 @@ INSERT test/tutorials/basics_tutorial_test.dart
 
 ```dart
 INSERT test/tutorials/debugging_tutorial_test.dart
+```
+
+## Async producers
+
+A `produce` function may return a `Future`. The node stays in production until
+the future resolves, and its customers wait for the result. Use `scm.settle()`
+instead of `scm.flush()` to await in-flight asynchronous productions.
+
+```dart
+INSERT test/tutorials/async_tutorial_test.dart
 ```
 
 ## Features and bugs

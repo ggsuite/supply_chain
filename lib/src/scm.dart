@@ -4,7 +4,7 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-import 'dart:async' show scheduleMicrotask, Timer;
+import 'dart:async' show scheduleMicrotask, Timer, Zone;
 
 import 'package:gg_fake_stopwatch/gg_fake_stopwatch.dart';
 import 'package:gg_fake_timer/gg_fake_timer.dart';
@@ -67,6 +67,7 @@ class Scm {
     _smartNodes.remove(node);
     _nodesWithMissedSuppliers.remove(node);
     _nodesNeedingSupplierUpdate.remove(node);
+    _asyncProductions.remove(node);
   }
 
   /// Adds node for initialization of suppliers
@@ -85,7 +86,12 @@ class Scm {
         !node.isInsert &&
         !node.isDisposed) {
       node.produce(announce: false, triggerOnChange: true);
-      node.finalizeProduction();
+
+      // For asynchronous productions the node finalizes itself once its future
+      // resolves (see Node._onAsyncResult). Only finalize synchronous ones.
+      if (!node.isProducingAsync) {
+        node.finalizeProduction();
+      }
       return;
     }
 
@@ -108,6 +114,58 @@ class Scm {
 
     // Finalize production
     _finalizeProduction(node);
+  }
+
+  // ...........................................................................
+  // Asynchronous production
+
+  /// The futures of all currently in-flight asynchronous productions.
+  Iterable<Future<dynamic>> get pendingAsyncProductions =>
+      _asyncProductions.values;
+
+  /// Registers an in-flight asynchronous production. Called by [Node.produce].
+  void registerAsyncProduction(Node<dynamic> node, Future<dynamic> future) {
+    _asyncProductions[node] = future;
+  }
+
+  /// Unregisters an in-flight asynchronous production.
+  void unregisterAsyncProduction(Node<dynamic> node) {
+    _asyncProductions.remove(node);
+  }
+
+  /// Applies an asynchronous result that resolved after the node had already
+  /// been finalized with its previous product (its [Node.productionTimeout]
+  /// elapsed). Schedules the node's customers and inserts so the fresh product
+  /// propagates as a follow-up update.
+  void applyLateAsyncResult(Node<dynamic> node) {
+    // The caller ([Node._onAsyncResult]) already guarded against disposed or
+    // superseded nodes. Re-enter and immediately finalize so customers /
+    // inserts are scheduled through the regular path.
+    _producingNodes.add(node);
+    _finalizeProduction(node);
+  }
+
+  /// Optional hook invoked when an asynchronous production future rejects.
+  ///
+  /// When set, the hook receives the failing node, the error and the stack
+  /// trace. The node keeps its previous product. When `null`, the error is
+  /// forwarded to the current [Zone] (so it surfaces during tests) without
+  /// crashing the supply chain.
+  void Function(Node<dynamic> node, Object error, StackTrace stack)?
+  onProductionError;
+
+  /// Reports an asynchronous production error. Called by [Node].
+  void reportProductionError(
+    Node<dynamic> node,
+    Object error,
+    StackTrace stack,
+  ) {
+    final handler = onProductionError;
+    if (handler != null) {
+      handler(node, error, stack);
+    } else {
+      Zone.current.handleUncaughtError(error, stack);
+    }
   }
 
   // ...........................................................................
@@ -155,6 +213,7 @@ class Scm {
     _preparedNodes.clear();
     _preparedInsertNodes.clear();
     _producingNodes.clear();
+    _asyncProductions.clear();
   }
 
   // ...........................................................................
@@ -222,6 +281,55 @@ class Scm {
     _initMissedSuppliers();
   }
 
+  // ...........................................................................
+  /// Like [flush], but also awaits in-flight asynchronous productions until
+  /// the supply chain is quiescent.
+  ///
+  /// Use this in tests with asynchronous producers. Synchronous-only chains
+  /// can keep using [flush]. Asynchronous `then` callbacks resolve on the real
+  /// microtask queue, which [flush] cannot observe - hence this awaitable
+  /// variant.
+  Future<void> settle({bool tick = true}) async {
+    var guard = 0;
+    while (true) {
+      // Pump all synchronous test tasks and supplier init.
+      flush(tick: tick);
+
+      final quiescent =
+          _asyncProductions.isEmpty &&
+          _testFastTasks.isEmpty &&
+          _testNormalTasks.isEmpty &&
+          _nodesNeedingSupplierUpdate.isEmpty &&
+          _preparedNodesAreEmpty &&
+          _producingNodes.isEmpty;
+      if (quiescent) {
+        break;
+      }
+
+      // Await all currently pending async productions. Their `then` callbacks
+      // (which may re-nominate nodes) run afterwards; the loop re-checks.
+      if (_asyncProductions.isNotEmpty) {
+        await Future.wait(
+          _asyncProductions.values.toList(),
+        ).catchError((Object _) => <dynamic>[]); // per-node error handled
+      }
+
+      // Give microtask callbacks a chance to run before re-checking.
+      await Future<void>.delayed(Duration.zero);
+
+      // coverage:ignore-start
+      if (++guard > 10000) {
+        throw StateError(
+          'settle() did not converge - possible circular async re-nomination.',
+        );
+      }
+      // coverage:ignore-end
+    }
+  }
+
+  /// Alias for [settle].
+  Future<void> flushAsync({bool tick = true}) => settle(tick: tick);
+
   /// Clears all scheduled tasks
   void testClearScheduledTasks() {
     _testNormalTasks.clear();
@@ -285,6 +393,10 @@ class Scm {
   final Set<Node<dynamic>> _preparedInsertNodes = {};
   final Set<Node<dynamic>> _preparedRealtimeNodes = {};
   final Set<Node<dynamic>> _producingNodes = {};
+
+  // ...........................................................................
+  // In-flight asynchronous productions, keyed by node (one per node).
+  final Map<Node<dynamic>, Future<dynamic>> _asyncProductions = {};
 
   // ...........................................................................
   late GgOncePerCycle _schedulePreparation;
@@ -753,9 +865,11 @@ class Scm {
 
     // Iterate all producing nodes
     for (final node in [..._producingNodes]) {
-      // If a nodes production duration exceeds timeout duration,
+      // If a nodes production duration exceeds its timeout duration,
+      // (the node's own productionTimeout, defaulting to the global timeout)
       final currentTime = _stopwatch.elapsed;
-      final isTimeout = currentTime - node.productionStartTime >= timeout;
+      final isTimeout =
+          currentTime - node.productionStartTime >= node.productionTimeout;
 
       // mark node as timed out
       if (isTimeout) {

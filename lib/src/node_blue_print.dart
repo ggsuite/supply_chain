@@ -44,6 +44,10 @@ NodeBluePrint<T> nbp<T>({
 /// - [allowedProducts] A list of allowed products
 /// - [produce] The produce function
 /// - [smartMaster] The smart master of this node
+/// - [productionTimeout] Overrides the SCM's default production timeout for
+///   this node. Use a longer duration for asynchronous producers that should
+///   deliver their result in a single update instead of being finalized with
+///   the previous product when the default frame budget is exceeded.
 class NodeBluePrint<T> {
   /// Constructor of the node
   const NodeBluePrint({
@@ -55,6 +59,7 @@ class NodeBluePrint<T> {
     Produce<T>? produce,
     List<String> smartMaster = const [],
     this.canBeSmart = true,
+    this.productionTimeout,
     T Function(Map<String, dynamic> json)? fromJson,
   }) : produce = produce ?? doNothing<T>,
        _smartMaster = smartMaster;
@@ -103,6 +108,14 @@ class NodeBluePrint<T> {
 
   /// The produce function
   final Produce<T> produce;
+
+  /// Overrides the SCM's default production timeout for this node.
+  ///
+  /// When `null`, the SCM's global [Scm.timeout] (5ms) applies. Set a longer
+  /// duration for asynchronous producers that should deliver their result in a
+  /// single update rather than being finalized with the previous product when
+  /// the default frame budget is exceeded.
+  final Duration? productionTimeout;
 
   // ...........................................................................
   /// Returns true if this node is a smart node, i.e. it has a smartMaster
@@ -186,12 +199,15 @@ class NodeBluePrint<T> {
     Produce<T>? produce,
     bool? canBeSmart,
     List<String>? smartMaster,
+    Duration? productionTimeout,
   }) {
     if ((initialProduct == null || initialProduct == this.initialProduct) &&
         (key == null || key == this.key) &&
         (suppliers == null || suppliers == this.suppliers) &&
         (produce == null || produce == this.produce) &&
         (canBeSmart == null || canBeSmart == this.canBeSmart) &&
+        (productionTimeout == null ||
+            productionTimeout == this.productionTimeout) &&
         (smartMaster == null ||
             smartMaster == this.smartMaster ||
             _listEquals(smartMaster, this.smartMaster) ||
@@ -206,6 +222,7 @@ class NodeBluePrint<T> {
       produce: produce ?? this.produce,
       canBeSmart: canBeSmart ?? this.canBeSmart,
       smartMaster: smartMaster ?? _smartMaster,
+      productionTimeout: productionTimeout ?? this.productionTimeout,
     );
   }
 

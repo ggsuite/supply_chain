@@ -19,9 +19,12 @@ void main() {
           final factoryInstance = factory.instantiate(scope: scope);
 
           // Test the produce function. It should return a scope blue print
-          // for each row height
+          // for each row height. produce now returns FutureOr, so cast the
+          // synchronous result for this direct call.
           final rowHeights = [10, 20, 30];
-          final rowScopes = factory.produce([rowHeights], [], factoryInstance);
+          final rowScopes =
+              factory.produce([rowHeights], [], factoryInstance)
+                  as List<ScopeBluePrint>;
           expect(rowScopes.length, 3);
 
           // Each scope should have a "RowHeight" node
