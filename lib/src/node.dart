@@ -34,16 +34,11 @@ typedef Produce<T> =
 /// A node in a scope
 class Node<T> {
   // ...........................................................................
-  /// - [initialProduct]: The product delivered before [produce] is called the
-  ///   first time
-  /// - [produce]: A function producing the product and saving it in product.
-  ///   Important: Call node.reportUpdate() after production.
-  /// - [hasUpdates]: Is called after the product has been updated
-  /// - [needsUpdates]: Is called when the product needs to be updated
+  /// - [bluePrint]: The blue print configuring this node, including its
+  ///   produce function, key and initial product
   /// - [scope]: The scope the node belongs to
-  /// - [key]: The key of the node
-  /// - [cacheSize]: The number of items in the cache
-  /// - [owner]: The owner of the node
+  /// - [isInsert]: Whether this node is an insert in a host node's chain
+  /// - [owner]: The optional owner notified about lifecycle events
   Node({
     required NodeBluePrint<T> bluePrint,
     required this.scope,

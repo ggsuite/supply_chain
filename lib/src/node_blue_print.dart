@@ -302,7 +302,7 @@ class NodeBluePrint<T> {
       try {
         return (product as dynamic).toJson();
       } on NoSuchMethodError catch (_) {
-        final serializer = _jsonSerializers[T.runtimeType];
+        final serializer = _jsonSerializers[T];
         if (serializer != null) {
           return serializer(product);
         } else {
@@ -336,7 +336,7 @@ class NodeBluePrint<T> {
 
   /// Removes a json parser for the given type
   static void removeJsonParser<T>() {
-    _jsonParsers.remove(T.runtimeType);
+    _jsonParsers.remove(T);
   }
 
   /// Set a string converter here to be able to convert json into the product
@@ -351,17 +351,17 @@ class NodeBluePrint<T> {
     _stringParsers[T] = parseString;
   }
 
-  /// Clears all json parsers. Useful for testing purposes.
+  /// Clears all json/string parsers and serializers. Useful for testing.
   static void clearParsers() {
     _jsonParsers.clear();
     _stringParsers.clear();
+    _jsonSerializers.clear();
   }
 
   /// Set a json converter here to be able to convert json into the product
   static void addJsonSerializer<T>(ToJson<T> toJson) {
-    final rtt = T.runtimeType;
-    if (!_jsonSerializers.containsKey(rtt)) {
-      _jsonSerializers[rtt] = toJson;
+    if (!_jsonSerializers.containsKey(T)) {
+      _jsonSerializers[T] = toJson;
     }
   }
 
@@ -432,7 +432,7 @@ class NodeBluePrint<T> {
     } else if (T == Map<String, bool>) {
       return _cast<bool>(map) as T;
     } else if (T == Map<String, String>) {
-      return _cast<bool>(map) as T;
+      return _cast<String>(map) as T;
     }
 
     return map as T;

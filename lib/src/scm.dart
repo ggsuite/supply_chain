@@ -220,6 +220,13 @@ class Scm {
   // Timeouts
 
   /// Set this property to true, if production timeouts should block
+  ///
+  /// Note for asynchronous producers: while a node is producing, [tick] does
+  /// not start new frames. The production timeout is what frees a stuck async
+  /// node (by finalizing it with the previous product). When [shouldTimeOut]
+  /// is `false`, an asynchronous production whose future never completes will
+  /// therefore block the frame pipeline indefinitely. With timeouts disabled,
+  /// only use asynchronous producers whose futures are guaranteed to complete.
   bool shouldTimeOut = true;
 
   // ...........................................................................

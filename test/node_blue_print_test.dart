@@ -892,6 +892,42 @@ void main() {
 
         NodeBluePrint.clearParsers();
       });
+
+      test('removeJsonParser actually removes the registered parser', () {
+        NodeBluePrint.clearParsers();
+        NodeBluePrint.addJsonParser<MyType>(MyType.fromJson);
+        NodeBluePrint.removeJsonParser<MyType>();
+
+        const n = NodeBluePrint<MyType>(key: 'n', initialProduct: MyType(0));
+        expect(() => n.fromJson({'x': 42}), throwsA(isA<Exception>()));
+
+        NodeBluePrint.clearParsers();
+      });
+    });
+
+    group('addJsonSerializer', () {
+      test('keys serializers by type so multiple types stay independent', () {
+        NodeBluePrint.clearParsers();
+        NodeBluePrint.addJsonSerializer<MyTypNoJson>((d) => {'a': d.x});
+        NodeBluePrint.addJsonSerializer<MyTypNoJson2>((d) => {'b': d.x});
+
+        expect(
+          const NodeBluePrint<MyTypNoJson>(
+            key: 'k',
+            initialProduct: MyTypNoJson(0),
+          ).toJson(const MyTypNoJson(1)),
+          {'a': 1},
+        );
+        expect(
+          const NodeBluePrint<MyTypNoJson2>(
+            key: 'k',
+            initialProduct: MyTypNoJson2(0),
+          ).toJson(const MyTypNoJson2(2)),
+          {'b': 2},
+        );
+
+        NodeBluePrint.clearParsers();
+      });
     });
 
     group('addStringParser, removeStringParser, clearStringParsers', () {
@@ -1266,6 +1302,13 @@ void main() {
             expect(casted, isA<Map<String, String>>());
           });
 
+          test('casts a dynamic map with only string values', () {
+            const dynamicStringMap = <String, dynamic>{'a': 'foo', 'b': 'bar'};
+            final casted = stringNode.castMap(dynamicStringMap);
+            expect(casted, {'a': 'foo', 'b': 'bar'});
+            expect(casted, isA<Map<String, String>>());
+          });
+
           test(
             'throws when a dynamic map contains string and other values',
             () {
@@ -1281,11 +1324,11 @@ void main() {
                 message = (e as dynamic).message.toString().split('\n');
               }
               expect(message, [
-                'Cannot cast _ConstMap<String, dynamic> to bool.',
+                'Cannot cast _ConstMap<String, dynamic> to String.',
                 '  - Make sure NodeBluePrint with key "stringNode" becomes '
                     'either a Node of type',
-                '    - Map<String, bool> or of type',
-                '    - Map<String, dynamic> containing only bool values',
+                '    - Map<String, String> or of type',
+                '    - Map<String, dynamic> containing only String values',
               ]);
             },
           );

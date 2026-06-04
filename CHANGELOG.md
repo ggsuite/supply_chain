@@ -1,5 +1,31 @@
 # Changelog
 
+## \[5.0.2\] - 2026-06-04
+
+### Fixed
+
+- `NodeBluePrint.castMap` now casts `Map<String, String>` correctly (it
+previously routed through the `bool` caster).
+- `NodeBluePrint.removeJsonParser` now actually removes the parser; it used a
+wrong map key (`T.runtimeType` instead of `T`) and silently did nothing.
+- `NodeBluePrint.addJsonSerializer` now keys serializers by type, so serializers
+for different types no longer collide. Previously the shared `T.runtimeType`
+key allowed only a single serializer to be registered globally.
+
+### Changed
+
+- `NodeBluePrint.clearParsers` now also clears registered json serializers.
+- Documentation: corrected the `Node` constructor parameter docs, documented
+how asynchronous producers interact with `Scm.shouldTimeOut`, and clarified
+that `Priority.value` encodes processing urgency (so `structure` has the
+highest value while `realtime` is the highest regular priority).
+
+## [5.0.2] - 2026-06-04
+
+### Added
+
+- Add clarification comments for priority
+
 ## [5.0.1] - 2026-06-04
 
 ### Changed
@@ -548,6 +574,7 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
+[5.0.2]: https://github.com/ggsuite/supply_chain/compare/5.0.1...5.0.2
 [5.0.1]: https://github.com/ggsuite/supply_chain/compare/5.0.0...5.0.1
 [5.0.0]: https://github.com/ggsuite/supply_chain/compare/4.0.3...5.0.0
 [4.0.3]: https://github.com/ggsuite/supply_chain/compare/4.0.2...4.0.3

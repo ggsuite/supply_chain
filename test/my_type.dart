@@ -11,6 +11,12 @@ class MyTypNoJson {
 }
 
 // .............................................................................
+class MyTypNoJson2 {
+  const MyTypNoJson2(this.x);
+  final int x;
+}
+
+// .............................................................................
 class MyType {
   const MyType(this.x);
   final int x;
