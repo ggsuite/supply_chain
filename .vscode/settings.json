@@ -36,17 +36,6 @@
   "workbench.editor.enablePreview": false,
 
   // ##############
-  // Copilot
-  // ##############
-
-  "github.copilot.enable": {
-    "*": false,
-    "plaintext": false,
-    "markdown": false,
-    "scminput": false
-  },
-
-  // ##############
   // Git Editor
   // ##############
 

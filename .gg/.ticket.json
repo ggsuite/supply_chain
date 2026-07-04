@@ -21,6 +21,10 @@
     {
       "name": "ds_generators",
       "url": "git@ssh.dev.azure.com:v3/mhk-carat/ds_cdm/ds_generators"
+    },
+    {
+      "name": "ds_mg",
+      "url": "git@ssh.dev.azure.com:v3/mhk-carat/ds_cdm/ds_mg"
     }
   ]
 }
