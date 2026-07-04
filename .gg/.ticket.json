@@ -1,0 +1,26 @@
+{
+  "issue_id": "remove_supply_chain",
+  "description": "Remove supply chain dependency",
+  "repositories": [
+    {
+      "name": "supply_chain",
+      "url": "git@github.com:ggsuite/supply_chain.git"
+    },
+    {
+      "name": "ds_floor_plan",
+      "url": "git@ssh.dev.azure.com:v3/mhk-carat/ds_cdm/ds_floor_plan"
+    },
+    {
+      "name": "ds_basic_shapes",
+      "url": "git@ssh.dev.azure.com:v3/mhk-carat/ds_cdm/ds_basic_shapes"
+    },
+    {
+      "name": "ds_blanks",
+      "url": "git@ssh.dev.azure.com:v3/mhk-carat/ds_cdm/ds_blanks"
+    },
+    {
+      "name": "ds_generators",
+      "url": "git@ssh.dev.azure.com:v3/mhk-carat/ds_cdm/ds_generators"
+    }
+  ]
+}
