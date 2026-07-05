@@ -4,7 +4,7 @@ digraph unix {
   fontname="Arial"
   node [fontname="Arial"]
   edge [fontname="Arial"]
-  subgraph cluster_root_8 {
+  subgraph cluster_root_4 {
     label = "root"; // scope
     supplier_1 [
       label = "supplier"; // node

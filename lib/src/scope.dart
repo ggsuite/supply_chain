@@ -350,10 +350,23 @@ class Scope {
 
   /// Returns meta scopes. These scopes manage suppliers providing informations
   /// about the scope.
-  Iterable<Scope> get metaScopes => _metaScopes.values;
+  ///
+  /// Note: The 'on' meta scope is created lazily. It must not be created on
+  /// disposed scopes - creating a meta scope would undispose its parent.
+  Iterable<Scope> get metaScopes {
+    if (!isMetaScope && !_isDisposed) {
+      _ensureOnMetaScope();
+    }
+    return _metaScopes.values;
+  }
 
   /// Returns the meta scope with the given key
-  Scope? metaScope(String key) => _metaScopes[key];
+  Scope? metaScope(String key) {
+    if (key == 'on' && !isMetaScope && !_isDisposed) {
+      return _ensureOnMetaScope();
+    }
+    return _metaScopes[key];
+  }
 
   /// Allows to add nodes to the meta scope
   Scope metaScopeFindOrCreate(String key) {
@@ -419,7 +432,7 @@ class Scope {
     for (final bluePrint in bluePrints) {
       final newNode = bluePrint.instantiate(
         scope: this,
-        applyScBuilders: true,
+        applyScBuilders: applyScBuilders,
         owner: owner,
       );
       result.add(newNode);
@@ -1049,16 +1062,23 @@ class Scope {
       return;
     }
 
-    _initOnMetaScope();
+    // The 'on' meta scope is created lazily (_ensureOnMetaScope) - unless
+    // change nodes are enabled, which live inside it.
+    if (Node.onChangeEnabled || Node.onRecursiveChangeEnabled) {
+      _ensureOnMetaScope();
+    }
+
     _initOnChangeNode();
     _initOnChangeRecursiveNode();
   }
 
   // ...........................................................................
-  void _initOnMetaScope() {
-    // Adds a 'on' meta scope providing event suppliers like on.change, etc.
-    Scope.metaScope(key: 'on', parent: this);
-  }
+  /// Creates the 'on' meta scope providing event suppliers like on.change.
+  ///
+  /// The scope is created lazily on first access: constructing it eagerly
+  /// would double the cost of every scope instantiation.
+  Scope _ensureOnMetaScope() =>
+      _metaScopes['on'] ?? Scope.metaScope(key: 'on', parent: this);
 
   // ...........................................................................
   void _dispose() {
@@ -1234,6 +1254,16 @@ class Scope {
         ? keyParts.sublist(0, keyParts.length - 1)
         : keyParts;
 
+    // Fail fast: when no node with the searched key exists at all, the
+    // search through the scope tree can be skipped entirely. Failed
+    // lookups would otherwise scan large parts of the scope tree.
+    if (findNodes && !scm.hasNodesWithKey(nodeKey)) {
+      if (throwIfNotFound) {
+        throw ArgumentError('Node with path "$key" not found.');
+      }
+      return null;
+    }
+
     Object? result;
 
     result = searchRoot._findItemInOwnScope<T>(
@@ -1314,7 +1344,7 @@ class Scope {
     // If path matches own scope and path segment is the last one
     // Return this scope.
     if (findScopes && scopePath.length == 1) {
-      final result = child(scopePath.first) ?? _metaScopes[scopePath.first];
+      final result = child(scopePath.first) ?? metaScope(scopePath.first);
 
       if (excludedScopes.isNotEmpty && excludedScopes.contains(result)) {
         return null;
@@ -1329,7 +1359,7 @@ class Scope {
 
     // If the scope path is not empty, find the child scope
     if (scopePath.isNotEmpty && !pathMatchesOwnScope) {
-      final childScope = child(scopePath.first) ?? _metaScopes[scopePath.first];
+      final childScope = child(scopePath.first) ?? metaScope(scopePath.first);
       if (childScope == null) {
         return null;
       } else {
@@ -1577,9 +1607,9 @@ class Scope {
       if (matchesKey(path.first)) {
         return this;
       }
-      final metaScope = _metaScopes[path.first];
-      if (metaScope != null) {
-        return metaScope;
+      final metaScopeForKey = metaScope(path.first);
+      if (metaScopeForKey != null) {
+        return metaScopeForKey;
       }
     }
 

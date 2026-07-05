@@ -507,8 +507,16 @@ class Node<T> {
   Iterable<Node<dynamic>> get suppliers => _suppliers;
 
   /// Get suppliers of the node of a given depth
+  ///
+  /// With a negative [depth] ALL transitive suppliers are returned, each
+  /// exactly once. With a bounded depth, nodes reachable via multiple paths
+  /// are contained once per path.
   Iterable<Node<dynamic>> deepSuppliers({int depth = 1}) {
-    if (depth < 0) depth = 100000;
+    // Unlimited depth: traverse each node once. Without the visited set the
+    // enumeration would be exponential on diamond shaped graphs.
+    if (depth < 0) {
+      return _collectDeep(this, (n) => n._suppliers);
+    }
 
     if (depth == 0) {
       return [];
@@ -519,6 +527,42 @@ class Node<T> {
     for (final supplier in suppliers) {
       result.addAll(supplier.deepSuppliers(depth: depth - 1));
     }
+    return result;
+  }
+
+  // ...........................................................................
+  /// Collects all nodes transitively reachable from [root] via [edges],
+  /// each exactly once, in depth first pre-order (direct neighbors first,
+  /// then the neighbors of the first neighbor, etc.).
+  ///
+  /// Iterative: the recursion depth would equal the graph depth and
+  /// overflow the stack on deep chains.
+  static List<Node<dynamic>> _collectDeep(
+    Node<dynamic> root,
+    Iterable<Node<dynamic>> Function(Node<dynamic>) edges,
+  ) {
+    final result = <Node<dynamic>>[];
+    final visited = <Node<dynamic>>{root};
+    final stack = <Node<dynamic>>[root];
+
+    while (stack.isNotEmpty) {
+      final node = stack.removeLast();
+
+      // Emit all yet unvisited neighbors first
+      final next = <Node<dynamic>>[];
+      for (final neighbor in edges(node)) {
+        if (visited.add(neighbor)) {
+          result.add(neighbor);
+          next.add(neighbor);
+        }
+      }
+
+      // Then descend into them, starting with the first one
+      for (final neighbor in next.reversed) {
+        stack.add(neighbor);
+      }
+    }
+
     return result;
   }
 
@@ -560,8 +604,18 @@ class Node<T> {
   /// The customers of the node
   Iterable<Node<dynamic>> get customers => _customers;
 
-  /// Get suppliers of the node of a given depth
+  /// Get customers of the node of a given depth
+  ///
+  /// With a negative [depth] ALL transitive customers are returned, each
+  /// exactly once. With a bounded depth, nodes reachable via multiple paths
+  /// are contained once per path.
   Iterable<Node<dynamic>> deepCustomers({int depth = 1}) {
+    // Unlimited depth: traverse each node once. Without the visited set the
+    // enumeration would be exponential on diamond shaped graphs.
+    if (depth < 0) {
+      return _collectDeep(this, (n) => n._customers);
+    }
+
     if (depth == 0) {
       return [];
     }

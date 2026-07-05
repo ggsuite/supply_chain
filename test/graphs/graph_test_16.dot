@@ -4,17 +4,17 @@ digraph unix {
   fontname="Arial"
   node [fontname="Arial"]
   edge [fontname="Arial"]
-  subgraph cluster_triangle_4 {
+  subgraph cluster_triangle_2 {
     label = "triangle"; // scope
     invisible0 [label = "", shape = point, style=invis]; // triangle
-    subgraph cluster_left_6 {
+    subgraph cluster_left_3 {
       label = "left"; // scope
       left_1 [
         label = "left"; // node
       ];
       
     }
-    subgraph cluster_right_8 {
+    subgraph cluster_right_4 {
       label = "right"; // scope
       right_2 [
         label = "right"; // node

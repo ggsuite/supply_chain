@@ -71,6 +71,8 @@ how asynchronous producers interact with `Scm.shouldTimeOut`, and clarified
 that `Priority.value` encodes processing urgency (so `structure` has the
 highest value while `realtime` is the highest regular priority).
 
+## [5.2.0] - 2026-07-05
+
 ## [5.1.0] - 2026-07-05
 
 ### Changed
@@ -631,6 +633,7 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
+[5.2.0]: https://github.com/ggsuite/supply_chain/compare/5.1.0...5.2.0
 [5.1.0]: https://github.com/ggsuite/supply_chain/compare/5.0.2...5.1.0
 [5.0.2]: https://github.com/ggsuite/supply_chain/compare/5.0.1...5.0.2
 [5.0.1]: https://github.com/ggsuite/supply_chain/compare/5.0.0...5.0.1

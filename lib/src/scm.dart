@@ -43,16 +43,25 @@ class Scm {
 
   /// Returns all nodes having a given key
   Iterable<Node<T>> nodesWithKey<T>(String key) {
-    return _nodes
-        .whereType<Node<T>>()
-        .where((element) => element.key == key)
-        .map((e) => e);
+    final nodes = _nodesByKey[key];
+    if (nodes == null) {
+      return const [];
+    }
+    return nodes.whereType<Node<T>>();
   }
+
+  /// Returns true if at least one node with the given key exists.
+  ///
+  /// Used by [Scope.findNode] to fail fast: when no node with the searched
+  /// key exists at all, the expensive search through the scope tree can be
+  /// skipped.
+  bool hasNodesWithKey(String key) => _nodesByKey.containsKey(key);
 
   /// Adds a node to scm
   void addNode(Node<dynamic> node) {
     _assertNodeIsNotErased(node);
     _nodes.add(node);
+    (_nodesByKey[node.key] ??= {}).add(node);
 
     nominate(node);
   }
@@ -60,25 +69,38 @@ class Scm {
   /// Removes the node from scm
   void removeNode(Node<dynamic> node) {
     _nodes.remove(node);
+
+    final nodesWithSameKey = _nodesByKey[node.key];
+    if (nodesWithSameKey != null) {
+      nodesWithSameKey.remove(node);
+      if (nodesWithSameKey.isEmpty) {
+        _nodesByKey.remove(node.key);
+      }
+    }
+
     _animatedNodes.remove(node);
     _nominatedNodes.remove(node);
     _removePreparedNode(node);
     _producingNodes.remove(node);
-    _smartNodes.remove(node);
+    _removeSmartNode(node);
     _nodesWithMissedSuppliers.remove(node);
     _nodesNeedingSupplierUpdate.remove(node);
     _asyncProductions.remove(node);
+    _nodesWithChangedPriority.remove(node);
+    _readyQueuesNeedRevalidation = true;
   }
 
   /// Called by [Node.dispose]: removes the node from the prepared sets so
   /// that disposed nodes do not keep the production pipeline open.
   void removeDisposedNode(Node<dynamic> node) {
     _removePreparedNode(node);
+    _readyQueuesNeedRevalidation = true;
   }
 
   /// Adds node for initialization of suppliers
   void needsInitSuppliers(Node<dynamic> node) {
     _nodesNeedingSupplierUpdate.add(node);
+    _readyQueuesNeedRevalidation = true;
   }
 
   /// Nominate node for production
@@ -208,6 +230,8 @@ class Scm {
 
   /// Inform the scm that a node's priority has changed
   void priorityHasChanged(Node<dynamic> node) {
+    _nodesWithChangedPriority.add(node);
+    _readyQueuesNeedRevalidation = true;
     _schedulePriorityUpdate.trigger();
   }
 
@@ -245,6 +269,22 @@ class Scm {
   bool shouldTimeOut = true;
 
   // ...........................................................................
+  /// Opt-in: process all production waves within a single scheduled cycle.
+  ///
+  /// By default the scm processes exactly one readiness wave (one priority
+  /// batch) per event-loop cycle. This keeps intermediate states observable
+  /// but pays one microtask hop per wave - noticeable on deep chains.
+  ///
+  /// With [drainMode] enabled, production keeps processing waves until no
+  /// more nodes become ready (or an asynchronous producer is in flight).
+  /// Deep chains then propagate within a single cycle.
+  ///
+  /// Trade-offs: intermediate one-wave-per-cycle states are no longer
+  /// observable between event-loop cycles, and all synchronous waves of an
+  /// update share one cycle - production timeouts still apply per node.
+  bool drainMode = false;
+
+  // ...........................................................................
   /// Manages disposed nodes and scopes
   late final Disposed disposedItems;
 
@@ -262,6 +302,12 @@ class Scm {
   bool isTest;
 
   /// Disable additional checks
+  ///
+  /// Performance note: with [extraChecks] enabled every announced
+  /// production pays an extra containment check (see [hasNewProduct]).
+  /// Set this to false in release builds of performance critical
+  /// applications. Also consider compiling with `dart compile exe` (AOT):
+  /// asserts are disabled there, removing all assert-only overhead.
   static bool extraChecks = true;
 
   // ...........................................................................
@@ -408,6 +454,7 @@ class Scm {
   // ...........................................................................
   // Nodes
   final Set<Node<dynamic>> _nodes = {};
+  final Map<String, Set<Node<dynamic>>> _nodesByKey = {};
   final Set<Node<dynamic>> _animatedNodes = {};
 
   // ...........................................................................
@@ -415,7 +462,51 @@ class Scm {
   final Set<Node<dynamic>> _nodesWithMissedSuppliers = {};
 
   // ...........................................................................
+  // Smart nodes, additionally indexed by the last segment of their smart
+  // master path. When a new node is created only the smart nodes whose
+  // master path ends with the node's key can connect to it - so only they
+  // need to be evaluated (see _connectNewMasterNodeToPotentialSmartNodes).
   final Set<Node<dynamic>> _smartNodes = {};
+  final Map<String, Set<Node<dynamic>>> _smartNodesByMasterKey = {};
+  final Map<Node<dynamic>, String> _smartNodeMasterKeys = {};
+
+  // ...........................................................................
+  void _addSmartNode(Node<dynamic> node) {
+    final masterKey = node.smartMaster.last;
+    final previousMasterKey = _smartNodeMasterKeys[node];
+
+    // Already registered under the same master key? Do nothing.
+    if (previousMasterKey == masterKey) {
+      return;
+    }
+
+    // The smart master path may have changed - remove the old registration
+    if (previousMasterKey != null) {
+      _removeSmartNode(node); // coverage:ignore-line
+    }
+
+    _smartNodes.add(node);
+    _smartNodeMasterKeys[node] = masterKey;
+    (_smartNodesByMasterKey[masterKey] ??= {}).add(node);
+  }
+
+  // ...........................................................................
+  void _removeSmartNode(Node<dynamic> node) {
+    final masterKey = _smartNodeMasterKeys.remove(node);
+    if (masterKey == null) {
+      return;
+    }
+
+    _smartNodes.remove(node);
+
+    final nodesWithMasterKey = _smartNodesByMasterKey[masterKey];
+    if (nodesWithMasterKey != null) {
+      nodesWithMasterKey.remove(node);
+      if (nodesWithMasterKey.isEmpty) {
+        _smartNodesByMasterKey.remove(masterKey);
+      }
+    }
+  }
 
   // ...........................................................................
   // Processing stages
@@ -572,6 +663,9 @@ class Scm {
 
   /// Prepares all nodes
   void _prepare() {
+    // Staging nodes can make queued customers unready
+    _readyQueuesNeedRevalidation = true;
+
     // Init suppliers
     if (_nodesNeedingSupplierUpdate.isNotEmpty ||
         _nodesWithMissedSuppliers.isNotEmpty) {
@@ -690,6 +784,25 @@ class Scm {
     // since they became ready into the right queue.
     _revalidateReadyQueues();
 
+    var produced = _produceNextBatch();
+
+    // In drain mode all waves becoming ready are processed within this
+    // cycle instead of scheduling one event-loop task per wave.
+    while (drainMode &&
+        produced &&
+        _producingNodes.isEmpty &&
+        !_preparedNodesAreEmpty) {
+      produced = _produceNextBatch();
+    }
+  }
+
+  // ...........................................................................
+  /// Produces the next batch of ready nodes.
+  ///
+  /// Processes only nodes of one priority level, making sure that all nodes
+  /// of a given priority are processed before the others start. Returns
+  /// true if a batch was produced.
+  bool _produceNextBatch() {
     // Process nodes grouped by priority
     for (final priority in Priority.values.reversed) {
       // Don't process priorities below minimum production priority
@@ -712,11 +825,7 @@ class Scm {
       final batch = [...queue];
       queue.clear();
       _produceBatch(batch);
-
-      // We process only nodes of one priority level in a cycle.
-      // Thus we are making sure that all nodes of a given priority are
-      // processed before the others start.
-      return;
+      return true;
     }
 
     // Fallback: The queues are empty, but prepared nodes exist. This happens
@@ -743,8 +852,10 @@ class Scm {
       }
 
       _produceBatch([...nodesOfPriority]);
-      return;
+      return true;
     }
+
+    return false;
   }
 
   // ...........................................................................
@@ -760,6 +871,16 @@ class Scm {
   /// Produces a batch of nodes of one priority level
   void _produceBatch(List<Node<dynamic>> batch) {
     for (final node in batch) {
+      // Disposed nodes must not produce. Remove them from the prepared
+      // sets - otherwise they would keep the production pipeline open.
+      // Nodes can be disposed while their own batch is producing.
+      // coverage:ignore-start
+      if (node.isDisposed) {
+        _removePreparedNode(node);
+        continue;
+      }
+      // coverage:ignore-end
+
       // Remove node from preparedNodes
       _removePreparedNode(node);
 
@@ -769,12 +890,9 @@ class Scm {
 
       assert(node.isReadyToProduce);
 
-      // Produce
-      if (!node.isDisposed) {
-        // Add node to producing nodes
-        _producingNodes.add(node);
-        node.produce();
-      }
+      // Add node to producing nodes
+      _producingNodes.add(node);
+      node.produce();
     }
   }
 
@@ -788,9 +906,23 @@ class Scm {
   /// re-nominated). Nodes becoming ready again are re-enqueued by
   /// _addPreparedNodes when their supplier finalizes.
   void _revalidateReadyQueues() {
+    // Only revalidate when something happened that can invalidate queue
+    // entries (see _readyQueuesNeedRevalidation call sites). _produceBatch
+    // additionally re-checks every node before producing it.
+    if (!_readyQueuesNeedRevalidation) {
+      return;
+    }
+    _readyQueuesNeedRevalidation = false;
+
     _revalidateReadyQueuesOfKind(_readyInsertNodes, _preparedInsertNodes);
     _revalidateReadyQueuesOfKind(_readyNodes, _preparedNodes);
   }
+
+  /// Set to true whenever an event occurs that can make ready queue entries
+  /// stale: preparing nodes (stages suppliers of queued nodes), priority
+  /// changes (queue assignment), disposals and removals from the prepared
+  /// sets, and supplier re-initializations.
+  bool _readyQueuesNeedRevalidation = true;
 
   void _revalidateReadyQueuesOfKind(
     List<Set<Node<dynamic>>> queues,
@@ -830,6 +962,11 @@ class Scm {
   // ...........................................................................
   void _addPreparedNodes(Iterable<Node<dynamic>> nodes) {
     for (final node in nodes) {
+      // Disposed nodes can never produce
+      if (node.isDisposed) {
+        continue;
+      }
+
       if (node.isInsert) {
         _preparedInsertNodes.add(node);
       } else {
@@ -853,10 +990,18 @@ class Scm {
   }
 
   void _removePreparedNode(Node<dynamic> node) {
+    // Also drop the node's ready queue entry. Otherwise a node re-enqueued
+    // while its batch is still producing (e.g. an insert whose input
+    // finalizes mid-batch) would keep a stale entry and produce twice.
+    // Entries queued under an outdated priority are cleaned up by
+    // _revalidateReadyQueues (priority changes set
+    // _readyQueuesNeedRevalidation).
     if (node.isInsert) {
       _preparedInsertNodes.remove(node);
+      _readyInsertNodes[node.priority.index].remove(node);
     } else {
       _preparedNodes.remove(node);
+      _readyNodes[node.priority.index].remove(node);
     }
 
     if (node.priority == Priority.realtime) {
@@ -923,47 +1068,85 @@ class Scm {
     _minProductionPriority = Priority.realtime;
   }
 
-  /// Update priorities of all nodes
-  void _updatePriorities() {
-    // Reset all assigned priorities
-    _resetPriorities();
+  /// Nodes whose priority changed since the last priority update
+  final Set<Node<dynamic>> _nodesWithChangedPriority = {};
 
-    // Update priorities for all nodes
-    for (final node in nodes) {
+  /// Update priorities of all nodes affected by a priority change.
+  ///
+  /// A node's priority can only affect its transitive suppliers (they take
+  /// over the highest customer priority). So instead of resetting and
+  /// recomputing the whole graph, only the supplier cone of the changed
+  /// nodes is invalidated and recomputed.
+  void _updatePriorities() {
+    if (_nodesWithChangedPriority.isEmpty) {
+      return;
+    }
+
+    // Collect the supplier cone of all changed nodes
+    final cone = <Node<dynamic>>{};
+    final stack = <Node<dynamic>>[..._nodesWithChangedPriority];
+    _nodesWithChangedPriority.clear();
+
+    while (stack.isNotEmpty) {
+      final node = stack.removeLast();
+      if (!cone.add(node)) {
+        continue;
+      }
+      stack.addAll(node.suppliers);
+    }
+
+    // Reset the assigned priorities within the cone
+    for (final node in cone) {
+      node.customerPriority = null;
+    }
+
+    // Recompute the priorities within the cone. Nodes outside the cone
+    // keep their values - they cannot be affected by the change.
+    for (final node in cone) {
       _updatePriorityForNode(node);
     }
   }
 
   // ..........................................................................
-  /// Resets priority for node
-  void _resetPriorities() {
-    for (final node in nodes) {
-      node.customerPriority = null;
-    }
-  }
+  /// Update the priority of [root] from its customers' priorities.
+  ///
+  /// Iterative with an explicit stack: the recursion depth would equal the
+  /// customer chain length and overflow on deep chains. Customers without a
+  /// computed priority are computed on demand; already computed customers
+  /// (customerPriority != null) are taken as is.
+  void _updatePriorityForNode(Node<dynamic> root) {
+    final stack = <Node<dynamic>>[root];
 
-  // ..........................................................................
-  /// Update priorities
-  void _updatePriorityForNode(Node<dynamic> node) {
-    // Has already a priority? Return.
-    if (node.customerPriority != null) {
-      return;
-    }
+    while (stack.isNotEmpty) {
+      final node = stack.last;
 
-    // Update priority for customers first
-    var highestChildPriority = Priority.lowest;
+      // Has already a priority? Return.
+      if (node.customerPriority != null) {
+        stack.removeLast();
+        continue;
+      }
 
-    for (final customer in node.customers) {
-      _updatePriorityForNode(customer);
+      // Update priority for customers first
+      var allCustomersComputed = true;
+      var highestChildPriority = Priority.lowest;
 
-      // Take over highest priority
-      if (customer.priority.value > highestChildPriority.value) {
-        highestChildPriority = customer.priority;
+      for (final customer in node.customers) {
+        if (customer.customerPriority == null) {
+          stack.add(customer);
+          allCustomersComputed = false;
+        }
+        // Take over highest priority
+        else if (customer.priority.value > highestChildPriority.value) {
+          highestChildPriority = customer.priority;
+        }
+      }
+
+      // Assign highest priority to itself
+      if (allCustomersComputed) {
+        node.customerPriority = highestChildPriority;
+        stack.removeLast();
       }
     }
-
-    // Assign highest priority to itself
-    node.customerPriority = highestChildPriority;
   }
 
   // ...........................................................................
@@ -1132,9 +1315,14 @@ class Scm {
 
   // ...........................................................................
   void _connectNewMasterNodeToPotentialSmartNodes(Node<dynamic> newMaster) {
-    // Connect each smart node to the new master
+    // Only smart nodes whose master path ends with the new master's key
+    // can connect to it.
+    final smartNodes = _smartNodesByMasterKey[newMaster.key];
+    if (smartNodes == null) {
+      return;
+    }
 
-    for (final smartNode in _smartNodes) {
+    for (final smartNode in [...smartNodes]) {
       _connectNewSmartNodeToPotentialMasters(
         smartNode,
         newPotentialMaster: newMaster,
@@ -1148,11 +1336,11 @@ class Scm {
     if (node.isSmartNode) {
       // Add the node to list of smartNodes.
       if (node.isDisposed) {
-        _smartNodes.remove(node);
+        _removeSmartNode(node);
         return;
       }
 
-      _smartNodes.add(node);
+      _addSmartNode(node);
       _connectNewSmartNodeToPotentialMasters(node);
 
       return;

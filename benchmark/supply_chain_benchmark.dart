@@ -283,6 +283,87 @@ BenchResult bulkUpdate(int width, int depth, int updates) {
 }
 
 // .............................................................................
+/// Instantiates a chain of nested ScopeBluePrints - measures scope and
+/// builder machinery during blueprint driven construction.
+BenchResult nestedScopes(int depth, int nodesPerScope) {
+  final sw = Stopwatch()..start();
+  final scm = Scm(isTest: true);
+  final root = Scope.root(key: 'bench', scm: scm);
+
+  var bp = ScopeBluePrint(
+    key: 'level0',
+    nodes: [
+      for (var i = 0; i < nodesPerScope; i++)
+        NodeBluePrint<int>(key: 'n$i', initialProduct: 0),
+    ],
+  );
+  for (var d = 1; d < depth; d++) {
+    bp = ScopeBluePrint(
+      key: 'level$d',
+      nodes: [
+        for (var i = 0; i < nodesPerScope; i++)
+          NodeBluePrint<int>(key: 'n$i', initialProduct: 0),
+      ],
+      children: [bp],
+    );
+  }
+
+  final scope = bp.instantiate(scope: root);
+  scm.flush();
+  final setupMs = sw.elapsedMicroseconds / 1000;
+
+  final verified = scope.findNode<int>('level0/n0') != null;
+
+  return BenchResult(
+    name: 'nestedScopes(d=$depth,n=$nodesPerScope)',
+    nodes: depth * nodesPerScope,
+    setupMs: setupMs,
+    updates: 1,
+    updateTotalMs: 0,
+    verified: verified,
+  );
+}
+
+// .............................................................................
+/// Linear chain like [chain], but with drainMode enabled: all waves of an
+/// update are processed within a single production cycle.
+BenchResult drainChain(int n, int updates) {
+  final sw = Stopwatch()..start();
+  final scm = Scm(isTest: true)..drainMode = true;
+  final scope = Scope.root(key: 'bench', scm: scm);
+
+  Node<int>(bluePrint: _source('n0'), scope: scope);
+  for (var i = 1; i < n; i++) {
+    Node<int>(bluePrint: _worker('n$i', ['n${i - 1}']), scope: scope);
+  }
+  scm.flush();
+  final setupMs = sw.elapsedMicroseconds / 1000;
+
+  final first = scope.findNode<int>('n0')!;
+  final last = scope.findNode<int>('n${n - 1}')!;
+
+  sw
+    ..reset()
+    ..start();
+  for (var u = 1; u <= updates; u++) {
+    first.product = u;
+    scm.flush();
+  }
+  final updateTotalMs = sw.elapsedMicroseconds / 1000;
+
+  final verified = last.product == updates + n - 1;
+
+  return BenchResult(
+    name: 'drainChain(n=$n)',
+    nodes: n,
+    setupMs: setupMs,
+    updates: updates,
+    updateTotalMs: updateTotalMs,
+    verified: verified,
+  );
+}
+
+// .............................................................................
 /// Linear chain driven in non-test mode (microtasks + real timers) - the
 /// production configuration of the scm.
 Future<BenchResult> chainProductionMode(int n, int updates) async {
@@ -359,6 +440,8 @@ void main(List<String> args) async {
     layered(10, 10, 100),
     layered(32, 16 ~/ (quick ? 2 : 1), 50),
     bulkUpdate(64, 8, 50),
+    nestedScopes(150 ~/ f, 10),
+    drainChain(1000 ~/ f, 100),
     await chainProductionMode(500 ~/ f, 20),
   ];
 

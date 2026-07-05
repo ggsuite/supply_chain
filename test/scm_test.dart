@@ -1100,6 +1100,120 @@ void main() {
       });
     });
 
+    group('drainMode', () {
+      test('should process all waves within a single production cycle', () {
+        final scm = Scm(isTest: true)..drainMode = true;
+        final scope = Scope.root(key: 'root', scm: scm);
+
+        scope.mockContent({
+          'supplier': 0,
+          'middle': nbp(
+            from: ['supplier'],
+            to: 'middle',
+            init: 0,
+            produce: (c, p, n) => (c.first as int) + 1,
+          ),
+          'customer': nbp(
+            from: ['middle'],
+            to: 'customer',
+            init: 0,
+            produce: (c, p, n) => (c.first as int) + 1,
+          ),
+        });
+        scm.flush();
+
+        final supplier = scope.findNode<int>('supplier')!;
+        final customer = scope.findNode<int>('customer')!;
+        expect(customer.product, 2);
+
+        // Nominate the supplier and prepare the chain
+        supplier.product = 10;
+        scm.testRunFastTasks();
+        scm.tick();
+
+        // Without drainMode this would take one production cycle per
+        // wave (supplier, middle, customer). With drainMode a single
+        // cycle propagates the whole chain.
+        scm.testRunNormalTasks();
+        expect(customer.product, 12);
+      });
+    });
+
+    group('incremental priority updates', () {
+      test('should handle multiple changed nodes in one cycle', () {
+        final scm = Scm(isTest: true);
+        final scope = Scope.root(key: 'root', scm: scm);
+
+        scope.mockContent({
+          'supplier': 0,
+          'customer': nbp(
+            from: ['supplier'],
+            to: 'customer',
+            init: 0,
+            produce: (c, p, n) => (c.first as int) + 1,
+          ),
+        });
+        scm.flush();
+
+        final supplier = scope.findNode<int>('supplier')!;
+        final customer = scope.findNode<int>('customer')!;
+
+        // Change the priorities of both chain members in the same cycle.
+        // The supplier's recompute also computes the customer; the
+        // customer's own recompute then finds it already up to date.
+        customer.ownPriority = Priority.frame;
+        supplier.ownPriority = Priority.realtime;
+        scm.testRunFastTasks();
+
+        expect(supplier.priority, Priority.realtime);
+        expect(customer.priority, Priority.frame);
+
+        scm.flush();
+      });
+    });
+
+    group('produce', () {
+      test('should skip nodes disposed while their batch is producing', () {
+        final scm = Scm(isTest: true);
+        final scope = Scope.root(key: 'root', scm: scm);
+
+        scope.mockContent({
+          'supplier': 0,
+          'c1': nbp(
+            from: ['supplier'],
+            to: 'c1',
+            init: 0,
+            produce: (c, p, n) {
+              // Dispose the sibling customer. It is part of the same
+              // production batch and must be skipped and removed from
+              // the prepared nodes.
+              n.scope.findNode<int>('c2')?.dispose();
+              return (c.first as int) + 1;
+            },
+          ),
+          'c2': nbp(
+            from: ['supplier'],
+            to: 'c2',
+            init: 0,
+            produce: (c, p, n) => (c.first as int) + 1,
+          ),
+        });
+        scm.flush();
+
+        // c2 was disposed by c1's produce and erased (no customers)
+        expect(scope.findNode<int>('c2'), isNull);
+
+        final c1 = scope.findNode<int>('c1')!;
+        expect(c1.product, 1);
+
+        // Updates keep working
+        final supplier = scope.findNode<int>('supplier')!;
+        supplier.product = 5;
+        scm.flush();
+        expect(c1.product, 6);
+      });
+    });
+
     group('produce fallback', () {
       test('should produce nodes that entered preparedNodes directly', () {
         // Nodes that enter the prepared sets without passing scm's

@@ -1,11 +1,11 @@
 ```mermaid
 flowchart TD
-  subgraph triangle_4["triangle"]
+  subgraph triangle_2["triangle"]
     top_0["top"]
-    subgraph left_6["left"]
+    subgraph left_3["left"]
       left_1["left"]
     end
-    subgraph right_8["right"]
+    subgraph right_4["right"]
       right_2["right"]
     end
   end
