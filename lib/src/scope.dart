@@ -230,6 +230,13 @@ class Scope {
 
   /// Returns the child scope with the given key
   Scope? child(String key) {
+    // Fast path: _children is keyed by the child's key
+    final direct = _children[key];
+    if (direct != null && !direct.isDisposed) {
+      return direct;
+    }
+
+    // Slow path: the key may match an alias of a child
     for (final child in children) {
       if (child.matchesKey(key)) {
         return child;
@@ -379,6 +386,10 @@ class Scope {
   Node<T>? node<T>(String key) =>
       _findItemInOwnScope<T>(key, [], true, true, false, const [], const [])
           as Node<T>?;
+
+  /// Returns the own node (including inserts) with exactly the given key,
+  /// or null if not found
+  Node<dynamic>? nodeByKey(String key) => _nodes[key];
 
   /// Returns the node with key. If not available in scope the node is created.
   Node<T> findOrCreateNode<T>(NodeBluePrint<T> bluePrint) {
@@ -1805,9 +1816,11 @@ class Scope {
     }
 
     // Otherwise this scope becomes a smart scope when it is contained in a
-    // a smart scope.
-    if (parent?.isSmartScope == true) {
-      return [...parent!.smartMaster, key];
+    // a smart scope. Compute the parent's smart master only once - it
+    // recurses up the scope tree.
+    final parentSmartMaster = parent?.smartMaster;
+    if (parentSmartMaster != null && parentSmartMaster.isNotEmpty) {
+      return [...parentSmartMaster, key];
     }
 
     return const [];

@@ -70,6 +70,12 @@ class Scm {
     _asyncProductions.remove(node);
   }
 
+  /// Called by [Node.dispose]: removes the node from the prepared sets so
+  /// that disposed nodes do not keep the production pipeline open.
+  void removeDisposedNode(Node<dynamic> node) {
+    _removePreparedNode(node);
+  }
+
   /// Adds node for initialization of suppliers
   void needsInitSuppliers(Node<dynamic> node) {
     _nodesNeedingSupplierUpdate.add(node);
@@ -77,14 +83,16 @@ class Scm {
 
   /// Nominate node for production
   void nominate(Node<dynamic> node) {
-    // If the node has no customers, it is more efficient to produce it directly
-    if (node.isReadyToProduce &&
-        node.suppliers.isEmpty &&
+    // If the node has no customers, it is more efficient to produce it
+    // directly. Check the cheap O(1) conditions first; isReadyToProduce
+    // scans the suppliers and is evaluated last.
+    if (node.suppliers.isEmpty &&
         node.customers.isEmpty &&
         node.inserts.isEmpty &&
         node.isInitialized &&
         !node.isInsert &&
-        !node.isDisposed) {
+        !node.isDisposed &&
+        node.isReadyToProduce) {
       node.produce(announce: false, triggerOnChange: true);
 
       // For asynchronous productions the node finalizes itself once its future
@@ -214,6 +222,13 @@ class Scm {
     _preparedInsertNodes.clear();
     _producingNodes.clear();
     _asyncProductions.clear();
+
+    for (final queue in _readyNodes) {
+      queue.clear();
+    }
+    for (final queue in _readyInsertNodes) {
+      queue.clear();
+    }
   }
 
   // ...........................................................................
@@ -382,6 +397,15 @@ class Scm {
       isTest ? _testScheduleNormal : Future.microtask;
 
   // ...........................................................................
+  /// Hands out monotonically increasing topological ranks for new nodes.
+  ///
+  /// Nodes keep their rank a valid topological order of the supplier graph
+  /// (suppliers before customers). This makes cycle detection cheap: adding
+  /// an edge from a lower to a higher rank can never close a cycle.
+  int nextTopoRank() => _nextTopoRank++;
+  int _nextTopoRank = 0;
+
+  // ...........................................................................
   // Nodes
   final Set<Node<dynamic>> _nodes = {};
   final Set<Node<dynamic>> _animatedNodes = {};
@@ -400,6 +424,23 @@ class Scm {
   final Set<Node<dynamic>> _preparedInsertNodes = {};
   final Set<Node<dynamic>> _preparedRealtimeNodes = {};
   final Set<Node<dynamic>> _producingNodes = {};
+
+  // ...........................................................................
+  // Ready-node queues, indexed by Priority.index.
+  //
+  // These queues are an acceleration index over the prepared sets above:
+  // whenever a node enters the prepared sets and is ready to produce, it is
+  // also added to the queue matching its priority. _produce then picks the
+  // next batch from these queues in O(batch) instead of rescanning all
+  // prepared nodes on every cycle. The prepared sets remain the source of
+  // truth: queue entries are hints that are re-validated (and re-bucketed
+  // when a node's priority changed) before production.
+  final List<Set<Node<dynamic>>> _readyNodes = [
+    for (final _ in Priority.values) <Node<dynamic>>{},
+  ];
+  final List<Set<Node<dynamic>>> _readyInsertNodes = [
+    for (final _ in Priority.values) <Node<dynamic>>{},
+  ];
 
   // ...........................................................................
   // In-flight asynchronous productions, keyed by node (one per node).
@@ -556,38 +597,48 @@ class Scm {
 
   // ...........................................................................
   /// Prepares a node and its customers
+  ///
+  /// Implemented iteratively with an explicit stack: the customer graph can
+  /// be deeper than the call stack allows (a recursive implementation
+  /// overflows on chains of a few thousand nodes).
   void _prepareNode(Node<dynamic> node) {
-    // Node is already prepared?
-    final isAlreadyPrepared = !node.needsPreparation();
-    if (isAlreadyPrepared) {
-      return;
-    }
+    final stack = <Node<dynamic>>[node];
 
-    // Nodes needs preparation? Prepare.
-    node.prepare();
+    while (stack.isNotEmpty) {
+      final current = stack.removeLast();
 
-    // Prepare all inserts
-    for (final insert in node.inserts) {
-      _prepareNode(insert);
-    }
+      // Node is already prepared?
+      final isAlreadyPrepared = !current.needsPreparation();
+      if (isAlreadyPrepared) {
+        continue;
+      }
 
-    // If node is a insert
-    if (node is Insert) {
-      _prepareInsert(node);
-    }
+      // Nodes needs preparation? Prepare.
+      current.prepare();
 
-    // Prepare also all customers
-    for (final customer in node.customers) {
-      _prepareNode(customer);
+      // Prepare all inserts
+      for (final insert in current.inserts) {
+        stack.add(insert);
+      }
+
+      // If node is a insert
+      if (current is Insert) {
+        _prepareInsert(current, stack);
+      }
+
+      // Prepare also all customers
+      for (final customer in current.customers) {
+        stack.add(customer);
+      }
     }
   }
 
   // ...........................................................................
-  void _prepareInsert(Insert<dynamic> node) {
+  void _prepareInsert(Insert<dynamic> node, List<Node<dynamic>> stack) {
     // Last insert? Prepare also host's customers
     if (node.isLastInsert) {
       for (final customer in node.host.customers) {
-        _prepareNode(customer);
+        stack.add(customer);
       }
     }
     // Not last insert? Prepare the following inserts
@@ -599,7 +650,7 @@ class Scm {
           continue;
         }
         if (isLaterInsert) {
-          _prepareNode(insert);
+          stack.add(insert);
         }
       }
     }
@@ -630,15 +681,14 @@ class Scm {
       return;
     }
 
-    // Remove disposed nodes
-    _preparedNodes.removeWhere((n) => n.isDisposed);
-    _preparedInsertNodes.removeWhere((n) => n.isDisposed);
-    _preparedRealtimeNodes.removeWhere((n) => n.isDisposed);
-
     // Start timeout timer
-    if (!_preparedNodesAreEmpty && shouldTimeOut) {
+    if (shouldTimeOut) {
       _startTimeoutCheck();
     }
+
+    // Drop stale queue entries and move nodes whose priority has changed
+    // since they became ready into the right queue.
+    _revalidateReadyQueues();
 
     // Process nodes grouped by priority
     for (final priority in Priority.values.reversed) {
@@ -649,63 +699,157 @@ class Scm {
 
       // Get nodes that have the desired priority
       // Process inserts first
-      final insertsReadyToProduce = _preparedInsertNodes.where(
-        (n) => n.isReadyToProduce && n.priority == priority,
-      );
-
-      final nodesOfPriority = insertsReadyToProduce.isNotEmpty
-          ? insertsReadyToProduce
-          : _preparedNodes.where(
-              (n) => n.isReadyToProduce && n.priority == priority,
-            );
+      final insertQueue = _readyInsertNodes[priority.index];
+      final queue = insertQueue.isNotEmpty
+          ? insertQueue
+          : _readyNodes[priority.index];
 
       // Continue if no such nodes are available
-      if (nodesOfPriority.isEmpty) {
+      if (queue.isEmpty) {
         continue;
       }
 
-      for (final node in [...nodesOfPriority]) {
-        // Remove node from preparedNodes
-        _removePreparedNode(node);
-
-        // Reset timeout state
-        node.isTimedOut = false;
-        node.productionStartTime = _stopwatch.elapsed;
-
-        assert(node.isReadyToProduce);
-
-        // Produce
-        if (!node.isDisposed) {
-          // Add node to producing nodes
-          _producingNodes.add(node);
-          node.produce();
-        }
-      }
+      final batch = [...queue];
+      queue.clear();
+      _produceBatch(batch);
 
       // We process only nodes of one priority level in a cycle.
       // Thus we are making sure that all nodes of a given priority are
       // processed before the others start.
       return;
     }
+
+    // Fallback: The queues are empty, but prepared nodes exist. This happens
+    // e.g. when nodes were put into the prepared sets from outside without
+    // going through _addPreparedNodes. Fall back to scanning the prepared
+    // sets like the queues never existed. Ready nodes found here are rare;
+    // the scan keeps the queue optimization safe without changing behavior.
+    for (final priority in Priority.values.reversed) {
+      if (priority.value < _minProductionPriority.value) {
+        continue;
+      }
+
+      final insertsReadyToProduce = _readyNodesOfPriority(
+        _preparedInsertNodes,
+        priority,
+      );
+
+      final nodesOfPriority = insertsReadyToProduce.isNotEmpty
+          ? insertsReadyToProduce
+          : _readyNodesOfPriority(_preparedNodes, priority);
+
+      if (nodesOfPriority.isEmpty) {
+        continue;
+      }
+
+      _produceBatch([...nodesOfPriority]);
+      return;
+    }
+  }
+
+  // ...........................................................................
+  /// Returns the nodes of [nodes] that are ready to produce with [priority]
+  Iterable<Node<dynamic>> _readyNodesOfPriority(
+    Set<Node<dynamic>> nodes,
+    Priority priority,
+  ) {
+    return nodes.where((n) => n.isReadyToProduce && n.priority == priority);
+  }
+
+  // ...........................................................................
+  /// Produces a batch of nodes of one priority level
+  void _produceBatch(List<Node<dynamic>> batch) {
+    for (final node in batch) {
+      // Remove node from preparedNodes
+      _removePreparedNode(node);
+
+      // Reset timeout state
+      node.isTimedOut = false;
+      node.productionStartTime = _stopwatch.elapsed;
+
+      assert(node.isReadyToProduce);
+
+      // Produce
+      if (!node.isDisposed) {
+        // Add node to producing nodes
+        _producingNodes.add(node);
+        node.produce();
+      }
+    }
+  }
+
+  // ...........................................................................
+  /// Removes stale entries from the ready queues and moves entries whose
+  /// priority changed since enqueueing into the queue of their current
+  /// priority.
+  ///
+  /// A queue entry is stale when the node was disposed, left the prepared
+  /// sets, or is no longer ready to produce (e.g. because a supplier was
+  /// re-nominated). Nodes becoming ready again are re-enqueued by
+  /// _addPreparedNodes when their supplier finalizes.
+  void _revalidateReadyQueues() {
+    _revalidateReadyQueuesOfKind(_readyInsertNodes, _preparedInsertNodes);
+    _revalidateReadyQueuesOfKind(_readyNodes, _preparedNodes);
+  }
+
+  void _revalidateReadyQueuesOfKind(
+    List<Set<Node<dynamic>>> queues,
+    Set<Node<dynamic>> preparedNodes,
+  ) {
+    for (var i = 0; i < queues.length; i++) {
+      final queue = queues[i];
+      if (queue.isEmpty) {
+        continue;
+      }
+
+      List<Node<dynamic>>? movedNodes;
+
+      queue.removeWhere((node) {
+        if (node.isDisposed ||
+            !preparedNodes.contains(node) ||
+            !node.isReadyToProduce) {
+          return true;
+        }
+
+        if (node.priority.index != i) {
+          (movedNodes ??= []).add(node);
+          return true;
+        }
+
+        return false;
+      });
+
+      if (movedNodes != null) {
+        for (final node in movedNodes!) {
+          queues[node.priority.index].add(node);
+        }
+      }
+    }
   }
 
   // ...........................................................................
   void _addPreparedNodes(Iterable<Node<dynamic>> nodes) {
-    if (nodes.isEmpty) {
-      return;
-    }
-
     for (final node in nodes) {
       if (node.isInsert) {
         _preparedInsertNodes.add(node);
       } else {
         _preparedNodes.add(node);
       }
-    }
 
-    _preparedRealtimeNodes.addAll(
-      nodes.where((n) => n.priority == Priority.realtime),
-    );
+      final priority = node.priority;
+
+      if (priority == Priority.realtime) {
+        _preparedRealtimeNodes.add(node);
+      }
+
+      // Nodes that are ready to produce are added to the matching ready
+      // queue. Nodes that are not ready yet will be re-added when their
+      // supplier finalizes production (_finalizeProduction).
+      if (node.isReadyToProduce) {
+        final queues = node.isInsert ? _readyInsertNodes : _readyNodes;
+        queues[priority.index].add(node);
+      }
+    }
   }
 
   void _removePreparedNode(Node<dynamic> node) {
@@ -842,7 +986,15 @@ class Scm {
 
   // ...........................................................................
   /// Starts an interval timer checking for production timeouts
+  ///
+  /// If a check timer is already running it is reused. Previously a new
+  /// periodic timer was created on every production cycle without
+  /// cancelling the old one, leaking one timer per cycle.
   void _startTimeoutCheck() {
+    if (_timeoutCheckTimer != null) {
+      return;
+    }
+
     final interval = Duration(milliseconds: timeout.inMilliseconds ~/ 2);
 
     if (isTest) {

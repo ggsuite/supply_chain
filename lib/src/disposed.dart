@@ -51,7 +51,9 @@ class Disposed {
   // Private
   // ######################
 
-  final List<Scope> _scopes = [];
+  // Sets (insertion-ordered) instead of lists: removeNode/removeScope are
+  // called once per erased item; with lists each removal is a linear scan.
+  final Set<Scope> _scopes = {};
 
-  final List<Node<dynamic>> _nodes = [];
+  final Set<Node<dynamic>> _nodes = {};
 }

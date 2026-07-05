@@ -69,6 +69,10 @@ class Node<T> {
     _owner?.willDispose?.call(this);
     _isDisposed = true;
 
+    // Remove the node from the scm's prepared sets. Disposed nodes must not
+    // keep the production pipeline open.
+    scm.removeDisposedNode(this);
+
     // Supersede any in-flight asynchronous production so its late result is
     // discarded by [_onAsyncResult].
     _produceGeneration++;
@@ -525,7 +529,7 @@ class Node<T> {
 
   /// Is called by SCM to initialize the suppliers
   void initSuppliers(Map<String, Node<dynamic>> newSuppliers) {
-    _detectCircularDependencies(this, newSuppliers.values, [this]);
+    _throwOnCircularDependencies(newSuppliers);
 
     // Make sure the keys match the blue print's suppliers
     final s = bluePrint.suppliers;
@@ -538,9 +542,10 @@ class Node<T> {
       _removeSupplier(supplier); // coverage:ignore-line
     }
 
-    // Reset old suppliers
+    // Add the new suppliers. All old suppliers were removed before, so each
+    // supplier is guaranteed to be new and no replacement lookup is needed.
     for (final supplier in newSuppliers.values) {
-      _addOrReplaceSupplier(supplier);
+      _addNewSupplier(supplier);
     }
 
     // Enlarge or shrink _products
@@ -769,6 +774,7 @@ class Node<T> {
   // ...........................................................................
   // Init & Dispose
   void _init() {
+    _topoRank = scm.nextTopoRank();
     _suppliersAreInitialized = bluePrint.suppliers.isEmpty;
     _initScope();
     _initScm();
@@ -907,27 +913,41 @@ class Node<T> {
   Priority _ownPriority = Priority.frame;
 
   // ...........................................................................
+  // _suppliers is a List because the order of the suppliers must match the
+  // order of the blue print's supplier paths (it defines the order of the
+  // components handed to produce). _suppliersSet shadows the list for O(1)
+  // contains checks.
   final List<Supplier<dynamic>> _suppliers = [];
-  final List<Customer<dynamic>> _customers = [];
+  final Set<Supplier<dynamic>> _suppliersSet = {};
+  final Set<Customer<dynamic>> _customers = {};
 
   // ...........................................................................
-  void _addOrReplaceSupplier(Supplier<dynamic> supplier) {
+  /// The node's position in a topological order of the supplier graph:
+  /// suppliers have smaller ranks than their customers.
+  ///
+  /// Maintained incrementally (Pearce-Kelly): most edges connect a lower
+  /// rank to a higher rank and cost O(1) to check for cycles. Only edges
+  /// violating the current order trigger a search of the affected region
+  /// plus a local rank reordering.
+  late int _topoRank;
+
+  // ...........................................................................
+  /// Adds a supplier that is guaranteed not to be one of the current
+  /// suppliers, e.g. because all suppliers were removed before.
+  void _addNewSupplier(Supplier<dynamic> supplier) {
     assert(supplier != this);
 
     // Supplier<T> already added? Do nothing.
-    if (_suppliers.contains(supplier)) {
+    if (_suppliersSet.contains(supplier)) {
       return;
     }
 
-    // Remove existing supplier
-    final path = _supplierPath(supplier);
-    final existingSupplier = _supplierForPath(path);
-    if (existingSupplier != null) {
-      _removeSupplier(existingSupplier); // coverage:ignore-line
-    }
+    // Keep the topological ranks in order
+    _restoreTopoOrderForEdge(supplier, this);
 
     // Add supplier to list of suppliers
     _suppliers.add(supplier);
+    _suppliersSet.add(supplier);
 
     // This producer becomes a customer of its supplier
     supplier._addCustomer(this);
@@ -938,23 +958,21 @@ class Node<T> {
 
   // ...........................................................................
   void _removeSupplier(Supplier<dynamic> supplier) {
-    if (!_suppliers.contains(supplier)) {
+    if (!_suppliersSet.contains(supplier)) {
       return;
     }
 
     _suppliers.remove(supplier);
+    _suppliersSet.remove(supplier);
     assert(supplier.customers.contains(this));
     supplier._removeCustomer(this);
   }
 
   // ...........................................................................
+  /// Is called by [_addNewSupplier] after this node was added to the
+  /// customer's supplier list.
   void _addCustomer(Customer<dynamic> customer) {
-    if (_customers.contains(customer)) {
-      return;
-    }
-
     _customers.add(customer);
-    customer._addOrReplaceSupplier(this);
   }
 
   // ...........................................................................
@@ -1012,7 +1030,10 @@ class Node<T> {
       // Replace the old suppliers by the smartNode
       final supplierIndex = customer._suppliers.indexOf(this);
 
+      _restoreTopoOrderForEdge(targetNode, customer);
       customer._suppliers[supplierIndex] = targetNode;
+      customer._suppliersSet.remove(this);
+      customer._suppliersSet.add(targetNode);
       scm.nominate(customer);
     }
 
@@ -1044,31 +1065,6 @@ class Node<T> {
   }
 
   // ...........................................................................
-  String _supplierPath(Node<dynamic> node) {
-    final result = <String>[];
-
-    for (final supplierPath in bluePrint.suppliers) {
-      if (node.matchesPath(supplierPath)) {
-        result.add(supplierPath);
-      }
-    }
-
-    assert(result.length == 1);
-
-    return result.first;
-  }
-
-  // ...........................................................................
-  Node<dynamic>? _supplierForPath(String path) {
-    for (final supplier in suppliers) {
-      if (supplier.matchesPath(path)) {
-        return supplier;
-      }
-    }
-    return null;
-  }
-
-  // ...........................................................................
   void _clearSuppliers() {
     _suppliersAreInitialized = bluePrint.suppliers.isEmpty;
 
@@ -1082,7 +1078,126 @@ class Node<T> {
   }
 
   // ...........................................................................
-  void _detectCircularDependencies(
+  /// Throws if connecting this node to [newSuppliers] would create a cycle.
+  ///
+  /// Thanks to the topological ranks this is O(1) per supplier for the
+  /// common case (supplier rank < customer rank). Only suppliers violating
+  /// the current order require a reachability check, bounded to the affected
+  /// rank region. Throws before any supplier is connected.
+  void _throwOnCircularDependencies(Map<String, Node<dynamic>> newSuppliers) {
+    for (final supplier in newSuppliers.values) {
+      // A supplier with a smaller rank can never close a cycle.
+      if (supplier._topoRank < _topoRank) {
+        continue;
+      }
+
+      // The supplier is the node itself or reachable from the node via
+      // customer edges? Then the new edge would close a cycle.
+      if (identical(supplier, this) ||
+          _isReachableViaCustomers(from: this, target: supplier)) {
+        _throwCircularDependency(this, newSuppliers.values, [this]);
+      }
+    }
+  }
+
+  // ...........................................................................
+  /// Returns true if [target] is reachable from [from] via customer edges.
+  ///
+  /// The search is bounded to the rank region `<= target._topoRank`: in a
+  /// valid topological order every path towards [target] has strictly
+  /// increasing ranks.
+  static bool _isReachableViaCustomers({
+    required Node<dynamic> from,
+    required Node<dynamic> target,
+  }) {
+    final maxRank = target._topoRank;
+    final visited = <Node<dynamic>>{};
+    final stack = <Node<dynamic>>[from];
+
+    while (stack.isNotEmpty) {
+      final current = stack.removeLast();
+      if (identical(current, target)) {
+        return true;
+      }
+      if (current._topoRank > maxRank || !visited.add(current)) {
+        continue;
+      }
+      stack.addAll(current._customers);
+    }
+    return false;
+  }
+
+  // ...........................................................................
+  /// Restores the topological order before adding the edge
+  /// [supplier] -> [customer] (Pearce-Kelly).
+  ///
+  /// When the edge already respects the order (supplier rank < customer
+  /// rank) this is O(1). Otherwise the affected rank region is searched and
+  /// locally reordered. If the new edge closes a cycle no order exists; the
+  /// ranks are left untouched (callers detect and report cycles themselves,
+  /// see [_throwOnCircularDependencies]).
+  static void _restoreTopoOrderForEdge(
+    Node<dynamic> supplier,
+    Node<dynamic> customer,
+  ) {
+    if (supplier._topoRank < customer._topoRank) {
+      return;
+    }
+
+    // Collect all nodes reachable forward from the customer within the
+    // affected region (they must move behind the supplier).
+    final maxRank = supplier._topoRank;
+    final forward = <Node<dynamic>>{};
+    var stack = <Node<dynamic>>[customer];
+    while (stack.isNotEmpty) {
+      final current = stack.removeLast();
+      if (identical(current, supplier)) {
+        // The new edge closes a cycle - no topological order exists.
+        return;
+      }
+      if (current._topoRank > maxRank || !forward.add(current)) {
+        continue;
+      }
+      stack.addAll(current._customers);
+    }
+
+    // Collect all nodes reaching the supplier backwards within the affected
+    // region (they must move before the customer's region).
+    final minRank = customer._topoRank;
+    final backward = <Node<dynamic>>{};
+    stack = <Node<dynamic>>[supplier];
+    while (stack.isNotEmpty) {
+      final current = stack.removeLast();
+      if (current._topoRank < minRank || !backward.add(current)) {
+        continue;
+      }
+      stack.addAll(current._suppliers);
+    }
+
+    // Reassign the affected ranks: backward nodes keep their relative order
+    // and move before the forward nodes, which also keep theirs.
+    final pool = [
+      for (final node in backward) node._topoRank,
+      for (final node in forward) node._topoRank,
+    ]..sort();
+
+    final backwardSorted = [...backward]
+      ..sort((a, b) => a._topoRank - b._topoRank);
+    final forwardSorted = [...forward]
+      ..sort((a, b) => a._topoRank - b._topoRank);
+
+    var i = 0;
+    for (final node in backwardSorted) {
+      node._topoRank = pool[i++];
+    }
+    for (final node in forwardSorted) {
+      node._topoRank = pool[i++];
+    }
+  }
+
+  // ...........................................................................
+  /// Reconstructs the cycle path and throws. Only called on the error path.
+  void _throwCircularDependency(
     Node<dynamic> node,
     Iterable<Node<dynamic>> suppliers,
     List<Node<dynamic>> visited,
@@ -1094,7 +1209,7 @@ class Node<T> {
     }
 
     for (final supplier in suppliers) {
-      _detectCircularDependencies(node, supplier.suppliers, [
+      _throwCircularDependency(node, supplier.suppliers, [
         ...visited,
         supplier,
       ]);

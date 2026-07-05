@@ -1099,6 +1099,40 @@ void main() {
         });
       });
     });
+
+    group('produce fallback', () {
+      test('should produce nodes that entered preparedNodes directly', () {
+        // Nodes that enter the prepared sets without passing scm's
+        // bookkeeping (e.g. in tests casting preparedNodes) are not part
+        // of the ready queues. The fallback scan in _produce picks them up.
+        final scm = Scm(isTest: true);
+        final scope = Scope.root(key: 'root', scm: scm);
+
+        scope.mockContent({
+          'supplier': 0,
+          'customer': nbp(
+            from: ['supplier'],
+            to: 'customer',
+            init: 0,
+            produce: (c, p, n) => (c.first as int) + 1,
+          ),
+        });
+        scm.flush();
+
+        final customer = scope.findNode<int>('customer')!;
+        expect(customer.product, 1);
+
+        // Put the customer into preparedNodes bypassing the ready queues
+        customer.prepare();
+        (scm.preparedNodes as Set<Node<dynamic>>).add(customer);
+
+        // Trigger production. The ready queues are empty, so only the
+        // fallback scan can find the node.
+        scm.flush();
+        expect(customer.isReady, isTrue);
+        expect(scm.preparedNodes, isNot(contains(customer)));
+      });
+    });
   });
 
   test('Test with non test environment should work fine', () {

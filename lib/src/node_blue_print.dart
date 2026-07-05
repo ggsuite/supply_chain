@@ -4,7 +4,6 @@
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
 
-import 'package:collection/collection.dart';
 import 'package:supply_chain/supply_chain.dart';
 
 /// Produce delegate that does nothing
@@ -86,7 +85,7 @@ class NodeBluePrint<T> {
     assert(key.isNotEmpty, 'The key must not be empty');
     assert(key.isCamelCase, 'The key must be in CamelCase');
 
-    if (suppliers.toSet().toList().length != suppliers.length) {
+    if (suppliers.toSet().length != suppliers.length) {
       throw ArgumentError('The suppliers must be unique.');
     }
   }
@@ -150,7 +149,7 @@ class NodeBluePrint<T> {
     Owner<Node<dynamic>>? owner,
   }) {
     check();
-    final node = scope.nodes.firstWhereOrNull((n) => n.key == key);
+    final node = scope.nodeByKey(key);
 
     if (node != null && !node.isDisposed) {
       assert(node is Node<T>, 'The node must be of type Node<T>');
