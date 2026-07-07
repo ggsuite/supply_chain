@@ -800,6 +800,7 @@ class Scope {
     int parentScopeDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
+    MarkdownFormat? markDownFormat,
   }) {
     final g = graph(
       childScopeDepth: childScopeDepth,
@@ -808,8 +809,10 @@ class Scope {
       highlightedScopes: highlightedScopes,
     );
 
-    final mm = GraphToMermaid(graph: g).mermaid;
-    return mm;
+    final mm = GraphToMermaid(graph: g);
+    return markDownFormat == null
+        ? mm.mermaid
+        : mm.markdown(markdownFormat: markDownFormat);
   }
 
   // ...........................................................................

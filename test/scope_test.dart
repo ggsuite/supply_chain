@@ -6,6 +6,7 @@
 
 import 'dart:io';
 
+import 'package:gg_golden/gg_golden.dart';
 import 'package:gg_is_github/gg_is_github.dart';
 import 'package:supply_chain/supply_chain.dart';
 import 'package:test/test.dart';
@@ -1265,6 +1266,14 @@ void main() {
         // Create mermaid
         final mm = chain.mermaid();
         expect(mm, isNotNull);
+
+        // Create mermaid markdown github
+        final mdGitHub = chain.mermaid(markDownFormat: .gitHub);
+        await writeGolden('md_git_hub.mm', mdGitHub);
+
+        // Create mermaid markdown azure
+        final mdGitAzure = chain.mermaid(markDownFormat: .azure);
+        await writeGolden('md_azure.mm', mdGitAzure);
       }
 
       // .......................................................................

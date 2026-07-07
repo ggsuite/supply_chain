@@ -94,12 +94,12 @@ void main() {
     // ..........................
     // Print node and scope graph
     final graph = scope.mermaid();
-    await writeGolden(fileName: 'basic_01.mmd', data: graph);
+    await writeGolden('basic_01.mmd', graph);
 
     // ...............................
     // Show all node pathes of a scope
     final allNodePathes = rootScope.ls();
-    await writeGolden(fileName: 'all_node_pathes.json', data: allNodePathes);
+    await writeGolden('all_node_pathes.json', allNodePathes);
     expect(allNodePathes, ['scope', 'scope/supplier', 'scope/customer']);
   });
 }
