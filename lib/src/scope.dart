@@ -178,7 +178,7 @@ class Scope {
   final int id = _idCounter++;
 
   /// Reset id counter for test purposes
-  static void testRestIdCounter() => _idCounter = 0;
+  static void testResetIdCounter() => _idCounter = 0;
 
   // ...........................................................................
   /// Returns the child scopes

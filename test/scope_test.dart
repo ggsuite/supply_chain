@@ -28,7 +28,7 @@ void main() {
     Node.onRecursiveChangeEnabled = enableOnChange;
 
     Node.testResetIdCounter();
-    Scope.testRestIdCounter();
+    Scope.testResetIdCounter();
     scm = Scm(isTest: true);
     scope = Scope.example(scm: scm);
 
