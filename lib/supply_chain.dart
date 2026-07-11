@@ -6,6 +6,8 @@
 
 library;
 
+export 'src/animated_node.dart';
+export 'src/animated_node_blue_print.dart';
 export 'src/disposed.dart';
 export 'src/graph.dart';
 export 'src/graph_to_dot.dart';

@@ -1671,4 +1671,78 @@ void main() {
       },
     );
   });
+
+  // #########################################################################
+  group('propagateOnChangeOnly', () {
+    test('does not schedule customers for an unchanged product', () {
+      final scm = Scm(isTest: true);
+      final scope = Scope.example(scm: scm);
+      scope.mockContent({
+        'a': 5,
+        'gated': NodeBluePrint<int>(
+          key: 'gated',
+          initialProduct: 0,
+          suppliers: ['a'],
+          produce: (c, p, n) => (c.first as int).clamp(0, 10),
+          propagateOnChangeOnly: true,
+        ),
+        'counter': nbp(
+          from: ['gated'],
+          to: 'counter',
+          init: 0,
+          produce: (c, p, n) => p + 1,
+        ),
+      });
+      final a = scope.findNode<int>('a')!;
+      final counter = scope.findNode<int>('counter')!;
+      scm.flush();
+      final produced = counter.product;
+
+      // 'gated' clamps 5 -> 5 (unchanged): customer must not be scheduled.
+      a.product = 5;
+      scm.flush();
+      expect(counter.product, produced);
+
+      // 'gated' clamps 20 -> 10 (changed): customer is scheduled.
+      a.product = 20;
+      scm.flush();
+      expect(counter.product, produced + 1);
+    });
+
+    test('uses the changeComparator when provided', () {
+      final scm = Scm(isTest: true);
+      final scope = Scope.example(scm: scm);
+      scope.mockContent({
+        'a': 0.0,
+        'gated': NodeBluePrint<double>(
+          key: 'gated',
+          initialProduct: 0.0,
+          suppliers: ['a'],
+          produce: (c, p, n) => c.first as double,
+          propagateOnChangeOnly: true,
+          changeComparator: (x, y) => (x - y).abs() < 1.0,
+        ),
+        'counter': nbp(
+          from: ['gated'],
+          to: 'counter',
+          init: 0,
+          produce: (c, p, n) => p + 1,
+        ),
+      });
+      final a = scope.findNode<double>('a')!;
+      final counter = scope.findNode<int>('counter')!;
+      scm.flush();
+      final produced = counter.product;
+
+      // Within tolerance -> treated as unchanged.
+      a.product = 0.5;
+      scm.flush();
+      expect(counter.product, produced);
+
+      // Beyond tolerance -> changed.
+      a.product = 5.0;
+      scm.flush();
+      expect(counter.product, produced + 1);
+    });
+  });
 }

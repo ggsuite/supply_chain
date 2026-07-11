@@ -1590,6 +1590,42 @@ void main() {
       });
     });
   });
+
+  // ...........................................................................
+  group('finalizeWithoutPropagation', () {
+    test('lets a change-gated node settle without waking its customers', () {
+      final scm = Scm(isTest: true);
+      final scope = Scope.example(scm: scm);
+      scope.mockContent({
+        'a': 5,
+        'gated': NodeBluePrint<int>(
+          key: 'gated',
+          initialProduct: 0,
+          suppliers: ['a'],
+          produce: (c, p, n) => (c.first as int).clamp(0, 10),
+          propagateOnChangeOnly: true,
+        ),
+        'counter': nbp(
+          from: ['gated'],
+          to: 'counter',
+          init: 0,
+          produce: (c, p, n) => p + 1,
+        ),
+      });
+      final a = scope.findNode<int>('a')!;
+      final gated = scope.findNode<int>('gated')!;
+      final counter = scope.findNode<int>('counter')!;
+      scm.flush();
+      final produced = counter.product;
+
+      // 'gated' clamps 5 -> 5 (unchanged): finalized without propagation.
+      a.product = 5;
+      scm.flush();
+      expect(counter.product, produced);
+      expect(gated.isStaged, isFalse);
+      expect(scm.nominatedNodes, isEmpty);
+    });
+  });
 }
 
 class _NodeThatTimesOut<T> extends Node<T> {

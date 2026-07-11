@@ -333,6 +333,10 @@ class Node<T> {
   /// The product produced by this node
   T _originalProduct;
 
+  /// Whether this node has finished at least one production. Used by the
+  /// change-gating in [_applyProduct]: the first production always propagates.
+  bool _producedAtLeastOnce = false;
+
   /// Monotonic production generation.
   ///
   /// Incremented on every [produce] call. An asynchronous production captures
@@ -403,7 +407,19 @@ class Node<T> {
   void _applyProduct(T newProduct, bool announce, bool triggerOnChange) {
     _throwIfNotAllowed(newProduct);
 
+    final previous = _originalProduct;
     _originalProduct = newProduct;
+
+    // Change-gating: a node configured with propagateOnChangeOnly does not
+    // schedule its customers when the freshly produced product equals the
+    // previous one. The first production and insert chains always propagate.
+    final gate =
+        bluePrint.propagateOnChangeOnly &&
+        _producedAtLeastOnce &&
+        !isInsert &&
+        _inserts.isEmpty &&
+        _productIsUnchanged(previous, newProduct);
+    _producedAtLeastOnce = true;
 
     // If this node is the last insert in the chain,
     // write the product into the host's insertResult
@@ -416,13 +432,23 @@ class Node<T> {
 
     // Announce
     if (announce) {
-      scm.hasNewProduct(this);
+      if (gate) {
+        scm.finalizeWithoutPropagation(this);
+      } else {
+        scm.hasNewProduct(this);
+      }
     }
 
-    if (triggerOnChange) {
+    if (triggerOnChange && !gate) {
       _triggerOnChange();
     }
   }
+
+  // ...........................................................................
+  /// Returns true if [next] equals [previous] according to the blue print's
+  /// [NodeBluePrint.changeComparator] (or `==` when none is configured).
+  bool _productIsUnchanged(T previous, T next) =>
+      bluePrint.changeComparator?.call(previous, next) ?? (previous == next);
 
   // ...........................................................................
   /// Handles the result of an asynchronous production.

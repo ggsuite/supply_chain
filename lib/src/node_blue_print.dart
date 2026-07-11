@@ -59,6 +59,8 @@ class NodeBluePrint<T> {
     List<String> smartMaster = const [],
     this.canBeSmart = true,
     this.productionTimeout,
+    this.propagateOnChangeOnly = false,
+    this.changeComparator,
     T Function(Map<String, dynamic> json)? fromJson,
   }) : produce = produce ?? doNothing<T>,
        _smartMaster = smartMaster;
@@ -117,6 +119,24 @@ class NodeBluePrint<T> {
   final Duration? productionTimeout;
 
   // ...........................................................................
+  /// If true, this node only schedules its customers when a freshly produced
+  /// product differs from the previous one.
+  ///
+  /// An unchanged product still finalizes the node cleanly, but does not start
+  /// a downstream production wave. This lets a node act as a rate-limiting
+  /// boundary (e.g. an [AnimatedNode]) so a jittery or high-frequency input
+  /// does not cascade redundant recomputations through the graph.
+  ///
+  /// Defaults to false, preserving the "always propagate" behavior. The very
+  /// first production always propagates, and gating is bypassed for insert
+  /// nodes and nodes hosting inserts so insert chains always run.
+  final bool propagateOnChangeOnly;
+
+  /// Optional equality used by [propagateOnChangeOnly] to decide whether a
+  /// product changed between two productions. When null, `==` is used.
+  final bool Function(T a, T b)? changeComparator;
+
+  // ...........................................................................
   /// Returns true if this node is a smart node, i.e. it has a smartMaster
   bool get isSmartNode => smartMaster.isNotEmpty;
 
@@ -156,7 +176,7 @@ class NodeBluePrint<T> {
       return node as Node<T>;
     }
 
-    final result = Node<T>(bluePrint: this, scope: scope, owner: owner);
+    final result = createNode(scope: scope, owner: owner);
 
     if (applyScBuilders) {
       _applyScBuilders(result);
@@ -164,6 +184,17 @@ class NodeBluePrint<T> {
 
     return result;
   }
+
+  // ...........................................................................
+  /// Creates the concrete node instance for this blue print.
+  ///
+  /// Subclasses override this to construct a specialized [Node] subtype (e.g.
+  /// [AnimatedNodeBluePrint] returns an [AnimatedNode]). It is the single node
+  /// construction point routed through by [instantiate] and
+  /// [Scope.findOrCreateNode], so subclasses are honored on every creation
+  /// path.
+  Node<T> createNode({required Scope scope, Owner<Node<dynamic>>? owner}) =>
+      Node<T>(bluePrint: this, scope: scope, owner: owner);
 
   // ...........................................................................
   /// Instantiates the blue print as insert in the given scope
@@ -199,6 +230,8 @@ class NodeBluePrint<T> {
     bool? canBeSmart,
     List<String>? smartMaster,
     Duration? productionTimeout,
+    bool? propagateOnChangeOnly,
+    bool Function(T a, T b)? changeComparator,
   }) {
     if ((initialProduct == null || initialProduct == this.initialProduct) &&
         (key == null || key == this.key) &&
@@ -207,6 +240,10 @@ class NodeBluePrint<T> {
         (canBeSmart == null || canBeSmart == this.canBeSmart) &&
         (productionTimeout == null ||
             productionTimeout == this.productionTimeout) &&
+        (propagateOnChangeOnly == null ||
+            propagateOnChangeOnly == this.propagateOnChangeOnly) &&
+        (changeComparator == null ||
+            identical(changeComparator, this.changeComparator)) &&
         (smartMaster == null ||
             smartMaster == this.smartMaster ||
             _listEquals(smartMaster, this.smartMaster) ||
@@ -222,6 +259,9 @@ class NodeBluePrint<T> {
       canBeSmart: canBeSmart ?? this.canBeSmart,
       smartMaster: smartMaster ?? _smartMaster,
       productionTimeout: productionTimeout ?? this.productionTimeout,
+      propagateOnChangeOnly:
+          propagateOnChangeOnly ?? this.propagateOnChangeOnly,
+      changeComparator: changeComparator ?? this.changeComparator,
     );
   }
 

@@ -1,5 +1,31 @@
 # Changelog
 
+## \[5.2.0\] - 2026-07-06
+
+### Added
+
+- `AnimatedNode` / `AnimatedNodeBluePrint`: a node that eases its output from
+its current value toward a new input value over a fixed number of frames,
+producing one intermediate value per `Scm.tick()`. Supply an animation curve
+(`double Function(double t)` mapping normalized time to eased progress) and a
+`lerp`; the convenience factories `AnimatedNodeBluePrint.forDouble` and
+`.forInt` cover the common cases. The node manages `isAnimated` itself, snaps
+the first input, retargets smoothly mid-animation, and exposes an `onComplete`
+callback and an `isAnimating` getter.
+- `NodeBluePrint.propagateOnChangeOnly` (with an optional `changeComparator`):
+when enabled, a node only schedules its customers when its freshly produced
+product differs from the previous one, so a high-frequency or jittery input
+does not cascade redundant recomputations through the graph. `AnimatedNode`
+enables this by default.
+- `NodeBluePrint.createNode`: the single overridable node-construction hook,
+routed through by both `instantiate` and `Scope.findOrCreateNode`, so
+`NodeBluePrint` subtypes are honored on every creation path.
+
+### Fixed
+
+- A node disposed while still animating (kept alive by remaining customers) is
+now removed from the SCM's animated set instead of being ticked forever.
+
 ## \[5.1.0\] - 2026-07-05
 
 ### Performance
@@ -70,6 +96,12 @@ key allowed only a single serializer to be registered globally.
 how asynchronous producers interact with `Scm.shouldTimeOut`, and clarified
 that `Priority.value` encodes processing urgency (so `structure` has the
 highest value while `realtime` is the highest regular priority).
+
+## [5.4.0] - 2026-07-11
+
+### Added
+
+- Add animation nodes
 
 ## [5.3.2] - 2026-07-10
 
@@ -647,6 +679,7 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
+[5.4.0]: https://github.com/ggsuite/supply_chain/compare/5.3.2...5.4.0
 [5.3.2]: https://github.com/ggsuite/supply_chain/compare/5.3.1...5.3.2
 [5.3.1]: https://github.com/ggsuite/supply_chain/compare/5.3.0...5.3.1
 [5.3.0]: https://github.com/ggsuite/supply_chain/compare/5.2.0...5.3.0

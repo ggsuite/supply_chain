@@ -677,6 +677,23 @@ void main() {
           );
           expect(newBluePrint, same(bluePrint));
         });
+
+        test('when propagateOnChangeOnly does not change', () {
+          final bluePrint = NodeBluePrint.example().copyWith(
+            propagateOnChangeOnly: true,
+          );
+          final newBluePrint = bluePrint.copyWith(propagateOnChangeOnly: true);
+          expect(newBluePrint, same(bluePrint));
+        });
+
+        test('when change comparator does not change', () {
+          bool cmp(int a, int b) => a == b;
+          final bluePrint = NodeBluePrint.example().copyWith(
+            changeComparator: cmp,
+          );
+          final newBluePrint = bluePrint.copyWith(changeComparator: cmp);
+          expect(newBluePrint, same(bluePrint));
+        });
       });
 
       group('returns a modified instance', () {

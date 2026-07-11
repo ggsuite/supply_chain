@@ -1041,6 +1041,35 @@ class Scm {
   }
 
   // ...........................................................................
+  /// Finalizes [node]'s production without scheduling its customers or inserts.
+  ///
+  /// Used by nodes configured with [NodeBluePrint.propagateOnChangeOnly] when a
+  /// freshly produced product equals the previous one: the node leaves the
+  /// production pipeline cleanly, but no downstream production wave is started.
+  /// This never removes an already-prepared customer from the pipeline - it
+  /// only refrains from adding customers because of this unchanged production.
+  void finalizeWithoutPropagation(Node<dynamic> node) {
+    // Remove node from producing nodes
+    _producingNodes.remove(node);
+
+    // Reset production state
+    node.finalizeProduction();
+
+    // Continue the pipeline for whatever else is prepared
+    _scheduleProduction();
+
+    if (_preparedNodesAreEmpty) {
+      _initMissedSuppliers();
+    }
+
+    // Everything is done?
+    if (_preparedNodesAreEmpty) {
+      _resetMinimumProductionPriority();
+      _stopTimeoutCheck();
+    }
+  }
+
+  // ...........................................................................
   void _finalizeInsert(Node<dynamic> node) {
     if (node is Insert) {
       // If node is the last insert, host's customers need to produce

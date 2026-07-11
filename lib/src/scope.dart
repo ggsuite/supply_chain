@@ -416,8 +416,9 @@ class Scope {
       return existingNode as Node<T>;
     }
 
-    // Create a new node
-    final node = Node<T>(bluePrint: bluePrint, scope: this);
+    // Create a new node. createNode honors NodeBluePrint subtypes such as
+    // AnimatedNodeBluePrint; for a plain blue print it builds a plain Node.
+    final node = bluePrint.createNode(scope: this);
 
     return node;
   }
