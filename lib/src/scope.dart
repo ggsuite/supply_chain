@@ -180,6 +180,11 @@ class Scope {
   /// Reset id counter for test purposes
   static void testResetIdCounter() => _idCounter = 0;
 
+  /// Old, misspelled name of [testResetIdCounter]. Kept as a forwarding
+  /// alias because the rename shipped in a non-major release.
+  @Deprecated('Use testResetIdCounter instead')
+  static void testRestIdCounter() => testResetIdCounter();
+
   // ...........................................................................
   /// Returns the child scopes
   Iterable<Scope> get children => _children.values.where((e) => !e.isDisposed);
@@ -415,6 +420,10 @@ class Scope {
       );
       return existingNode as Node<T>;
     }
+
+    // Validate before creating: a misconfigured blue print should fail
+    // here with a clear error, not later during production.
+    bluePrint.check();
 
     // Create a new node. createNode honors NodeBluePrint subtypes such as
     // AnimatedNodeBluePrint; for a plain blue print it builds a plain Node.
@@ -801,7 +810,7 @@ class Scope {
     int parentScopeDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
-    MarkdownFormat? markDownFormat,
+    MarkdownFormat? markdownFormat,
   }) {
     final g = graph(
       childScopeDepth: childScopeDepth,
@@ -811,9 +820,9 @@ class Scope {
     );
 
     final mm = GraphToMermaid(graph: g);
-    return markDownFormat == null
+    return markdownFormat == null
         ? mm.mermaid
-        : mm.markdown(markdownFormat: markDownFormat);
+        : mm.markdown(markdownFormat: markdownFormat);
   }
 
   // ...........................................................................

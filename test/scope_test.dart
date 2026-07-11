@@ -49,6 +49,11 @@ void main() {
         expect(scope, isA<Scope>());
       });
 
+      test('testRestIdCounter forwards to testResetIdCounter', () {
+        // ignore: deprecated_member_use_from_same_package
+        expect(Scope.testRestIdCounter, returnsNormally);
+      });
+
       test('scm', () {
         expect(scope.scm, scm);
       });
@@ -1267,13 +1272,19 @@ void main() {
         final mm = chain.mermaid();
         expect(mm, isNotNull);
 
+        // Write mermaid markdown goldens. The file names must be unique per
+        // graph - otherwise the three tests calling this helper overwrite
+        // each other's goldens and the committed content depends on test
+        // order.
+        final base = fileName.replaceAll('.dot', '');
+
         // Create mermaid markdown github
-        final mdGitHub = chain.mermaid(markDownFormat: .gitHub);
-        await writeGolden('md_git_hub.mm', mdGitHub);
+        final mdGitHub = chain.mermaid(markdownFormat: .gitHub);
+        await writeGolden('${base}_md_git_hub.mermaid.md', mdGitHub);
 
         // Create mermaid markdown azure
-        final mdGitAzure = chain.mermaid(markDownFormat: .azure);
-        await writeGolden('md_azure.mm', mdGitAzure);
+        final mdAzure = chain.mermaid(markdownFormat: .azure);
+        await writeGolden('${base}_md_azure.mermaid.md', mdAzure);
       }
 
       // .......................................................................

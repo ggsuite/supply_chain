@@ -20,31 +20,35 @@ import 'package:supply_chain/supply_chain.dart';
 /// The node manages [Node.isAnimated] itself: it starts animating when the
 /// input changes and stops when the animation settles. The very first input is
 /// snapped without animation (there is no previous value to animate from).
+///
+/// Frames advance with [Scm.tick]s: every production consumes at most one
+/// frame, and only when a tick happened since the previous production. A
+/// target change rebases the animation from the current output - and when the
+/// production was tick-driven the animation still advances one frame, so a
+/// target that changes on every tick keeps easing toward its latest value
+/// instead of freezing at its old one.
 class AnimatedNode<T> extends Node<T> {
   // ...........................................................................
   /// Creates an animated node from [bluePrint] within [scope].
-  // Explicit super call: [bluePrint] is narrowed and its config is read into
-  // final fields, which super parameters do not allow.
-  // ignore: use_super_parameters
   AnimatedNode({
     required AnimatedNodeBluePrint<T> bluePrint,
-    required Scope scope,
-    Owner<Node<dynamic>>? owner,
-  }) : _totalFrames = bluePrint.totalFrames,
-       _curve = bluePrint.curve,
-       _lerp = bluePrint.lerp,
-       _equals = bluePrint.isEqual,
-       _from = bluePrint.initialProduct,
+    required super.scope,
+    super.owner,
+  }) : _from = bluePrint.initialProduct,
        _to = bluePrint.initialProduct,
        _lastSeenInput = bluePrint.initialProduct,
        _frame = bluePrint.totalFrames,
-       super(bluePrint: bluePrint, scope: scope, owner: owner);
+       super(bluePrint: bluePrint);
 
   // ...........................................................................
   /// Returns true while an animation is in progress.
   bool get isAnimating => isAnimated;
 
   /// Called once when an animation reaches its final frame.
+  ///
+  /// Invoked after the final product has been applied and the production has
+  /// been finalized - the callback observes the settled value and may safely
+  /// mutate the graph.
   void Function()? onComplete;
 
   // ...........................................................................
@@ -61,66 +65,109 @@ class AnimatedNode<T> extends Node<T> {
   T get to => _to;
 
   // ...........................................................................
-  /// Advances the animation by one frame and returns this frame's value.
+  /// Advances the animation and returns this production's value.
   ///
-  /// Called by [animatedNodeProduce] on every production. A production that is
-  /// triggered by a changed input (re)starts the animation without consuming a
-  /// frame; a production triggered by a tick (input unchanged) advances exactly
-  /// one frame.
+  /// Called by [AnimatedNodeBluePrint] on every production. A changed input
+  /// (re)starts the animation from the current output. At most one frame is
+  /// consumed per production, and only when a [Scm.tick] happened since the
+  /// previous production - a supplier re-emission between ticks returns the
+  /// current output unchanged.
   @internal
   T advance(List<dynamic> components, T previousOutput) {
     final input = components.single as T;
+    final config = _config;
+    final equals = config.isEqual;
+
+    // Did a tick happen since the previous production? Only then a frame
+    // may be consumed.
+    final tick = scm.tickCount;
+    final tickElapsed = tick != _lastSeenTick;
+    _lastSeenTick = tick;
 
     // First production: snap to the input, no animation.
     if (!_initialized) {
       _initialized = true;
+      _from = input;
       _to = input;
       _lastSeenInput = input;
-      _frame = _totalFrames;
+      _frame = config.totalFrames;
       return input;
     }
 
-    // Input changed -> (re)start the animation. Do not consume a frame.
-    if (!_equals(input, _lastSeenInput)) {
+    // Input changed -> (re)start the animation from the current output.
+    if (!equals(input, _lastSeenInput)) {
       _from = previousOutput;
       _to = input;
       _lastSeenInput = input;
-      _frame = 0;
 
-      // Nothing to animate: snap.
-      if (_equals(_from, _to)) {
+      // Nothing to animate: snap and settle.
+      if (equals(_from, _to)) {
+        _frame = config.totalFrames;
         isAnimated = false;
         return _to;
       }
 
+      _frame = 0;
       isAnimated = true;
-      return _from;
+
+      // A tick-driven production still advances one frame - otherwise a
+      // target changing on every tick would freeze the output forever.
+      return tickElapsed ? _advanceFrame(config) : _from;
     }
 
-    // Input unchanged -> this production came from a tick. Advance one frame.
-    if (_frame >= _totalFrames) {
+    // Input unchanged and already settled: keep the settled value.
+    if (_frame >= config.totalFrames) {
       isAnimated = false;
       return _to;
     }
 
-    _frame++;
-    if (_frame >= _totalFrames) {
-      isAnimated = false;
-      onComplete?.call();
-      return _to;
+    // No tick since the previous production (the supplier re-emitted the
+    // same value): don't consume a frame.
+    if (!tickElapsed) {
+      return previousOutput;
     }
 
-    return _lerp(_from, _to, _curve(_frame / _totalFrames));
+    return _advanceFrame(config);
   }
 
   // ...........................................................................
   @override
-  void dispose() {
-    // Stop animating before disposal. Node.dispose() only removes the node
-    // from the SCM's animated set when it is erased (no customers left); an
-    // animating node kept alive by customers would otherwise tick forever.
-    isAnimated = false;
-    super.dispose();
+  void finalizeProduction() {
+    super.finalizeProduction();
+
+    // Deferred from _advanceFrame: at this point the final product has been
+    // applied and the node has left the production pipeline, so onComplete
+    // observes the settled value and may safely mutate the graph.
+    if (_completePending) {
+      _completePending = false;
+      onComplete?.call();
+    }
+  }
+
+  // ...........................................................................
+  @override
+  set mockedProduct(T? t) {
+    // Mocking bypasses advance(). Stop the animation so the node does not
+    // stay in the SCM's animated set and produce on every tick forever.
+    if (t != null) {
+      isAnimated = false;
+      _completePending = false;
+      _frame = _config.totalFrames;
+    }
+    super.mockedProduct = t;
+  }
+
+  // ...........................................................................
+  @override
+  void addBluePrint(NodeBluePrint<T> bluePrint) {
+    super.addBluePrint(bluePrint);
+    _stopAnimationIfProduceWasRerouted();
+  }
+
+  @override
+  void removeBluePrint(NodeBluePrint<T> bp) {
+    super.removeBluePrint(bp);
+    _stopAnimationIfProduceWasRerouted();
   }
 
   // ...........................................................................
@@ -140,7 +187,7 @@ class AnimatedNode<T> extends Node<T> {
         curve: linearCurve,
       ),
     });
-    scope.scm.flush(tick: false);
+    scope.scm.flush();
     return scope.findNode<double>(key)! as AnimatedNode<double>;
   }
 
@@ -148,14 +195,36 @@ class AnimatedNode<T> extends Node<T> {
   // Private
   // ######################
 
-  final int _totalFrames;
-  final double Function(double t) _curve;
-  final T Function(T a, T b, double t) _lerp;
-  final bool Function(T a, T b) _equals;
+  /// The animation config is read live from the blue print, so replacing the
+  /// blue print on a live node (e.g. via [Node.addBluePrint]) takes effect.
+  AnimatedNodeBluePrint<T> get _config => bluePrint as AnimatedNodeBluePrint<T>;
+
+  /// Consumes one frame and returns its value. Settles on the final frame.
+  T _advanceFrame(AnimatedNodeBluePrint<T> config) {
+    _frame++;
+    if (_frame >= config.totalFrames) {
+      isAnimated = false;
+      _completePending = true;
+      return _to;
+    }
+    return config.lerp(_from, _to, config.curve(_frame / config.totalFrames));
+  }
+
+  /// A blue print that routes production away from [advance] must not leave
+  /// the node in the SCM's animated set - it would be re-produced on every
+  /// tick forever.
+  void _stopAnimationIfProduceWasRerouted() {
+    if (bluePrint is! AnimatedNodeBluePrint<T>) {
+      isAnimated = false;
+      _completePending = false;
+    }
+  }
 
   T _from;
   T _to;
   T _lastSeenInput;
   int _frame;
+  int _lastSeenTick = -1;
   bool _initialized = false;
+  bool _completePending = false;
 }

@@ -1744,5 +1744,116 @@ void main() {
       scm.flush();
       expect(counter.product, produced + 1);
     });
+
+    test('compares against the last propagated product, so cumulative '
+        'drift propagates', () {
+      final scm = Scm(isTest: true);
+      final scope = Scope.example(scm: scm);
+      scope.mockContent({
+        'a': 0.0,
+        'gated': NodeBluePrint<double>(
+          key: 'gated',
+          initialProduct: 0.0,
+          suppliers: ['a'],
+          produce: (c, p, n) => c.first as double,
+          propagateOnChangeOnly: true,
+          changeComparator: (x, y) => (x - y).abs() < 1.0,
+        ),
+        'sink': nbp(
+          from: ['gated'],
+          to: 'sink',
+          init: -1.0,
+          produce: (c, p, n) => c.first as double,
+        ),
+      });
+      final a = scope.findNode<double>('a')!;
+      final sink = scope.findNode<double>('sink')!;
+      scm.flush();
+
+      // Each step stays within tolerance of the PREVIOUS step, but the
+      // cumulative drift exceeds it. The gate must compare against the
+      // last PROPAGATED product - not re-base on every gated production -
+      // so the drift propagates once it exceeds the tolerance.
+      for (var i = 1; i <= 20; i++) {
+        a.product = i * 0.9;
+        scm.flush();
+      }
+      expect(sink.product, closeTo(18.0, 1.0));
+    });
+
+    test('propagates external product writes on a writable gated node', () {
+      final scm = Scm(isTest: true);
+      final scope = Scope.example(scm: scm);
+      scope.mockContent({
+        'src': const NodeBluePrint<int>(
+          key: 'src',
+          initialProduct: 0,
+          suppliers: [],
+          propagateOnChangeOnly: true,
+        ),
+        'echo': nbp(
+          from: ['src'],
+          to: 'echo',
+          init: -1,
+          produce: (c, p, n) => c.first as int,
+        ),
+      });
+      final src = scope.findNode<int>('src')!;
+      final echo = scope.findNode<int>('echo')!;
+      scm.flush();
+
+      // The gate must not compare the freshly written product against
+      // itself - external writes have already overwritten the original
+      // product when the production runs.
+      src.product = 42;
+      scm.flush();
+      expect(echo.product, 42);
+
+      src.product = 43;
+      scm.flush();
+      expect(echo.product, 43);
+
+      // An unchanged write is still gated.
+      final echoProductions = echo.product;
+      src.product = 43;
+      scm.flush();
+      expect(echo.product, echoProductions);
+    });
+
+    test('propagates un-mocking even when the recomputed product equals '
+        'the pre-mock original', () {
+      final scm = Scm(isTest: true);
+      final scope = Scope.example(scm: scm);
+      scope.mockContent({
+        'a': 5,
+        'gated': NodeBluePrint<int>(
+          key: 'gated',
+          initialProduct: 0,
+          suppliers: ['a'],
+          produce: (c, p, n) => c.first as int,
+          propagateOnChangeOnly: true,
+        ),
+        'sink': nbp(
+          from: ['gated'],
+          to: 'sink',
+          init: -1,
+          produce: (c, p, n) => c.first as int,
+        ),
+      });
+      final gated = scope.findNode<int>('gated')!;
+      final sink = scope.findNode<int>('sink')!;
+      scm.flush();
+      expect(sink.product, 5);
+
+      gated.mockedProduct = 99;
+      scm.flush();
+      expect(sink.product, 99);
+
+      // Un-mock: the recomputed 5 equals the pre-mock original, but the
+      // customers last saw 99 - the change must propagate.
+      gated.mockedProduct = null;
+      scm.flush();
+      expect(sink.product, 5);
+    });
   });
 }

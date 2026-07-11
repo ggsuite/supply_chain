@@ -1,6 +1,83 @@
 # Changelog
 
-## \[5.2.0\] - 2026-07-06
+## [5.4.2] - 2026-07-11
+
+### Fixed
+
+- Fix issues in animation nodes and other issues
+
+## [5.5.0] - 2026-07-11
+
+### Added
+
+- `Scm.tickCount`: monotonic counter of the ticks that nominated the
+animated nodes.
+- `Scope.testRestIdCounter` is back as a deprecated forwarding alias of
+`testResetIdCounter` - the rename had shipped in a non-major release.
+
+### Changed
+
+- `Scope.mermaid`'s parameter is named `markdownFormat` (was
+`markDownFormat`), matching `Scope.writeImageFile`.
+- `AnimatedNodeBluePrint.forInt` accepts a custom `equals`.
+- `AnimatedNodeBluePrint` accepts `canBeSmart`, `smartMaster` and
+`productionTimeout` and forwards them to `NodeBluePrint`.
+
+### Fixed
+
+- Change-gating (`propagateOnChangeOnly`) no longer strands the staged
+customer cone when a production is gated. Previously a customer with a
+second supplier could never become ready again, deadlocking the whole
+pipeline (`Scm.flush()` spun forever and all animations froze).
+- The change gate compares against the product the customers last received
+instead of the freshly overwritten one. Previously every external
+`product =` write on a writable gated node and every un-mocking transition
+was silently swallowed, and a tolerance-based `changeComparator` re-based
+its baseline on every gated production so unbounded drift never propagated.
+- `AnimatedNode` frames are tick-aware (via the new `Scm.tickCount`): a
+supplier re-emitting the same value between ticks no longer fast-forwards
+the animation, and a target changing on every tick no longer freezes the
+output - the node keeps easing toward the latest target, consuming at most
+one frame per tick.
+- A retarget to the current output value (snap) settles the frame counter;
+previously later same-value writes advanced a phantom animation and fired
+`onComplete` spuriously.
+- `onComplete` fires after the final product is applied and the production
+is finalized. Previously it fired mid-production, observed the previous
+frame's value, and a callback disposing the node crashed the pipeline.
+- The generic `AnimatedNodeBluePrint` default `equals` treats NaN as equal
+to NaN; a NaN target no longer restarts the animation on every tick forever
+(previously only `forDouble` was NaN-aware).
+- Output gating of animated nodes always uses exact equality. Previously the
+user-supplied tolerance `equals` also gated propagation, so animations whose
+per-frame steps stayed within the tolerance never reached their customers.
+- `AnimatedNodeBluePrint.copyWith` and `connectSupplier` preserve the
+animated subtype. Previously deriving or rewiring an animated blue print
+(e.g. via `ScopeBluePrint` connections or smart masters) silently produced a
+plain forwarding node, and instantiating a derived copy crashed with a
+type-cast error at its first production. Pairing the blue print with a
+non-animated node (e.g. as an insert) now throws a descriptive `StateError`.
+- `AnimatedNode` reads its animation config live from the blue print, so
+replacing the blue print on a live node takes effect instead of being
+silently ignored. Overlaying a non-animated blue print or setting
+`mockedProduct` stops the animation instead of leaving the node in the SCM's
+animated set producing on every tick forever.
+- Disposing any node clears `isAnimated`, so a plain node disposed while
+animated no longer stalls its remaining customers (the 5.4.0 fix only
+covered `AnimatedNode`).
+- `AnimatedNode.example()` flushes with a tick and returns a produced,
+settled node instead of an unproduced, still staged one.
+- `Scope.findOrCreateNode` validates the blue print (`check()`) before
+creating the node, so misconfigured blue prints fail with a clear
+`ArgumentError` instead of a raw `StateError` during production.
+- The mermaid markdown goldens are written to unique files per graph;
+previously three tests overwrote the same two golden files.
+- `.gitignore` uses `.gg/*` so the `!.gg/.gg.json` re-include actually
+works; the inert `pubspec.lock merge=ours` attribute was removed.
+
+## [5.4.1] - 2026-07-11
+
+## [5.4.0] - 2026-07-11
 
 ### Added
 
@@ -26,13 +103,53 @@ routed through by both `instantiate` and `Scope.findOrCreateNode`, so
 - A node disposed while still animating (kept alive by remaining customers) is
 now removed from the SCM's animated set instead of being ticked forever.
 
-## \[5.1.0\] - 2026-07-05
+## [5.3.2] - 2026-07-10
+
+### Changed
+
+- Rename testRestIdCounter into testResetIdCounter
+
+## [5.3.1] - 2026-07-09
+
+## [5.3.0] - 2026-07-08
+
+### Added
+
+- `Scope.nodeByKey`: O(1) lookup of an own node (including inserts) by its
+exact key.
+- `benchmark/supply_chain_benchmark.dart`: reproducible performance
+benchmark covering chains, fan-out, fan-in, layered DAGs, bulk updates and
+the non-test (microtask driven) production mode.
+
+### Changed
+
+- Allow mermaid to be printed as markdown
+- `NodeBluePrint.clearParsers` now also clears registered json serializers.
+- Documentation: corrected the `Node` constructor parameter docs, documented
+how asynchronous producers interact with `Scm.shouldTimeOut`, and clarified
+that `Priority.value` encodes processing urgency (so `structure` has the
+highest value while `realtime` is the highest regular priority).
+
+### Fixed
+
+- `Scm` no longer leaks one periodic timeout-check timer per production
+cycle. Previously every cycle created a new `Timer.periodic` without
+cancelling the old one; in non-test mode a single long chain propagation
+could leak thousands of permanently firing timers.
+- Preparing very deep customer chains no longer overflows the stack
+(`Scm._prepareNode` is iterative now; chains of 8000+ nodes previously
+crashed with a `StackOverflowError`).
+- Disposed nodes are removed from the prepared sets immediately on dispose
+instead of lingering until the next production cycle.
+- `NodeBluePrint.castMap` now casts `Map<String, String>` correctly (it
+previously routed through the `bool` caster).
+- `NodeBluePrint.removeJsonParser` now actually removes the parser; it used a
+wrong map key (`T.runtimeType` instead of `T`) and silently did nothing.
+- `NodeBluePrint.addJsonSerializer` now keys serializers by type, so serializers
+for different types no longer collide. Previously the shared `T.runtimeType`
+key allowed only a single serializer to be registered globally.
 
 ### Performance
-
-Large supply chains are now orders of magnitude faster to build and update
-(measured >100x on graphs with a few thousand nodes, growing with graph
-size). See `benchmark/supply_chain_benchmark.dart`.
 
 - `Scm._produce` no longer rescans all prepared nodes on every production
 cycle. Ready nodes are kept in per-priority ready queues; each production
@@ -56,68 +173,6 @@ linear instead of quadratic.
 - `Scm._addPreparedNodes` iterates its input once instead of twice.
 - `Scm.nominate` evaluates the cheap fast-path conditions before scanning
 suppliers.
-
-### Fixed
-
-- `Scm` no longer leaks one periodic timeout-check timer per production
-cycle. Previously every cycle created a new `Timer.periodic` without
-cancelling the old one; in non-test mode a single long chain propagation
-could leak thousands of permanently firing timers.
-- Preparing very deep customer chains no longer overflows the stack
-(`Scm._prepareNode` is iterative now; chains of 8000+ nodes previously
-crashed with a `StackOverflowError`).
-- Disposed nodes are removed from the prepared sets immediately on dispose
-instead of lingering until the next production cycle.
-
-### Added
-
-- `Scope.nodeByKey`: O(1) lookup of an own node (including inserts) by its
-exact key.
-- `benchmark/supply_chain_benchmark.dart`: reproducible performance
-benchmark covering chains, fan-out, fan-in, layered DAGs, bulk updates and
-the non-test (microtask driven) production mode.
-
-## \[5.0.2\] - 2026-06-04
-
-### Fixed
-
-- `NodeBluePrint.castMap` now casts `Map<String, String>` correctly (it
-previously routed through the `bool` caster).
-- `NodeBluePrint.removeJsonParser` now actually removes the parser; it used a
-wrong map key (`T.runtimeType` instead of `T`) and silently did nothing.
-- `NodeBluePrint.addJsonSerializer` now keys serializers by type, so serializers
-for different types no longer collide. Previously the shared `T.runtimeType`
-key allowed only a single serializer to be registered globally.
-
-### Changed
-
-- `NodeBluePrint.clearParsers` now also clears registered json serializers.
-- Documentation: corrected the `Node` constructor parameter docs, documented
-how asynchronous producers interact with `Scm.shouldTimeOut`, and clarified
-that `Priority.value` encodes processing urgency (so `structure` has the
-highest value while `realtime` is the highest regular priority).
-
-## [5.4.1] - 2026-07-11
-
-## [5.4.0] - 2026-07-11
-
-### Added
-
-- Add animation nodes
-
-## [5.3.2] - 2026-07-10
-
-### Changed
-
-- Rename testRestIdCounter into testResetIdCounter
-
-## [5.3.1] - 2026-07-09
-
-## [5.3.0] - 2026-07-08
-
-### Changed
-
-- Allow mermaid to be printed as markdown
 
 ## [5.2.0] - 2026-07-05
 
@@ -681,6 +736,8 @@ Modifications can only be done via builders.
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
 
+[5.4.2]: https://github.com/ggsuite/supply_chain/compare/5.4.1...5.4.2
+[5.5.0]: https://github.com/ggsuite/supply_chain/compare/5.4.1...5.5.0
 [5.4.1]: https://github.com/ggsuite/supply_chain/compare/5.4.0...5.4.1
 [5.4.0]: https://github.com/ggsuite/supply_chain/compare/5.3.2...5.4.0
 [5.3.2]: https://github.com/ggsuite/supply_chain/compare/5.3.1...5.3.2

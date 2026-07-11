@@ -105,9 +105,60 @@ void main() {
         scm.flush();
 
         target.product = 1.0;
-        scm.flush(); // restart
         scm.flush(); // frame 1 -> 0.5
         expect(smooth.product, closeTo(0.5, 1e-9));
+      });
+
+      test('throws a descriptive error when attached to a plain node', () {
+        final scope = Scope.example();
+        final scm = scope.scm;
+
+        // 'smooth' is created as a PLAIN node here.
+        scope.mockContent({'target': 0.0, 'smooth': 1.0});
+        final plain = scope.findNode<double>('smooth')!;
+        expect(plain, isNot(isA<AnimatedNode<double>>()));
+
+        plain.addBluePrint(doubleBluePrint());
+        expect(
+          () => scm.flush(),
+          throwsA(
+            isA<StateError>().having(
+              (e) => e.message,
+              'message',
+              contains('must be instantiated as an AnimatedNode'),
+            ),
+          ),
+        );
+      });
+    });
+
+    group('copyWith', () {
+      test('preserves the animated subtype and config', () {
+        final copy = doubleBluePrint(totalFrames: 6).copyWith(key: 'copy');
+        expect(copy, isA<AnimatedNodeBluePrint<double>>());
+        expect((copy as AnimatedNodeBluePrint<double>).totalFrames, 6);
+
+        // The copy instantiates as a working AnimatedNode.
+        final scope = Scope.example();
+        scope.mockContent({'target': 0.0});
+        expect(copy.instantiate(scope: scope), isA<AnimatedNode<double>>());
+      });
+
+      test('falls back to a plain blue print when produce is replaced', () {
+        final muted = doubleBluePrint().copyWith(
+          produce: doNothing<double>,
+          suppliers: [],
+        );
+        expect(muted, isNot(isA<AnimatedNodeBluePrint<double>>()));
+        expect(muted.produce, doNothing<double>);
+      });
+    });
+
+    group('connectSupplier', () {
+      test('rewires the supplier while keeping the animation', () {
+        final connected = doubleBluePrint().connectSupplier('other.path');
+        expect(connected, isA<AnimatedNodeBluePrint<double>>());
+        expect(connected.suppliers, ['other.path']);
       });
     });
 

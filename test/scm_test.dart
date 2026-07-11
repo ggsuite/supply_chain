@@ -260,6 +260,17 @@ void main() {
       });
     });
 
+    test('should increase tickCount with every tick', () {
+      final scope = Scope.example();
+      final scm = scope.scm;
+      scm.flush(); // drain - a busy pipeline defers the tick
+      final before = scm.tickCount;
+      scm.tick();
+      expect(scm.tickCount, before + 1);
+      scm.tick();
+      expect(scm.tickCount, before + 2);
+    });
+
     test('should animate correctly', () {
       // Create a chain, containing a supplier, a producer and a customer
       final scope = Scope.example();
@@ -1592,7 +1603,7 @@ void main() {
   });
 
   // ...........................................................................
-  group('finalizeWithoutPropagation', () {
+  group('finalize without propagation (change-gating)', () {
     test('lets a change-gated node settle without waking its customers', () {
       final scm = Scm(isTest: true);
       final scope = Scope.example(scm: scm);
@@ -1624,6 +1635,142 @@ void main() {
       expect(counter.product, produced);
       expect(gated.isStaged, isFalse);
       expect(scm.nominatedNodes, isEmpty);
+
+      // The skipped customers must not stay staged either - a staged
+      // customer would block every future wave running through it.
+      expect(counter.isStaged, isFalse);
+    });
+
+    test('un-stages skipped customers including their inserts', () {
+      final scm = Scm(isTest: true);
+      final scope = Scope.example(scm: scm);
+      scope.mockContent({
+        'a': 5,
+        'gated': NodeBluePrint<int>(
+          key: 'gated',
+          initialProduct: 0,
+          suppliers: ['a'],
+          produce: (c, p, n) => (c.first as int).clamp(0, 10),
+          propagateOnChangeOnly: true,
+        ),
+        'counter': nbp(
+          from: ['gated'],
+          to: 'counter',
+          init: 0,
+          produce: (c, p, n) => c.first as int,
+        ),
+      });
+      final a = scope.findNode<int>('a')!;
+      final counter = scope.findNode<int>('counter')!;
+
+      // Give the skipped customer an insert - it is staged with the wave
+      // and must be un-staged with it too.
+      final insert = NodeBluePrint<int>(
+        key: 'insert0',
+        initialProduct: 0,
+        produce: (c, p, n) => p * 10,
+      ).instantiateAsInsert(host: counter);
+      scm.flush();
+
+      // 'gated' clamps 5 -> 5 (unchanged): the wave ends at 'gated'.
+      a.product = 5;
+      scm.flush();
+      expect(counter.isStaged, isFalse);
+      expect(insert.isStaged, isFalse);
+    });
+
+    test('does not stall customers reachable through a second supplier', () {
+      final scm = Scm(isTest: true);
+      final scope = Scope.example(scm: scm);
+      scope.mockContent({
+        'a': 5,
+        'x': 0,
+        'gated': NodeBluePrint<int>(
+          key: 'gated',
+          initialProduct: 0,
+          suppliers: ['a'],
+          produce: (c, p, n) => (c.first as int).clamp(0, 10),
+          propagateOnChangeOnly: true,
+        ),
+        'counter': nbp(
+          from: ['gated'],
+          to: 'counter',
+          init: 0,
+          produce: (c, p, n) => c.first as int,
+        ),
+        'sink': nbp(
+          from: ['counter', 'x'],
+          to: 'sink',
+          init: 0,
+          produce: (c, p, n) => (c.first as int) + (c.last as int),
+        ),
+      });
+      final a = scope.findNode<int>('a')!;
+      final x = scope.findNode<int>('x')!;
+      final counter = scope.findNode<int>('counter')!;
+      final sink = scope.findNode<int>('sink')!;
+      scm.flush();
+
+      // A gated wave: 'gated' clamps 15 -> 10... first make it unchanged.
+      a.product = 5; // clamps to 5, unchanged -> gated
+      scm.flush();
+      expect(counter.isStaged, isFalse);
+      expect(sink.isStaged, isFalse);
+
+      // A later wave through the second supplier must reach 'sink'.
+      // Before the fix, 'counter' and 'sink' stayed staged forever and
+      // this flush spun without ever producing 'sink'.
+      x.product = 100;
+      scm.flush();
+      expect(sink.product, 5 + 100);
+    });
+  });
+
+  // ...........................................................................
+  group('disposed animated nodes', () {
+    test('disposing a plain node with isAnimated=true removes it from the '
+        'animated set and does not stall its customers', () {
+      final scm = Scm(isTest: true);
+      final scope = Scope.example(scm: scm);
+      scope.mockContent({
+        'animatedSrc': nbp(
+          from: [],
+          to: 'animatedSrc',
+          init: 0,
+          produce: (c, p, n) => p + 1,
+        ),
+        'other': 0,
+        'consumer': nbp(
+          from: ['animatedSrc', 'other'],
+          to: 'consumer',
+          init: 0,
+          produce: (c, p, n) => (c.first as int) + (c.last as int),
+        ),
+      });
+      final src = scope.findNode<int>('animatedSrc')!;
+      final other = scope.findNode<int>('other')!;
+      final consumer = scope.findNode<int>('consumer')!;
+      scm.flush();
+
+      src.isAnimated = true;
+      scm.flush();
+      expect(scm.animatedNodes, contains(src));
+
+      // Dispose while a customer keeps the node alive.
+      src.dispose();
+      expect(scm.animatedNodes, isNot(contains(src)));
+
+      // Ticks must not re-nominate or re-stage the disposed node, and the
+      // customer must stay reachable through its other supplier.
+      for (var i = 0; i < 5; i++) {
+        scm.flush();
+      }
+      expect(scm.animatedNodes, isNot(contains(src)));
+      expect(src.isStaged, isFalse);
+
+      other.product = 7;
+      scm.flush();
+      expect(consumer.product, greaterThanOrEqualTo(7));
     });
   });
 }

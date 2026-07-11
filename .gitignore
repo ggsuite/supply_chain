@@ -11,5 +11,8 @@ coverage
 build
 *.vm.json
 .DS_Store
-.gg
+# Ignore .gg contents but keep the check results. The pattern must be
+# `.gg/*`, not `.gg`: git cannot re-include a file whose parent directory
+# is excluded, so a negation below a `.gg` line would be dead.
+.gg/*
 !.gg/.gg.json

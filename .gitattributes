@@ -1,4 +1,3 @@
 * text=auto eol=lf
 .gg.json merge=ours
 .gg/.gg.json merge=ours
-pubspec.lock merge=ours

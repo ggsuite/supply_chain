@@ -47,6 +47,7 @@ class Node<T> {
   }) : scm = scope.scm,
        _owner = owner,
        _originalProduct = bluePrint.initialProduct,
+       _lastPropagatedProduct = bluePrint.initialProduct,
        assert(bluePrint.key.isCamelCase) {
     _bluePrints.add(bluePrint);
     _init();
@@ -68,6 +69,12 @@ class Node<T> {
   void dispose() {
     _owner?.willDispose?.call(this);
     _isDisposed = true;
+
+    // Stop animating. A disposed node kept alive by remaining customers
+    // would otherwise stay in the SCM's animated set, be re-nominated on
+    // every tick and - since disposed nodes never produce - stay staged
+    // forever, stalling its customers.
+    isAnimated = false;
 
     // Remove the node from the scm's prepared sets. Disposed nodes must not
     // keep the production pipeline open.
@@ -337,6 +344,16 @@ class Node<T> {
   /// change-gating in [_applyProduct]: the first production always propagates.
   bool _producedAtLeastOnce = false;
 
+  /// The product the customers last received.
+  ///
+  /// This is the baseline the change-gating in [_applyProduct] compares a
+  /// freshly produced product against. It must NOT be the previous
+  /// [_originalProduct]: external writes (the [product] setter) overwrite
+  /// [_originalProduct] before the production runs, and gated productions
+  /// would re-base the comparison so unbounded drift never propagates.
+  /// Mocked announces update it too - customers observed the mocked value.
+  T _lastPropagatedProduct;
+
   /// Monotonic production generation.
   ///
   /// Incremented on every [produce] call. An asynchronous production captures
@@ -371,6 +388,11 @@ class Node<T> {
       scm.unregisterAsyncProduction(this);
       if (announce) {
         scm.hasNewProduct(this);
+
+        // Customers observed the mocked product. Track it as the gating
+        // baseline so that un-mocking propagates even when the recomputed
+        // product equals the pre-mock original.
+        _lastPropagatedProduct = product;
       }
       return;
     }
@@ -407,19 +429,22 @@ class Node<T> {
   void _applyProduct(T newProduct, bool announce, bool triggerOnChange) {
     _throwIfNotAllowed(newProduct);
 
-    final previous = _originalProduct;
     _originalProduct = newProduct;
 
     // Change-gating: a node configured with propagateOnChangeOnly does not
     // schedule its customers when the freshly produced product equals the
-    // previous one. The first production and insert chains always propagate.
+    // product the customers last received ([_lastPropagatedProduct]). The
+    // first production and insert chains always propagate.
     final gate =
         bluePrint.propagateOnChangeOnly &&
         _producedAtLeastOnce &&
         !isInsert &&
         _inserts.isEmpty &&
-        _productIsUnchanged(previous, newProduct);
+        _productIsUnchanged(_lastPropagatedProduct, newProduct);
     _producedAtLeastOnce = true;
+    if (!gate) {
+      _lastPropagatedProduct = newProduct;
+    }
 
     // If this node is the last insert in the chain,
     // write the product into the host's insertResult
@@ -432,11 +457,7 @@ class Node<T> {
 
     // Announce
     if (announce) {
-      if (gate) {
-        scm.finalizeWithoutPropagation(this);
-      } else {
-        scm.hasNewProduct(this);
-      }
+      scm.hasNewProduct(this, propagate: !gate);
     }
 
     if (triggerOnChange && !gate) {

@@ -57,16 +57,14 @@ void main() {
 
         target.product = 1.0;
 
-        // First produce is the restart: emits the frame-0 value (no jump), no
-        // frame consumed.
-        scm.flush();
-        expect(smooth.product, 0.0);
-        expect(smooth.isAnimating, isTrue);
-        expect(smooth.frame, 0);
-
-        // Each tick advances exactly one frame.
+        // The tick that delivers the new target already advances the first
+        // frame - the animation starts moving immediately.
         scm.flush();
         expect(smooth.product, closeTo(0.25, 1e-9));
+        expect(smooth.isAnimating, isTrue);
+        expect(smooth.frame, 1);
+
+        // Each tick advances exactly one frame.
         scm.flush();
         expect(smooth.product, closeTo(0.5, 1e-9));
         scm.flush();
@@ -85,47 +83,83 @@ void main() {
     });
 
     group('retargeting', () {
-      test('mid-animation retarget starts from the current visible value, '
-          'no stolen frame', () {
+      test('mid-animation retarget rebases from the current visible value', () {
         build(totalFrames: 4);
 
         target.product = 1.0;
-        scm.flush(); // restart, frame 0
         scm.flush(); // 0.25
         scm.flush(); // 0.5
         expect(smooth.product, closeTo(0.5, 1e-9));
 
         target.product = 3.0;
-        scm.flush(); // restart from 0.5 towards 3.0
+        scm.flush(); // rebase from 0.5 towards 3.0, first frame consumed
         expect(smooth.from, closeTo(0.5, 1e-9));
         expect(smooth.to, closeTo(3.0, 1e-9));
-        expect(smooth.frame, 0);
-        expect(smooth.product, closeTo(0.5, 1e-9));
+        expect(smooth.frame, 1);
+        expect(smooth.product, closeTo(1.125, 1e-9)); // 0.5 + 2.5 * 0.25
 
-        scm.flush(); // 0.5 + (3.0 - 0.5) * 0.25 = 1.125
-        expect(smooth.product, closeTo(1.125, 1e-9));
+        scm.flush(); // 0.5 + 2.5 * 0.5 = 1.75
+        expect(smooth.product, closeTo(1.75, 1e-9));
+      });
+
+      test('a target changing on every tick keeps easing toward the '
+          'latest value', () {
+        build(totalFrames: 4);
+
+        // Before the fix the restart branch never consumed a frame, so a
+        // continuously moving target froze the output at 0.0 forever.
+        for (var i = 1; i <= 8; i++) {
+          target.product = i.toDouble();
+          scm.flush();
+        }
+        expect(smooth.product, greaterThan(0.0));
+        expect(smooth.isAnimating, isTrue);
+
+        // Once the target stops moving, the animation settles on it.
+        for (var i = 0; i < 4; i++) {
+          scm.flush();
+        }
+        expect(smooth.product, closeTo(8.0, 1e-9));
+        expect(smooth.isAnimating, isFalse);
       });
 
       test('rewriting the same target does not restart the animation', () {
         build(totalFrames: 4);
 
         target.product = 1.0;
-        scm.flush(); // frame 0
         scm.flush(); // frame 1
         expect(smooth.frame, 1);
 
         target.product = 1.0; // same value -> no retarget
         scm.flush();
         expect(smooth.isAnimating, isTrue);
-        expect(smooth.frame, greaterThanOrEqualTo(1));
-        expect(smooth.frame, isNot(0));
+        expect(smooth.frame, 2);
+      });
+
+      test('a supplier re-emission between ticks does not consume a '
+          'frame', () {
+        build(totalFrames: 4);
+        smooth.ownPriority = Priority.realtime;
+
+        target.product = 1.0;
+        scm.flush();
+        final frameAfterTick = smooth.frame;
+
+        // Re-emit the same value without a tick: realtime nodes produce
+        // between ticks, but no frame may be consumed.
+        target.product = 1.0;
+        scm.flush(tick: false);
+        expect(smooth.frame, frameAfterTick);
+        expect(smooth.isAnimating, isTrue);
       });
 
       test('retargeting to the current output value snaps and stops', () {
         build(totalFrames: 4);
 
+        var completeCount = 0;
+        smooth.onComplete = () => completeCount++;
+
         target.product = 1.0;
-        scm.flush(); // 0.0
         scm.flush(); // 0.25
         scm.flush(); // 0.5
         expect(smooth.product, closeTo(0.5, 1e-9));
@@ -133,6 +167,16 @@ void main() {
         // Retarget to the value currently on the output: from == to -> snap.
         target.product = 0.5;
         scm.flush();
+        expect(smooth.isAnimating, isFalse);
+        expect(smooth.product, closeTo(0.5, 1e-9));
+
+        // The snap settles the frame counter: later same-value rewrites must
+        // not advance a phantom animation or fire onComplete spuriously.
+        for (var i = 0; i < 6; i++) {
+          target.product = 0.5;
+          scm.flush();
+        }
+        expect(completeCount, 0);
         expect(smooth.isAnimating, isFalse);
         expect(smooth.product, closeTo(0.5, 1e-9));
       });
@@ -162,7 +206,6 @@ void main() {
         build(totalFrames: 4, curve: (t) => t * t);
 
         target.product = 1.0;
-        scm.flush(); // frame 0
         scm.flush(); // frame 1: t = 0.25, curve = 0.0625
         expect(smooth.product, closeTo(0.0625, 1e-9));
       });
@@ -174,12 +217,12 @@ void main() {
 
         target.product = double.nan;
         scm.flush();
-        expect(smooth.frame, 0);
+        expect(smooth.frame, 1);
 
         // NaN == NaN is false; the NaN-aware comparator must treat it as
         // unchanged so the animation advances instead of restarting.
         scm.flush();
-        expect(smooth.frame, 1);
+        expect(smooth.frame, 2);
       });
     });
 
@@ -197,6 +240,27 @@ void main() {
 
         expect(smooth.product, closeTo(1.0, 1e-9));
         expect(completeCount, 1);
+      });
+
+      test('onComplete observes the settled product and may dispose the '
+          'node', () {
+        build(totalFrames: 4);
+
+        double? productSeenInCallback;
+        smooth.onComplete = () {
+          productSeenInCallback = smooth.product;
+          smooth.dispose();
+        };
+
+        target.product = 1.0;
+        for (var i = 0; i < 10; i++) {
+          scm.flush();
+        }
+
+        // The callback ran after the final product was applied and the
+        // production was finalized - disposing did not crash the pipeline.
+        expect(productSeenInCallback, closeTo(1.0, 1e-9));
+        expect(smooth.isDisposed, isTrue);
       });
     });
 
@@ -255,13 +319,74 @@ void main() {
 
         targetA.product = 1.0;
         targetB.product = 10.0;
-        scopeA.scm.flush(); // restart
-        scopeB.scm.flush();
         scopeA.scm.flush(); // frame 1
         scopeB.scm.flush();
 
         expect(smoothA.product, closeTo(0.25, 1e-9));
         expect(smoothB.product, closeTo(2.5, 1e-9));
+      });
+    });
+
+    group('live blue print replacement', () {
+      test('a replacement animated blue print applies its config', () {
+        build(totalFrames: 4);
+
+        // Overlay the same node with a longer animation.
+        smooth.addBluePrint(
+          AnimatedNodeBluePrint.forDouble(
+            key: 'smooth',
+            initialProduct: 0.0,
+            suppliers: ['target'],
+            totalFrames: 12,
+            curve: linearCurve,
+          ),
+        );
+        scm.flush();
+
+        target.product = 1.0;
+        scm.flush();
+        expect(smooth.product, closeTo(1.0 / 12.0, 1e-9));
+      });
+
+      test('mockedProduct stops the animation', () {
+        build(totalFrames: 4);
+
+        target.product = 1.0;
+        scm.flush();
+        expect(smooth.isAnimating, isTrue);
+
+        smooth.mockedProduct = 9.0;
+        scm.flush();
+        expect(smooth.isAnimating, isFalse);
+        expect(scm.animatedNodes, isNot(contains(smooth)));
+        expect(smooth.product, 9.0);
+      });
+
+      test('overlaying a non-animated blue print stops the animation', () {
+        build(totalFrames: 4);
+
+        target.product = 1.0;
+        scm.flush();
+        expect(smooth.isAnimating, isTrue);
+
+        final overlay = nbp(
+          from: ['target'],
+          to: 'smooth',
+          init: 0.0,
+          produce: (c, p, n) => c.first as double,
+        );
+        smooth.addBluePrint(overlay);
+        scm.flush();
+        expect(smooth.isAnimating, isFalse);
+        expect(scm.animatedNodes, isNot(contains(smooth)));
+
+        // Removing the overlay restores the animated blue print; the next
+        // target change animates again.
+        smooth.removeBluePrint(overlay);
+        scm.flush();
+        target.product = 2.0;
+        scm.flush();
+        expect(smooth.isAnimating, isTrue);
       });
     });
 
@@ -284,7 +409,6 @@ void main() {
         scm.flush();
 
         target.product = 8;
-        scm.flush(); // frame 0
         scm.flush(); // round(8 * 0.25) = 2
         expect(smooth.product, 2);
         scm.flush(); // round(8 * 0.5) = 4
@@ -329,8 +453,8 @@ void main() {
           scm.flush();
         }
 
-        // The restart frame emits 0.0 (== previous output) and is gated, so the
-        // recorder only sees the four value-changing frames.
+        // The recorder sees exactly the four value-changing frames - no
+        // redundant restart emission.
         expect(recorded, [
           closeTo(0.25, 1e-9),
           closeTo(0.5, 1e-9),

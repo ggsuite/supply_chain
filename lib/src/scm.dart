@@ -131,7 +131,16 @@ class Scm {
   }
 
   /// Inform scm about an update
-  void hasNewProduct(Node<dynamic> node, {bool? extraChecks}) {
+  ///
+  /// With [propagate] set to false the node leaves the production pipeline
+  /// cleanly, but its customers and inserts are not scheduled. Used by nodes
+  /// configured with [NodeBluePrint.propagateOnChangeOnly] when a freshly
+  /// produced product equals the previously propagated one.
+  void hasNewProduct(
+    Node<dynamic> node, {
+    bool? extraChecks,
+    bool propagate = true,
+  }) {
     // Node is not in producing nodes?
     // Throw an exception. Only producing nodes should call hasNewProduct()
     final check = extraChecks ?? Scm.extraChecks;
@@ -143,7 +152,7 @@ class Scm {
     }
 
     // Finalize production
-    _finalizeProduction(node);
+    _finalizeProduction(node, propagate: propagate);
   }
 
   // ...........................................................................
@@ -212,6 +221,14 @@ class Scm {
 
   /// Call this method to trigger animation frame calculation
   void tick() => _tick();
+
+  /// Monotonic counter of the ticks that nominated the animated nodes.
+  ///
+  /// [AnimatedNode] compares it against the value seen at its previous
+  /// production to decide whether a production is tick-driven (advance one
+  /// frame) or was triggered by a supplier re-emission between ticks (do
+  /// not consume a frame).
+  int get tickCount => _tickCount;
 
   // ...........................................................................
   // Product live cycle
@@ -457,6 +474,9 @@ class Scm {
   final Map<String, Set<Node<dynamic>>> _nodesByKey = {};
   final Set<Node<dynamic>> _animatedNodes = {};
 
+  /// See [tickCount]
+  int _tickCount = 0;
+
   // ...........................................................................
   final Set<Node<dynamic>> _nodesNeedingSupplierUpdate = {};
   final Set<Node<dynamic>> _nodesWithMissedSuppliers = {};
@@ -593,7 +613,10 @@ class Scm {
       return;
     }
 
-    // Nominate all animated nodes
+    // Nominate all animated nodes. The counter lets animated nodes
+    // distinguish tick-driven productions from productions triggered by a
+    // supplier re-emission between ticks (see AnimatedNode.advance).
+    _tickCount++;
     _nominatedNodes.addAll(_animatedNodes);
 
     // Start preparation
@@ -1010,21 +1033,30 @@ class Scm {
   }
 
   // ...........................................................................
-  void _finalizeProduction(Node<dynamic> node) {
+  void _finalizeProduction(Node<dynamic> node, {bool propagate = true}) {
     // Remove node from producing nodes
     _producingNodes.remove(node);
 
     // Reset production state
     node.finalizeProduction();
 
-    // Inserts now need to produce
-    _addPreparedNodes(node.inserts);
+    if (propagate) {
+      // Inserts now need to produce
+      _addPreparedNodes(node.inserts);
 
-    // Customers now need to produce
-    _addPreparedNodes(node.customers);
+      // Customers now need to produce
+      _addPreparedNodes(node.customers);
 
-    // If node is a insert
-    _finalizeInsert(node);
+      // If node is a insert
+      _finalizeInsert(node);
+    } else {
+      // The production wave ends here. _prepareNode staged the node's
+      // transitive customers before this production; un-stage every one
+      // that no other pending wave will produce. Otherwise they would
+      // stay staged forever and block every future wave running through
+      // them (their customers would never become isReadyToProduce).
+      _unstageSkippedNodes(node);
+    }
 
     // Schedule production
     _scheduleProduction();
@@ -1041,31 +1073,50 @@ class Scm {
   }
 
   // ...........................................................................
-  /// Finalizes [node]'s production without scheduling its customers or inserts.
+  /// Un-stages the transitive customers of [node] that were staged for the
+  /// wave ending at [node] and that no other pending wave will finalize.
   ///
-  /// Used by nodes configured with [NodeBluePrint.propagateOnChangeOnly] when a
-  /// freshly produced product equals the previous one: the node leaves the
-  /// production pipeline cleanly, but no downstream production wave is started.
-  /// This never removes an already-prepared customer from the pipeline - it
-  /// only refrains from adding customers because of this unchanged production.
-  void finalizeWithoutPropagation(Node<dynamic> node) {
-    // Remove node from producing nodes
-    _producingNodes.remove(node);
+  /// Mirrors the traversal of [_prepareNode]. Nodes that are nominated,
+  /// prepared or producing are owed a production by another wave which will
+  /// finalize (and thereby un-stage) them - those are left untouched.
+  void _unstageSkippedNodes(Node<dynamic> node) {
+    final stack = <Node<dynamic>>[...node.inserts, ...node.customers];
+    var unstagedNodes = false;
 
-    // Reset production state
-    node.finalizeProduction();
+    while (stack.isNotEmpty) {
+      final current = stack.removeLast();
 
-    // Continue the pipeline for whatever else is prepared
-    _scheduleProduction();
+      if (!current.isStaged) {
+        continue;
+      }
 
-    if (_preparedNodesAreEmpty) {
-      _initMissedSuppliers();
+      // Owed a production by another pending wave? Leave it staged.
+      if (_nominatedNodes.contains(current) ||
+          _preparedNodes.contains(current) ||
+          _preparedInsertNodes.contains(current) ||
+          _producingNodes.contains(current)) {
+        continue;
+      }
+
+      current.finalizeProduction();
+      unstagedNodes = true;
+
+      for (final insert in current.inserts) {
+        stack.add(insert);
+      }
+
+      if (current is Insert) {
+        _prepareInsert(current, stack);
+      }
+
+      for (final customer in current.customers) {
+        stack.add(customer);
+      }
     }
 
-    // Everything is done?
-    if (_preparedNodesAreEmpty) {
-      _resetMinimumProductionPriority();
-      _stopTimeoutCheck();
+    // Un-staging changes readiness of already queued nodes
+    if (unstagedNodes) {
+      _readyQueuesNeedRevalidation = true;
     }
   }
 
