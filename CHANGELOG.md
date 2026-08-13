@@ -1,12 +1,12 @@
 # Changelog
 
-## [5.4.2] - 2026-07-11
+## Unreleased
 
-### Fixed
+### Changed
 
-- Fix issues in animation nodes and other issues
+- Rework copyright headers
 
-## [5.5.0] - 2026-07-11
+## 5.5.0 - 2026-07-11
 
 ### Added
 
@@ -75,9 +75,15 @@ previously three tests overwrote the same two golden files.
 - `.gitignore` uses `.gg/*` so the `!.gg/.gg.json` re-include actually
 works; the inert `pubspec.lock merge=ours` attribute was removed.
 
-## [5.4.1] - 2026-07-11
+## 5.4.2 - 2026-07-11
 
-## [5.4.0] - 2026-07-11
+### Fixed
+
+- Fix issues in animation nodes and other issues
+
+## 5.4.1 - 2026-07-11
+
+## 5.4.0 - 2026-07-11
 
 ### Added
 
@@ -103,15 +109,15 @@ routed through by both `instantiate` and `Scope.findOrCreateNode`, so
 - A node disposed while still animating (kept alive by remaining customers) is
 now removed from the SCM's animated set instead of being ticked forever.
 
-## [5.3.2] - 2026-07-10
+## 5.3.2 - 2026-07-10
 
 ### Changed
 
 - Rename testRestIdCounter into testResetIdCounter
 
-## [5.3.1] - 2026-07-09
+## 5.3.1 - 2026-07-09
 
-## [5.3.0] - 2026-07-08
+## 5.3.0 - 2026-07-08
 
 ### Added
 
@@ -174,27 +180,27 @@ linear instead of quadratic.
 - `Scm.nominate` evaluates the cheap fast-path conditions before scanning
 suppliers.
 
-## [5.2.0] - 2026-07-05
+## 5.2.0 - 2026-07-05
 
-## [5.1.0] - 2026-07-05
+## 5.1.0 - 2026-07-05
 
 ### Changed
 
 - Improve performance using claude code
 
-## [5.0.2] - 2026-06-04
+## 5.0.2 - 2026-06-04
 
 ### Added
 
 - Add clarification comments for priority
 
-## [5.0.1] - 2026-06-04
+## 5.0.1 - 2026-06-04
 
 ### Changed
 
 - Fix CHANGELOG.md
 
-## [5.0.0] - 2026-06-04
+## 5.0.0 - 2026-06-04
 
 ### Added
 
@@ -219,19 +225,19 @@ when the result is known to be synchronous.
 never blocked; the real result is applied as a follow-up update once the
 future resolves. Set a longer `productionTimeout` for a single-update result.
 
-## [4.0.3] - 2025-10-27
+## 4.0.3 - 2025-10-27
 
 ### Fixed
 
 - Trial to fix non displayed image 2
 
-## [4.0.2] - 2025-10-27
+## 4.0.2 - 2025-10-27
 
 ### Fixed
 
 - Trial to fix non displayed image
 
-## [4.0.1] - 2025-10-27
+## 4.0.1 - 2025-10-27
 
 ### Added
 
@@ -241,7 +247,7 @@ future resolves. Set a longer `productionTimeout` for a single-update result.
 
 - Fix issue with diagram on main README.md
 
-## [4.0.0] - 2025-10-27
+## 4.0.0 - 2025-10-27
 
 ### Changed
 
@@ -253,31 +259,31 @@ future resolves. Set a longer `productionTimeout` for a single-update result.
 
 - Remove doc.dart
 
-## [3.0.2] - 2025-10-21
+## 3.0.2 - 2025-10-21
 
 ### Fixed
 
 - Fix an error with .. pathes
 
-## [3.0.1] - 2025-10-21
+## 3.0.1 - 2025-10-21
 
 ### Changed
 
 - Update dart SDK to 3.9.2
 
-## [3.0.0] - 2025-10-21
+## 3.0.0 - 2025-10-21
 
 ### Changed
 
 - BREAKING CHANGE: Use / instead of . for describing node and scope pathes
 
-## [2.0.0] - 2025-09-09
+## 2.0.0 - 2025-09-09
 
 ### Changed
 
 - BREAKING CHANGE: ScopeBluePrint.fromJson will treat numbers as num and not as int or double anymore
 
-## [1.3.3] - 2025-09-09
+## 1.3.3 - 2025-09-09
 
 ### Added
 
@@ -287,19 +293,19 @@ future resolves. Set a longer `productionTimeout` for a single-update result.
 
 - BREAKING CHANGE: Switch from double to num
 
-## [1.3.2] - 2025-07-15
+## 1.3.2 - 2025-07-15
 
 ### Fixed
 
 - Fix an error while adding JSON parsers
 
-## [1.3.1] - 2025-06-25
+## 1.3.1 - 2025-06-25
 
 ### Fixed
 
 - Fix an issue with registering JSON parsers
 
-## [1.3.0] - 2025-06-24
+## 1.3.0 - 2025-06-24
 
 ### Added
 
@@ -312,33 +318,33 @@ future resolves. Set a longer `productionTimeout` for a single-update result.
 - Improve json handling in nodes
 - Prepare new version
 
-## [1.2.0] - 2025-06-19
+## 1.2.0 - 2025-06-19
 
 ### Changed
 
 - Improve catching JSON serialization errors
 
-## [1.1.3] - 2025-06-19
+## 1.1.3 - 2025-06-19
 
 ### Changed
 
 - `Scope.preset` and `Scope.setPreset` will output and input custom types as JSON
 - `Scope.dumpSupplyChain` and `Scope.dumpSupplyChain` will output and input custom types as JSON
 
-## [1.1.2] - 2025-06-12
+## 1.1.2 - 2025-06-12
 
 ### Fixed
 
 - Fix an error confusing double and int while setting presets
 
-## [1.1.1] - 2025-06-07
+## 1.1.1 - 2025-06-07
 
 ### Changed
 
 - BREAKING CHANGE: Update API to generate graph images
 - Allow to specify the markdown format (azure or github) when exporting mermaid diagrams
 
-## [1.1.0] - 2025-06-07
+## 1.1.0 - 2025-06-07
 
 ### Added
 
@@ -349,7 +355,7 @@ future resolves. Set a longer `productionTimeout` for a single-update result.
 - Tests do not create png and svg files anymore
 - Upgrade to dart 2.8
 
-## [1.0.15] - 2025-05-21
+## 1.0.15 - 2025-05-21
 
 ### Changed
 
@@ -359,7 +365,7 @@ future resolves. Set a longer `productionTimeout` for a single-update result.
 
 - Fix unit test errors
 
-## [1.0.14] - 2025-05-21
+## 1.0.14 - 2025-05-21
 
 ### Added
 
@@ -497,7 +503,7 @@ Modifications can only be done via builders.
 - Rename findScope2 into findScope
 - Introduce metaScopes to provide suppliers informing about scope changes
 - Improve instantiation of MetaScopes
-- Rename \_findNode into \_findItem
+- Rename _findNode into _findItem
 - Using supplier pathes like a.on.change or a.on.changeRecursive it is now possible to observe changes on complete scopes or children
 - Write svg instead of dot files. Fix an error causing cropped SVG window for dot graphs.
 - Set graph quality to 300 dpi
@@ -512,7 +518,7 @@ Modifications can only be done via builders.
 - Make removeCustomer private. Only dispose and erase can be used.
 - Make erase private. Publicly nodes can only be disposed. Erasal happens when the last customer is removed from a node.
 - Mute suppliers in the blue print when a node is disposed
-- Move all scope disposal steps to \_dispose
+- Move all scope disposal steps to _dispose
 - Don't erase scopes until the last node and child scope has been erased
 - Allow to add an owner to nodes who is informed about disposal or erasal
 - Allow to add an owner to scopes who is informat about disposal, undisposal and erasal
@@ -520,7 +526,7 @@ Modifications can only be done via builders.
 - Prevent that a builder is applied to scopes created by this builder before
 - Make sure produce does not change the order
 - ScBuilderBluePrint can be instantiated without constructor
-- Use \_2x instead of @2x for highres files
+- Use _2x instead of @2x for highres files
 - Scope.children must not return disposed nodes
 - Generate graph new with GraphViz 12.0.0. Set font to Arial.
 - Experiment using Image Magick to convert svgs to pngs
@@ -563,7 +569,7 @@ Modifications can only be done via builders.
 - Allow to search nodes only in parents by adding ..
 - Point to parent suppliers by adding ..
 - Improve searching things in parent scopes
-- Update gg\_cache
+- Update gg_cache
 - Allow to return an eflushhout throwing when setting presets
 - Setting an empty preset will reset the supply chain
 - Presets do not export empty scopes
@@ -609,7 +615,7 @@ Modifications can only be done via builders.
 - Remove replaceScopes - Is done by builders now
 - Removed an exception when the same blueprint was added multiple times to a node
 
-## [1.0.13] - 2024-05-17
+## 1.0.13 - 2024-05-17
 
 ### Added
 
@@ -633,13 +639,13 @@ Modifications can only be done via builders.
 
 - Remove findOrCreateNodes because type cannot be inferred
 
-## [1.0.12] - 2024-05-10
+## 1.0.12 - 2024-05-10
 
 ### Changed
 
 - Rename createNode into findOrCreateNode
 
-## [1.0.11] - 2024-05-10
+## 1.0.11 - 2024-05-10
 
 - Add `equalsGraph`
 - Make `findNode` finding arbitrary nodes
@@ -652,59 +658,59 @@ Modifications can only be done via builders.
 
 - Remove ScmNodeInterface, find arbitrary nodes by SupplyChain:findNode
 
-## [1.0.10] - 2024-05-10
+## 1.0.10 - 2024-05-10
 
-## [1.0.9] - 2024-05-10
+## 1.0.9 - 2024-05-10
 
 ### Changed
 
 - Nodes can be found in direct children
 - Supply chains need a parent chain from beginning
 
-## [1.0.8] - 2024-05-10
+## 1.0.8 - 2024-05-10
 
 ### Added
 
 - Add option to findNode
 
-## [1.0.7] - 2024-05-08
+## 1.0.7 - 2024-05-08
 
 ### Added
 
 - Add SupplyChain.hasNode
 
-## [1.0.6] - 2024-05-08
+## 1.0.6 - 2024-05-08
 
 ### Removed
 
 - Remove print statement
 
-## [1.0.5] - 2024-05-08
+## 1.0.5 - 2024-05-08
 
 ### Fixed
 
 - Fix issues in supply chain
 
-## [1.0.4] - 2024-05-08
+## 1.0.4 - 2024-05-08
 
 ### Changed
 
 - Rename scope into chain
 
-## [1.0.3] - 2024-05-08
+## 1.0.3 - 2024-05-08
 
 ### Changed
 
 - Renamed name into key
 
-## [1.0.2] - 2024-05-08
+## 1.0.2 - 2024-05-08
 
 ### Changed
 
 - Rename name into key
 - Rename Scope into SupplyChain
 
-## [1.0.1] - 2024-05-08
+## 1.0.1 - 2024-05-08
 
 ### Added
 
@@ -722,62 +728,16 @@ Modifications can only be done via builders.
 
 - Removed needsUpdate because it is not used
 
-## [1.0.0] - 2024-05-04
+## 1.0.0 - 2024-05-04
 
 ### Changed
 
-- Rename gg\_supply\_chain into supply\_chain
+- Rename gg_supply_chain into supply_chain
 - Updated version
-- Upgraded gg\_fake\_timer
+- Upgraded gg_fake_timer
 - 'Pipline: Disable cache'
-- 'publish\_to: none for private repositories'
+- 'publish_to: none for private repositories'
 - Rework changelog
 - 'Github Actions Pipeline'
 - 'Github Actions Pipeline: Add SDK file containing flutter into
 .github/workflows to make github installing flutter and not dart SDK'
-
-[5.4.2]: https://github.com/ggsuite/supply_chain/compare/5.4.1...5.4.2
-[5.5.0]: https://github.com/ggsuite/supply_chain/compare/5.4.1...5.5.0
-[5.4.1]: https://github.com/ggsuite/supply_chain/compare/5.4.0...5.4.1
-[5.4.0]: https://github.com/ggsuite/supply_chain/compare/5.3.2...5.4.0
-[5.3.2]: https://github.com/ggsuite/supply_chain/compare/5.3.1...5.3.2
-[5.3.1]: https://github.com/ggsuite/supply_chain/compare/5.3.0...5.3.1
-[5.3.0]: https://github.com/ggsuite/supply_chain/compare/5.2.0...5.3.0
-[5.2.0]: https://github.com/ggsuite/supply_chain/compare/5.1.0...5.2.0
-[5.1.0]: https://github.com/ggsuite/supply_chain/compare/5.0.2...5.1.0
-[5.0.2]: https://github.com/ggsuite/supply_chain/compare/5.0.1...5.0.2
-[5.0.1]: https://github.com/ggsuite/supply_chain/compare/5.0.0...5.0.1
-[5.0.0]: https://github.com/ggsuite/supply_chain/compare/4.0.3...5.0.0
-[4.0.3]: https://github.com/ggsuite/supply_chain/compare/4.0.2...4.0.3
-[4.0.2]: https://github.com/ggsuite/supply_chain/compare/4.0.1...4.0.2
-[4.0.1]: https://github.com/ggsuite/supply_chain/compare/4.0.0...4.0.1
-[4.0.0]: https://github.com/ggsuite/supply_chain/compare/3.0.2...4.0.0
-[3.0.2]: https://github.com/ggsuite/supply_chain/compare/3.0.1...3.0.2
-[3.0.1]: https://github.com/ggsuite/supply_chain/compare/3.0.0...3.0.1
-[3.0.0]: https://github.com/ggsuite/supply_chain/compare/2.0.0...3.0.0
-[2.0.0]: https://github.com/ggsuite/supply_chain/compare/1.3.3...2.0.0
-[1.3.3]: https://github.com/ggsuite/supply_chain/compare/1.3.2...1.3.3
-[1.3.2]: https://github.com/ggsuite/supply_chain/compare/1.3.1...1.3.2
-[1.3.1]: https://github.com/ggsuite/supply_chain/compare/1.3.0...1.3.1
-[1.3.0]: https://github.com/ggsuite/supply_chain/compare/1.2.0...1.3.0
-[1.2.0]: https://github.com/ggsuite/supply_chain/compare/1.1.3...1.2.0
-[1.1.3]: https://github.com/ggsuite/supply_chain/compare/1.1.2...1.1.3
-[1.1.2]: https://github.com/ggsuite/supply_chain/compare/1.1.1...1.1.2
-[1.1.1]: https://github.com/ggsuite/supply_chain/compare/1.1.0...1.1.1
-[1.1.0]: https://github.com/ggsuite/supply_chain/compare/1.0.15...1.1.0
-[1.0.15]: https://github.com/ggsuite/supply_chain/compare/1.0.14...1.0.15
-[1.0.14]: https://github.com/ggsuite/supply_chain/compare/1.0.13...1.0.14
-[1.0.13]: https://github.com/ggsuite/supply_chain/compare/1.0.12...1.0.13
-[1.0.12]: https://github.com/ggsuite/supply_chain/compare/1.0.11...1.0.12
-[1.0.11]: https://github.com/ggsuite/supply_chain/compare/1.0.10...1.0.11
-[1.0.10]: https://github.com/ggsuite/supply_chain/compare/1.0.9...1.0.10
-[1.0.9]: https://github.com/ggsuite/supply_chain/compare/1.0.8...1.0.9
-[1.0.8]: https://github.com/ggsuite/supply_chain/compare/1.0.7...1.0.8
-[1.0.7]: https://github.com/ggsuite/supply_chain/compare/1.0.6...1.0.7
-[1.0.6]: https://github.com/ggsuite/supply_chain/compare/1.0.5...1.0.6
-[1.0.5]: https://github.com/ggsuite/supply_chain/compare/1.0.4...1.0.5
-[1.0.4]: https://github.com/ggsuite/supply_chain/compare/1.0.3...1.0.4
-[1.0.3]: https://github.com/ggsuite/supply_chain/compare/1.0.2...1.0.3
-[1.0.2]: https://github.com/ggsuite/supply_chain/compare/1.0.1...1.0.2
-[1.0.1]: https://github.com/ggsuite/supply_chain/compare/1.0.0...1.0.1
-[1.0.0]: https://github.com/ggsuite/supply_chain/tag/%tag
