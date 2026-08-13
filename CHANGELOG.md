@@ -9,6 +9,7 @@
 ### Fixed
 
 - Cleanup copy right headers. Update to dart 3.13. Auto fixes.
+- Cleanup copy right headers. Update to dart 3.13. Auto fixes. Setup quick-check pipeline.
 
 ## 5.5.0 - 2026-07-11
 
