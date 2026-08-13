@@ -13,38 +13,16 @@ class ScBuilderBluePrint {
   const ScBuilderBluePrint({
     required this.key,
     this.needsUpdateSuppliers = const [],
-    List<ScopeBluePrint> Function({required Scope hostScope})? addScopes,
-    bool Function(Scope scope)? shouldProcessChildren,
-    bool Function(Scope scope)? shouldProcessScope,
-    ScopeBluePrint Function({
-      required Scope hostScope,
-      required ScopeBluePrint scopeToBeReplaced,
-    })?
-    replaceScope,
-    List<NodeBluePrint<dynamic>>? Function({required Scope hostScope})?
-    addNodes,
-    NodeBluePrint<dynamic>? Function({
-      required Scope hostScope,
-      required Node<dynamic> nodeToBeReplaced,
-    })?
-    replaceNode,
-    List<NodeBluePrint<dynamic>> Function({required Node<dynamic> hostNode})?
-    inserts,
-    void Function({
-      required Scope hostScope,
-      required List<dynamic> components,
-    })?
-    needsUpdate,
-    List<ScBuilderBluePrint> Function({required Scope hostScope})? children,
-  }) : _addScopes = addScopes,
-       _replaceScope = replaceScope,
-       _addNodes = addNodes,
-       _replaceNode = replaceNode,
-       _inserts = inserts,
-       _needsUpdate = needsUpdate,
-       _children = children,
-       _shouldProcessChildren = shouldProcessChildren,
-       _shouldProcessScope = shouldProcessScope;
+    this._addScopes,
+    this._shouldProcessChildren,
+    this._shouldProcessScope,
+    this._replaceScope,
+    this._addNodes,
+    this._replaceNode,
+    this._inserts,
+    this._needsUpdate,
+    this._children,
+  });
 
   /// Instantiates this builder and it's children within the given hostScope
   ///

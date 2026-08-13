@@ -223,9 +223,8 @@ void main() {
           );
 
           final rootScope = Scope.example();
-          final scope = ExampleScopeBluePrint(
-            nodes: [replacedBluePrint],
-          ).instantiate(scope: rootScope);
+          final scope = ExampleScopeBluePrint(nodes: [replacedBluePrint])
+              .instantiate(scope: rootScope);
 
           expect(
             scope.findNode<int>('parentScope/nodeBuiltByParent')!.bluePrint,

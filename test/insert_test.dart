@@ -305,9 +305,9 @@ void main() {
         NodeBluePrint.example(key: 'insert0').instantiateAsInsert(host: host);
 
         expect(
-          () => NodeBluePrint.example(
-            key: 'insert1',
-          ).instantiateAsInsert(host: host, index: 2),
+          () =>
+              NodeBluePrint.example(key: 'insert1')
+                  .instantiateAsInsert(host: host, index: 2),
           throwsA(
             isA<ArgumentError>().having(
               (p0) {
@@ -323,9 +323,9 @@ void main() {
         final host = Node.example();
 
         expect(
-          () => NodeBluePrint.example(
-            key: 'insert0',
-          ).instantiateAsInsert(host: host, index: -1),
+          () =>
+              NodeBluePrint.example(key: 'insert0')
+                  .instantiateAsInsert(host: host, index: -1),
           throwsA(
             isA<ArgumentError>().having(
               (p0) {

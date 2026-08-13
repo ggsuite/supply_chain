@@ -143,9 +143,8 @@ void main() {
           test('wraps the mermaid into ```... ```', () {
             // Create the tree
             final tree = t.graph.treeForNode(node: t.x);
-            final markdown = GraphToMermaid(
-              graph: tree,
-            ).markdown(markdownFormat: MarkdownFormat.gitHub);
+            final markdown = GraphToMermaid(graph: tree)
+                .markdown(markdownFormat: MarkdownFormat.gitHub);
             expect(markdown, startsWith('```mermaid\n'));
             expect(markdown, endsWith('\n```'));
           });
@@ -154,9 +153,8 @@ void main() {
           test('wraps the mermaid into :::... :::', () {
             // Create the tree
             final tree = t.graph.treeForNode(node: t.x);
-            final markdown = GraphToMermaid(
-              graph: tree,
-            ).markdown(markdownFormat: MarkdownFormat.azure);
+            final markdown = GraphToMermaid(graph: tree)
+                .markdown(markdownFormat: MarkdownFormat.azure);
             expect(markdown, startsWith(':::mermaid\n'));
             expect(markdown, endsWith('\n:::'));
           });

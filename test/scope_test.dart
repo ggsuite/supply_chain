@@ -751,9 +751,8 @@ void main() {
           expect(supplier.isErased, isFalse);
 
           // Now add a fresh scope
-          final newChildScope = const ScopeBluePrint(
-            key: 'freshScope',
-          ).instantiate(scope: s1);
+          final newChildScope = const ScopeBluePrint(key: 'freshScope')
+              .instantiate(scope: s1);
           expect(newChildScope.isDisposed, isFalse);
           expect(newChildScope.isErased, isFalse);
 
@@ -3493,12 +3492,10 @@ void main() {
 
         // Create a customer and a supplier scope with an owner
         final scope = Scope.example();
-        final s = const ScopeBluePrint(
-          key: 's',
-        ).instantiate(scope: scope, owner: owner);
-        final c = const ScopeBluePrint(
-          key: 'c',
-        ).instantiate(scope: scope, owner: owner);
+        final s = const ScopeBluePrint(key: 's')
+            .instantiate(scope: scope, owner: owner);
+        final c = const ScopeBluePrint(key: 'c')
+            .instantiate(scope: scope, owner: owner);
 
         // Instantiate a customer and a supplier node
         const NodeBluePrint<int>(

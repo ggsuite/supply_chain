@@ -56,14 +56,13 @@ class NodeBluePrint<T> {
     this.suppliers = const <String>[],
     this.allowedProducts = const [],
     Produce<T>? produce,
-    List<String> smartMaster = const [],
+    this._smartMaster = const [],
     this.canBeSmart = true,
     this.productionTimeout,
     this.propagateOnChangeOnly = false,
     this.changeComparator,
     T Function(Map<String, dynamic> json)? fromJson,
-  }) : produce = produce ?? doNothing<T>,
-       _smartMaster = smartMaster;
+  }) : produce = produce ?? doNothing<T>;
 
   /// Maps a supplier to a different key
   factory NodeBluePrint.map({
