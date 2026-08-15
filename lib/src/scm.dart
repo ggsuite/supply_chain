@@ -1,5 +1,5 @@
 // @license
-// Copyright (c) 2019 - 2023 ggsuite. All Rights Reserved.
+// Copyright (c) ggsuite
 //
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
@@ -394,9 +394,8 @@ class Scm {
       // Await all currently pending async productions. Their `then` callbacks
       // (which may re-nominate nodes) run afterwards; the loop re-checks.
       if (_asyncProductions.isNotEmpty) {
-        await Future.wait(
-          _asyncProductions.values.toList(),
-        ).catchError((Object _) => <dynamic>[]); // per-node error handled
+        await Future.wait(_asyncProductions.values.toList())
+            .catchError((Object _) => <dynamic>[]); // per-node error handled
       }
 
       // Give microtask callbacks a chance to run before re-checking.

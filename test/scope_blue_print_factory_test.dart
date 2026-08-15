@@ -1,5 +1,5 @@
 // @license
-// Copyright (c) 2019 - 2024 ggsuite. All Rights Reserved.
+// Copyright (c) ggsuite
 //
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
@@ -22,9 +22,11 @@ void main() {
           // for each row height. produce now returns FutureOr, so cast the
           // synchronous result for this direct call.
           final rowHeights = [10, 20, 30];
-          final rowScopes =
-              factory.produce([rowHeights], [], factoryInstance)
-                  as List<ScopeBluePrint>;
+          final rowScopes = factory.produce(
+            [rowHeights],
+            [],
+            factoryInstance,
+          ) as List<ScopeBluePrint>;
           expect(rowScopes.length, 3);
 
           // Each scope should have a "RowHeight" node

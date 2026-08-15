@@ -1,5 +1,5 @@
 // @license
-// Copyright (c) 2019 - 2024 ggsuite. All Rights Reserved.
+// Copyright (c) ggsuite
 //
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
@@ -223,9 +223,8 @@ void main() {
           );
 
           final rootScope = Scope.example();
-          final scope = ExampleScopeBluePrint(
-            nodes: [replacedBluePrint],
-          ).instantiate(scope: rootScope);
+          final scope = ExampleScopeBluePrint(nodes: [replacedBluePrint])
+              .instantiate(scope: rootScope);
 
           expect(
             scope.findNode<int>('parentScope/nodeBuiltByParent')!.bluePrint,

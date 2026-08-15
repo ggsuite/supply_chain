@@ -1,5 +1,5 @@
 // @license
-// Copyright (c) 2019 - 2024 ggsuite. All Rights Reserved.
+// Copyright (c) ggsuite
 //
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
@@ -305,9 +305,9 @@ void main() {
         NodeBluePrint.example(key: 'insert0').instantiateAsInsert(host: host);
 
         expect(
-          () => NodeBluePrint.example(
-            key: 'insert1',
-          ).instantiateAsInsert(host: host, index: 2),
+          () =>
+              NodeBluePrint.example(key: 'insert1')
+                  .instantiateAsInsert(host: host, index: 2),
           throwsA(
             isA<ArgumentError>().having(
               (p0) {
@@ -323,9 +323,9 @@ void main() {
         final host = Node.example();
 
         expect(
-          () => NodeBluePrint.example(
-            key: 'insert0',
-          ).instantiateAsInsert(host: host, index: -1),
+          () =>
+              NodeBluePrint.example(key: 'insert0')
+                  .instantiateAsInsert(host: host, index: -1),
           throwsA(
             isA<ArgumentError>().having(
               (p0) {

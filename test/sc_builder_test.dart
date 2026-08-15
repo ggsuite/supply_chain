@@ -1,5 +1,5 @@
 // @license
-// Copyright (c) 2019 - 2024 ggsuite. All Rights Reserved.
+// Copyright (c) ggsuite
 //
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
@@ -175,9 +175,8 @@ void main() {
               final add = components.first as bool;
               final container = hostScope.findScope('container')!;
               if (add) {
-                const ScopeBluePrint(
-                  key: 'panel',
-                ).instantiate(scope: container);
+                const ScopeBluePrint(key: 'panel')
+                    .instantiate(scope: container);
               } else {
                 container.child('panel')?.dispose();
               }
@@ -302,9 +301,8 @@ void main() {
         expect(scope.node<num>('didCallOnInstantiate')?.product, 1);
 
         // Add a child scope
-        final child = const ScopeBluePrint(
-          key: 'child',
-        ).instantiate(scope: scope);
+        final child = const ScopeBluePrint(key: 'child')
+            .instantiate(scope: scope);
 
         // The onInstantiate method should not be called for children
         expect(child.node<int>('didCallOnInstantiate'), isNull);

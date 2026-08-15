@@ -1,5 +1,5 @@
 // @license
-// Copyright (c) 2019 - 2023 ggsuite. All Rights Reserved.
+// Copyright (c) ggsuite
 //
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
@@ -24,12 +24,11 @@ typedef Worker<T> = Node<T>;
 /// Synchronous producers behave exactly as before. Asynchronous producers
 /// keep the node in production until their [Future] resolves or the node's
 /// [Node.productionTimeout] elapses.
-typedef Produce<T> =
-    FutureOr<T> Function(
-      List<dynamic> components,
-      T previousProduct,
-      Node<T> node,
-    );
+typedef Produce<T> = FutureOr<T> Function(
+  List<dynamic> components,
+  T previousProduct,
+  Node<T> node,
+);
 
 /// A node in a scope
 class Node<T> {
@@ -38,14 +37,13 @@ class Node<T> {
   ///   produce function, key and initial product
   /// - [scope]: The scope the node belongs to
   /// - [isInsert]: Whether this node is an insert in a host node's chain
-  /// - [owner]: The optional owner notified about lifecycle events
+  /// - [_owner]: The optional owner notified about lifecycle events
   Node({
     required NodeBluePrint<T> bluePrint,
     required this.scope,
     this.isInsert = false,
-    Owner<Node<dynamic>>? owner,
+    this._owner,
   }) : scm = scope.scm,
-       _owner = owner,
        _originalProduct = bluePrint.initialProduct,
        _lastPropagatedProduct = bluePrint.initialProduct,
        assert(bluePrint.key.isCamelCase) {

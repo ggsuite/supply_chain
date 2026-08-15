@@ -1,5 +1,5 @@
 // @license
-// Copyright (c) 2019 - 2024 ggsuite. All Rights Reserved.
+// Copyright (c) ggsuite
 //
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
@@ -21,23 +21,16 @@ class ScopeBluePrint {
   /// Constructor of the scope
   const ScopeBluePrint({
     required this.key,
-    List<NodeBluePrint<dynamic>> nodes = const [],
-    List<ScopeBluePrint> children = const [],
-    List<String> aliases = const [],
+    this._nodes = const [],
+    this._children = const [],
+    this._aliases = const [],
     Map<String, String> connect = const {},
-    List<ScBuilderBluePrint> builders = const [],
-    void Function(Scope)? onInstantiate,
-    void Function(Scope)? onDispose,
-    List<String> smartMaster = const [],
+    this._builders = const [],
+    this._onInstantiate,
+    this._onDispose,
+    this._smartMaster = const [],
     this.canBeSmart = true,
-  }) : _aliases = aliases,
-       _smartMaster = smartMaster,
-       _builders = builders,
-       _connections = connect,
-       _nodes = nodes,
-       _children = children,
-       _onInstantiate = onInstantiate,
-       _onDispose = onDispose;
+  }) : _connections = connect;
   // coverage:ignore-end
 
   // ...........................................................................
@@ -445,23 +438,15 @@ class ScopeBluePrint {
   /// Private constructor
   ScopeBluePrint._private({
     required this.key,
-    required List<String> aliases,
-    required List<NodeBluePrint<dynamic>> nodes,
-    required List<ScopeBluePrint> children,
-    required List<ScBuilderBluePrint> builders,
-    required Map<String, String> connections,
-    void Function(Scope)? onInstantiate,
-    void Function(Scope)? onDispose,
-    List<String> smartMaster = const [],
+    required this._aliases,
+    required this._nodes,
+    required this._children,
+    required this._builders,
+    required this._connections,
+    this._smartMaster = const [],
     this.canBeSmart = true,
-  }) : _smartMaster = smartMaster,
-       _connections = connections,
-       _aliases = aliases,
-       _nodes = nodes,
-       _children = children,
-       _builders = builders,
-       _onInstantiate = onInstantiate,
-       _onDispose = onDispose;
+  }) : _onInstantiate = null,
+       _onDispose = null;
 
   // ...........................................................................
   final List<String> _smartMaster;

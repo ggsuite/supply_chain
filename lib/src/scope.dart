@@ -1,5 +1,5 @@
 // @license
-// Copyright (c) 2019 - 2024 ggsuite. All Rights Reserved.
+// Copyright (c) ggsuite
 //
 // Use of this source code is governed by terms that can be
 // found in the LICENSE file in the root of this package.
@@ -86,10 +86,9 @@ class Scope {
   Scope._private({
     required this.bluePrint,
     required this.parent,
-    Owner<Scope>? owner,
+    this._owner,
     required this.isMetaScope,
   }) : scm = parent!.scm,
-       _owner = owner,
        assert(
          bluePrint.key.isCamelCase,
          // coverage:ignore-start
@@ -550,14 +549,13 @@ class Scope {
     List<Node<T>> excludedNodes = const [],
   }) {
     return _findItem<T>(
-          path,
-          throwIfNotFound: throwIfNotFound,
-          skipInserts: skipInserts,
-          findNodes: true,
-          findScopes: false,
-          excludedNodes: excludedNodes,
-        )
-        as Node<T>?;
+      path,
+      throwIfNotFound: throwIfNotFound,
+      skipInserts: skipInserts,
+      findNodes: true,
+      findScopes: false,
+      excludedNodes: excludedNodes,
+    ) as Node<T>?;
   }
 
   /// Returns the child node but only when it is a direct child
@@ -585,13 +583,12 @@ class Scope {
     bool skipInserts = false,
   }) {
     return _findItem<dynamic>(
-          path,
-          throwIfNotFound: throwIfNotFound,
-          skipInserts: skipInserts,
-          findNodes: false,
-          findScopes: true,
-        )
-        as Scope?;
+      path,
+      throwIfNotFound: throwIfNotFound,
+      skipInserts: skipInserts,
+      findNodes: false,
+      findScopes: true,
+    ) as Scope?;
   }
 
   // ...........................................................................
