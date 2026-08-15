@@ -8,77 +8,75 @@
 
 ### Fixed
 
-- Cleanup copy right headers. Update to dart 3.13. Auto fixes.
-- Cleanup copy right headers. Update to dart 3.13. Auto fixes. Setup quick-check pipeline.
-
-## 5.5.0 - 2026-07-11
-
 ### Added
 
 - `Scm.tickCount`: monotonic counter of the ticks that nominated the
-animated nodes.
+  animated nodes.
 - `Scope.testRestIdCounter` is back as a deprecated forwarding alias of
-`testResetIdCounter` - the rename had shipped in a non-major release.
+  `testResetIdCounter` - the rename had shipped in a non-major release.
 
 ### Changed
 
 - `Scope.mermaid`'s parameter is named `markdownFormat` (was
-`markDownFormat`), matching `Scope.writeImageFile`.
+  `markDownFormat`), matching `Scope.writeImageFile`.
 - `AnimatedNodeBluePrint.forInt` accepts a custom `equals`.
 - `AnimatedNodeBluePrint` accepts `canBeSmart`, `smartMaster` and
-`productionTimeout` and forwards them to `NodeBluePrint`.
+  `productionTimeout` and forwards them to `NodeBluePrint`.
 
 ### Fixed
 
+- Cleanup copy right headers. Update to dart 3.13. Auto fixes.
+- Cleanup copy right headers. Update to dart 3.13. Auto fixes. Setup quick-check pipeline.
+
 - Change-gating (`propagateOnChangeOnly`) no longer strands the staged
-customer cone when a production is gated. Previously a customer with a
-second supplier could never become ready again, deadlocking the whole
-pipeline (`Scm.flush()` spun forever and all animations froze).
+  customer cone when a production is gated. Previously a customer with a
+  second supplier could never become ready again, deadlocking the whole
+  pipeline (`Scm.flush()` spun forever and all animations froze).
 - The change gate compares against the product the customers last received
-instead of the freshly overwritten one. Previously every external
-`product =` write on a writable gated node and every un-mocking transition
-was silently swallowed, and a tolerance-based `changeComparator` re-based
-its baseline on every gated production so unbounded drift never propagated.
+  instead of the freshly overwritten one. Previously every external
+  `product =` write on a writable gated node and every un-mocking transition
+  was silently swallowed, and a tolerance-based `changeComparator` re-based
+  its baseline on every gated production so unbounded drift never propagated.
 - `AnimatedNode` frames are tick-aware (via the new `Scm.tickCount`): a
-supplier re-emitting the same value between ticks no longer fast-forwards
-the animation, and a target changing on every tick no longer freezes the
-output - the node keeps easing toward the latest target, consuming at most
-one frame per tick.
+  supplier re-emitting the same value between ticks no longer fast-forwards
+  the animation, and a target changing on every tick no longer freezes the
+  output - the node keeps easing toward the latest target, consuming at most
+  one frame per tick.
 - A retarget to the current output value (snap) settles the frame counter;
-previously later same-value writes advanced a phantom animation and fired
-`onComplete` spuriously.
+  previously later same-value writes advanced a phantom animation and fired
+  `onComplete` spuriously.
 - `onComplete` fires after the final product is applied and the production
-is finalized. Previously it fired mid-production, observed the previous
-frame's value, and a callback disposing the node crashed the pipeline.
+  is finalized. Previously it fired mid-production, observed the previous
+  frame's value, and a callback disposing the node crashed the pipeline.
 - The generic `AnimatedNodeBluePrint` default `equals` treats NaN as equal
-to NaN; a NaN target no longer restarts the animation on every tick forever
-(previously only `forDouble` was NaN-aware).
+  to NaN; a NaN target no longer restarts the animation on every tick forever
+  (previously only `forDouble` was NaN-aware).
 - Output gating of animated nodes always uses exact equality. Previously the
-user-supplied tolerance `equals` also gated propagation, so animations whose
-per-frame steps stayed within the tolerance never reached their customers.
+  user-supplied tolerance `equals` also gated propagation, so animations whose
+  per-frame steps stayed within the tolerance never reached their customers.
 - `AnimatedNodeBluePrint.copyWith` and `connectSupplier` preserve the
-animated subtype. Previously deriving or rewiring an animated blue print
-(e.g. via `ScopeBluePrint` connections or smart masters) silently produced a
-plain forwarding node, and instantiating a derived copy crashed with a
-type-cast error at its first production. Pairing the blue print with a
-non-animated node (e.g. as an insert) now throws a descriptive `StateError`.
+  animated subtype. Previously deriving or rewiring an animated blue print
+  (e.g. via `ScopeBluePrint` connections or smart masters) silently produced a
+  plain forwarding node, and instantiating a derived copy crashed with a
+  type-cast error at its first production. Pairing the blue print with a
+  non-animated node (e.g. as an insert) now throws a descriptive `StateError`.
 - `AnimatedNode` reads its animation config live from the blue print, so
-replacing the blue print on a live node takes effect instead of being
-silently ignored. Overlaying a non-animated blue print or setting
-`mockedProduct` stops the animation instead of leaving the node in the SCM's
-animated set producing on every tick forever.
+  replacing the blue print on a live node takes effect instead of being
+  silently ignored. Overlaying a non-animated blue print or setting
+  `mockedProduct` stops the animation instead of leaving the node in the SCM's
+  animated set producing on every tick forever.
 - Disposing any node clears `isAnimated`, so a plain node disposed while
-animated no longer stalls its remaining customers (the 5.4.0 fix only
-covered `AnimatedNode`).
+  animated no longer stalls its remaining customers (the 5.4.0 fix only
+  covered `AnimatedNode`).
 - `AnimatedNode.example()` flushes with a tick and returns a produced,
-settled node instead of an unproduced, still staged one.
+  settled node instead of an unproduced, still staged one.
 - `Scope.findOrCreateNode` validates the blue print (`check()`) before
-creating the node, so misconfigured blue prints fail with a clear
-`ArgumentError` instead of a raw `StateError` during production.
+  creating the node, so misconfigured blue prints fail with a clear
+  `ArgumentError` instead of a raw `StateError` during production.
 - The mermaid markdown goldens are written to unique files per graph;
-previously three tests overwrote the same two golden files.
+  previously three tests overwrote the same two golden files.
 - `.gitignore` uses `.gg/*` so the `!.gg/.gg.json` re-include actually
-works; the inert `pubspec.lock merge=ours` attribute was removed.
+  works; the inert `pubspec.lock merge=ours` attribute was removed.
 
 ## 5.4.2 - 2026-07-11
 
@@ -93,26 +91,26 @@ works; the inert `pubspec.lock merge=ours` attribute was removed.
 ### Added
 
 - `AnimatedNode` / `AnimatedNodeBluePrint`: a node that eases its output from
-its current value toward a new input value over a fixed number of frames,
-producing one intermediate value per `Scm.tick()`. Supply an animation curve
-(`double Function(double t)` mapping normalized time to eased progress) and a
-`lerp`; the convenience factories `AnimatedNodeBluePrint.forDouble` and
-`.forInt` cover the common cases. The node manages `isAnimated` itself, snaps
-the first input, retargets smoothly mid-animation, and exposes an `onComplete`
-callback and an `isAnimating` getter.
+  its current value toward a new input value over a fixed number of frames,
+  producing one intermediate value per `Scm.tick()`. Supply an animation curve
+  (`double Function(double t)` mapping normalized time to eased progress) and a
+  `lerp`; the convenience factories `AnimatedNodeBluePrint.forDouble` and
+  `.forInt` cover the common cases. The node manages `isAnimated` itself, snaps
+  the first input, retargets smoothly mid-animation, and exposes an `onComplete`
+  callback and an `isAnimating` getter.
 - `NodeBluePrint.propagateOnChangeOnly` (with an optional `changeComparator`):
-when enabled, a node only schedules its customers when its freshly produced
-product differs from the previous one, so a high-frequency or jittery input
-does not cascade redundant recomputations through the graph. `AnimatedNode`
-enables this by default.
+  when enabled, a node only schedules its customers when its freshly produced
+  product differs from the previous one, so a high-frequency or jittery input
+  does not cascade redundant recomputations through the graph. `AnimatedNode`
+  enables this by default.
 - `NodeBluePrint.createNode`: the single overridable node-construction hook,
-routed through by both `instantiate` and `Scope.findOrCreateNode`, so
-`NodeBluePrint` subtypes are honored on every creation path.
+  routed through by both `instantiate` and `Scope.findOrCreateNode`, so
+  `NodeBluePrint` subtypes are honored on every creation path.
 
 ### Fixed
 
 - A node disposed while still animating (kept alive by remaining customers) is
-now removed from the SCM's animated set instead of being ticked forever.
+  now removed from the SCM's animated set instead of being ticked forever.
 
 ## 5.3.2 - 2026-07-10
 
@@ -127,63 +125,63 @@ now removed from the SCM's animated set instead of being ticked forever.
 ### Added
 
 - `Scope.nodeByKey`: O(1) lookup of an own node (including inserts) by its
-exact key.
+  exact key.
 - `benchmark/supply_chain_benchmark.dart`: reproducible performance
-benchmark covering chains, fan-out, fan-in, layered DAGs, bulk updates and
-the non-test (microtask driven) production mode.
+  benchmark covering chains, fan-out, fan-in, layered DAGs, bulk updates and
+  the non-test (microtask driven) production mode.
 
 ### Changed
 
 - Allow mermaid to be printed as markdown
 - `NodeBluePrint.clearParsers` now also clears registered json serializers.
 - Documentation: corrected the `Node` constructor parameter docs, documented
-how asynchronous producers interact with `Scm.shouldTimeOut`, and clarified
-that `Priority.value` encodes processing urgency (so `structure` has the
-highest value while `realtime` is the highest regular priority).
+  how asynchronous producers interact with `Scm.shouldTimeOut`, and clarified
+  that `Priority.value` encodes processing urgency (so `structure` has the
+  highest value while `realtime` is the highest regular priority).
 
 ### Fixed
 
 - `Scm` no longer leaks one periodic timeout-check timer per production
-cycle. Previously every cycle created a new `Timer.periodic` without
-cancelling the old one; in non-test mode a single long chain propagation
-could leak thousands of permanently firing timers.
+  cycle. Previously every cycle created a new `Timer.periodic` without
+  cancelling the old one; in non-test mode a single long chain propagation
+  could leak thousands of permanently firing timers.
 - Preparing very deep customer chains no longer overflows the stack
-(`Scm._prepareNode` is iterative now; chains of 8000+ nodes previously
-crashed with a `StackOverflowError`).
+  (`Scm._prepareNode` is iterative now; chains of 8000+ nodes previously
+  crashed with a `StackOverflowError`).
 - Disposed nodes are removed from the prepared sets immediately on dispose
-instead of lingering until the next production cycle.
+  instead of lingering until the next production cycle.
 - `NodeBluePrint.castMap` now casts `Map<String, String>` correctly (it
-previously routed through the `bool` caster).
+  previously routed through the `bool` caster).
 - `NodeBluePrint.removeJsonParser` now actually removes the parser; it used a
-wrong map key (`T.runtimeType` instead of `T`) and silently did nothing.
+  wrong map key (`T.runtimeType` instead of `T`) and silently did nothing.
 - `NodeBluePrint.addJsonSerializer` now keys serializers by type, so serializers
-for different types no longer collide. Previously the shared `T.runtimeType`
-key allowed only a single serializer to be registered globally.
+  for different types no longer collide. Previously the shared `T.runtimeType`
+  key allowed only a single serializer to be registered globally.
 
 ### Performance
 
 - `Scm._produce` no longer rescans all prepared nodes on every production
-cycle. Ready nodes are kept in per-priority ready queues; each production
-cycle now costs O(batch) instead of O(all prepared nodes). Bulk updates and
-initial production of a graph with N nodes dropped from O(N²) to O(N).
+  cycle. Ready nodes are kept in per-priority ready queues; each production
+  cycle now costs O(batch) instead of O(all prepared nodes). Bulk updates and
+  initial production of a graph with N nodes dropped from O(N²) to O(N).
 - Circular dependency detection no longer enumerates every path through the
-supplier graph (exponential on diamond-shaped graphs). Nodes maintain an
-incrementally updated topological rank (Pearce-Kelly); connecting a supplier
-created before its customer is now O(1) to check.
+  supplier graph (exponential on diamond-shaped graphs). Nodes maintain an
+  incrementally updated topological rank (Pearce-Kelly); connecting a supplier
+  created before its customer is now O(1) to check.
 - `Node.initSuppliers` no longer performs Θ(S²) pairwise path matching when
-connecting S suppliers.
+  connecting S suppliers.
 - `Node._customers` is now a Set and suppliers are shadowed by a Set:
-building and tearing down wide fan-outs is linear instead of quadratic.
+  building and tearing down wide fan-outs is linear instead of quadratic.
 - `Scope.child` uses the existing children map instead of a linear scan.
 - `Scope.smartMaster` no longer recurses into the parent twice
-(was O(2^depth), now O(depth)).
+  (was O(2^depth), now O(depth)).
 - `NodeBluePrint.instantiate` looks the node up in the scope's node map
-instead of scanning all nodes.
+  instead of scanning all nodes.
 - `Disposed` stores nodes and scopes in Sets; erasing many disposed items is
-linear instead of quadratic.
+  linear instead of quadratic.
 - `Scm._addPreparedNodes` iterates its input once instead of twice.
 - `Scm.nominate` evaluates the cheap fast-path conditions before scanning
-suppliers.
+  suppliers.
 
 ## 5.2.0 - 2026-07-05
 
@@ -210,25 +208,25 @@ suppliers.
 ### Added
 
 - Asynchronous producers: a produce function may now return a `Future`. The
-node stays in production until the future resolves and its customers wait for
-the result.
+  node stays in production until the future resolves and its customers wait for
+  the result.
 - `Scm.settle()` (alias `Scm.flushAsync()`) awaits in-flight asynchronous
-productions until the supply chain is quiescent.
+  productions until the supply chain is quiescent.
 - `NodeBluePrint.productionTimeout` and `Node.productionTimeout` to override the
-SCM's default production timeout per node.
+  SCM's default production timeout per node.
 - `Scm.onProductionError` hook invoked when an asynchronous production fails.
 
 ### Changed
 
 - BREAKING CHANGE: `Produce<T>` now returns `FutureOr<T>` instead of `T`.
-Providing synchronous producers is unchanged, but code that calls a produce
-function directly (e.g. `NodeBluePrint.produce` or
-`ScopeBluePrintFactory.produce`) now receives a `FutureOr<T>` and must cast
-when the result is known to be synchronous.
+  Providing synchronous producers is unchanged, but code that calls a produce
+  function directly (e.g. `NodeBluePrint.produce` or
+  `ScopeBluePrintFactory.produce`) now receives a `FutureOr<T>` and must cast
+  when the result is known to be synchronous.
 - By default an asynchronous production that exceeds the frame budget
-(`Scm.timeout`, 5ms) is finalized with the previous product so the frame is
-never blocked; the real result is applied as a follow-up update once the
-future resolves. Set a longer `productionTimeout` for a single-update result.
+  (`Scm.timeout`, 5ms) is finalized with the previous product so the frame is
+  never blocked; the real result is applied as a follow-up update once the
+  future resolves. Set a longer `productionTimeout` for a single-update result.
 
 ## 4.0.3 - 2025-10-27
 
@@ -488,15 +486,15 @@ future resolves. Set a longer `productionTimeout` for a single-update result.
 - Improve merging of built and constructor nodes and scopes
 - Rename ScopeBluePrintFactory into ScopeFactory
 - Rename SubScopeManager into ScopeFactory, rename ScopeBluePrint.findNode()
-into findNode, offer methods to connect a blue print's node to other external
-nodes
+  into findNode, offer methods to connect a blue print's node to other external
+  nodes
 - Allow to connect nodes and scopes to nodes and scopes in the outside
 - Rename Plugin into ScBuilder
 - Change Scope.example - Use instantiate
 - ScBuilder: Allow to init additional scopes later
 - ScBuilders can be applied to nodes and scopes after instantiation
 - BREAKING CHANGE: Remove modifyChildScope and modifyChildNode.
-Modifications can only be done via builders.
+  Modifications can only be done via builders.
 - Rework scope nodes and scope children
 - Some renamings
 - Refactor aliases. Add buildAliases
@@ -508,7 +506,7 @@ Modifications can only be done via builders.
 - Rename findScope2 into findScope
 - Introduce metaScopes to provide suppliers informing about scope changes
 - Improve instantiation of MetaScopes
-- Rename _findNode into _findItem
+- Rename \_findNode into \_findItem
 - Using supplier pathes like a.on.change or a.on.changeRecursive it is now possible to observe changes on complete scopes or children
 - Write svg instead of dot files. Fix an error causing cropped SVG window for dot graphs.
 - Set graph quality to 300 dpi
@@ -523,7 +521,7 @@ Modifications can only be done via builders.
 - Make removeCustomer private. Only dispose and erase can be used.
 - Make erase private. Publicly nodes can only be disposed. Erasal happens when the last customer is removed from a node.
 - Mute suppliers in the blue print when a node is disposed
-- Move all scope disposal steps to _dispose
+- Move all scope disposal steps to \_dispose
 - Don't erase scopes until the last node and child scope has been erased
 - Allow to add an owner to nodes who is informed about disposal or erasal
 - Allow to add an owner to scopes who is informat about disposal, undisposal and erasal
@@ -531,7 +529,7 @@ Modifications can only be done via builders.
 - Prevent that a builder is applied to scopes created by this builder before
 - Make sure produce does not change the order
 - ScBuilderBluePrint can be instantiated without constructor
-- Use _2x instead of @2x for highres files
+- Use \_2x instead of @2x for highres files
 - Scope.children must not return disposed nodes
 - Generate graph new with GraphViz 12.0.0. Set font to Arial.
 - Experiment using Image Magick to convert svgs to pngs
@@ -745,4 +743,4 @@ Modifications can only be done via builders.
 - Rework changelog
 - 'Github Actions Pipeline'
 - 'Github Actions Pipeline: Add SDK file containing flutter into
-.github/workflows to make github installing flutter and not dart SDK'
+  .github/workflows to make github installing flutter and not dart SDK'
