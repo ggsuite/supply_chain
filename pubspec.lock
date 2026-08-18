@@ -116,66 +116,65 @@ packages:
   gg_cache:
     dependency: "direct dev"
     description:
-      name: gg_cache
-      sha256: "5ca8ecc3fb2bfed93db80b4005e1489b9eb3ef9a4c4fff18a7b92f5860238e98"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_cache"
+      relative: true
+    source: path
+    version: "1.1.0"
+  gg_capture_print:
+    dependency: "direct overridden"
+    description:
+      path: "../gg_capture_print"
+      relative: true
+    source: path
     version: "1.1.0"
   gg_fake_stopwatch:
     dependency: "direct main"
     description:
-      name: gg_fake_stopwatch
-      sha256: "268d70bef3efb96645c9beeecb3058992f967116404a0c7f0cba3ceca655dff1"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_fake_stopwatch"
+      relative: true
+    source: path
     version: "1.3.0"
   gg_fake_timer:
     dependency: "direct main"
     description:
-      name: gg_fake_timer
-      sha256: "86823beeac5211c4dfe5d291d4d536176caa1e10a8502c800ab27d9a1923065c"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_fake_timer"
+      relative: true
+    source: path
     version: "1.1.0"
   gg_golden:
     dependency: "direct dev"
     description:
-      name: gg_golden
-      sha256: def537e8108e6091ae4b13a37f72cc2d464034dfec49b24c4ce6781428af991f
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_golden"
+      relative: true
+    source: path
     version: "3.1.0"
   gg_is_github:
     dependency: "direct dev"
     description:
-      name: gg_is_github
-      sha256: b831382b1f05bb902185940f3c6000d6570c9508f287a539b4433d5e3b76d378
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_is_github"
+      relative: true
+    source: path
     version: "1.1.0"
   gg_list:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: gg_list
-      sha256: "3dd48cf017cd4d631829901f2329688d4cad3d4dd56a5115233b76a5e83066ca"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_list"
+      relative: true
+    source: path
     version: "2.1.0"
   gg_log:
     dependency: "direct dev"
     description:
-      name: gg_log
-      sha256: ce3e914a4b276b5462b23dca28d63b3648985f6f2744c5d957faa31ee15ab544
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_log"
+      relative: true
+    source: path
     version: "1.1.0"
   gg_once_per_cycle:
     dependency: "direct main"
     description:
-      name: gg_once_per_cycle
-      sha256: "361cfa28ae1305cc2765704ac3a2bb995aa8d51a94163e0d4b99c6fcaf35c74f"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../gg_once_per_cycle"
+      relative: true
+    source: path
     version: "1.4.0"
   glob:
     dependency: transitive
