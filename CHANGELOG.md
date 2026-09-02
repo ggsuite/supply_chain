@@ -1,10 +1,11 @@
 # Changelog
 
-## Unreleased
+## 5.6.0 - 2026-09-02
 
 ### Changed
 
 - Use ggwsm in pipelines
+- Install the dna_ggsuite DNA
 
 ## 5.5.0 - 2026-08-15
 
@@ -92,7 +93,6 @@ previously three tests overwrote the same two golden files.
 
 - `.gitignore` uses `.gg/*` so the `!.gg/.gg.json` re-include actually
 works; the inert `pubspec.lock merge=ours` attribute was removed.
-
 
 ## 5.4.2 - 2026-07-11
 

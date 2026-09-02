@@ -9,4 +9,4 @@
 // coverage:ignore-file
 
 /// The version of the `supply_chain` package.
-const String supplyChainVersion = '5.5.0';
+const String supplyChainVersion = '5.6.0';
