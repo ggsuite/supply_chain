@@ -109,6 +109,18 @@ void main() {
     });
   });
 
+  group('exclude in dot', () {
+    test('should leave out matching scopes and nodes', () {
+      final root = t.x.scope.parent!.parent!.parent!.parent!.parent!;
+      final all = root.dot();
+      final dot = root.dot(exclude: RegExp(r'level0$|/c\d+$'));
+      expect(all, contains('level0'));
+      expect(dot, isNot(contains('level0')));
+      expect(dot, isNot(contains('c111')));
+      expect(dot, contains('s111'));
+    });
+  });
+
   group('GraphNodeItem', () {
     group('toString', () {
       test('should return the node.key', () {

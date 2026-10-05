@@ -831,17 +831,22 @@ class Scope {
 
   // ...........................................................................
   /// Returns a graph that can be turned into svg using graphviz
+  ///
+  /// Scopes and nodes whose path matches [exclude] are left out together
+  /// with their children.
   String dot({
     int childScopeDepth = -1,
     int parentScopeDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
+    Pattern? exclude,
   }) {
     final g = graph(
       childScopeDepth: childScopeDepth,
       parentScopeDepth: parentScopeDepth,
       highlightedNodes: highlightedNodes,
       highlightedScopes: highlightedScopes,
+      exclude: exclude,
     );
 
     final dot = GraphToDot(graph: g).dot;

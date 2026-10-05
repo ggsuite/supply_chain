@@ -5,6 +5,7 @@
 ### Changed
 
 - Allow to exclude nodes when exporting mermaid
+- Allow to exclude nodes when exporting dot
 
 ## 5.6.0 - 2026-09-02
 
