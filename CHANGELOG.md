@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Allow to exclude nodes when exporting mermaid
+
 ## 5.6.0 - 2026-09-02
 
 ### Changed
@@ -93,6 +99,7 @@ previously three tests overwrote the same two golden files.
 
 - `.gitignore` uses `.gg/*` so the `!.gg/.gg.json` re-include actually
 works; the inert `pubspec.lock merge=ours` attribute was removed.
+
 
 ## 5.4.2 - 2026-07-11
 

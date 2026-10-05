@@ -49,6 +49,66 @@ void main() {
     });
   });
 
+  group('exclude', () {
+    test('should leave out matching scopes, nodes and their children', () {
+      final root = t.x.scope.parent!.parent!.parent!.parent!.parent!;
+      final all = root.mermaid();
+      final path = t.x.path;
+      final withoutNode = root.mermaid(exclude: path);
+      expect(withoutNode.length, lessThan(all.length));
+      final withoutScope = root.mermaid(exclude: t.x.scope.path);
+      expect(withoutScope.length, lessThan(all.length));
+    });
+  });
+
+  group('exclude with ButterFlyExample', () {
+    late Scope root;
+
+    setUp(() {
+      root = t.x.scope.parent!.parent!.parent!.parent!.parent!;
+    });
+
+    test('should exclude nodes matching a pattern', () {
+      final mm = root.mermaid(exclude: RegExp(r'/level2/s\d+$'));
+      for (final key in ['s11', 's10', 's01', 's00']) {
+        expect(mm, isNot(contains('["$key"]')));
+      }
+      expect(mm, contains('["s111"]'));
+      expect(mm, contains('["s1"]'));
+      expect(mm, contains('["c00"]'));
+      expect(mm, contains('["level1"]'));
+    });
+
+    test('should exclude a scope with its nodes and child scopes', () {
+      final mm = root.mermaid(exclude: 'root/butterFly/level3/level2/level1');
+      for (final key in ['level1', 'level0', 's1', 's0', 'c0', 'c1', 'x']) {
+        expect(mm, isNot(contains('["$key"]')));
+      }
+      expect(mm, contains('["level2"]'));
+      expect(mm, contains('["s11"]'));
+      expect(mm, contains('["c00"]'));
+      // No edges to excluded nodes
+      expect(mm, isNot(contains('x_')));
+    });
+
+    test('should exclude nodes and scopes at once', () {
+      final mmEx = root.mermaid(exclude: RegExp(r'level0$|/c\d+$'));
+      final mm = root.mermaid();
+      expect(mmEx, isNot(contains('["level0"]')));
+      expect(mm, contains('["level0"]'));
+      expect(mmEx, isNot(contains('["x"]')));
+      expect(mm, contains('["x"]'));
+      expect(mmEx, isNot(contains('["c111"]')));
+      expect(mm, contains('["c111"]'));
+      expect(mmEx, isNot(contains('["c00"]')));
+      expect(mm, contains('["c00"]'));
+      expect(mmEx, contains('["s111"]'));
+      expect(mm, contains('["s111"]'));
+      expect(mmEx, contains('["level1"]'));
+      expect(mm, contains('["level1"]'));
+    });
+  });
+
   group('GraphNodeItem', () {
     group('toString', () {
       test('should return the node.key', () {
