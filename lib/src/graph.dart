@@ -128,17 +128,22 @@ class Graph {
 
   // ...........................................................................
   /// Returns a graph for a scope that can be converted to the dot format later
+  ///
+  /// Scopes and nodes whose path matches [exclude] are left out, together
+  /// with all their children. The given [scope] itself is never excluded.
   GraphScopeItem treeForScope({
     required Scope scope,
     int childScopeDepth = 0,
     int parentScopeDepth = 0,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
+    Pattern? exclude,
   }) {
     return _treeForScope(
       scope: scope,
       childScopeDepth: childScopeDepth,
       parentScopeDepth: parentScopeDepth,
+      exclude: exclude,
       highlightedNodes: highlightedNodes,
       highlightedScopes: highlightedScopes,
     )!;
@@ -188,6 +193,16 @@ class Graph {
   // text
   // ######################
 
+  bool _isExcludedScope(Scope s, Pattern? exclude, Scope rootScope) {
+    if (exclude == null) return false;
+    Scope? current = s;
+    while (current != null && current != rootScope) {
+      if (exclude.allMatches(current.path).isNotEmpty) return true;
+      current = current.parent;
+    }
+    return false;
+  }
+
   // ...........................................................................
   GraphScopeItem? _treeForScope({
     required Scope scope,
@@ -195,19 +210,30 @@ class Graph {
     required int parentScopeDepth,
     List<Node<dynamic>>? highlightedNodes,
     List<Scope>? highlightedScopes,
+    Pattern? exclude,
   }) {
     // Get scopes to be shown
+    final rootScope = scope;
+
     final parentScopes = scope.deepParents(depth: parentScopeDepth);
-    final childScopes = scope.deepChildren(depth: childScopeDepth);
+    final childScopes = scope
+        .deepChildren(depth: childScopeDepth)
+        .where((s) => !_isExcludedScope(s, exclude, rootScope));
     final scopesToBeShown = [...parentScopes, scope, ...childScopes];
     final scopesToBeShownWithChildren = [...scopesToBeShown];
-    final scopesToBeShownEmpty = _scopesToBeShownEmpty(scopesToBeShown);
+    final scopesToBeShownEmpty = _scopesToBeShownEmpty(scopesToBeShown)
+        .where((s) => !_isExcludedScope(s, exclude, rootScope))
+        .toList();
     scopesToBeShown.addAll(scopesToBeShownEmpty);
 
     // Show all nodes that are in the specified scopes
     final shownNodes = <Node<dynamic>>[];
     for (final scope in scopesToBeShownWithChildren) {
-      shownNodes.addAll(scope.nodes);
+      shownNodes.addAll(
+        scope.nodes.where(
+          (n) => exclude == null || exclude.allMatches(n.path).isEmpty,
+        ),
+      );
     }
 
     // Order the scopes by depth
