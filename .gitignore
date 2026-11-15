@@ -12,6 +12,7 @@ build
 # `.gg/*`, not `.gg`: git cannot re-include a file whose parent directory
 # is excluded, so a negation below a `.gg` line would be dead.
 .gg/*
+!.gg/gg_rc
 !.gg/gg.json
 .gg/publish_config.json
 .gg/publish_state.json
