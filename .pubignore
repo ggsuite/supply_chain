@@ -1,0 +1,27 @@
+# .gitignore
+# https://dart.dev/guides/libraries/private-files
+# Created by `dart pub`
+.dart_tool/
+
+
+node_modules
+coverage
+build
+*.vm.json
+.DS_Store
+# Ignore .gg contents but keep the check results. The pattern must be
+# `.gg/*`, not `.gg`: git cannot re-include a file whose parent directory
+# is excluded, so a negation below a `.gg` line would be dead.
+.gg/*
+!.gg/gg_rc
+!.gg/gg.json
+.gg/publish_config.json
+.gg/publish_state.json
+.gg/gg-publish.json
+.gg/pubspec_overrides_backup.yaml
+.gg/pnpm_workspace_backup.yaml
+
+# dna-readme
+/doc/*/guides/
+/doc/*/templates/
+/scripts/
